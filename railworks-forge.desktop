@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Railworks Forge
+Exec="/opt/railworks-forge/RailworksForge" %u
+Type=Application
+Categories=Application;
+Terminal=false
+Icon=/opt/railworks-forge/railworks-forge-icon.png
+Comment=A GUI Program for managing Railworks assets, scenarios and locomotives.

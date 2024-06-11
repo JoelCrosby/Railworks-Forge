@@ -1,0 +1,34 @@
+_pkgbasename=railworks-forge
+pkgname=railworks-forge-git
+pkgver=0.1
+pkgrel=1
+pkgdesc="Program for managing Railworks assets, scenarios and locomotives"
+arch=(x86_64)
+url="https://github.com/joelcrosby/railworks-forge.git"
+license=('GPL3')
+depends=(dotnet-runtime)
+makedepends=(dotnet-sdk)
+checkdepends=(dotnet-runtime)
+optdepends=()
+provides=(railworks-forge)
+conflicts=(railworks-forge)
+options=(!strip)
+source=("${pkgname}::git+${url}")
+sha512sums=('SKIP')
+
+build() {
+	cd "${pkgname}"
+	dotnet publish --configuration Release "src/RailworksForge"
+}
+
+package() {
+	cd "${pkgname}"
+
+	mkdir -pv "$pkgdir/opt/$_pkgbasename"
+	mkdir -pv "$pkgdir/usr/share/applications/"
+
+	cp -R "src/RailworksForge/bin/Release/net8.0/linux-x64/publish/." "$pkgdir/opt/$_pkgbasename/"
+
+	cp railworks-forge.desktop "$pkgdir/usr/share/applications/"
+	cp railworks-forge-icon.png "$pkgdir/opt/$_pkgbasename/"
+}
