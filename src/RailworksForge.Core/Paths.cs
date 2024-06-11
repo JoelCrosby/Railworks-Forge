@@ -1,15 +1,75 @@
+using System.Runtime.InteropServices;
+
 namespace RailworksForge.Core;
 
 public static class Paths
 {
-    public static string GetHomeDirectory()
+    private enum Platform
     {
-        return Environment.GetEnvironmentVariable("HOME") ?? throw new Exception("Could not find user home directory");
+        Linux = 0,
+        FreeBsd = 1,
+        Osx = 2,
+        Windows = 3,
+    }
+
+    private const string PrimaryDirName = nameof(RailworksForge);
+
+    private static Platform GetPlatform()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Platform.Windows;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return Platform.Osx;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+        {
+            return Platform.FreeBsd;
+        }
+
+        return Platform.Linux;
+    }
+
+    public static string? GetHomeDirectory() => GetPlatform() switch
+    {
+        Platform.Linux => Environment.GetEnvironmentVariable("HOME"),
+        Platform.Osx => Environment.GetEnvironmentVariable("HOME"),
+        Platform.FreeBsd => Environment.GetEnvironmentVariable("HOME"),
+        Platform.Windows => GetHomeDirectoryWindows(),
+        _ => throw new PlatformNotSupportedException(),
+    };
+
+    private static string GetHomeDirectoryWindows()
+    {
+        var homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+        var homePath = Environment.GetEnvironmentVariable("HOMEPATH");
+
+        return Path.Join(homeDrive, homePath);
+    }
+
+    public static string GetConfigurationFolder()
+    {
+        var home = GetHomeDirectory();
+        const string configFolder = ".config";
+
+        return Path.Join(home, configFolder, PrimaryDirName);
+    }
+
+    public static string GetCacheFolder()
+    {
+        var home = GetHomeDirectory();
+        const string configFolder = ".cache";
+
+        return Path.Join(home, configFolder, PrimaryDirName);
     }
 
     public static string GetGameDirectory()
     {
-        return "/cache/SteamLibrary/steamapps/common/RailWorks/";
+        return ApplicationConfig.Get().GameDirectoryPath;
     }
 
     public static string GetAssetsDirectory()
