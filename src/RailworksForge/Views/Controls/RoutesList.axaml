@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RailworksForge.Views.Controls.RoutesList"
+             x:DataType="vm:RoutesListViewModel">
+
+    <DataGrid ItemsSource="{Binding ListItems}"
+              IsReadOnly="True"
+              DoubleTapped="DataGrid_OnDoubleTapped"
+              GridLinesVisibility="All"
+              SelectionMode="Single"
+              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+              BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+    >
+
+        <DataGrid.Columns>
+            <DataGridTemplateColumn Header="Image" Width="64">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Image Width="64" Source="{Binding ImageBitmap}" />
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+
+            <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+            <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+            <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
+        </DataGrid.Columns>
+
+        <DataGrid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
+                <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
+                <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
+            </ContextMenu>
+        </DataGrid.ContextMenu>
+
+    </DataGrid>
+
+</UserControl>

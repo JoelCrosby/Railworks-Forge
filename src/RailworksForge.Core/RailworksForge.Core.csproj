@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AngleSharp" Version="1.1.2" />
+      <PackageReference Include="CliWrap" Version="3.6.6" />
+      <PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
+      <PackageReference Include="Gameloop.Vdf.JsonConverter" Version="0.2.1" />
+      <PackageReference Include="VdfConverter" Version="1.0.3" />
+      <PackageReference Include="VDFParser.dotnet" Version="1.1.0" />
+    </ItemGroup>
+
+</Project>

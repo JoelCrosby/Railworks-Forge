@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
+             x:Class="RailworksForge.Views.Controls.ScenarioDetail"
+             x:DataType="vm:ScenarioDetailViewModel">
+
+    <Design.DataContext>
+        <vm:DesignScenarioDetailViewModel />
+    </Design.DataContext>
+
+    <DockPanel>
+
+        <StackPanel Margin="12,12,0,0" DockPanel.Dock="Top">
+            <Panel.Styles>
+                <Style Selector="StackPanel">
+                    <Setter Property="Spacing" Value="4"></Setter>
+                    <Setter Property="Margin" Value="0, 0, 0, 8"></Setter>
+                </Style>
+
+                <Style Selector="TextBlock">
+                    <Setter Property="TextWrapping" Value="1"></Setter>
+                </Style>
+            </Panel.Styles>
+
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="Description" />
+                <TextBlock Text="{Binding Scenario.Description}" />
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="Briefing" />
+                <TextBlock Text="{Binding Scenario.Briefing}" />
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="Locomotive" />
+                <TextBlock Text="{Binding Scenario.Locomotive}" />
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="Start Location" />
+                <TextBlock Text="{Binding Scenario.StartLocation}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
+            <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>
+            <Button Command="{Binding ExportBinXmlCommand}">Export Bin to XML</Button>
+            <Button Command="{Binding ExportXmlBinCommand}">Convert XML to Bin</Button>
+            <Button Command="{Binding ClickedConsistCommand}">View Scenario Tree</Button>
+        </StackPanel>
+
+        <DataGrid DockPanel.Dock="Bottom"
+                  ItemsSource="{Binding Scenario.Consists}"
+                  IsReadOnly="True"
+                  GridLinesVisibility="All"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding SelectedConsist}"
+                  DoubleTapped="DataGrid_OnDoubleTapped"
+                  BorderThickness="0,1,0,0"
+                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+        >
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+    </DockPanel>
+
+</UserControl>

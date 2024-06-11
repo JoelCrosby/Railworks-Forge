@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RailworksForge.Views.Controls.NavigationBar"
+             x:DataType="vm:NavigationBarViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel Margin="8" Orientation="Horizontal" Spacing="12">
+        <Button Command="{Binding RoutesClickedCommand}">Routes</Button>
+        <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding ShowRouteButton}" Content="{Binding Route.Name}" />
+        <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding ShowScenarioButton}" Content="{Binding Scenario.Name}" />
+    </StackPanel>
+</UserControl>
