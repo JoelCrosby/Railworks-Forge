@@ -8,7 +8,7 @@
         x:CompileBindings="True"
         x:Class="RailworksForge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/railworks-forge-icon.png"
         Title="RailworksForge">
 
     <DockPanel>
