@@ -23,7 +23,22 @@
         >
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+
+                <DataGridTemplateColumn Header="Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="2"
+                                    Margin="12, 4"
+                                    VerticalAlignment="Center">
+                                <TextBlock Margin="3" VerticalAlignment="Center"
+                                           Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
+                                           FontFamily="monospace"
+                                           FontSize="13"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
                 <DataGridTextColumn Header="Locomotive" Binding="{Binding Locomotive}" />
                 <DataGridTextColumn Header="Type" Binding="{Binding ScenarioClass}" />

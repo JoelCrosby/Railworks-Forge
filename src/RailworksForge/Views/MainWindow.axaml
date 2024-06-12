@@ -9,7 +9,7 @@
         x:Class="RailworksForge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/railworks-forge-icon.png"
-        Title="RailworksForge">
+        Title="Railworks Forge">
 
     <DockPanel>
         <controls:MainMenu DockPanel.Dock="Top" DataContext="{Binding MainMenu}" />

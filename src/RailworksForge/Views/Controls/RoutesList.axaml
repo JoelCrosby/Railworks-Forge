@@ -25,8 +25,21 @@
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
 
+            <DataGridTemplateColumn Header="Id">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="2"
+                                Margin="12, 4"
+                                VerticalAlignment="Center">
+                            <TextBlock Margin="3" VerticalAlignment="Center"
+                                       Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
+                                       FontFamily="monospace"
+                                       FontSize="13"/>
+                        </Border>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-            <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
             <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
             <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
         </DataGrid.Columns>

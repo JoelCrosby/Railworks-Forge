@@ -13,37 +13,42 @@
 
     <DockPanel>
 
-        <StackPanel Margin="12,12,0,0" DockPanel.Dock="Top">
+        <StackPanel Margin="12,12,12,0" DockPanel.Dock="Top">
             <Panel.Styles>
                 <Style Selector="StackPanel">
-                    <Setter Property="Spacing" Value="4"></Setter>
-                    <Setter Property="Margin" Value="0, 0, 0, 8"></Setter>
+                    <Setter Property="Spacing" Value="4" />
+                    <Setter Property="Margin" Value="0, 0, 0, 8" />
                 </Style>
 
                 <Style Selector="TextBlock">
-                    <Setter Property="TextWrapping" Value="1"></Setter>
+                    <Setter Property="TextWrapping" Value="1" />
+                    <Setter Property="LineSpacing" Value="1.8" />
                 </Style>
             </Panel.Styles>
 
-            <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="Description" />
-                <TextBlock Text="{Binding Scenario.Description}" />
-            </StackPanel>
+            <Border BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                <StackPanel>
+                    <StackPanel>
+                        <TextBlock FontWeight="SemiBold" Text="Description" />
+                        <TextBlock Text="{Binding Scenario.Description}" />
+                    </StackPanel>
 
-            <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="Briefing" />
-                <TextBlock Text="{Binding Scenario.Briefing}" />
-            </StackPanel>
+                    <StackPanel IsVisible="{Binding Scenario.Briefing, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Briefing" />
+                        <TextBlock Text="{Binding Scenario.Briefing}" />
+                    </StackPanel>
 
-            <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="Locomotive" />
-                <TextBlock Text="{Binding Scenario.Locomotive}" />
-            </StackPanel>
+                    <StackPanel IsVisible="{Binding Scenario.Locomotive, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Locomotive" />
+                        <TextBlock Text="{Binding Scenario.Locomotive}" />
+                    </StackPanel>
 
-            <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="Start Location" />
-                <TextBlock Text="{Binding Scenario.StartLocation}" />
-            </StackPanel>
+                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Start Location" />
+                        <TextBlock Text="{Binding Scenario.StartLocation}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">

@@ -29,4 +29,8 @@
   <ItemGroup>
     <ProjectReference Include="..\RailworksForge.Core\RailworksForge.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\DataGrid\DataGridIdentifierColumn.axaml" />
+  </ItemGroup>
 </Project>

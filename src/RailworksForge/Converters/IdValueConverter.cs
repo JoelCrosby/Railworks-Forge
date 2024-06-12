@@ -11,7 +11,7 @@ public class IdValueConverter : IValueConverter
     {
         if (value is string text)
         {
-            return text[..6];
+            return text;
         }
 
         return string.Empty;

@@ -18,6 +18,9 @@
     </UserControl.Styles>
 
     <StackPanel Margin="8" Orientation="Horizontal" Spacing="12">
+
+        <Image Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32"  />
+
         <Button Command="{Binding RoutesClickedCommand}">Routes</Button>
         <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding ShowRouteButton}" Content="{Binding Route.Name}" />
         <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding ShowScenarioButton}" Content="{Binding Scenario.Name}" />
