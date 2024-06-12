@@ -6,7 +6,7 @@ public class DesignNavigationBarViewModel : NavigationBarViewModel
 {
     public DesignNavigationBarViewModel()
     {
-        Route = new RouteViewModel(Example.Route);
+        Route = new RouteDetailViewModel(new RouteViewModel(Example.Route));
         Scenario = Example.Scenario;
     }
 }

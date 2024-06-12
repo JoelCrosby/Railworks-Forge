@@ -9,5 +9,5 @@ public class DesignRouteDetailViewModel : RouteDetailViewModel
 {
     public override ObservableCollection<Scenario> Scenarios { get; init; } = new(Example.Scenarios);
 
-    public DesignRouteDetailViewModel() : base(new(Example.Route)) { }
+    public DesignRouteDetailViewModel() : base(Example.Route) { }
 }

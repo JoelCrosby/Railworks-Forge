@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Controls.ScenarioDetail"
              x:DataType="vm:ScenarioDetailViewModel">
 
@@ -13,8 +13,8 @@
 
     <DockPanel>
 
-        <StackPanel Margin="12,12,12,0" DockPanel.Dock="Top">
-            <Panel.Styles>
+        <Grid Margin="12,12,12,0" DockPanel.Dock="Top" ColumnDefinitions="280,*" >
+            <Grid.Styles>
                 <Style Selector="StackPanel">
                     <Setter Property="Spacing" Value="4" />
                     <Setter Property="Margin" Value="0, 0, 0, 8" />
@@ -24,9 +24,33 @@
                     <Setter Property="TextWrapping" Value="1" />
                     <Setter Property="LineSpacing" Value="1.8" />
                 </Style>
-            </Panel.Styles>
+            </Grid.Styles>
 
-            <Border BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+            <Border Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                <StackPanel>
+                    <StackPanel IsVisible="{Binding Scenario.Locomotive, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Locomotive" />
+                        <TextBlock Text="{Binding Scenario.Locomotive}" />
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Start Location" />
+                        <TextBlock Text="{Binding Scenario.StartLocation}" />
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Scenario Type" />
+                        <TextBlock Text="{Binding Scenario.ScenarioClass}" />
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock FontWeight="SemiBold" Text="Packaging Type" />
+                        <TextBlock Text="{Binding Scenario.PackagingType}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
                     <StackPanel>
                         <TextBlock FontWeight="SemiBold" Text="Description" />
@@ -37,19 +61,9 @@
                         <TextBlock FontWeight="SemiBold" Text="Briefing" />
                         <TextBlock Text="{Binding Scenario.Briefing}" />
                     </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.Locomotive, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Locomotive" />
-                        <TextBlock Text="{Binding Scenario.Locomotive}" />
-                    </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Start Location" />
-                        <TextBlock Text="{Binding Scenario.StartLocation}" />
-                    </StackPanel>
                 </StackPanel>
             </Border>
-        </StackPanel>
+        </Grid>
 
         <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
             <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>

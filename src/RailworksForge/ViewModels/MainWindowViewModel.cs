@@ -34,10 +34,10 @@ public class MainWindowViewModel : ViewModelBase
 
     public void SelectRoute(RouteViewModel route)
     {
-        NavigationBar.Route = route;
+        NavigationBar.Route = new RouteDetailViewModel(route);
         NavigationBar.Scenario = null;
 
-        ContentViewModel = new RouteDetailViewModel(route);
+        ContentViewModel = NavigationBar.Route;
     }
 
     public void SelectAllRoutes()
@@ -59,7 +59,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         NavigationBar.Scenario = null;
 
-        ContentViewModel = new RouteDetailViewModel(NavigationBar.Route!);
+        ContentViewModel = NavigationBar.Route!;
     }
 
     public void SelectCurrentScenario()

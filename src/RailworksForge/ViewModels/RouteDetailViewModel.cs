@@ -55,6 +55,8 @@ public class RouteDetailViewModel : ViewModelBase
         GetScenarios();
     }
 
+    public RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }
+
     private void GetScenarios()
     {
         if (Design.IsDesignMode)

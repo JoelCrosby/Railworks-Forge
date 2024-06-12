@@ -10,9 +10,9 @@ namespace RailworksForge.ViewModels;
 
 public class NavigationBarViewModel : ViewModelBase
 {
-    private RouteViewModel? _route;
+    private RouteDetailViewModel? _route;
 
-    public RouteViewModel? Route
+    public RouteDetailViewModel? Route
     {
         get => _route;
         set
