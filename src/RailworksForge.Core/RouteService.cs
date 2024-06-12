@@ -22,7 +22,7 @@ public class RouteService
 
     private static List<Route> ReadRouteFiles(List<string> routeFiles)
     {
-        var results = new List<Route>();
+        var results = new HashSet<Route>();
 
         foreach (var path in routeFiles)
         {
