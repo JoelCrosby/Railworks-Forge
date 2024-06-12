@@ -56,9 +56,9 @@ public class RoutesListViewModel : ViewModelBase
         });
     }
 
-    private void GetRoutes()
+    private async Task GetRoutes()
     {
-        var items = _routeService.GetRoutes();
+        var items = await Task.Run(() => _routeService.GetRoutes());
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -70,9 +70,11 @@ public class RoutesListViewModel : ViewModelBase
 
     private async void LoadImages()
     {
-        foreach (var route in ListItems)
+        var options = new ParallelOptions
         {
-            await route.LoadImage();
-        }
+            MaxDegreeOfParallelism = 8,
+        };
+
+        await Parallel.ForEachAsync(ListItems, options, async (route, _) => await route.LoadImage());
     }
 }
