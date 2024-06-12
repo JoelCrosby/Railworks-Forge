@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Controls.RouteDetail"
              x:DataType="vm:RouteDetailViewModel">
@@ -11,8 +12,8 @@
         <vm:DesignRouteDetailViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Vertical" Margin="12" Spacing="8">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="12" Spacing="8">
             <Border VerticalAlignment="Center" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8, 4" CornerRadius="4">
                 <TextBlock FontFamily="monospace" Text="{Binding Route.Id}" Opacity="0.7" />
             </Border>
@@ -60,7 +61,7 @@
             </DataGrid.ContextMenu>
 
         </DataGrid>
-    </StackPanel>
+    </DockPanel>
 
 
 </UserControl>

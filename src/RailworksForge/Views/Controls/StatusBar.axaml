@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             x:CompileBindings="True"
+             mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="32"
+             x:Class="RailworksForge.Views.Controls.StatusBar"
+             x:DataType="vm:StatusBarViewModel">
+
+    <Design.DataContext>
+        <vm:DesignStatusBarViewModel />
+    </Design.DataContext>
+
+    <Border Padding="12,6" Background="{StaticResource SystemBaseHighColor}" Height="32" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+
+        <Border.Styles>
+            <Style Selector="TextBlock">
+                <Setter Property="Foreground" Value="White" />
+            </Style>
+
+            <Style Selector="TextBlock">
+                <Setter Property="LetterSpacing" Value="0.36" />
+            </Style>
+        </Border.Styles>
+
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="32">
+                <Border IsVisible="{Binding ShowProgress}">
+                    <StackPanel Spacing="2">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock FontSize="12" Text="{Binding Progress}" />
+                            <TextBlock FontSize="12" Text="{Binding ProgressText}" />
+                        </StackPanel>
+                        <ProgressBar Value="{Binding Progress}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <TextBlock FontSize="14" Text="{Binding StatusText}" />
+        </DockPanel>
+    </Border>
+
+</UserControl>

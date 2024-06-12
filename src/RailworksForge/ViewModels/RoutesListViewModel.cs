@@ -16,8 +16,6 @@ namespace RailworksForge.ViewModels;
 
 public class RoutesListViewModel : ViewModelBase
 {
-    private readonly RouteService _routeService;
-
     public ObservableCollection<RouteViewModel> ListItems { get; }
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
@@ -26,12 +24,8 @@ public class RoutesListViewModel : ViewModelBase
 
     public RouteViewModel? SelectedItem { get; set; }
 
-    public RoutesListViewModel(RouteService service)
+    public RoutesListViewModel()
     {
-        _routeService = service;
-
-        Task.Run(GetRoutes);
-
         ListItems = new ObservableCollection<RouteViewModel>();
 
         CopyClickedCommand = ReactiveCommand.CreateFromTask(() =>
@@ -56,16 +50,13 @@ public class RoutesListViewModel : ViewModelBase
         });
     }
 
-    private async Task GetRoutes()
+    public async Task LoadRoutes()
     {
-        var items = await Task.Run(() => _routeService.GetRoutes());
+        var items = await Task.Run(RouteService.GetRoutes);
 
-        Dispatcher.UIThread.Post(() =>
-        {
             ListItems.AddRange(items.Select(item => new RouteViewModel(item)));
 
             LoadImages();
-        });
     }
 
     private async void LoadImages()

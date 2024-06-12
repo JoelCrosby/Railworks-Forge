@@ -9,12 +9,41 @@ namespace RailworksForge.Core;
 
 public class RouteService
 {
-    public List<Route> GetRoutes()
+    public static List<Route> GetRoutes()
     {
         var baseDir = Paths.GetScenariosDirectory();
         var routeFiles = Directory
             .EnumerateFiles(baseDir, "*",  SearchOption.AllDirectories)
             .Where(file => file.EndsWith("RouteProperties.xml") || file.EndsWith("MainContent.ap"))
+            .Aggregate(new Dictionary<string, List<string>>(), (acc, route) =>
+            {
+                var dir = Path.GetDirectoryName(route);
+
+                if (dir is null)
+                {
+                    throw new Exception($"could not get dirname for route path {route}");
+                }
+
+                if (acc.TryGetValue(dir, out var value))
+                {
+                    value.Add(route);
+                }
+                else
+                {
+                    acc.Add(dir, [route]);
+                }
+
+                return acc;
+            })
+            .Select(pair =>
+            {
+                if (pair.Value.FirstOrDefault(p => p.EndsWith(".xml")) is {} xml)
+                {
+                    return xml;
+                }
+
+                return pair.Value.First();
+            })
             .ToList();
 
         return ReadRouteFiles(routeFiles);

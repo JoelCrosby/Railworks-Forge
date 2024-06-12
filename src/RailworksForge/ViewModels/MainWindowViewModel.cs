@@ -1,26 +1,22 @@
 ﻿using System;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core.Models;
 
-using ReactiveUI;
-
 namespace RailworksForge.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase
 {
     public MainMenuViewModel MainMenu { get; }
     public NavigationBarViewModel NavigationBar { get; }
     public RoutesListViewModel RoutesList { get; }
+    public StatusBarViewModel StatusBar { get; }
 
+    [ObservableProperty]
     private ViewModelBase _contentViewModel;
-
-    public ViewModelBase ContentViewModel
-    {
-        get => _contentViewModel;
-        private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
-    }
 
     public MainWindowViewModel(IServiceProvider provider)
     {
@@ -28,8 +24,18 @@ public class MainWindowViewModel : ViewModelBase
 
         MainMenu = new MainMenuViewModel();
         NavigationBar = new NavigationBarViewModel();
+        StatusBar = new StatusBarViewModel();
 
         _contentViewModel = RoutesList;
+
+        OnStartup();
+    }
+
+    private async void OnStartup()
+    {
+        await RoutesList.LoadRoutes();
+
+        StatusBar.StatusText = $"{RoutesList.ListItems.Count} Routes Loaded";
     }
 
     public void SelectRoute(RouteViewModel route)

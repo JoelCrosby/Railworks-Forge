@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesList"
              x:DataType="vm:RoutesListViewModel">
@@ -12,15 +13,16 @@
               DoubleTapped="DataGrid_OnDoubleTapped"
               GridLinesVisibility="All"
               SelectionMode="Single"
+              RowHeight="64"
               SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
               BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
     >
 
         <DataGrid.Columns>
-            <DataGridTemplateColumn Header="Image" Width="64">
+            <DataGridTemplateColumn Header="Image" Width="128">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                        <Image Width="64" Source="{Binding ImageBitmap}" />
+                        <Image Height="64" Source="{Binding ImageBitmap}" />
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>

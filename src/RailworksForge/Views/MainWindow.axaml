@@ -14,7 +14,8 @@
     <DockPanel>
         <controls:MainMenu DockPanel.Dock="Top" DataContext="{Binding MainMenu}" />
         <controls:NavigationBar DockPanel.Dock="Top" DataContext="{Binding NavigationBar}"/>
+        <controls:StatusBar DockPanel.Dock="Bottom" DataContext="{Binding StatusBar}"/>
 
-        <ContentControl Content="{Binding ContentViewModel}" />
+        <ContentControl DockPanel.Dock="Top" Content="{Binding ContentViewModel}" />
     </DockPanel>
 </Window>

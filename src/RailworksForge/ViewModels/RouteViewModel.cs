@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using RailworksForge.Core.Models;
 
 using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
-public class RouteViewModel : ViewModelBase
+public partial class RouteViewModel : ViewModelBase
 {
     public string Id { get; init; }
 
@@ -26,13 +28,8 @@ public class RouteViewModel : ViewModelBase
 
     public PackagingType PackagingType { get; }
 
+    [ObservableProperty]
     private Bitmap? _imageBitmap;
-
-    public Bitmap? ImageBitmap
-    {
-        get => _imageBitmap;
-        private set => this.RaiseAndSetIfChanged(ref _imageBitmap, value);
-    }
 
     public RouteViewModel(Route route)
     {
@@ -99,7 +96,7 @@ public class RouteViewModel : ViewModelBase
     {
         try
         {
-            return stream is null ? null : Bitmap.DecodeToWidth(stream, 64);
+            return stream is null ? null : Bitmap.DecodeToWidth(stream, 256);
         }
         catch
         {
