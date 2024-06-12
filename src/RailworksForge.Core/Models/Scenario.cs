@@ -6,21 +6,21 @@ public record Scenario
 
     public required string Name { get; init; }
 
-    public required string Description { get; init; }
+    public string? Description { get; init; }
 
-    public required string Briefing { get; init; }
+    public string? Briefing { get; init; }
 
-    public required string StartLocation { get; init; }
+    public string? StartLocation { get; init; }
 
-    public required string Locomotive { get; init; }
+    public string? Locomotive { get; init; }
 
-    public required string Path { get; init; }
+    public string? Path { get; init; }
 
-    public required string RootPath { get; init; }
+    public string? RootPath { get; init; }
 
-    public required string FileContent { get; init; }
+    public string? FileContent { get; init; }
 
-    public required List<Consist> Consists { get; init; }
+    public List<Consist> Consists { get; init; } = [];
 
     public required PackagingType PackagingType { get; init; }
 

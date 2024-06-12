@@ -3,13 +3,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Controls.RouteDetail"
              x:DataType="vm:RouteDetailViewModel">
 
+    <Design.DataContext>
+        <vm:DesignRouteDetailViewModel />
+    </Design.DataContext>
+
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Vertical" Margin="12" Spacing="8">
-            <TextBlock FontFamily="monospace" Text="{Binding Route.Id}" />
+            <Border VerticalAlignment="Center" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8, 4" CornerRadius="4">
+                <TextBlock FontFamily="monospace" Text="{Binding Route.Id}" Opacity="0.7" />
+            </Border>
+
             <TextBlock FontSize="20" Text="Scenarios" />
         </StackPanel>
 

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Threading.Tasks;
 
+using Avalonia.Controls;
 using Avalonia.Threading;
 
 using DynamicData;
@@ -18,7 +19,7 @@ public class RouteDetailViewModel : ViewModelBase
 {
     public RouteViewModel Route { get; }
 
-    public ObservableCollection<Scenario> Scenarios { get; }
+    public virtual ObservableCollection<Scenario> Scenarios { get; init; } = [];
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
@@ -29,7 +30,6 @@ public class RouteDetailViewModel : ViewModelBase
     public RouteDetailViewModel(RouteViewModel route)
     {
         Route = route;
-        Scenarios = new ObservableCollection<Scenario>();
 
         DetailsClickedCommand = ReactiveCommand.Create(() =>
         {
@@ -47,7 +47,7 @@ public class RouteDetailViewModel : ViewModelBase
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
-            if (SelectedItem is null) return;
+            if (SelectedItem?.Path is null) return;
 
             Launcher.Open(SelectedItem.Path);
         });
@@ -57,6 +57,11 @@ public class RouteDetailViewModel : ViewModelBase
 
     private void GetScenarios()
     {
+        if (Design.IsDesignMode)
+        {
+            return;
+        }
+
         var items = ScenarioService.GetScenarios(Route.Model);
 
         Dispatcher.UIThread.Post(() =>
