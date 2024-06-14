@@ -27,15 +27,6 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusBar = new StatusBarViewModel();
 
         _contentViewModel = RoutesList;
-
-        OnStartup();
-    }
-
-    private async void OnStartup()
-    {
-        await RoutesList.LoadRoutes();
-
-        StatusBar.StatusText = $"{RoutesList.ListItems.Count} Routes Loaded";
     }
 
     public void SelectRoute(RouteViewModel route)
@@ -75,6 +66,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void SelectScenarioConsist(Scenario scenario, Consist consist)
     {
-        ContentViewModel = new ConsistViewModel(scenario, consist);
+        ContentViewModel = new ConsistDetailViewModel(scenario, consist);
     }
 }

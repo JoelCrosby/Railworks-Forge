@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Threading;
@@ -16,7 +19,7 @@ namespace RailworksForge.ViewModels;
 
 public class RoutesListViewModel : ViewModelBase
 {
-    public ObservableCollection<RouteViewModel> ListItems { get; }
+    public IObservable<ObservableCollection<RouteViewModel>> ListItems { get; }
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -26,8 +29,6 @@ public class RoutesListViewModel : ViewModelBase
 
     public RoutesListViewModel()
     {
-        ListItems = new ObservableCollection<RouteViewModel>();
-
         CopyClickedCommand = ReactiveCommand.CreateFromTask(() =>
         {
             if (SelectedItem is null) return Task.CompletedTask;
@@ -48,24 +49,27 @@ public class RoutesListViewModel : ViewModelBase
 
             Utils.GetApplicationViewModel().SelectRoute(SelectedItem);
         });
+
+        ListItems = Observable.Start(LoadRoutes, RxApp.TaskpoolScheduler);
     }
 
-    public async Task LoadRoutes()
+    public ObservableCollection<RouteViewModel> LoadRoutes()
     {
-        var items = await Task.Run(RouteService.GetRoutes);
+        var items = RouteService.GetRoutes();
+        var models = items.Select(item => new RouteViewModel(item)).ToList();
 
-            ListItems.AddRange(items.Select(item => new RouteViewModel(item)));
+        LoadImages(models);
 
-            LoadImages();
+        return new ObservableCollection<RouteViewModel>(models);
     }
 
-    private async void LoadImages()
+    private async void LoadImages(IEnumerable<RouteViewModel> items)
     {
         var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = 8,
         };
 
-        await Parallel.ForEachAsync(ListItems, options, async (route, _) => await route.LoadImage());
+        await Parallel.ForEachAsync(items, options, async (route, _) => await route.LoadImage());
     }
 }

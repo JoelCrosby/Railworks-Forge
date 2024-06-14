@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace RailworksForge.Views.Controls;
 
-public partial class Consist : UserControl
+public partial class FileBrowser : UserControl
 {
-    public Consist()
+    public FileBrowser()
     {
         InitializeComponent();
     }

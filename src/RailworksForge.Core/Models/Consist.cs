@@ -14,6 +14,8 @@ public class Consist
 
     public bool PlayerDriver { get; init; }
 
+    public required string BlueprintId { get; init; }
+
     public string? RawText { get; init; }
 }
 
@@ -22,4 +24,8 @@ public class ConsistRailVehicle
     public required string Id { get; init; }
 
     public required string LocomotiveName { get; init; }
+
+    public string? UniqueNumber { get; init; }
+
+    public bool Flipped { get; init; }
 }

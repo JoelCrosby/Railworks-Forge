@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
+             x:CompileBindings="True"
+             mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
+             x:Class="RailworksForge.Views.Controls.ConsistDetail"
+             x:DataType="vm:ConsistDetailViewModel">
+
+
+    <Grid ColumnDefinitions="*, 4, *">
+        <DataGrid Grid.Column="0"
+                  ItemsSource="{Binding RailVehicles^}"
+                  IsReadOnly="True"
+                  GridLinesVisibility="All"
+                  SelectionMode="Single"
+                  BorderThickness="0,1,0,0"
+                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+        >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />
+                <DataGridTextColumn Header="Is Flipped" Binding="{Binding Flipped}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Columns"/>
+
+        <Border Grid.Column="2" BorderThickness="0,1,1,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+           <Grid RowDefinitions="*,4,*">
+               <controls:FileBrowser Grid.Row="0" DataContext="{Binding FileBrowser}" />
+
+               <GridSplitter Grid.Row="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Rows"/>
+
+               <DockPanel Grid.Row="2">
+                   <StackPanel DockPanel.Dock="Top">
+                       <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}">
+                           <TextBlock Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" FontSize="12">Consist</TextBlock>
+                       </Border>
+                   </StackPanel>
+
+                   <DataGrid  BorderThickness="0,1,0,0"
+                              BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                              ItemsSource="{Binding AvailableStock}">
+                       <DataGrid.Columns>
+                           <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                           <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                           <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />
+                           <DataGridTextColumn Header="Is Flipped" Binding="{Binding Flipped}" />
+                       </DataGrid.Columns>
+                   </DataGrid>
+               </DockPanel>
+           </Grid>
+        </Border>
+    </Grid>
+</UserControl>

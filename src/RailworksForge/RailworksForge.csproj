@@ -34,4 +34,11 @@
   <ItemGroup>
     <UpToDateCheckInput Remove="Views\DataGrid\DataGridIdentifierColumn.axaml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Controls\FileBrowser.axaml.cs">
+      <DependentUpon>RollingStockBrowser.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

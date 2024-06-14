@@ -8,7 +8,7 @@
              x:Class="RailworksForge.Views.Controls.RoutesList"
              x:DataType="vm:RoutesListViewModel">
 
-    <DataGrid ItemsSource="{Binding ListItems}"
+    <DataGrid ItemsSource="{Binding ListItems^}"
               IsReadOnly="True"
               DoubleTapped="DataGrid_OnDoubleTapped"
               GridLinesVisibility="All"

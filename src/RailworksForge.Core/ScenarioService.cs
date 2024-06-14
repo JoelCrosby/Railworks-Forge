@@ -117,6 +117,7 @@ public static class ScenarioService
         var serviceName = el.SelectTextContnet("ServiceName English");
         var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
         var locoAuthor = el.SelectTextContnet("LocoAuthor");
+        var blueprintId = el.SelectTextContnet("BlueprintID");
         var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
 
         return new Consist
@@ -127,6 +128,7 @@ public static class ScenarioService
             LocoClass = locoClass,
             ServiceName = serviceName,
             PlayerDriver = playerDriver,
+            BlueprintId = blueprintId,
             RawText = el.OuterHtml,
         };
     }
