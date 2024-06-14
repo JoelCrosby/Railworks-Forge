@@ -22,7 +22,7 @@
         </StackPanel>
 
 
-        <DataGrid ItemsSource="{Binding Scenarios}"
+        <DataGrid ItemsSource="{Binding Scenarios^}"
                   IsReadOnly="True"
                   DoubleTapped="DataGrid_OnDoubleTapped"
                   GridLinesVisibility="All"

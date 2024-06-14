@@ -4,6 +4,8 @@ public record Scenario
 {
     public required string Id { get; init; }
 
+    public required Route Route { get; init; }
+
     public required string Name { get; init; }
 
     public string? Description { get; init; }
@@ -14,9 +16,9 @@ public record Scenario
 
     public string? Locomotive { get; init; }
 
-    public string? Path { get; init; }
+    public string? DirectoryPath { get; init; }
 
-    public string? RootPath { get; init; }
+    public string? ScenarioPropertiesPath { get; init; }
 
     public string? FileContent { get; init; }
 
@@ -26,8 +28,11 @@ public record Scenario
 
     public required ScenarioClass ScenarioClass { get; init; }
 
-    private string ScenarioBinaryPath => System.IO.Path.Join(Path, "Scenario.bin");
-    private string ScenarioBinaryXmlPath => System.IO.Path.Join(Path, "Scenario.bin.xml");
+    private string ScenarioBinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
+    private string ScenarioBinaryXmlPath => Path.Join(DirectoryPath, "Scenario.bin.xml");
+
+    private bool HasScenarioBinary => File.Exists(ScenarioBinaryPath);
+    private bool HasMainContentArchive => File.Exists(Route.MainContentArchivePath);
 
     public async Task<string> ConvertBinToXml()
     {
@@ -36,19 +41,44 @@ public record Scenario
             return ScenarioBinaryXmlPath;
         }
 
-        var path = System.IO.Path.Join(Path, "Scenario.bin");
+        if (!HasScenarioBinary)
+        {
+            ExtractScenarioXml();
+        }
 
-        await Serz.Convert(path);
+        await Serz.Convert(ScenarioBinaryPath);
 
         return ScenarioBinaryXmlPath;
     }
 
+    private string ExtractScenarioXml()
+    {
+        if (!HasMainContentArchive)
+        {
+            throw new NotImplementedException("scenario does not contain a MainContent.ap");
+        }
+
+        return Archives.GetTextFileContentFromPath(Route.MainContentArchivePath, "Scenario.bin");
+    }
+
     public async Task<string> ConvertXmlToBin()
     {
-        var path = System.IO.Path.Join(Path, "Scenario.bin.xml");
+        var path = Path.Join(DirectoryPath, "Scenario.bin.xml");
 
         await Serz.Convert(path);
 
         return ScenarioBinaryPath;
+    }
+
+    public virtual bool Equals(Scenario? other)
+    {
+        if (other is null) return false;
+
+        return Id == other.Id;
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
     }
 }

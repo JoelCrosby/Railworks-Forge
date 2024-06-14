@@ -40,7 +40,7 @@ public class RoutesListViewModel : ViewModelBase
         {
             if (SelectedItem is null) return;
 
-            Launcher.Open(SelectedItem.Path);
+            Launcher.Open(SelectedItem.DirectoryPath);
         });
 
         DetailsClickedCommand = ReactiveCommand.Create(() =>

@@ -1,14 +1,14 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
-using Avalonia.Threading;
-
-using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Models.Examples;
 using RailworksForge.Util;
 
 using ReactiveUI;
@@ -19,7 +19,7 @@ public class RouteDetailViewModel : ViewModelBase
 {
     public RouteViewModel Route { get; }
 
-    public virtual ObservableCollection<Scenario> Scenarios { get; init; } = [];
+    public IObservable<ObservableCollection<Scenario>> Scenarios { get; init; }
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
@@ -47,28 +47,25 @@ public class RouteDetailViewModel : ViewModelBase
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
-            if (SelectedItem?.Path is null) return;
+            if (SelectedItem?.DirectoryPath is null) return;
 
-            Launcher.Open(SelectedItem.Path);
+            Launcher.Open(SelectedItem.DirectoryPath);
         });
 
-        GetScenarios();
+        Scenarios = Observable.Start(GetScenarios, RxApp.TaskpoolScheduler);
     }
 
-    public RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }
+    protected RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }
 
-    private void GetScenarios()
+    private ObservableCollection<Scenario> GetScenarios()
     {
         if (Design.IsDesignMode)
         {
-            return;
+            return new (Example.Scenarios);
         }
 
         var items = ScenarioService.GetScenarios(Route.Model);
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            Scenarios.AddRange(items);
-        });
+        return new (items);
     }
 }

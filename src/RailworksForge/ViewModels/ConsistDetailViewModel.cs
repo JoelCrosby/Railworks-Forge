@@ -1,6 +1,8 @@
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using AngleSharp.Dom;
@@ -11,6 +13,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
+
+using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
@@ -25,26 +29,32 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     public ObservableCollection<ConsistRailVehicle> _AvailableStock;
 
-    public Task<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
+    public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
 
     public ConsistDetailViewModel(Scenario scenario, Consist consist)
     {
         Scenario = scenario;
         Consist = consist;
 
-        RailVehicles = GetRailVehicles();
+        AvailableStock = [];
+        RailVehicles = Observable.FromAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
         FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
     }
 
     private async Task<ObservableCollection<ConsistRailVehicle>> GetRailVehicles()
     {
+        if (string.IsNullOrWhiteSpace(Consist.BlueprintId))
+        {
+            return [];
+        }
+
         var path = await Scenario.ConvertBinToXml();
         var text = await File.ReadAllTextAsync(path);
+        var doc = await new HtmlParser().ParseDocumentAsync(text);
 
-        var doc = new HtmlParser().ParseDocument(text);
         var consists = doc
             .QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.SelectTextContnet("BlueprintID BlueprintID") == Consist.BlueprintId)?
+            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == Consist.ServiceId)?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
             .Select(ParseConsist)
             .ToList() ?? [];

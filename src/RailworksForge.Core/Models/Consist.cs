@@ -16,6 +16,8 @@ public class Consist
 
     public required string BlueprintId { get; init; }
 
+    public required string ServiceId { get; init; }
+
     public string? RawText { get; init; }
 }
 

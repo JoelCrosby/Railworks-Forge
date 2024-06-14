@@ -12,22 +12,36 @@ public static class ScenarioService
 {
     public static List<Scenario> GetScenarios(Route route)
     {
-        var scenarios = new List<Scenario>();
+        var scenarios = new HashSet<Scenario>();
 
-        if (GetScenarioDirectory(route) is {} dir)
-        {
-            scenarios.AddRange(ReadScenarioFiles(dir));
-        }
-
-        foreach (var package in Directory.EnumerateFiles(route.Path, "*.ap"))
-        {
-            scenarios.AddRange(ReadCompressedScenarios(package));
-        }
+        AddUnPackedScenarios(route, scenarios);
+        AddPackedScenarios(route, scenarios);
 
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
     }
 
-    private static List<Scenario> ReadScenarioFiles(string directory)
+    private static void AddPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    {
+        foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
+        {
+            foreach (var scenario in ReadCompressedScenarios(route, package))
+            {
+                scenarios.Add(scenario);
+            }
+        }
+    }
+
+    private static void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    {
+        if (GetScenarioDirectory(route) is not {} dir) return;
+
+        foreach (var scenario in ReadScenarioFiles(route, dir))
+        {
+            scenarios.Add(scenario);
+        }
+    }
+
+    private static List<Scenario> ReadScenarioFiles(Route route, string directory)
     {
         var scenarios = new List<Scenario>();
 
@@ -38,7 +52,7 @@ public static class ScenarioService
             if (!File.Exists(scenarioPath)) continue;
 
             var content = File.ReadAllText(scenarioPath);
-            var scenario = ReadScenarioProperties(scenarioPath, content);
+            var scenario = ReadScenarioProperties(route, scenarioPath, content);
 
             scenarios.Add(scenario);
         }
@@ -48,14 +62,14 @@ public static class ScenarioService
 
     private static string? GetScenarioDirectory(Route route)
     {
-        return Directory.EnumerateDirectories(route.Path).FirstOrDefault(path =>
+        return Directory.EnumerateDirectories(route.DirectoryPath).FirstOrDefault(path =>
         {
             var dirname = Path.GetFileName(path);
             return string.Equals(dirname, "Scenarios", StringComparison.OrdinalIgnoreCase);
         });
     }
 
-    private static IEnumerable<Scenario> ReadCompressedScenarios(string path)
+    private static IEnumerable<Scenario> ReadCompressedScenarios(Route route, string path)
     {
         using var archive = ZipFile.Open(path, ZipArchiveMode.Read);
 
@@ -74,19 +88,20 @@ public static class ScenarioService
 
             var file = reader.ReadToEnd();
 
-            yield return ReadScenarioProperties(path, file);
+            yield return ReadScenarioProperties(route, path, file);
         }
     }
 
-    private static Scenario ReadScenarioProperties(string path, string fileContent)
+    private static Scenario ReadScenarioProperties(Route route, string path, string fileContent)
     {
-        var id = Directory.GetParent(path)?.Name ?? string.Empty;
         var doc = new HtmlParser().ParseDocument(fileContent);
+
+        var id = doc.SelectTextContnet("ID cGUID DevString");
         var name = doc.SelectTextContnet("DisplayName English");
         var description = doc.SelectTextContnet("description English");
         var briefing = doc.SelectTextContnet("Briefing English");
         var startLocation = doc.SelectTextContnet("StartLocation English");
-        var directoryPath = Directory.GetParent(path)?.FullName ?? string.Empty;
+        var directoryPath = Path.GetDirectoryName(path) ?? string.Empty;
         var scenarioClass = doc.SelectTextContnet("ScenarioClass");
 
         var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(ParseConsist).ToList();
@@ -101,12 +116,13 @@ public static class ScenarioService
             Briefing = briefing,
             StartLocation = startLocation,
             Locomotive = locomotive,
-            Path = directoryPath,
-            RootPath = path,
+            DirectoryPath = directoryPath,
+            ScenarioPropertiesPath = path,
             Consists = consists,
             ScenarioClass = ScenarioClassTypes.Parse(scenarioClass),
             PackagingType = path.EndsWith(".xml") ? PackagingType.Unpacked : PackagingType.Packed,
             FileContent = fileContent,
+            Route = route,
         };
     }
 
@@ -118,6 +134,7 @@ public static class ScenarioService
         var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
         var locoAuthor = el.SelectTextContnet("LocoAuthor");
         var blueprintId = el.SelectTextContnet("BlueprintID");
+        var serviceId = el.SelectTextContnet("ServiceName Key");
         var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
 
         return new Consist
@@ -129,6 +146,7 @@ public static class ScenarioService
             ServiceName = serviceName,
             PlayerDriver = playerDriver,
             BlueprintId = blueprintId,
+            ServiceId = serviceId,
             RawText = el.OuterHtml,
         };
     }

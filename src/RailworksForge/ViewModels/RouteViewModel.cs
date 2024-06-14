@@ -10,8 +10,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core.Models;
 
-using ReactiveUI;
-
 namespace RailworksForge.ViewModels;
 
 public partial class RouteViewModel : ViewModelBase
@@ -20,9 +18,9 @@ public partial class RouteViewModel : ViewModelBase
 
     public string Name { get; init; }
 
-    public string Path { get; }
+    public string RoutePropertiesPath { get; }
 
-    public string RootPath { get; }
+    public string DirectoryPath { get; }
 
     public Route Model { get; }
 
@@ -35,8 +33,8 @@ public partial class RouteViewModel : ViewModelBase
     {
         Id = route.Id;
         Name = route.Name;
-        Path = route.Path;
-        RootPath = route.RootPath;
+        RoutePropertiesPath = route.RoutePropertiesPath;
+        DirectoryPath = route.DirectoryPath;
         PackagingType = route.PackagingType;
         Model = route;
     }
@@ -58,11 +56,7 @@ public partial class RouteViewModel : ViewModelBase
 
     private Bitmap? GetUnCompressedImageStream()
     {
-        var directoryPath = Directory.GetParent(RootPath)?.FullName;
-
-        if (directoryPath is null) return null;
-
-        var imageFiles = Directory.EnumerateFiles(directoryPath, "*.png", SearchOption.AllDirectories);
+        var imageFiles = Directory.EnumerateFiles(DirectoryPath, "*.png", SearchOption.AllDirectories);
         var imagePath = imageFiles.FirstOrDefault(i => i.EndsWith("image.png", StringComparison.OrdinalIgnoreCase));
         var image = File.Exists(imagePath) ? File.OpenRead(imagePath) : null;
 
@@ -72,7 +66,7 @@ public partial class RouteViewModel : ViewModelBase
     private async Task<Bitmap?> GetCompressedImageStream()
     {
         var path = Directory
-            .EnumerateFiles(Path, "*.ap", SearchOption.AllDirectories)
+            .EnumerateFiles(DirectoryPath, "*.ap", SearchOption.AllDirectories)
             .FirstOrDefault(f => f.EndsWith("MainContent.ap", StringComparison.OrdinalIgnoreCase));
 
         if (path is null) return null;

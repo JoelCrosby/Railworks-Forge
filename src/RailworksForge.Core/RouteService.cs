@@ -77,20 +77,7 @@ public class RouteService
 
     private static Route ReadCompressedRouteFile(string path)
     {
-        using var archive = ZipFile.Open(path, ZipArchiveMode.Read);
-
-        var properties = archive.Entries.FirstOrDefault(entry => entry.Name == "RouteProperties.xml");
-
-        if (properties is null)
-        {
-            throw new Exception("failed to find route properties file in compressed archive");
-        }
-
-        var content = properties.Open();
-
-        using var reader = new StreamReader(content);
-
-        var file = reader.ReadToEnd();
+        var file = Archives.GetTextFileContentFromPath(path, "/RouteProperties.xml");
 
         return ReadRouteProperties(path, file);
     }
@@ -106,8 +93,8 @@ public class RouteService
         {
             Id = id,
             Name = name,
-            Path = directoryPath,
-            RootPath = path,
+            RoutePropertiesPath = path,
+            DirectoryPath = directoryPath,
             PackagingType = path.EndsWith(".xml") ? PackagingType.Unpacked : PackagingType.Packed,
         };
     }
