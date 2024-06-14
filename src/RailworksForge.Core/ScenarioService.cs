@@ -27,52 +27,6 @@ public static class ScenarioService
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
     }
 
-    public static async Task<ScenarioTree> GetScenarioTree(Scenario scenario)
-    {
-        var path = await scenario.ConvertBinToXml();
-        var content = await File.ReadAllTextAsync(path);
-
-        var doc = new HtmlParser().ParseDocument(content);
-
-        if (doc.Body is null)
-        {
-            return new ScenarioTree();
-        }
-
-        var root = new ScenarioTree
-        {
-            Nodes = AddChildren(doc.Body),
-        };
-
-        return root;
-
-        List<ScenarioTreeNode> AddChildren(IElement element)
-        {
-            var nodes = new List<ScenarioTreeNode>();
-
-            foreach (var child in element.Children)
-            {
-                nodes.Add(new ScenarioTreeNode
-                {
-                    Name = child.NodeName,
-                    Content = GetTextContent(),
-                    ChildNodes = AddChildren(child),
-                });
-
-                continue;
-
-                string? GetTextContent()
-                {
-                    return child.ChildNodes
-                        .FirstOrDefault(c => c.NodeType == NodeType.Text)?
-                        .TextContent;
-                }
-            }
-
-            return nodes;
-        }
-    }
-
     private static List<Scenario> ReadScenarioFiles(string directory)
     {
         var scenarios = new List<Scenario>();
@@ -162,11 +116,15 @@ public static class ScenarioService
         var locomotiveName = el.SelectTextContnet("LocoName English");
         var serviceName = el.SelectTextContnet("ServiceName English");
         var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
+        var locoAuthor = el.SelectTextContnet("LocoAuthor");
+        var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
 
         return new Consist
         {
             Id = consistId,
             LocomotiveName = locomotiveName,
+            LocoAuthor = locoAuthor,
+            LocoClass = locoClass,
             ServiceName = serviceName,
             PlayerDriver = playerDriver,
             RawText = el.OuterHtml,

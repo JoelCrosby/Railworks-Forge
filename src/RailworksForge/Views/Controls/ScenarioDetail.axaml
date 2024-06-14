@@ -86,7 +86,9 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                <DataGridTextColumn Header="Locomotive Author" Binding="{Binding LocoAuthor}" />
                 <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                <DataGridTextColumn Header="Locomotive Class" Binding="{Binding LocoClass}" />
                 <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
             </DataGrid.Columns>
 

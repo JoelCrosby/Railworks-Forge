@@ -6,6 +6,10 @@ public class Consist
 
     public required string LocomotiveName { get; init; }
 
+    public string? LocoAuthor { get; init; }
+
+    public LocoClass? LocoClass { get; set; }
+
     public required string ServiceName { get; init; }
 
     public bool PlayerDriver { get; init; }
