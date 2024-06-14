@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 
+using RailworksForge.Core.Models;
+
 namespace RailworksForge.Core;
 
 public static class Paths
@@ -85,5 +87,29 @@ public static class Paths
     public static string ToWindowsPath(this string path)
     {
         return path.Replace("/", @"\").Replace(@"\cache\SteamLibrary\steamapps\", @"s:\");
+    }
+
+    public static List<BrowserDirectory> GetTopLevelRailVehicleDirectories()
+    {
+        var assetsPath = GetAssetsDirectory();
+        var assetDirectories = Directory.GetDirectories(assetsPath);
+
+        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 2).Any());
+
+        var sorted = directories
+            .Select(dir => new BrowserDirectory(dir))
+            .OrderBy(dir => dir.Name);
+
+        return [..sorted];
+    }
+
+    public static IEnumerable<string> EnumerateRailVehicles(string dir, int depth)
+    {
+        return Directory.EnumerateFileSystemEntries(dir, "RailVehicles", new EnumerationOptions
+        {
+            MaxRecursionDepth = depth,
+            IgnoreInaccessible = true,
+            RecurseSubdirectories = true,
+        });
     }
 }

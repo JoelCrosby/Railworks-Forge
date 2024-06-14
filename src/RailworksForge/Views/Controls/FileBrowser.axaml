@@ -23,7 +23,7 @@
 
         <TreeView ItemsSource="{Binding Items^}" SelectedItem="{Binding SelectedItem}">
             <TreeView.ItemTemplate>
-                <TreeDataTemplate ItemsSource="{Binding Subfolders}">
+                <TreeDataTemplate ItemsSource="{Binding Subfolders^}">
                     <StackPanel Orientation="Horizontal">
                         <PathIcon Opacity="0.72" Width="16" Height="16" Data="{StaticResource folder}" Margin="0,0,12,0" />
                         <TextBlock Text="{Binding Name}"/>
