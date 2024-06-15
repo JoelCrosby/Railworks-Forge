@@ -21,9 +21,9 @@ public class BrowserDirectory
 
         return relativeGamePath.Split("/").Length switch
         {
-            2 => AssetBrowserLevel.Author,
-            3 => AssetBrowserLevel.Package,
-            _ => AssetBrowserLevel.PackageArchive,
+            2 => AssetBrowserLevel.Provider,
+            3 => AssetBrowserLevel.Product,
+            _ => AssetBrowserLevel.ProductAsset,
         };
     }
 

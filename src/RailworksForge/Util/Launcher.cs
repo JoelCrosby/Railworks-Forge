@@ -12,7 +12,7 @@ public static class Launcher
         var processInfo = new ProcessStartInfo
         {
             FileName = "xdg-open",
-            Arguments = path,
+            Arguments = $"\"{path}\"",
         };
 
         Process.Start(processInfo);

@@ -47,4 +47,10 @@ public static class Archives
             entry.ExtractToFile(destination, true);
         }
     }
+
+    public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
+    {
+        using var archive = ZipFile.OpenRead(archivePath);
+        return archive.Entries.Any(entry => string.Equals(entry.FullName, agnosticBlueprintIdPath, StringComparison.OrdinalIgnoreCase));
+    }
 }

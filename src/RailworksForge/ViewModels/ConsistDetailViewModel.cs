@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -20,46 +21,86 @@ namespace RailworksForge.ViewModels;
 
 public partial class ConsistDetailViewModel : ViewModelBase
 {
-    public Scenario Scenario { get; }
-    public Consist Consist { get; }
+    private readonly Scenario _scenario;
+    private readonly Consist _consist;
 
     [ObservableProperty]
-    public FileBrowserViewModel _fileBrowser;
+    private FileBrowserViewModel _fileBrowser;
 
     [ObservableProperty]
-    public ObservableCollection<ConsistRailVehicle> _AvailableStock;
+    private ObservableCollection<ConsistBlueprint> _availableStock;
 
     public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
 
     public ConsistDetailViewModel(Scenario scenario, Consist consist)
     {
-        Scenario = scenario;
-        Consist = consist;
+        _scenario = scenario;
+        _consist = consist;
 
         AvailableStock = [];
         RailVehicles = Observable.FromAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
         FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
     }
 
+    public async Task LoadAvailableStock(BrowserDirectory directory)
+    {
+        var preloadDirectory = Path.Join(directory.FullPath, "PreLoad");
+
+        if (!Directory.Exists(preloadDirectory))
+        {
+            return;
+        }
+
+        var binFiles = Directory.EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories);
+
+        var items = new List<ConsistBlueprint>();
+
+        foreach (var binFile in binFiles)
+        {
+            var exported = await Serz.Convert(binFile);
+            var consists = await GetConsistBlueprints(exported.OutputPath);
+
+            items.AddRange(consists);
+        }
+
+        AvailableStock = new ObservableCollection<ConsistBlueprint>(items);
+    }
+
     private async Task<ObservableCollection<ConsistRailVehicle>> GetRailVehicles()
     {
-        if (string.IsNullOrWhiteSpace(Consist.BlueprintId))
+        if (string.IsNullOrWhiteSpace(_consist.BlueprintId))
         {
             return [];
         }
 
-        var path = await Scenario.ConvertBinToXml();
+        var path = await _scenario.ConvertBinToXml();
+        var consists = await GetConsists(path);
+
+        return new ObservableCollection<ConsistRailVehicle>(consists);
+    }
+
+    private async Task<List<ConsistRailVehicle>> GetConsists(string path)
+    {
         var text = await File.ReadAllTextAsync(path);
         var doc = await new HtmlParser().ParseDocumentAsync(text);
 
-        var consists = doc
+        return doc
             .QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == Consist.ServiceId)?
+            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == _consist.ServiceId)?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
             .Select(ParseConsist)
             .ToList() ?? [];
+    }
 
-        return new ObservableCollection<ConsistRailVehicle>(consists);
+    private async Task<List<ConsistBlueprint>> GetConsistBlueprints(string path)
+    {
+        var text = await File.ReadAllTextAsync(path);
+        var doc = await new HtmlParser().ParseDocumentAsync(text);
+
+        return doc
+            .QuerySelectorAll("Blueprint")
+            .Select(ParseConsistBlueprint)
+            .ToList();
     }
 
     private static ConsistRailVehicle ParseConsist(IElement el)
@@ -67,7 +108,10 @@ public partial class ConsistDetailViewModel : ViewModelBase
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
         var locomotiveName = el.SelectTextContnet("Name");
         var uniqueNumber = el.SelectTextContnet("UniqueNumber");
+        var blueprintId = el.SelectTextContnet("BlueprintID BlueprintID");
         var flipped = el.SelectTextContnet("Flipped") == "1";
+        var blueprintSetIdProduct = el.SelectTextContnet("iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContnet("iBlueprintLibrary-cBlueprintSetID Provider");
 
         return new ConsistRailVehicle
         {
@@ -75,6 +119,21 @@ public partial class ConsistDetailViewModel : ViewModelBase
             LocomotiveName = locomotiveName,
             UniqueNumber = uniqueNumber,
             Flipped = flipped,
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+        };
+    }
+
+    private static ConsistBlueprint ParseConsistBlueprint(IElement el)
+    {
+        var locomotiveName = el.SelectTextContnet("LocoName English");
+        var displayName = el.SelectTextContnet("DisplayName English");
+
+        return new ConsistBlueprint
+        {
+            LocomotiveName = locomotiveName,
+            DisplayName = displayName,
         };
     }
 }

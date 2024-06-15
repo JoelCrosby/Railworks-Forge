@@ -14,11 +14,16 @@ public class Serz
         }
     }
 
-    public static async Task<ConvertedSerzFile> Convert(string inputPath)
+    public static async Task<ConvertedSerzFile> Convert(string inputPath, bool force = false)
     {
         var isBin = Path.GetExtension(inputPath) == ".bin";
-
         var outputPath = isBin ? inputPath.Replace(".bin", ".bin.xml") : inputPath.Replace(".bin.xml", ".bin");
+
+        if (!force && File.Exists(outputPath))
+        {
+            return new ConvertedSerzFile(inputPath, outputPath);
+        }
+
         var exe = Path.Join(Paths.GetGameDirectory(), "serz.exe");
         var inputArg = inputPath.ToWindowsPath();
         var outputType = isBin ? "xml" : "bin";

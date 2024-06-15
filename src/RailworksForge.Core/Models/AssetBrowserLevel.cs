@@ -2,7 +2,7 @@ namespace RailworksForge.Core.Models;
 
 public enum AssetBrowserLevel
 {
-    Author = 0,
-    Package = 1,
-    PackageArchive = 2,
+    Provider = 0,
+    Product = 1,
+    ProductAsset = 2,
 }

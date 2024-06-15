@@ -13,12 +13,12 @@
     </Design.DataContext>
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="12" Spacing="8">
-            <Border VerticalAlignment="Center" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8, 4" CornerRadius="4">
-                <TextBlock FontFamily="monospace" Text="{Binding Route.Id}" Opacity="0.7" />
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+            <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,1">
+                <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
+                    Scenarios
+                </TextBlock>
             </Border>
-
-            <TextBlock FontSize="20" Text="Scenarios" />
         </StackPanel>
 
 
