@@ -136,6 +136,8 @@ public static class ScenarioService
         var blueprintId = el.SelectTextContnet("BlueprintID");
         var serviceId = el.SelectTextContnet("ServiceName Key");
         var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
+        var blueprintSetIdProduct = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
         return new Consist
         {
@@ -146,6 +148,8 @@ public static class ScenarioService
             ServiceName = serviceName,
             PlayerDriver = playerDriver,
             BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
             RawText = el.OuterHtml,
         };
