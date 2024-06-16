@@ -112,4 +112,39 @@ public static class Paths
             RecurseSubdirectories = true,
         });
     }
+
+    public static bool Exists(string path)
+    {
+        if (GetPlatform() is Platform.Windows)
+        {
+            return Path.Exists(path);
+        }
+
+        var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);
+
+        if (Path.Exists(normalisedPath)) return true;
+
+        var assets = GetAssetsDirectory();
+        var relative = normalisedPath.Replace(assets, string.Empty);
+        var parts = relative.Split(Path.DirectorySeparatorChar).Where(r => !string.IsNullOrEmpty(r));
+        var partsQueue = new Queue<string>(parts);
+        var basePath = assets;
+
+        while (partsQueue.TryDequeue(out var part))
+        {
+            var entries = Directory.EnumerateFileSystemEntries(basePath, "*");
+            var partPath = Path.Join(basePath, part);
+
+            if (entries.FirstOrDefault(e => string.Equals(e, partPath, StringComparison.OrdinalIgnoreCase)) is {} entry)
+            {
+                basePath = entry;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

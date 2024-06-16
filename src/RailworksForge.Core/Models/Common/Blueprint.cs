@@ -35,7 +35,7 @@ public abstract class Blueprint
         var binaryPath = agnosticBlueprintIdPath.Replace(".xml", ".bin");
         var blueprintPath = Path.Join(ProductDirectory, binaryPath);
 
-        if (File.Exists(blueprintPath))
+        if (Paths.Exists(blueprintPath))
         {
             return AcquisitionState.Found;
         }
