@@ -41,14 +41,12 @@ public record Scenario
             return ScenarioBinaryXmlPath;
         }
 
-        if (!HasScenarioBinary)
-        {
-            ExtractScenarioXml();
-        }
+        var inputPath = HasScenarioBinary ? ScenarioBinaryPath : ExtractScenarioXml();
+        var outputPath = inputPath.Replace(".bin", ".bin.xml");
 
-        await Serz.Convert(ScenarioBinaryPath);
+        await Serz.Convert(inputPath);
 
-        return ScenarioBinaryXmlPath;
+        return outputPath;
     }
 
     private string ExtractScenarioXml()
@@ -58,7 +56,12 @@ public record Scenario
             throw new NotImplementedException("scenario does not contain a MainContent.ap");
         }
 
-        return Archives.GetTextFileContentFromPath(Route.MainContentArchivePath, "Scenario.bin");
+        var propertiesPath = Path.Join("Scenarios", Id, "Scenario.bin");
+        var destination = Path.Join(Route.DirectoryPath, "Scenarios", Id, "Scenario.bin");
+
+        Archives.ExtractFileContentFromPath(Route.MainContentArchivePath, propertiesPath, destination);
+
+        return destination;
     }
 
     public async Task<string> ConvertXmlToBin()

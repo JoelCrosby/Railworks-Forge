@@ -4,11 +4,10 @@ namespace RailworksForge.Core.Exceptions;
 
 public class DirectoryException(string message) : Exception(message)
 {
-    [DoesNotReturn]
-    public static void ThrowNotExists( string? path)
+    public static void ThrowIfNotExists([NotNull] string? path)
     {
-        throw new DirectoryException(
-            "an error occured while attempting to read directory information"
-        );
+        if (path is not null) return;
+
+        throw new DirectoryException("an error occured while attempting to read directory information");
     }
 }

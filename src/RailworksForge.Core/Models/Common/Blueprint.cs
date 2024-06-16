@@ -10,6 +10,8 @@ public abstract class Blueprint
 
     public AcquisitionState AcquisitionState => GetAcquisitionState();
 
+    private AcquisitionState _cachedAcquisitionState;
+
     private string ProductDirectory => Path.Join(
         Paths.GetAssetsDirectory(),
         BlueprintSetIdProvider,
@@ -17,6 +19,17 @@ public abstract class Blueprint
     );
 
     private AcquisitionState GetAcquisitionState()
+    {
+        if (_cachedAcquisitionState is not AcquisitionState.Unknown)
+        {
+            return _cachedAcquisitionState;
+        }
+
+        _cachedAcquisitionState = LoadAcquisitionState();
+        return _cachedAcquisitionState;
+    }
+
+    private AcquisitionState LoadAcquisitionState()
     {
         var agnosticBlueprintIdPath = BlueprintId.Replace('\\', Path.DirectorySeparatorChar);
         var binaryPath = agnosticBlueprintIdPath.Replace(".xml", ".bin");

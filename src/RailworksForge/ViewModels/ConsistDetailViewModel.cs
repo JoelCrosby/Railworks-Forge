@@ -92,7 +92,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .ToList() ?? [];
     }
 
-    private async Task<List<ConsistBlueprint>> GetConsistBlueprints(string path)
+    private static async Task<List<ConsistBlueprint>> GetConsistBlueprints(string path)
     {
         var text = await File.ReadAllTextAsync(path);
         var doc = await new HtmlParser().ParseDocumentAsync(text);

@@ -24,6 +24,25 @@ public static class Archives
         return reader.ReadToEnd();
     }
 
+    public static void ExtractFileContentFromPath(string archivePath, string filePath, string destination)
+    {
+        var destinationDir = Path.GetDirectoryName(destination);
+
+        DirectoryException.ThrowIfNotExists(destinationDir);
+        Directory.CreateDirectory(destinationDir);
+
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+
+        var entry = archive.Entries.FirstOrDefault(entry => entry.FullName == filePath);
+
+        if (entry is null)
+        {
+            ArchiveException.ThrowFileNotFound(archivePath, filePath);
+        }
+
+        entry.ExtractToFile(destination, true);
+    }
+
     public static void ExtractDirectory(string archivePath, string directoryPath)
     {
         using var archive = ZipFile.OpenRead(archivePath);
@@ -41,7 +60,7 @@ public static class Archives
             var destination = Path.Join(containingDirectory, entry.FullName);
             var destinationDir = Path.GetDirectoryName(destination);
 
-            DirectoryException.ThrowNotExists(destinationDir);
+            DirectoryException.ThrowIfNotExists(destinationDir);
             Directory.CreateDirectory(destinationDir);
 
             entry.ExtractToFile(destination, true);
