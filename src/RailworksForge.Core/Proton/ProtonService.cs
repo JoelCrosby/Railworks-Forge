@@ -6,11 +6,11 @@ using Gameloop.Vdf.JsonConverter;
 using VdfParser;
 
 
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.Proton;
 
-public class Proton
+public class ProtonService
 {
-    public static readonly ProtonInstance Instance = new Proton().GetProtonInstance();
+    private static ProtonInstance? _instance;
 
     private const string TargetAppId = "24010";
 
@@ -22,6 +22,11 @@ public class Proton
 
     public ProtonInstance GetProtonInstance()
     {
+        if (_instance is not null)
+        {
+            return _instance;
+        }
+
         var steamInstallation = FindSteamInstallations().FirstOrDefault();
 
         if (steamInstallation is null)
@@ -46,13 +51,15 @@ public class Proton
         var executable = Path.Join(protonApp.InstallDir, "proton");
         var directory = protonApp.InstallDir;
 
-        return new ProtonInstance
+        _instance = new ProtonInstance
         (
             steamCompatDataPath,
             steamCompatClientInstallPath,
             executable,
             directory
         );
+
+        return _instance;
     }
 
     private record SteamInstallation(string Path);

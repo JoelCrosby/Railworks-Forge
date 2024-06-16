@@ -2,22 +2,21 @@ using System.Text;
 
 using CliWrap;
 
+using RailworksForge.Core.Proton;
+
 namespace RailworksForge.Core;
 
 public class SubProcess
 {
-    public record ExecOutput(string StdOut, string StdError);
+    private static readonly ProtonService _protonService = new ();
 
-    private static readonly IReadOnlyDictionary<string, string?> EnvironmentVariables = new Dictionary<string, string?>
-    {
-        { "STEAM_COMPAT_DATA_PATH", Proton.Instance.SteamCompatDataPath },
-        { "STEAM_COMPAT_CLIENT_INSTALL_PATH", Proton.Instance.SteamCompatClientInstallPath },
-        { "WINEPREFIX", Proton.Instance.PrefixPath },
-        { "WINEFSYNC", "1" },
-    };
+    public record ExecOutput(string StdOut, string StdError);
 
     public static async Task<ExecOutput> ExecProcess(string path, List<string> arguments)
     {
+        var proton = _protonService.GetProtonInstance();
+        var environmentVariables = GetEnvironmentVariables();
+
         var stdOutBuffer = new StringBuilder();
         var stdErrBuffer = new StringBuilder();
 
@@ -30,8 +29,8 @@ public class SubProcess
             throw new Exception($"could not find working dir {workingDir}");
         }
 
-        await Cli.Wrap(Proton.Instance.WineBinPath)
-            .WithEnvironmentVariables(EnvironmentVariables)
+        await Cli.Wrap(proton.WineBinPath)
+            .WithEnvironmentVariables(environmentVariables)
             .WithArguments(args)
             .WithWorkingDirectory(workingDir)
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
@@ -43,5 +42,18 @@ public class SubProcess
         var error = stdErrBuffer.ToString();
 
         return new ExecOutput(output, error);
+    }
+
+    private static IReadOnlyDictionary<string, string?> GetEnvironmentVariables()
+    {
+        var proton = _protonService.GetProtonInstance();
+
+        return new Dictionary<string, string?>
+        {
+            { "STEAM_COMPAT_DATA_PATH", proton.SteamCompatDataPath },
+            { "STEAM_COMPAT_CLIENT_INSTALL_PATH", proton.SteamCompatClientInstallPath },
+            { "WINEPREFIX", proton.PrefixPath },
+            { "WINEFSYNC", "1" },
+        };
     }
 }

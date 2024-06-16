@@ -1,4 +1,4 @@
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.Proton;
 
 public class ProtonInstance
 {
