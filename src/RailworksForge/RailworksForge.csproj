@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.1.2" />
     <PackageReference Include="Avalonia" Version="11.0.10" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.10" />
     <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.10" />
@@ -30,16 +31,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RailworksForge.Core\RailworksForge.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Views\DataGrid\DataGridIdentifierColumn.axaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Views\Controls\FileBrowser.axaml.cs">
-      <DependentUpon>RollingStockBrowser.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
 </Project>
