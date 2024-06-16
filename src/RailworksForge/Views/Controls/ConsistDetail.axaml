@@ -10,26 +10,37 @@
              x:DataType="vm:ConsistDetailViewModel">
 
 
-    <Grid ColumnDefinitions="*, 4, *">
-        <DataGrid Grid.Column="0"
-                  ItemsSource="{Binding RailVehicles^}"
-                  IsReadOnly="True"
-                  GridLinesVisibility="All"
-                  SelectionMode="Single"
-                  BorderThickness="0,1,0,0"
-                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-        >
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
-                <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
-                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />
-                <DataGridTextColumn Header="Is Flipped" Binding="{Binding Flipped}" />
-                <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                <DataGridTextColumn Header="BlueprintId" Binding="{Binding BlueprintId}" />
-            </DataGrid.Columns>
-        </DataGrid>
+    <Grid ColumnDefinitions="2*, 4, *">
+
+        <DockPanel Grid.Column="0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+                <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
+                    <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
+                        Consist Vehicles
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+
+            <DataGrid
+                      ItemsSource="{Binding RailVehicles^}"
+                      IsReadOnly="True"
+                      GridLinesVisibility="All"
+                      SelectionMode="Single"
+                      BorderThickness="0,1,0,0"
+                      BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+            >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                    <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
+                    <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                    <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />
+                    <DataGridTextColumn Header="Is Flipped" Binding="{Binding Flipped}" />
+                    <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
+                    <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
+                    <DataGridTextColumn Header="BlueprintId" Binding="{Binding BlueprintId}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
 
         <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Columns"/>
 

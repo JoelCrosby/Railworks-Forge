@@ -48,6 +48,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public void SelectScenario(Scenario scenario)
     {
         NavigationBar.Scenario = scenario;
+        NavigationBar.Consist = null;
 
         ContentViewModel = new ScenarioDetailViewModel(scenario);
     }
@@ -55,17 +56,37 @@ public partial class MainWindowViewModel : ViewModelBase
     public void SelectCurrentRoute()
     {
         NavigationBar.Scenario = null;
+        NavigationBar.Consist = null;
 
         ContentViewModel = NavigationBar.Route!;
     }
 
     public void SelectCurrentScenario()
     {
+        NavigationBar.Consist = null;
+
+        if (NavigationBar.Scenario is null)
+        {
+            return;
+        }
+
         ContentViewModel = new ScenarioDetailViewModel(NavigationBar.Scenario!);
     }
 
     public void SelectScenarioConsist(Scenario scenario, Consist consist)
     {
+        NavigationBar.Consist = consist;
+
         ContentViewModel = new ConsistDetailViewModel(scenario, consist);
+    }
+
+    public void SelectCurrentConsist()
+    {
+        if (NavigationBar.Scenario is null || NavigationBar.Consist is null)
+        {
+            return;
+        }
+
+        ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario, NavigationBar.Consist);
     }
 }

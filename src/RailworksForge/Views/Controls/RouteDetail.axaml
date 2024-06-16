@@ -13,6 +13,45 @@
     </Design.DataContext>
 
     <DockPanel>
+
+        <Grid Margin="12,12,12,0" DockPanel.Dock="Top" ColumnDefinitions="280,*" >
+            <Grid.Styles>
+                <Style Selector="StackPanel">
+                    <Setter Property="Spacing" Value="4" />
+                    <Setter Property="Margin" Value="0, 0, 0, 8" />
+                </Style>
+
+                <Style Selector="TextBlock">
+                    <Setter Property="TextWrapping" Value="1" />
+                    <Setter Property="LineSpacing" Value="1.8" />
+                </Style>
+            </Grid.Styles>
+
+            <Border Background="Black" Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                <StackPanel>
+                    <Image Width="272" Source="{Binding Route.ImageBitmap}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                <StackPanel>
+                    <StackPanel>
+                        <TextBlock FontWeight="SemiBold" Text="Name" />
+                        <TextBlock Text="{Binding Route.Name}" />
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock FontWeight="SemiBold" Text="Packaging Type" />
+                        <TextBlock Text="{Binding Route.PackagingType}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
+            <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>
+        </StackPanel>
+
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,1">
                 <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
@@ -56,7 +95,7 @@
                 <ContextMenu>
                     <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
                     <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
-                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
+                    <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />
                 </ContextMenu>
             </DataGrid.ContextMenu>
 

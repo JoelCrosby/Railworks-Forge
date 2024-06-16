@@ -24,6 +24,7 @@ public class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenScenarioInExplorerCommand { get; }
 
     public Scenario? SelectedItem { get; set; }
 
@@ -46,6 +47,11 @@ public class RouteDetailViewModel : ViewModelBase
         });
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
+        {
+            Launcher.Open(Route.DirectoryPath);
+        });
+
+        OpenScenarioInExplorerCommand = ReactiveCommand.Create(() =>
         {
             if (SelectedItem?.DirectoryPath is null) return;
 
