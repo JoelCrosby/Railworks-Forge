@@ -18,6 +18,10 @@ public class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ExtractScenariosCommand { get; }
     public ReactiveCommand<Unit, Unit> ClickedConsistCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> SaveConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
+
     public Consist? SelectedConsist { get; set; }
 
     public ScenarioDetailViewModel(Scenario scenario)
@@ -45,5 +49,9 @@ public class ScenarioDetailViewModel : ViewModelBase
 
             Utils.GetApplicationViewModel().SelectScenarioConsist(Scenario, SelectedConsist);
         });
+
+        SaveConsistCommand = ReactiveCommand.Create(() => {});
+        ReplaceConsistCommand = ReactiveCommand.Create(() => {});
+        DeleteConsistCommand = ReactiveCommand.Create(() => {});
     }
 }

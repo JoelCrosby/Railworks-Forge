@@ -93,6 +93,15 @@
                 <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
             </DataGrid.Columns>
 
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
+                    <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
+                    <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
+                    <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
         </DataGrid>
 
     </DockPanel>
