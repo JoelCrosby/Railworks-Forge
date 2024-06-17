@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="232"
+        x:Class="RailworksForge.Views.Controls.SaveConsistDialog"
+        x:DataType="vm:SaveConsistViewModel"
+        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Title="SaveConsistDialog">
+
+        <Design.DataContext>
+                <vm:DesignSaveConsistViewModel />
+        </Design.DataContext>
+
+        <Border Padding="24, 24">
+                <DockPanel MinWidth="540">
+                        <StackPanel DockPanel.Dock="Top">
+                                <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8">
+                                        <StackPanel Spacing="4">
+                                                <TextBlock FontWeight="SemiBold" FontSize="12">Selected Consist</TextBlock>
+                                                <TextBlock Text="{Binding Consist.LocomotiveName}" />
+                                        </StackPanel>
+                                </Border>
+
+                                <StackPanel HorizontalAlignment="Stretch" Margin="0,16,0,8" Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" FontSize="12">Name</TextBlock>
+                                        <TextBox Text="{Binding Name}" Watermark="Consist Name" />
+                                </StackPanel>
+                        </StackPanel>
+
+
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                <Button Click="CancelButtonOnClick">Cancel</Button>
+                                <Button Command="{Binding SaveConsistCommand}">Save Consist</Button>
+                        </StackPanel>
+                </DockPanel>
+        </Border>
+
+</Window>

@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core.Models;
 
+using ReactiveUI;
+
 namespace RailworksForge.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -14,6 +16,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public NavigationBarViewModel NavigationBar { get; }
     public RoutesListViewModel RoutesList { get; }
     public StatusBarViewModel StatusBar { get; }
+
+    public Interaction<SaveConsistViewModel, SaveConsistViewModel?> ShowSaveConsistDialog { get; }
 
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
@@ -25,6 +29,8 @@ public partial class MainWindowViewModel : ViewModelBase
         MainMenu = new MainMenuViewModel();
         NavigationBar = new NavigationBarViewModel();
         StatusBar = new StatusBarViewModel();
+
+        ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SaveConsistViewModel?>();
 
         _contentViewModel = RoutesList;
     }

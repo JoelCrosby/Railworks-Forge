@@ -1,6 +1,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 
+using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
 
@@ -50,7 +51,24 @@ public class ScenarioDetailViewModel : ViewModelBase
             Utils.GetApplicationViewModel().SelectScenarioConsist(Scenario, SelectedConsist);
         });
 
-        SaveConsistCommand = ReactiveCommand.Create(() => {});
+        SaveConsistCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (SelectedConsist is null)
+            {
+                return;
+            }
+
+            var result = await Utils.GetApplicationViewModel().ShowSaveConsistDialog.Handle(new SaveConsistViewModel
+            {
+                Consist = SelectedConsist,
+                Name = SelectedConsist.LocomotiveName,
+            });
+
+            if (result?.Name is null) return;
+
+            PersistenceService.SaveConsist(result.Name, result.Consist);
+        });
+
         ReplaceConsistCommand = ReactiveCommand.Create(() => {});
         DeleteConsistCommand = ReactiveCommand.Create(() => {});
     }

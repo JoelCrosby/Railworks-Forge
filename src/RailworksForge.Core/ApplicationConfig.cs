@@ -27,7 +27,7 @@ public class ApplicationConfig
         return options;
     }
 
-    private static TConfig? GetConfigFromPath<TConfig>(string filename, TConfig defaultValue)
+    public static TConfig GetConfigFromPath<TConfig>(string filename, TConfig defaultValue)
     {
         try
         {
@@ -36,7 +36,9 @@ public class ApplicationConfig
             if (File.Exists(path))
             {
                 var content = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<TConfig>(content, JsonSerializerOptions);
+                var deserialized = JsonSerializer.Deserialize<TConfig>(content, JsonSerializerOptions);
+
+                return deserialized ?? defaultValue;
             }
 
             var json = JsonSerializer.Serialize(defaultValue, JsonSerializerOptions);
@@ -50,6 +52,27 @@ public class ApplicationConfig
             File.WriteAllText(path, json);
 
             return defaultValue;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"unable to read config for file {filename}", ex);
+        }
+    }
+
+    public static void SaveConfig<TValue>(string filename, TValue value)
+    {
+        try
+        {
+            var path = Path.Join(Paths.GetConfigurationFolder(), $"{filename}.json");
+            var json = JsonSerializer.Serialize(value, JsonSerializerOptions);
+
+            if (Path.GetDirectoryName(path) is not {} directory)
+            {
+                throw new Exception($"failed to create config file {filename}");
+            }
+
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(path, json);
         }
         catch (Exception ex)
         {
