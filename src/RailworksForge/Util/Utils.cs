@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
 
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 
 using RailworksForge.ViewModels;
 
@@ -30,5 +32,20 @@ public class Utils
         }
 
         throw new Exception("could not get application view model");
+    }
+
+    public static async Task<IStorageFile?> OpenFilePickerAsync(string title)
+    {
+        var window = GetApplicationWindow();
+        var provider = window.StorageProvider;
+
+        var files = await provider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            FileTypeFilter = [FilePickerFileTypes.All]
+        });
+
+        return files.Count >= 1 ? files[0] : null;
     }
 }

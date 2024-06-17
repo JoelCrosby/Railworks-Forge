@@ -14,9 +14,9 @@
             <Separator/>
             <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
         </MenuItem>
-        <MenuItem Header="_Settings">
-            <MenuItem Header="Copy"/>
-            <MenuItem Header="Paste"/>
+        <MenuItem Header="_Tools">
+            <MenuItem Command="{Binding ConvertBinToXmlCommand}" Header="Convert .bin to .xml"/>
+            <MenuItem Command="{Binding ConvertXmlToBinCommand}" Header="Convert .bin to .xml"/>
         </MenuItem>
     </Menu>
 
