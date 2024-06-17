@@ -10,9 +10,9 @@ using ReactiveUI;
 
 namespace RailworksForge.Views.Controls;
 
-public partial class SaveConsistDialog : ReactiveWindow<SaveConsistViewModel>
+public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewModel>
 {
-    public SaveConsistDialog()
+    public ReplaceConsistDialog()
     {
         InitializeComponent();
 
@@ -20,7 +20,7 @@ public partial class SaveConsistDialog : ReactiveWindow<SaveConsistViewModel>
 
         this.WhenActivated(action =>
         {
-            var disposable = ViewModel!.SaveConsistCommand.Subscribe(Close);
+            var disposable = ViewModel!.ReplaceConsistCommand.Subscribe(Close);
 
             action(disposable);
         });

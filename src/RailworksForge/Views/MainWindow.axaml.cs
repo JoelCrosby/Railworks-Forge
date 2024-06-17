@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Avalonia.ReactiveUI;
 
+using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 using RailworksForge.Views.Controls;
 
@@ -23,18 +24,24 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 throw new Exception("view model not instantiated");
             }
 
-            action(ViewModel!.ShowSaveConsistDialog.RegisterHandler(DoShowDialogAsync));
+            action(ViewModel.ShowSaveConsistDialog.RegisterHandler(ShowDialog
+                <SaveConsistViewModel, SaveConsistViewModel, SaveConsistDialog>));
+
+            action(ViewModel.ShowReplaceConsistDialog.RegisterHandler(ShowDialog
+                <ReplaceConsistViewModel, SavedConsist, ReplaceConsistDialog>));
         });
     }
 
-    private async Task DoShowDialogAsync(InteractionContext<SaveConsistViewModel, SaveConsistViewModel?> interaction)
+    private async Task ShowDialog<TInput, TOutput, TDialog>(InteractionContext<TInput, TOutput?> interaction)
+        where TInput : ViewModelBase
+        where TDialog : ReactiveWindow<TInput>, new ()
     {
-        var dialog = new SaveConsistDialog
+        var dialog = new TDialog
         {
             DataContext = interaction.Input,
         };
 
-        var result = await dialog.ShowDialog<SaveConsistViewModel?>(this);
+        var result = await dialog.ShowDialog<TOutput?>(this);
 
         interaction.SetOutput(result);
     }

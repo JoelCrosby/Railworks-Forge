@@ -1,8 +1,9 @@
+using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
 
-public class RailVehiclesService
+public class PreloadService
 {
     public async Task<List<RailVehicle>> GetRailVehicles()
     {

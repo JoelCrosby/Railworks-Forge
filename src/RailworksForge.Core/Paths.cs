@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 
+using RailworksForge.Core.Config;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -71,7 +72,7 @@ public static class Paths
 
     public static string GetGameDirectory()
     {
-        return ApplicationConfig.Get().GameDirectoryPath;
+        return Configuration.Get().GameDirectoryPath;
     }
 
     public static string GetAssetsDirectory()

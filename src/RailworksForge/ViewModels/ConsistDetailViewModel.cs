@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
 using ReactiveUI;

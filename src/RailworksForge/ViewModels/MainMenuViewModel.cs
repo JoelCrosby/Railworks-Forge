@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Reactive;
 
-using RailworksForge.Core;
+using RailworksForge.Core.External;
 using RailworksForge.Util;
 
 using ReactiveUI;

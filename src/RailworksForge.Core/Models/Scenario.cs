@@ -1,3 +1,5 @@
+using RailworksForge.Core.External;
+
 namespace RailworksForge.Core.Models;
 
 public record Scenario

@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="232"
+        x:Class="RailworksForge.Views.Controls.ReplaceConsistDialog"
+        x:DataType="vm:ReplaceConsistViewModel"
+        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Title="Replace Consist">
+
+        <Design.DataContext>
+                <vm:DesignReplaceConsistViewModel />
+        </Design.DataContext>
+
+        <Border Padding="24, 24">
+                <DockPanel MinWidth="540">
+                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Border BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="1">
+                                        <DataGrid
+                                                ItemsSource="{Binding SaveConsists}"
+                                                SelectedItem="{Binding SelectedConsist}"
+                                                IsReadOnly="True"
+                                                GridLinesVisibility="All"
+                                                SelectionMode="Single"
+                                                BorderThickness="0,1,0,0"
+                                                BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                                        >
+                                                <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="Id" Binding="{Binding Consist.Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                                                        <DataGridTextColumn Header="Consist Name" Binding="{Binding Name}" />
+                                                        <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
+                                                </DataGrid.Columns>
+                                        </DataGrid>
+                                </Border>
+                        </StackPanel>
+
+
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                <Button Click="CancelButtonOnClick">Cancel</Button>
+                                <Button IsEnabled="{Binding SelectedConsist, Converter={x:Static ObjectConverters.IsNotNull}}" Command="{Binding ReplaceConsistCommand}">Replace Consist</Button>
+                        </StackPanel>
+                </DockPanel>
+        </Border>
+
+</Window>

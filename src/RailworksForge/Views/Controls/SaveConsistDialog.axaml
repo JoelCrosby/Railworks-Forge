@@ -9,7 +9,7 @@
         CanResize="False"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
-        Title="SaveConsistDialog">
+        Title="Save Consist">
 
         <Design.DataContext>
                 <vm:DesignSaveConsistViewModel />

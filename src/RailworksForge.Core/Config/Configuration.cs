@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.Config;
 
-public class ApplicationConfig
+public class Configuration
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
     {
@@ -12,14 +12,14 @@ public class ApplicationConfig
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    private static readonly ConfigOptions DefaultConfigOptions = new ()
+    private static readonly ConfigurationOptions DefaultConfigurationOptions = new ()
     {
         GameDirectoryPath = string.Empty,
     };
 
-    public static ConfigOptions Get()
+    public static ConfigurationOptions Get()
     {
-        if (GetConfigFromPath("settings", DefaultConfigOptions) is not {} options)
+        if (GetConfigFromPath("settings", DefaultConfigurationOptions) is not {} options)
         {
             throw new Exception("Failed to read configuration settings.");
         }

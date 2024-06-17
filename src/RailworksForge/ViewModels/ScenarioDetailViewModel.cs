@@ -69,7 +69,26 @@ public class ScenarioDetailViewModel : ViewModelBase
             PersistenceService.SaveConsist(result.Name, result.Consist);
         });
 
-        ReplaceConsistCommand = ReactiveCommand.Create(() => {});
+        ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (SelectedConsist is null)
+            {
+                return;
+            }
+
+            var savedConsists = PersistenceService.GetConsists();
+
+            var result = await Utils.GetApplicationViewModel().ShowReplaceConsistDialog.Handle(new ReplaceConsistViewModel
+            {
+                SaveConsists = savedConsists,
+                TargetConsist = SelectedConsist,
+            });
+
+            if (result?.Name is null) return;
+
+            PersistenceService.SaveConsist(result.Name, result.Consist);
+        });
+
         DeleteConsistCommand = ReactiveCommand.Create(() => {});
     }
 }

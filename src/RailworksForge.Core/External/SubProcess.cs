@@ -4,7 +4,7 @@ using CliWrap;
 
 using RailworksForge.Core.Proton;
 
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.External;
 
 public class SubProcess
 {

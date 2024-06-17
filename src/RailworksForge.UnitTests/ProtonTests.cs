@@ -1,4 +1,4 @@
-using RailworksForge.Core;
+using RailworksForge.Core.External;
 
 namespace RailworksForge.UnitTests;
 

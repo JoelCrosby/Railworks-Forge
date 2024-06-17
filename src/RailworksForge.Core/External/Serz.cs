@@ -1,7 +1,7 @@
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.External;
 
 public class Serz
 {
