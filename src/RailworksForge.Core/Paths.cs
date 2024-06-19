@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 
+using AngleSharp.Text;
+
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Models;
 
@@ -87,7 +89,7 @@ public static class Paths
 
     public static string ToWindowsPath(this string path)
     {
-        return path.Replace("/", @"\").Replace(@"\cache\SteamLibrary\steamapps\", @"s:\");
+        return path.Replace("/", @"\").ReplaceFirst(@"\", @"z:\");
     }
 
     public static List<BrowserDirectory> GetTopLevelRailVehicleDirectories()
