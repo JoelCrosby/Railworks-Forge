@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reactive;
 
+using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Util;
 
@@ -15,6 +16,7 @@ public class MainMenuViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> ConvertBinToXmlCommand { get; }
     public ReactiveCommand<Unit, Unit> ConvertXmlToBinCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenSettingsDirectoryCommand { get; }
 
     public MainMenuViewModel()
     {
@@ -42,6 +44,11 @@ public class MainMenuViewModel : ViewModelBase
             if (Path.GetExtension(path) != ".xml") return;
 
             await Serz.Convert(path);
+        });
+
+        OpenSettingsDirectoryCommand = ReactiveCommand.Create(() =>
+        {
+            Launcher.Open(Paths.GetConfigurationFolder());
         });
     }
 }

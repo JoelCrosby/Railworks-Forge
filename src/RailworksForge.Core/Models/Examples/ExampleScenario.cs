@@ -11,11 +11,10 @@ public static partial class Example
         Briefing = "An early evening run from Colwich to Crewe with an 8-car Class 325 consist, forming a Willesden to Shieldmuir mail working, diverted today via Stoke due to operational issues. Be aware also of a 60MPH TSR at Hixon.",
         StartLocation = "Colwich",
         Locomotive = "Class 390 'Pendolino'",
-        DirectoryPath = "/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/a8a66429-5f23-44e1-bb3c-2ba1f6bcc29b/",
+        DirectoryPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/a8a66429-5f23-44e1-bb3c-2ba1f6bcc29b",
         PackagingType = PackagingType.Unpacked,
-        ScenarioPropertiesPath = "/",
+        ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/a8a66429-5f23-44e1-bb3c-2ba1f6bcc29b/ScenarioProperties.xml",
         ScenarioClass = ScenarioClass.Standard,
-        FileContent = string.Empty,
         Consists =
         [
             new()
@@ -23,24 +22,24 @@ public static partial class Example
                 LocomotiveName = "Class 390 'Pendolino'",
                 Id = "520411720",
                 ServiceName = "9M59 1747 Blackpool North - London Euston",
-                BlueprintId = "RailVehicles\\Diesel\\221\\Brown\\Engine\\a25_locomotive_221_dmf_xc.xml",
-                ServiceId = Guid.NewGuid().ToString(),
+                BlueprintId = "RailVehicles\\Electric\\Class390\\Default\\DMRF\\Class390DMRF.xml",
+                ServiceId = "1f792a70-7095-414d-8a1a-bb9016411cf6",
                 LocoAuthor = "DTG",
                 LocoClass = LocoClass.Electric,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "WCML-South",
+                BlueprintSetIdProvider = "DTG",
             },
             new()
             {
                 LocomotiveName = "Class 150/2 Ex-Arriva Trains Wales",
                 Id = "520411788",
                 ServiceName = "1V62 1831 Manchester Piccadilly - Camarthen",
-                BlueprintId = "RailVehicles\\Diesel\\221\\Brown\\Engine\\a25_locomotive_221_dmf_xc.xml",
-                ServiceId = Guid.NewGuid().ToString(),
+                BlueprintId = "RailVehicles\\Class150\\Ex-ATW2_AP\\Class150_DMS.xml",
+                ServiceId = "d4b19b94-6cd4-4589-b7d2-38720d301ec1",
                 LocoAuthor = "AP",
                 LocoClass = LocoClass.Diesel,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "Class150Pack01",
+                BlueprintSetIdProvider = "AP",
             },
             new()
             {
@@ -51,8 +50,8 @@ public static partial class Example
                 ServiceId = Guid.NewGuid().ToString(),
                 LocoAuthor = "DTG",
                 LocoClass = LocoClass.Electric,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "WCML-South",
+                BlueprintSetIdProvider = "DTG",
             },
             new()
             {
@@ -63,8 +62,8 @@ public static partial class Example
                 ServiceId = Guid.NewGuid().ToString(),
                 LocoAuthor = "RSC",
                 LocoClass = LocoClass.Diesel,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "Class66Pack03",
+                BlueprintSetIdProvider = "RSC",
             },
             new()
             {
@@ -75,8 +74,8 @@ public static partial class Example
                 ServiceId = Guid.NewGuid().ToString(),
                 LocoAuthor = "JustTrains",
                 LocoClass = LocoClass.Diesel,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "Voyager",
+                BlueprintSetIdProvider = "JustTrains",
             },
             new()
             {
@@ -87,8 +86,8 @@ public static partial class Example
                 ServiceId = Guid.NewGuid().ToString(),
                 LocoAuthor = "DTG",
                 LocoClass = LocoClass.Electric,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "PortsmouthDirect",
+                BlueprintSetIdProvider = "DTG",
             },
             new()
             {
@@ -99,8 +98,8 @@ public static partial class Example
                 ServiceId = Guid.NewGuid().ToString(),
                 LocoAuthor = "RSC",
                 LocoClass = LocoClass.Electric,
-                BlueprintSetIdProduct = string.Empty,
-                BlueprintSetIdProvider = string.Empty,
+                BlueprintSetIdProduct = "Class325Pack01",
+                BlueprintSetIdProvider = "RSC",
             },
             new()
             {

@@ -1,7 +1,11 @@
+using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
 
@@ -58,15 +62,21 @@ public class ScenarioDetailViewModel : ViewModelBase
                 return;
             }
 
+            var consistElement = await GetSavedConsistRailVehicleElement();
+
             var result = await Utils.GetApplicationViewModel().ShowSaveConsistDialog.Handle(new SaveConsistViewModel
             {
-                Consist = SelectedConsist,
+                ConsistElement = consistElement,
                 Name = SelectedConsist.LocomotiveName,
+                LocomotiveName = SelectedConsist.LocomotiveName,
             });
 
             if (result?.Name is null) return;
 
-            PersistenceService.SaveConsist(result.Name, result.Consist);
+            PersistenceService.SaveConsist(result with
+            {
+                ConsistElement = consistElement,
+            });
         });
 
         ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -86,9 +96,28 @@ public class ScenarioDetailViewModel : ViewModelBase
 
             if (result?.Name is null) return;
 
-            PersistenceService.SaveConsist(result.Name, result.Consist);
+            await ConsistService.ReplaceConsist(SelectedConsist, result, Scenario);
         });
 
         DeleteConsistCommand = ReactiveCommand.Create(() => {});
+    }
+
+    private async Task<string> GetSavedConsistRailVehicleElement()
+    {
+        ArgumentNullException.ThrowIfNull(SelectedConsist);
+
+        var doc = await Scenario.GetXmlDocument();
+
+        var vehicles = doc
+            .QuerySelectorAll("cConsist")
+            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == SelectedConsist.ServiceId)?
+            .QuerySelector("RailVehicles");
+
+        if (vehicles is null)
+        {
+            throw new Exception("could not find consist in scenario bin");
+        }
+
+        return vehicles.OuterHtml;
     }
 }

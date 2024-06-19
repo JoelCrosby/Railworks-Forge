@@ -1,3 +1,7 @@
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
+
+using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.External;
 
 namespace RailworksForge.Core.Models;
@@ -21,8 +25,6 @@ public record Scenario
     public string? DirectoryPath { get; init; }
 
     public string? ScenarioPropertiesPath { get; init; }
-
-    public string? FileContent { get; init; }
 
     public List<Consist> Consists { get; init; } = [];
 
@@ -49,6 +51,17 @@ public record Scenario
         await Serz.Convert(inputPath);
 
         return outputPath;
+    }
+
+    public async Task<IHtmlDocument> GetXmlDocument()
+    {
+        var path = await ConvertBinToXml();
+        var text = await File.ReadAllTextAsync(path);
+        var document = await new HtmlParser().ParseDocumentAsync(text);
+
+        XmlException.ThrowIfNotExists(document, path);
+
+        return document;
     }
 
     private string ExtractScenarioXml()

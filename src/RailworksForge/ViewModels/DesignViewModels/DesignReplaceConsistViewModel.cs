@@ -11,8 +11,9 @@ public class DesignReplaceConsistViewModel : ReplaceConsistViewModel
     {
         SaveConsists = Example.Scenario.Consists.ConvertAll(c => new SavedConsist
         {
-            Consist = c,
             Name = $"[{c.BlueprintSetIdProvider}-{c.BlueprintSetIdProduct}] {c.LocomotiveName}",
+            LocomotiveName = c.LocomotiveName,
+            ConsistElement = string.Empty,
         });
 
         SelectedConsist = SaveConsists.First();

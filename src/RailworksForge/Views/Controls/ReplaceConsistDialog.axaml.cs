@@ -20,7 +20,9 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
 
         this.WhenActivated(action =>
         {
-            var disposable = ViewModel!.ReplaceConsistCommand.Subscribe(Close);
+            if (ViewModel is null) return;
+
+            var disposable = ViewModel.ReplaceConsistCommand.Subscribe(Close);
 
             action(disposable);
         });

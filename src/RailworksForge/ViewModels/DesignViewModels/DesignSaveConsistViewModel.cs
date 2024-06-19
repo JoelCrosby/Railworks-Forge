@@ -1,13 +1,11 @@
-using System.Linq;
-
-using RailworksForge.Core.Models.Examples;
-
 namespace RailworksForge.ViewModels;
 
 public class DesignSaveConsistViewModel : SaveConsistViewModel
 {
     public DesignSaveConsistViewModel()
     {
-        Consist = Example.Scenario.Consists.First();
+        Name = "Class 390 'Pendolino'";
+        LocomotiveName = "Class 390 'Pendolino'";
+        ConsistElement = string.Empty;
     }
 }

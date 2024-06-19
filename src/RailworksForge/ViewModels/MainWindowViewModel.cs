@@ -17,7 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public RoutesListViewModel RoutesList { get; }
     public StatusBarViewModel StatusBar { get; }
 
-    public Interaction<SaveConsistViewModel, SaveConsistViewModel?> ShowSaveConsistDialog { get; }
+    public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
     public Interaction<ReplaceConsistViewModel, SavedConsist?> ShowReplaceConsistDialog { get; }
 
     [ObservableProperty]
@@ -31,7 +31,7 @@ public partial class MainWindowViewModel : ViewModelBase
         NavigationBar = new NavigationBarViewModel();
         StatusBar = new StatusBarViewModel();
 
-        ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SaveConsistViewModel?>();
+        ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, SavedConsist?>();
 
         _contentViewModel = RoutesList;

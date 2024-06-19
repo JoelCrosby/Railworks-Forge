@@ -21,7 +21,7 @@
                                 <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8">
                                         <StackPanel Spacing="4">
                                                 <TextBlock FontWeight="SemiBold" FontSize="12">Selected Consist</TextBlock>
-                                                <TextBlock Text="{Binding Consist.LocomotiveName}" />
+                                                <TextBlock Text="{Binding LocomotiveName}" />
                                         </StackPanel>
                                 </Border>
 

@@ -7,17 +7,11 @@ public class PersistenceService
 {
     private const string ConsistsFilename = "consists";
 
-    public static void SaveConsist(string name, Consist consist)
+    public static void SaveConsist(SavedConsist consist)
     {
-
-
         var consists = Configuration.GetConfigFromPath<List<SavedConsist>>(ConsistsFilename, []);
 
-        consists.Add(new SavedConsist
-        {
-            Name = name,
-            Consist = consist,
-        });
+        consists.Add(consist);
 
         Configuration.SaveConfig(ConsistsFilename, consists);
     }

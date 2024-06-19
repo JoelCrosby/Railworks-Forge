@@ -25,7 +25,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             }
 
             action(ViewModel.ShowSaveConsistDialog.RegisterHandler(ShowDialog
-                <SaveConsistViewModel, SaveConsistViewModel, SaveConsistDialog>));
+                <SaveConsistViewModel, SavedConsist, SaveConsistDialog>));
 
             action(ViewModel.ShowReplaceConsistDialog.RegisterHandler(ShowDialog
                 <ReplaceConsistViewModel, SavedConsist, ReplaceConsistDialog>));

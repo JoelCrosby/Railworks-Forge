@@ -19,12 +19,12 @@ public class Serz
         var isBin = Path.GetExtension(inputPath) == ".bin";
         var outputPath = isBin ? inputPath.Replace(".bin", ".bin.xml") : inputPath.Replace(".bin.xml", ".bin");
 
-        if (!force && File.Exists(outputPath))
+        if (force is false && File.Exists(outputPath))
         {
             return new ConvertedSerzFile(inputPath, outputPath);
         }
 
-        var exe = Path.Join(Paths.GetGameDirectory(), "serz.exe");
+        var exe = Path.Join(Paths.GetGameDirectory(), "serz64.exe");
         var inputArg = inputPath.ToWindowsPath();
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";

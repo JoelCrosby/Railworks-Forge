@@ -17,8 +17,6 @@ public class Consist : Blueprint
     public bool PlayerDriver { get; init; }
 
     public required string ServiceId { get; init; }
-
-    public string? RawText { get; init; }
 }
 
 public class ConsistRailVehicle : Blueprint

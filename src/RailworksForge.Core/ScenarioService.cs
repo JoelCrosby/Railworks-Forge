@@ -121,7 +121,6 @@ public static class ScenarioService
             Consists = consists,
             ScenarioClass = ScenarioClassTypes.Parse(scenarioClass),
             PackagingType = path.EndsWith(".xml") ? PackagingType.Unpacked : PackagingType.Packed,
-            FileContent = fileContent,
             Route = route,
         };
     }
@@ -151,7 +150,6 @@ public static class ScenarioService
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
-            RawText = el.OuterHtml,
         };
     }
 }
