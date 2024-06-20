@@ -86,11 +86,9 @@ public class ScenarioDetailViewModel : ViewModelBase
                 return;
             }
 
-            var savedConsists = PersistenceService.GetConsists();
-
             var result = await Utils.GetApplicationViewModel().ShowReplaceConsistDialog.Handle(new ReplaceConsistViewModel
             {
-                SaveConsists = savedConsists,
+                AvailableStock = [],
                 TargetConsist = SelectedConsist,
             });
 

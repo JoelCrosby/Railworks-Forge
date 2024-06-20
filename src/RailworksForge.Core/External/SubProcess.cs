@@ -12,7 +12,7 @@ public class SubProcess
 
     public record ExecOutput(string StdOut, string StdError);
 
-    public static async Task<ExecOutput> ExecProcess(string path, List<string> arguments)
+    public static async Task<ExecOutput> ExecProcess(string path, List<string> arguments, CancellationToken cancellationToken = default)
     {
         var proton = _protonService.GetProtonInstance();
         var environmentVariables = GetEnvironmentVariables();
@@ -36,7 +36,7 @@ public class SubProcess
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
             .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
             .WithValidation(CommandResultValidation.None)
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken);
 
         var output = stdOutBuffer.ToString();
         var error = stdErrBuffer.ToString();

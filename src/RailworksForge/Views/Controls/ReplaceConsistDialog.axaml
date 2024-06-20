@@ -3,51 +3,67 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="232"
+        xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Controls.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
-        CanResize="False"
-        SizeToContent="WidthAndHeight"
+        Width="1280"
+        Height="720"
         WindowStartupLocation="CenterOwner"
         Title="Replace Consist">
 
-        <Design.DataContext>
-                <vm:DesignReplaceConsistViewModel />
-        </Design.DataContext>
+    <Design.DataContext>
+        <vm:DesignReplaceConsistViewModel />
+    </Design.DataContext>
 
-        <Border Padding="24, 24">
-                <DockPanel MinWidth="540">
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                                <Border Margin="0,0,0,8" DockPanel.Dock="Top" Padding="0,8">
-                                        <StackPanel Spacing="4">
-                                                <TextBlock FontSize="16">Select Consist</TextBlock>
-                                        </StackPanel>
-                                </Border>
-
-                                <Border BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="1,0,1,1">
-                                        <DataGrid
-                                                ItemsSource="{Binding SaveConsists}"
-                                                SelectedItem="{Binding SelectedConsist}"
-                                                IsReadOnly="True"
-                                                GridLinesVisibility="All"
-                                                SelectionMode="Single"
-                                                BorderThickness="0,1,0,0"
-                                                BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                                        >
-                                                <DataGrid.Columns>
-                                                        <DataGridTextColumn Header="Consist Name" Binding="{Binding Name}" />
-                                                        <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                                                </DataGrid.Columns>
-                                        </DataGrid>
-                                </Border>
-                        </StackPanel>
-
-
-                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                <Button Click="CancelButtonOnClick">Cancel</Button>
-                                <Button IsEnabled="{Binding SelectedConsist, Converter={x:Static ObjectConverters.IsNotNull}}" Command="{Binding ReplaceConsistCommand}">Replace Consist</Button>
-                        </StackPanel>
-                </DockPanel>
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel Spacing="4">
+                <TextBlock FontWeight="SemiBold" FontSize="16">Select Consist</TextBlock>
+            </StackPanel>
         </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,4,3*">
+            <controls:FileBrowser Grid.Row="0" DataContext="{Binding FileBrowser}" />
+
+            <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}"
+                          ResizeDirection="Columns" />
+
+            <Border Grid.Column="2">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}">
+                            <TextBlock Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}"
+                                       FontSize="12">
+                                Consist
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+
+                    <DataGrid BorderThickness="0,1,0,0"
+                              BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                              ItemsSource="{Binding AvailableStock}"
+                              GridLinesVisibility="All"
+                              SelectionMode="Single"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Click="CancelButtonOnClick">Cancel</Button>
+                <Button IsEnabled="{Binding SelectedConsist, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Command="{Binding ReplaceConsistCommand}">
+                    Replace Consist
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
 
 </Window>

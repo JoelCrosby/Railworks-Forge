@@ -21,9 +21,9 @@ public partial class FileBrowser : UserControl
     {
         if (DataContext is not FileBrowserViewModel viewModel) return;
 
-        var parent = this.FindAncestorOfType<ConsistDetail>();
+        var parent = this.FindAncestorOfType<ReplaceConsistDialog>();
 
-        if (parent is not { DataContext: ConsistDetailViewModel model }) return;
+        if (parent is not { DataContext: ReplaceConsistViewModel model }) return;
         if (viewModel.SelectedItem is not { } selected) return;
 
         Observable.Start(() => model.LoadAvailableStock(selected), RxApp.TaskpoolScheduler);

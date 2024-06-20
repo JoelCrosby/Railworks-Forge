@@ -14,7 +14,7 @@ public class Serz
         }
     }
 
-    public static async Task<ConvertedSerzFile> Convert(string inputPath, bool force = false)
+    public static async Task<ConvertedSerzFile> Convert(string inputPath, CancellationToken cancellationToken = default, bool force = false)
     {
         var isBin = Path.GetExtension(inputPath) == ".bin";
         var outputPath = isBin ? inputPath.Replace(".bin", ".bin.xml") : inputPath.Replace(".bin.xml", ".bin");
@@ -29,7 +29,7 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
-        var commandOutput = await SubProcess.ExecProcess(exe, [inputArg, outputArg]);
+        var commandOutput = await SubProcess.ExecProcess(exe, [inputArg, outputArg], cancellationToken);
         var isSuccess = File.Exists(outputPath);
 
         if (!isSuccess)
