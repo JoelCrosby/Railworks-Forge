@@ -20,78 +20,32 @@ public class Consist : Blueprint
     public bool PlayerDriver { get; init; }
 
     public required string ServiceId { get; init; }
-}
 
-public class ConsistRailVehicle : Blueprint
-{
-    public required string Id { get; init; }
-
-    public required string LocomotiveName { get; init; }
-
-    public string? UniqueNumber { get; init; }
-
-    public bool Flipped { get; init; }
-}
-
-public class ConsistBlueprint
-{
-    public required string LocomotiveName { get; init; }
-
-    public required string DisplayName { get; init; }
-
-    public LocoClass EngineType { get; init; }
-
-    public string? EraStartYear { get; init; }
-
-    public string? EraEndYear { get; init; }
-
-    public required List<ConsistEntry> ConsistEntries { get; init; }
-
-    public static ConsistBlueprint Parse(IElement el)
+    public static Consist Parse(IElement el)
     {
+        var consistId = el.GetAttribute("d:id") ?? string.Empty;
         var locomotiveName = el.SelectTextContnet("LocoName English");
-        var displayName = el.SelectTextContnet("DisplayName English");
-        var engineType = el.SelectTextContnet("EngineType");
-        var eraStartYear = el.SelectTextContnet("EraStartYear");
-        var eraEndYear = el.SelectTextContnet("EraEndYear");
+        var serviceName = el.SelectTextContnet("ServiceName English");
+        var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
+        var locoAuthor = el.SelectTextContnet("LocoAuthor");
+        var blueprintId = el.SelectTextContnet("BlueprintID");
+        var serviceId = el.SelectTextContnet("ServiceName Key");
+        var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
+        var blueprintSetIdProduct = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
-        var entries = el
-            .QuerySelectorAll("cConsistEntry")
-            .Select(entry => new ConsistEntry
-            {
-                BlueprintIdProvider = entry.SelectTextContnet("Provider"),
-                BlueprintIdProduct = entry.SelectTextContnet("Product"),
-                BlueprintId = entry.SelectTextContnet("BlueprintID"),
-                Flipped = entry.SelectTextContnet("Flipped") is "eTrue",
-            })
-            .ToList();
-
-        return new ConsistBlueprint
+        return new Consist
         {
+            Id = consistId,
             LocomotiveName = locomotiveName,
-            DisplayName = displayName,
-            EngineType = LocoClassUtils.Parse(engineType),
-            EraStartYear = eraStartYear,
-            EraEndYear = eraEndYear,
-            ConsistEntries = entries,
+            LocoAuthor = locoAuthor,
+            LocoClass = locoClass,
+            ServiceName = serviceName,
+            PlayerDriver = playerDriver,
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+            ServiceId = serviceId,
         };
     }
-}
-
-public class ConsistEntry
-{
-    public required string BlueprintId { get; init; }
-
-    public required string BlueprintIdProduct { get; init; }
-
-    public required string BlueprintIdProvider { get; init; }
-
-    public required bool Flipped { get; init; }
-}
-
-public enum AcquisitionState
-{
-    Unknown = 0,
-    Found = 1,
-    Missing = 2,
 }

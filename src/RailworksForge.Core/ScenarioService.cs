@@ -1,9 +1,7 @@
 ﻿using System.IO.Compression;
 
-using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
-using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -96,60 +94,6 @@ public static class ScenarioService
     {
         var doc = new HtmlParser().ParseDocument(fileContent);
 
-        var id = doc.SelectTextContnet("ID cGUID DevString");
-        var name = doc.SelectTextContnet("DisplayName English");
-        var description = doc.SelectTextContnet("description English");
-        var briefing = doc.SelectTextContnet("Briefing English");
-        var startLocation = doc.SelectTextContnet("StartLocation English");
-        var directoryPath = Path.GetDirectoryName(path) ?? string.Empty;
-        var scenarioClass = doc.SelectTextContnet("ScenarioClass");
-
-        var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(ParseConsist).ToList();
-
-        var locomotive = consists.FirstOrDefault(c => c.PlayerDriver)?.LocomotiveName ?? string.Empty;
-
-        return new Scenario
-        {
-            Id = id,
-            Name = name,
-            Description = description,
-            Briefing = briefing,
-            StartLocation = startLocation,
-            Locomotive = locomotive,
-            DirectoryPath = directoryPath,
-            ScenarioPropertiesPath = path,
-            Consists = consists,
-            ScenarioClass = ScenarioClassTypes.Parse(scenarioClass),
-            PackagingType = path.EndsWith(".xml") ? PackagingType.Unpacked : PackagingType.Packed,
-            Route = route,
-        };
-    }
-
-    private static Consist ParseConsist(IElement el)
-    {
-        var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = el.SelectTextContnet("LocoName English");
-        var serviceName = el.SelectTextContnet("ServiceName English");
-        var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
-        var locoAuthor = el.SelectTextContnet("LocoAuthor");
-        var blueprintId = el.SelectTextContnet("BlueprintID");
-        var serviceId = el.SelectTextContnet("ServiceName Key");
-        var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
-        var blueprintSetIdProduct = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
-        var blueprintSetIdProvider = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
-
-        return new Consist
-        {
-            Id = consistId,
-            LocomotiveName = locomotiveName,
-            LocoAuthor = locoAuthor,
-            LocoClass = locoClass,
-            ServiceName = serviceName,
-            PlayerDriver = playerDriver,
-            BlueprintId = blueprintId,
-            BlueprintSetIdProduct = blueprintSetIdProduct,
-            BlueprintSetIdProvider = blueprintSetIdProvider,
-            ServiceId = serviceId,
-        };
+        return Scenario.Parse(doc.DocumentElement, route, path);
     }
 }

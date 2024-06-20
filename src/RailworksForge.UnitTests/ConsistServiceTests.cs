@@ -11,7 +11,7 @@ public class ConsistServiceTests
     {
         var scenario = Example.Scenario;
 
-        var targetConsist = Example.Scenario.Consists.ElementAt(1);
+        var targetConsist = Example.Scenario.Consists.First();
 
         var consist = new ConsistBlueprint
         {

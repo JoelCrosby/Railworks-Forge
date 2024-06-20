@@ -1,7 +1,9 @@
+using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 
 using RailworksForge.Core.Exceptions;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 
 namespace RailworksForge.Core.Models;
@@ -32,25 +34,41 @@ public record Scenario
 
     public required ScenarioClass ScenarioClass { get; init; }
 
-    private string ScenarioBinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
-    private string ScenarioBinaryXmlPath => Path.Join(DirectoryPath, "Scenario.bin.xml");
+    private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
+    private string BinaryXmlPath => Path.Join(DirectoryPath, "Scenario.bin.xml");
 
-    private bool HasScenarioBinary => File.Exists(ScenarioBinaryPath);
+    private bool HasBinary => File.Exists(BinaryPath);
     private bool HasMainContentArchive => File.Exists(Route.MainContentArchivePath);
 
-    public async Task<string> ConvertBinToXml()
+    public static Scenario Parse(IElement el, Route route, string path)
     {
-        if (File.Exists(ScenarioBinaryXmlPath))
+        var id = el.SelectTextContnet("ID cGUID DevString");
+        var name = el.SelectTextContnet("DisplayName English");
+        var description = el.SelectTextContnet("description English");
+        var briefing = el.SelectTextContnet("Briefing English");
+        var startLocation = el.SelectTextContnet("StartLocation English");
+        var directoryPath = Path.GetDirectoryName(path) ?? string.Empty;
+        var scenarioClass = el.SelectTextContnet("ScenarioClass");
+
+        var consists = el.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.Parse).ToList();
+
+        var locomotive = consists.FirstOrDefault(c => c.PlayerDriver)?.LocomotiveName ?? string.Empty;
+
+        return new Scenario
         {
-            return ScenarioBinaryXmlPath;
-        }
-
-        var inputPath = HasScenarioBinary ? ScenarioBinaryPath : ExtractScenarioXml();
-        var outputPath = inputPath.Replace(".bin", ".bin.xml");
-
-        await Serz.Convert(inputPath);
-
-        return outputPath;
+            Id = id,
+            Name = name,
+            Description = description,
+            Briefing = briefing,
+            StartLocation = startLocation,
+            Locomotive = locomotive,
+            DirectoryPath = directoryPath,
+            ScenarioPropertiesPath = path,
+            Consists = consists,
+            ScenarioClass = ScenarioClassTypes.Parse(scenarioClass),
+            PackagingType = path.EndsWith(".xml") ? PackagingType.Unpacked : PackagingType.Packed,
+            Route = route,
+        };
     }
 
     public async Task<IHtmlDocument> GetXmlDocument()
@@ -64,7 +82,22 @@ public record Scenario
         return document;
     }
 
-    private string ExtractScenarioXml()
+    public async Task<string> ConvertBinToXml()
+    {
+        if (File.Exists(BinaryXmlPath))
+        {
+            return BinaryXmlPath;
+        }
+
+        var inputPath = HasBinary ? BinaryPath : ExtractXml();
+        var outputPath = inputPath.Replace(".bin", ".bin.xml");
+
+        await Serz.Convert(inputPath);
+
+        return outputPath;
+    }
+
+    private string ExtractXml()
     {
         if (!HasMainContentArchive)
         {
@@ -85,7 +118,7 @@ public record Scenario
 
         await Serz.Convert(path);
 
-        return ScenarioBinaryPath;
+        return BinaryPath;
     }
 
     public virtual bool Equals(Scenario? other)
