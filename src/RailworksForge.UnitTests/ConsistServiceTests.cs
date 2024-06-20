@@ -13,11 +13,37 @@ public class ConsistServiceTests
 
         var targetConsist = Example.Scenario.Consists.ElementAt(1);
 
-        var consist = new SavedConsist
+        var consist = new ConsistBlueprint
         {
-            Name = "Test Consist",
             LocomotiveName = "Class 390 'Pendolino'",
-            ConsistElement = string.Empty,
+            DisplayName = "Class 390 'Pendolino' Avanti - 9 Car Set",
+            EraStartYear = "2002",
+            EraEndYear = "2050",
+            EngineType = LocoClass.Electric,
+            ConsistEntries =
+            [
+                new ()
+                {
+                    BlueprintId = @"RailVehicles\Electric\Class390\Default\DMSO\Class390DMSO.xml",
+                    BlueprintIdProvider = "DTG",
+                    BlueprintIdProduct = "WCML-South",
+                    Flipped = false,
+                },
+                new ()
+                {
+                    BlueprintId = @"RailVehicles\Electric\Class390\Default\MS\MS_b.xml",
+                    BlueprintIdProvider = "DTG",
+                    BlueprintIdProduct = "WCML-South",
+                    Flipped = true,
+                },
+                new ()
+                {
+                    BlueprintId = @"RailVehicles\Electric\Class390\Default\PTSRMB\PTSRMB.xml",
+                    BlueprintIdProvider = "DTG",
+                    BlueprintIdProduct = "WCML-South",
+                    Flipped = true,
+                },
+            ],
         };
 
         await ConsistService.ReplaceConsist(targetConsist, consist, scenario);

@@ -14,8 +14,11 @@ public static class LocoClassUtils
     {
         return locoClass switch
         {
+            "Diesel" => LocoClass.Diesel,
             "LOCO_CLASS_DIESEL" => LocoClass.Diesel,
+            "Electric" => LocoClass.Electric,
             "LOCO_CLASS_ELECTRIC" => LocoClass.Electric,
+            "Steam" => LocoClass.Steam,
             "LOCO_CLASS_STEAM" => LocoClass.Steam,
             _ => LocoClass.Unknown,
         };

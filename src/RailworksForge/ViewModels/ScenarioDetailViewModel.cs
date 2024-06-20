@@ -92,7 +92,7 @@ public class ScenarioDetailViewModel : ViewModelBase
                 TargetConsist = SelectedConsist,
             });
 
-            if (result?.Name is null) return;
+            if (result is null) return;
 
             await ConsistService.ReplaceConsist(SelectedConsist, result, Scenario);
         });

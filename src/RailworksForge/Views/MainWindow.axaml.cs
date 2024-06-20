@@ -28,7 +28,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 <SaveConsistViewModel, SavedConsist, SaveConsistDialog>));
 
             action(ViewModel.ShowReplaceConsistDialog.RegisterHandler(ShowDialog
-                <ReplaceConsistViewModel, SavedConsist, ReplaceConsistDialog>));
+                <ReplaceConsistViewModel, ConsistBlueprint, ReplaceConsistDialog>));
         });
     }
 

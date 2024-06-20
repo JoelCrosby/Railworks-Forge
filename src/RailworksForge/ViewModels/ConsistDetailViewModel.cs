@@ -100,7 +100,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         return doc
             .QuerySelectorAll("Blueprint")
-            .Select(ParseConsistBlueprint)
+            .Select(ConsistBlueprint.Parse)
             .ToList();
     }
 
@@ -123,18 +123,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
             BlueprintId = blueprintId,
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
-        };
-    }
-
-    private static ConsistBlueprint ParseConsistBlueprint(IElement el)
-    {
-        var locomotiveName = el.SelectTextContnet("LocoName English");
-        var displayName = el.SelectTextContnet("DisplayName English");
-
-        return new ConsistBlueprint
-        {
-            LocomotiveName = locomotiveName,
-            DisplayName = displayName,
         };
     }
 }

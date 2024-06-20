@@ -43,12 +43,15 @@
                     <DataGrid BorderThickness="0,1,0,0"
                               BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
                               ItemsSource="{Binding AvailableStock}"
+                              SelectedItem="{Binding SelectedConsist}"
                               GridLinesVisibility="All"
                               SelectionMode="Single"
                               IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
                             <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" />
+                            <DataGridTextColumn Header="Engine Type" Binding="{Binding EngineType}" />
+                            <DataGridTextColumn Header="Length" Binding="{Binding ConsistEntries.Count}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

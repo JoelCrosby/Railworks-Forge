@@ -26,7 +26,7 @@ namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel : ViewModelBase
 {
-    public ReactiveCommand<Unit, SavedConsist?> ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, ConsistBlueprint?> ReplaceConsistCommand { get; }
 
     [ObservableProperty]
     private ObservableCollection<ConsistBlueprint> _availableStock;
@@ -37,7 +37,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     private FileBrowserViewModel _fileBrowser;
 
     [ObservableProperty]
-    private SavedConsist? _selectedConsist;
+    private ConsistBlueprint? _selectedConsist;
 
     public ReplaceConsistViewModel()
     {
@@ -91,19 +91,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
         return doc
             .QuerySelectorAll("Blueprint cConsistBlueprint")
-            .Select(ParseConsistBlueprint)
+            .Select(ConsistBlueprint.Parse)
             .ToList();
-    }
-
-    private static ConsistBlueprint ParseConsistBlueprint(IElement el)
-    {
-        var locomotiveName = el.SelectTextContnet("LocoName English");
-        var displayName = el.SelectTextContnet("DisplayName English");
-
-        return new ConsistBlueprint
-        {
-            LocomotiveName = locomotiveName,
-            DisplayName = displayName,
-        };
     }
 }

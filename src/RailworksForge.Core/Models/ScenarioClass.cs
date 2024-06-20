@@ -2,22 +2,22 @@ namespace RailworksForge.Core.Models;
 
 public enum ScenarioClass
 {
-    Standard = 0,
-    FreeRoam = 1,
-    Career = 2,
-    Template = 3,
-    Timetable = 4,
-    Unknown = 99,
+    Unknown = 0,
+    Standard = 1,
+    FreeRoam = 2,
+    Career = 3,
+    Template = 4,
+    Timetable = 5,
 }
 
 
 public class ScenarioClassTypes
 {
-    public const string Standard = "eStandardScenarioClass";
-    public const string FreeRoam = "eFreeRoamScenarioClass";
-    public const string Career = "eCareerScenarioClass";
-    public const string Template = "eTemplateScenarioClass";
-    public const string Timetable = "eTimetableScenarioClass";
+    private const string Standard = "eStandardScenarioClass";
+    private const string FreeRoam = "eFreeRoamScenarioClass";
+    private const string Career = "eCareerScenarioClass";
+    private const string Template = "eTemplateScenarioClass";
+    private const string Timetable = "eTimetableScenarioClass";
 
     public static ScenarioClass Parse(string name)
     {
