@@ -6,10 +6,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-using Avalonia.Threading;
-
-using DynamicData;
-
 using RailworksForge.Core;
 using RailworksForge.Util;
 

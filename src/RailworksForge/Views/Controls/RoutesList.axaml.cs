@@ -15,6 +15,7 @@ public partial class RoutesList : UserControl
         InitializeComponent();
     }
 
+    // ReSharper disable once UnusedParameter.Local
     private void DataGrid_OnDoubleTapped(object? _, TappedEventArgs args)
     {
         if (DataContext is RoutesListViewModel context)

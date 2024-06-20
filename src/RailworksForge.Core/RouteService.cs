@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-
-using AngleSharp.Html.Parser;
+﻿using AngleSharp.Html.Parser;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;

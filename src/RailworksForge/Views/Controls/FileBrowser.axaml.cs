@@ -17,7 +17,8 @@ public partial class FileBrowser : UserControl
         InitializeComponent();
     }
 
-    private void LoadAvailableStockOnClick(object? _sender, RoutedEventArgs _e)
+    // ReSharper disable UnusedParameter.Local
+    private void LoadAvailableStockOnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not FileBrowserViewModel viewModel) return;
 

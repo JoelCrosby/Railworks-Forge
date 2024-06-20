@@ -5,7 +5,7 @@ namespace RailworksForge.Core.Exceptions;
 public class ArchiveException(string message) : Exception(message)
 {
     [DoesNotReturn]
-    public static void ThrowFileNotFound(string archivePath, [NotNull] string filename)
+    public static void ThrowFileNotFound(string archivePath, string filename)
     {
         throw new ArchiveException(
             $"failed to find file with name {filename} in compressed archive {archivePath}"
