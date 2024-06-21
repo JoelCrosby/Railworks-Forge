@@ -1,7 +1,6 @@
-using System.Diagnostics;
-
 using AngleSharp;
 using AngleSharp.Dom;
+using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
@@ -12,9 +11,9 @@ public class ConsistService
 {
     public static async Task ReplaceConsist(Consist target, PreloadConsist preload, Scenario scenario)
     {
-        var scenarioDocument = await scenario.GetXmlDocument();
+        var document = await scenario.GetXmlDocument();
 
-        var scenarioConsist = scenarioDocument.QuerySelectorAll("cConsist")
+        var scenarioConsist = document.QuerySelectorAll("cConsist")
             .FirstOrDefault(el => el.SelectTextContnet("Driver ServiceName Key") == target.ServiceId);
 
         if (scenarioConsist is null)
@@ -23,10 +22,6 @@ public class ConsistService
         }
 
         var blueprintNodes = scenarioConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
-        var blueprintText = blueprintNodes.Select(n => n.SelectTextContnet("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID")).ToList();
-
-        Debug.WriteLine("found blueprint node count {0}", blueprintText.Count);
-
         var nodeCountToKeep = preload.ConsistEntries.Count;
 
         await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
@@ -71,10 +66,51 @@ public class ConsistService
             scenarioBlueprintSetId.TextContent = blueprintNode.BlueprintId;
         }
 
+        await UpdateScenarioProperties(scenario, target, preload);
+        await WriteScenarioDocument(document);
+    }
+
+    private static async Task UpdateScenarioProperties(Scenario scenario, Consist target, PreloadConsist preload)
+    {
+        var document = await scenario.GetPropertiesXmlDocument();
+
+        var serviceElement = document
+            .QuerySelectorAll("sDriverFrontEndDetails")
+            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == target.ServiceId);
+
+        if (serviceElement is null)
+        {
+            throw new Exception($"could not find service {target.ServiceName} in scenario properties file.");
+        }
+
+        if (serviceElement.QuerySelector("LocoName English") is {} locoName)
+        {
+            locoName.TextContent = preload.LocomotiveName;
+        }
+
+        if (serviceElement.QuerySelector("LocoBP BlueprintID") is {} blueprintId)
+        {
+            blueprintId.TextContent = preload.BlueprintId;
+        }
+
+        await WriteScenarioPropertiesDocument(document);
+    }
+
+    private static async Task WriteScenarioDocument(IXmlDocument document)
+    {
         var filename = $"scenario-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.xml";
         var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
 
         await using var stream = File.OpenWrite(outputPath);
-        await scenarioDocument.ToHtmlAsync(stream);
+        await document.ToHtmlAsync(stream);
+    }
+
+    private static async Task WriteScenarioPropertiesDocument(IXmlDocument document)
+    {
+        var filename = $"scenario-properties-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.xml";
+        var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
+
+        await using var stream = File.OpenWrite(outputPath);
+        await document.ToHtmlAsync(stream);
     }
 }

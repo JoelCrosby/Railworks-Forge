@@ -18,6 +18,8 @@ public class PreloadConsist
 
     public required List<ConsistEntry> ConsistEntries { get; init; }
 
+    public required string BlueprintId { get; init; }
+
     public static PreloadConsist Parse(IElement el)
     {
         var locomotiveName = el.SelectTextContnet("LocoName English");
@@ -39,6 +41,7 @@ public class PreloadConsist
 
         return new PreloadConsist
         {
+            BlueprintId = entries.First().BlueprintId,
             LocomotiveName = locomotiveName,
             DisplayName = displayName,
             EngineType = LocoClassUtils.Parse(engineType),

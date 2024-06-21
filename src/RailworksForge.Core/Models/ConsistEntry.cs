@@ -1,5 +1,4 @@
-using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
+using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.External;
@@ -24,9 +23,9 @@ public class ConsistEntry
 
     public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
 
-    private IHtmlDocument? _xmlDocument;
+    private IXmlDocument? _xmlDocument;
 
-    public async Task<IHtmlDocument> GetXmlDocument()
+    public async Task<IXmlDocument> GetXmlDocument()
     {
         if (_xmlDocument is not null)
         {
@@ -35,7 +34,7 @@ public class ConsistEntry
 
         var path = await ConvertBinToXml();
         var text = await File.ReadAllTextAsync(path);
-        var document = await new HtmlParser().ParseDocumentAsync(text);
+        var document = await XmlParser.ParseDocumentAsync(text);
 
         XmlException.ThrowIfNotExists(document, path);
 

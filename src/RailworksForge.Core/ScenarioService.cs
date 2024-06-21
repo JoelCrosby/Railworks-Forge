@@ -1,7 +1,5 @@
 ﻿using System.IO.Compression;
 
-using AngleSharp.Html.Parser;
-
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -92,7 +90,7 @@ public static class ScenarioService
 
     private static Scenario ReadScenarioProperties(Route route, string path, string fileContent)
     {
-        var doc = new HtmlParser().ParseDocument(fileContent);
+        var doc = XmlParser.ParseDocument(fileContent);
 
         return Scenario.Parse(doc.DocumentElement, route, path);
     }

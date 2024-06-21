@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using AngleSharp.Dom;
-using AngleSharp.Html.Parser;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -83,7 +82,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private async Task<List<ConsistRailVehicle>> GetConsists(string path)
     {
         var text = await File.ReadAllTextAsync(path);
-        var doc = await new HtmlParser().ParseDocumentAsync(text);
+        var doc = await XmlParser.ParseDocumentAsync(text);
 
         return doc
             .QuerySelectorAll("cConsist")
@@ -96,7 +95,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
     {
         var text = await File.ReadAllTextAsync(path);
-        var doc = await new HtmlParser().ParseDocumentAsync(text);
+        var doc = await XmlParser.ParseDocumentAsync(text);
 
         return doc
             .QuerySelectorAll("Blueprint")

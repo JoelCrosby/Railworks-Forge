@@ -1,6 +1,4 @@
-﻿using AngleSharp.Html.Parser;
-
-using RailworksForge.Core.Extensions;
+﻿using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -83,7 +81,7 @@ public class RouteService
     private static Route ReadRouteProperties(string path, string fileContent)
     {
         var id = Directory.GetParent(path)?.Name ?? string.Empty;
-        var doc = new HtmlParser().ParseDocument(fileContent);
+        var doc = XmlParser.ParseDocument(fileContent);
         var name = doc.SelectTextContnet("DisplayName English");
         var directoryPath = Directory.GetParent(path)?.FullName ?? string.Empty;
 

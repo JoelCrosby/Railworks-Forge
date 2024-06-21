@@ -116,7 +116,7 @@ public static class Paths
         });
     }
 
-    public static bool Exists(string path, string rootPath)
+    public static bool Exists(string path, string? rootPath = null)
     {
         return GetActualPathFromInsensitive(path, rootPath) is not null;
     }

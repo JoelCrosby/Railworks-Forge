@@ -6,8 +6,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
-using AngleSharp.Html.Parser;
-
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -98,7 +96,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
     {
         var text = await File.ReadAllTextAsync(path);
-        var doc = await new HtmlParser().ParseDocumentAsync(text);
+        var doc = await XmlParser.ParseDocumentAsync(text);
 
         return doc
             .QuerySelectorAll("Blueprint cConsistBlueprint")
