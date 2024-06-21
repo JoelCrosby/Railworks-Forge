@@ -16,13 +16,13 @@ public class ConsistEntry
 
     public required bool Flipped { get; init; }
 
-    private string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
-
-    private string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintIdProvider, BlueprintIdProduct);
-
     private string BinaryXmlPath => BinaryPath.Replace(".bin", ".bin.xml");
 
-    private string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
+    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
+
+    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintIdProvider, BlueprintIdProduct);
+
+    public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
 
     private IHtmlDocument? _xmlDocument;
 

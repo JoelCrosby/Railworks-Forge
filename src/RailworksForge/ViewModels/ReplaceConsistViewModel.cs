@@ -27,7 +27,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public ReactiveCommand<Unit, PreloadConsist?> ReplaceConsistCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<PreloadConsist> _availableStock;
+    private ObservableCollection<PreloadConsistViewModel> _availableStock;
 
     public required Consist TargetConsist { get; init; }
 
@@ -60,9 +60,22 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         {
             var exported = await Serz.Convert(binFile, cancellationToken);
             var consists = await GetConsistBlueprints(exported.OutputPath);
+            var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
 
-            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(consists));
+            LoadImages(models);
+
+            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
         });
+    }
+
+    private static async void LoadImages(IEnumerable<PreloadConsistViewModel> items)
+    {
+        var options = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = 8,
+        };
+
+        await Parallel.ForEachAsync(items, options, async (route, _) => await route.LoadImage());
     }
 
     private static string GetPreloadDirectory(BrowserDirectory directory)

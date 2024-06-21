@@ -121,7 +121,7 @@ public static class Paths
         return GetActualPathFromInsensitive(path, rootPath) is not null;
     }
 
-    public static string? GetActualPathFromInsensitive(string path, string rootPath)
+    public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
         if (GetPlatform() is Platform.Windows && Path.Exists(path))
         {
@@ -135,10 +135,15 @@ public static class Paths
             return normalisedPath;
         }
 
-        var relative = normalisedPath.Replace(rootPath, string.Empty);
+        if (normalisedPath is null)
+        {
+            throw new Exception("unable to get relative path.");
+        }
+
+        var relative = rootPath is not null ? normalisedPath.Replace(rootPath, string.Empty) : normalisedPath;
         var parts = relative.Split(Path.DirectorySeparatorChar).Where(r => !string.IsNullOrEmpty(r));
         var partsQueue = new Queue<string>(parts);
-        var basePath = rootPath;
+        var basePath = rootPath ?? "/";
 
         while (partsQueue.TryDequeue(out var part))
         {

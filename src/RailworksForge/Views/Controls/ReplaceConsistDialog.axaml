@@ -48,10 +48,19 @@
                               SelectionMode="Single"
                               IsReadOnly="True">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" />
-                            <DataGridTextColumn Header="Engine Type" Binding="{Binding EngineType}" />
-                            <DataGridTextColumn Header="Length" Binding="{Binding ConsistEntries.Count}" />
+
+                            <DataGridTemplateColumn Header="Image" Width="64">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Height="32" Source="{Binding ImageBitmap}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding Consist.DisplayName}" />
+                            <DataGridTextColumn Header="Engine Type" Binding="{Binding Consist.EngineType}" />
+                            <DataGridTextColumn Header="Length" Binding="{Binding Consist.ConsistEntries.Count}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
