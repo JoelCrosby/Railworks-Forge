@@ -22,7 +22,7 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
         {
             if (ViewModel is null) return;
 
-            var disposable = ViewModel.ReplaceConsistCommand.Subscribe(Close);
+            var disposable = ViewModel.ReplaceConsistCommand.Subscribe(_ => Close());
 
             action(disposable);
         });

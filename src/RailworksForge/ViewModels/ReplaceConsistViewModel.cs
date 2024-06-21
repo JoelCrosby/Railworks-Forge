@@ -22,24 +22,35 @@ namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel : ViewModelBase
 {
-    public ReactiveCommand<Unit, PreloadConsist?> ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
+
+    public required Consist TargetConsist { get; init; }
+
+    public required Scenario Scenario { get; init; }
 
     [ObservableProperty]
     private ObservableCollection<PreloadConsistViewModel> _availableStock;
-
-    public required Consist TargetConsist { get; init; }
 
     [ObservableProperty]
     private FileBrowserViewModel _fileBrowser;
 
     [ObservableProperty]
-    private PreloadConsist? _selectedConsist;
+    private PreloadConsistViewModel? _selectedConsist;
 
     public ReplaceConsistViewModel()
     {
         AvailableStock = [];
-        ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist);
         FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
+
+        ReplaceConsistCommand = ReactiveCommand.CreateFromTask(() =>
+        {
+            if (TargetConsist is null || SelectedConsist is null || Scenario is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            return ConsistService.ReplaceConsist(TargetConsist, SelectedConsist.Consist, Scenario);
+        });
     }
 
     public async Task LoadAvailableStock(BrowserDirectory directory)

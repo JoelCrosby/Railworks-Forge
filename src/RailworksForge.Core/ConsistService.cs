@@ -93,6 +93,26 @@ public class ConsistService
             blueprintId.TextContent = preload.BlueprintId;
         }
 
+        if (serviceElement.QuerySelector("LocoBP Provider") is {} blueprintProviderId)
+        {
+            blueprintProviderId.TextContent = preload.BlueprintIdProvider;
+        }
+
+        if (serviceElement.QuerySelector("LocoBP Product") is {} blueprintProductId)
+        {
+            blueprintProductId.TextContent = preload.BlueprintIdProduct;
+        }
+
+        if (serviceElement.QuerySelector("FilePath") is {} filePath)
+        {
+            var parts = preload.BlueprintId.Split('\\');
+            var partsWithoutFilename = parts[..^1];
+            var blueprintDirectory = string.Join('\\', partsWithoutFilename);
+            var packagedPath = $@"{preload.BlueprintIdProvider}\{preload.BlueprintIdProduct}\{blueprintDirectory}";
+
+            filePath.TextContent = packagedPath;
+        }
+
         await WriteScenarioPropertiesDocument(document);
     }
 

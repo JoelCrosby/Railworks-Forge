@@ -20,6 +20,10 @@ public class PreloadConsist
 
     public required string BlueprintId { get; init; }
 
+    public required string BlueprintIdProvider { get; init; }
+
+    public required string BlueprintIdProduct { get; init; }
+
     public static PreloadConsist Parse(IElement el)
     {
         var locomotiveName = el.SelectTextContnet("LocoName English");
@@ -39,9 +43,13 @@ public class PreloadConsist
             })
             .ToList();
 
+        var locomotive = entries.First();
+
         return new PreloadConsist
         {
-            BlueprintId = entries.First().BlueprintId,
+            BlueprintId = locomotive.BlueprintId,
+            BlueprintIdProduct = locomotive.BlueprintIdProduct,
+            BlueprintIdProvider = locomotive.BlueprintIdProvider,
             LocomotiveName = locomotiveName,
             DisplayName = displayName,
             EngineType = LocoClassUtils.Parse(engineType),

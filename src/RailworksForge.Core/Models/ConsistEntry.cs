@@ -60,7 +60,7 @@ public class ConsistEntry
 
     private string ExtractBinary()
     {
-        var destination = Path.Join(ProductPath, BlueprintIdPath.Replace(".bin", ".bin.xml"));
+        var destination = Path.Join(ProductPath, BlueprintIdPath);
         var archives = Directory.EnumerateFiles(ProductPath, "*.ap");
         var archivePath = BlueprintIdPath.StartsWith('/') ? BlueprintIdPath.Remove(1) : BlueprintIdPath;
 

@@ -90,6 +90,7 @@ public class ScenarioDetailViewModel : ViewModelBase
             {
                 AvailableStock = [],
                 TargetConsist = SelectedConsist,
+                Scenario = Scenario,
             });
 
             if (result is null) return;
