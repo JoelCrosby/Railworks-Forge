@@ -9,7 +9,7 @@ public class RouteService
 {
     public static List<Route> GetRoutes()
     {
-        var baseDir = Paths.GetScenariosDirectory();
+        var baseDir = Paths.GetRoutesDirectory();
         var routeFiles = Directory
             .EnumerateFiles(baseDir, "*",  SearchOption.AllDirectories)
             .Where(file => file.EndsWith("RouteProperties.xml") || file.EndsWith("MainContent.ap"))

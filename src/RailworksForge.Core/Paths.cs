@@ -82,7 +82,7 @@ public static class Paths
         return Path.Join(GetGameDirectory(), "Assets");
     }
 
-    public static string GetScenariosDirectory()
+    public static string GetRoutesDirectory()
     {
         return Path.Join(GetGameDirectory(), "Content", "Routes");
     }
@@ -116,22 +116,29 @@ public static class Paths
         });
     }
 
-    public static bool Exists(string path)
+    public static bool Exists(string path, string rootPath)
     {
-        if (GetPlatform() is Platform.Windows)
+        return GetActualPathFromInsensitive(path, rootPath) is not null;
+    }
+
+    public static string? GetActualPathFromInsensitive(string path, string rootPath)
+    {
+        if (GetPlatform() is Platform.Windows && Path.Exists(path))
         {
-            return Path.Exists(path);
+            return path;
         }
 
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);
 
-        if (Path.Exists(normalisedPath)) return true;
+        if (Path.Exists(normalisedPath))
+        {
+            return normalisedPath;
+        }
 
-        var assets = GetAssetsDirectory();
-        var relative = normalisedPath.Replace(assets, string.Empty);
+        var relative = normalisedPath.Replace(rootPath, string.Empty);
         var parts = relative.Split(Path.DirectorySeparatorChar).Where(r => !string.IsNullOrEmpty(r));
         var partsQueue = new Queue<string>(parts);
-        var basePath = assets;
+        var basePath = rootPath;
 
         while (partsQueue.TryDequeue(out var part))
         {
@@ -144,10 +151,10 @@ public static class Paths
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
-        return true;
+        return basePath;
     }
 }

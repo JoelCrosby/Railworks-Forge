@@ -1,6 +1,9 @@
 using System.IO.Compression;
 
+using Avalonia.Media.Imaging;
+
 using RailworksForge.Core.Exceptions;
+using RailworksForge.Core.Extensions;
 
 namespace RailworksForge.Core;
 
@@ -11,7 +14,7 @@ public static class Archives
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
 
         var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
-        var entry = archive.Entries.FirstOrDefault(entry => entry.FullName == normalisedFilepath);
+        var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
 
         if (entry is null)
         {
@@ -23,6 +26,32 @@ public static class Archives
         using var reader = new StreamReader(content);
 
         return reader.ReadToEnd();
+    }
+
+    public static async Task<Bitmap?> GetStreamFromPath(string archivePath, string filePath, bool strict = true)
+    {
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+
+        var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
+        var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
+
+        if (entry is null)
+        {
+            if (strict)
+            {
+                ArchiveException.ThrowFileNotFound(archivePath, filePath);
+            }
+
+            return null;
+        }
+
+        var stream = entry.Open();
+
+        var image = new MemoryStream();
+        await stream.CopyToAsync(image);
+        image.Position = 0;
+
+        return image.ReadBitmap();
     }
 
     public static bool ExtractFileContentFromPath(string archivePath, string filePath, string destination)

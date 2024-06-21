@@ -10,7 +10,7 @@ namespace RailworksForge.Core;
 
 public class ConsistService
 {
-    public static async Task ReplaceConsist(Consist target, ConsistBlueprint blueprint, Scenario scenario)
+    public static async Task ReplaceConsist(Consist target, PreloadConsist preload, Scenario scenario)
     {
         var scenarioDocument = await scenario.GetXmlDocument();
 
@@ -27,9 +27,9 @@ public class ConsistService
 
         Debug.WriteLine("found blueprint node count {0}", blueprintText.Count);
 
-        var nodeCountToKeep = blueprint.ConsistEntries.Count;
+        var nodeCountToKeep = preload.ConsistEntries.Count;
 
-        await Parallel.ForEachAsync(blueprint.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
+        await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
 
         for (var i = 0; i < blueprintNodes.Length; i++)
         {
@@ -41,8 +41,10 @@ public class ConsistService
                 continue;
             }
 
-            var blueprintNode = blueprint.ConsistEntries[i];
+            var blueprintNode = preload.ConsistEntries[i];
             var blueprintBinDocument = await blueprintNode.GetXmlDocument();
+
+            var blueprintName = blueprintBinDocument.SelectTextContnet("Blueprint Name");
 
             var name = scenarioNode.QuerySelector("Name");
             var scenarioBlueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
@@ -59,9 +61,9 @@ public class ConsistService
                 continue;
             }
 
-            if (name is not null && blueprintNode.LocoName is not null)
+            if (name is not null)
             {
-                name.TextContent = blueprintNode.LocoName;
+                name.TextContent = blueprintName;
             }
 
             scenarioProvider.TextContent = blueprintNode.BlueprintIdProvider;

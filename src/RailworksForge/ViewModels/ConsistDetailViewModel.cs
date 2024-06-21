@@ -29,7 +29,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private FileBrowserViewModel _fileBrowser;
 
     [ObservableProperty]
-    private ObservableCollection<ConsistBlueprint> _availableStock;
+    private ObservableCollection<PreloadConsist> _availableStock;
 
     public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
 
@@ -54,7 +54,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         var binFiles = Directory.EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories);
 
-        var items = new List<ConsistBlueprint>();
+        var items = new List<PreloadConsist>();
 
         foreach (var binFile in binFiles)
         {
@@ -64,7 +64,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             items.AddRange(consists);
         }
 
-        AvailableStock = new ObservableCollection<ConsistBlueprint>(items);
+        AvailableStock = new ObservableCollection<PreloadConsist>(items);
     }
 
     private async Task<ObservableCollection<ConsistRailVehicle>> GetRailVehicles()
@@ -93,14 +93,14 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .ToList() ?? [];
     }
 
-    private static async Task<List<ConsistBlueprint>> GetConsistBlueprints(string path)
+    private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
     {
         var text = await File.ReadAllTextAsync(path);
         var doc = await new HtmlParser().ParseDocumentAsync(text);
 
         return doc
             .QuerySelectorAll("Blueprint")
-            .Select(ConsistBlueprint.Parse)
+            .Select(PreloadConsist.Parse)
             .ToList();
     }
 

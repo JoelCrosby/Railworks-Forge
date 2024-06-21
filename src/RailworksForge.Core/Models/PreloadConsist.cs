@@ -4,7 +4,7 @@ using RailworksForge.Core.Extensions;
 
 namespace RailworksForge.Core.Models;
 
-public class ConsistBlueprint
+public class PreloadConsist
 {
     public required string LocomotiveName { get; init; }
 
@@ -18,7 +18,7 @@ public class ConsistBlueprint
 
     public required List<ConsistEntry> ConsistEntries { get; init; }
 
-    public static ConsistBlueprint Parse(IElement el)
+    public static PreloadConsist Parse(IElement el)
     {
         var locomotiveName = el.SelectTextContnet("LocoName English");
         var displayName = el.SelectTextContnet("DisplayName English");
@@ -37,7 +37,7 @@ public class ConsistBlueprint
             })
             .ToList();
 
-        return new ConsistBlueprint
+        return new PreloadConsist
         {
             LocomotiveName = locomotiveName,
             DisplayName = displayName,

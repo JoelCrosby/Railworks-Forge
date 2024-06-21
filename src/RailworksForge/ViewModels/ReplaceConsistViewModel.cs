@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
-using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
 using Avalonia.Threading;
@@ -16,7 +15,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 
 using RailworksForge.Core;
-using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
@@ -26,10 +24,10 @@ namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel : ViewModelBase
 {
-    public ReactiveCommand<Unit, ConsistBlueprint?> ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, PreloadConsist?> ReplaceConsistCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<ConsistBlueprint> _availableStock;
+    private ObservableCollection<PreloadConsist> _availableStock;
 
     public required Consist TargetConsist { get; init; }
 
@@ -37,7 +35,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     private FileBrowserViewModel _fileBrowser;
 
     [ObservableProperty]
-    private ConsistBlueprint? _selectedConsist;
+    private PreloadConsist? _selectedConsist;
 
     public ReplaceConsistViewModel()
     {
@@ -84,14 +82,14 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         return preloadDirectory;
     }
 
-    private static async Task<List<ConsistBlueprint>> GetConsistBlueprints(string path)
+    private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
     {
         var text = await File.ReadAllTextAsync(path);
         var doc = await new HtmlParser().ParseDocumentAsync(text);
 
         return doc
             .QuerySelectorAll("Blueprint cConsistBlueprint")
-            .Select(ConsistBlueprint.Parse)
+            .Select(PreloadConsist.Parse)
             .ToList();
     }
 }

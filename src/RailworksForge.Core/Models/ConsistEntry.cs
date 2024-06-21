@@ -16,8 +16,6 @@ public class ConsistEntry
 
     public required bool Flipped { get; init; }
 
-    public string? LocoName { get; set; }
-
     private string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
     private string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintIdProvider, BlueprintIdProduct);

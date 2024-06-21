@@ -62,7 +62,7 @@ public abstract class Blueprint
 
     private AcquisitionState LoadAcquisitionState()
     {
-        if (Paths.Exists(BlueprintPath))
+        if (Paths.Exists(BlueprintPath, Paths.GetAssetsDirectory()))
         {
             return AcquisitionState.Found;
         }

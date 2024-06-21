@@ -10,10 +10,9 @@ public class ConsistServiceTests
     public async Task ReplaceConsistsReturnsCorrectly()
     {
         var scenario = Example.Scenario;
-
         var targetConsist = Example.Scenario.Consists.First();
 
-        var consist = new ConsistBlueprint
+        var consist = new PreloadConsist
         {
             LocomotiveName = "Class 390 'Pendolino'",
             DisplayName = "Class 390 'Pendolino' Avanti - 9 Car Set",

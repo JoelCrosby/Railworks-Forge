@@ -1,13 +1,12 @@
-using System;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using RailworksForge.Core;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.ViewModels;
@@ -46,55 +45,30 @@ public partial class RouteViewModel : ViewModelBase
 
     private async Task<Bitmap?> GetImageBitmap()
     {
-        if (await GetCompressedImageStream() is {} result)
+        if (GetUnCompressedImageStream() is {} result)
         {
             return result;
         }
 
-        return GetUnCompressedImageStream();
+        return await GetCompressedImageStream();
     }
 
     private Bitmap? GetUnCompressedImageStream()
     {
-        var imageFiles = Directory.EnumerateFiles(DirectoryPath, "*.png", SearchOption.AllDirectories);
-        var imagePath = imageFiles.FirstOrDefault(i => i.EndsWith("image.png", StringComparison.OrdinalIgnoreCase));
+        var idealPath = Path.Join(DirectoryPath, "RouteInformation", "Image.png");
+        var imagePath = Paths.GetActualPathFromInsensitive(idealPath, Paths.GetRoutesDirectory());
         var image = File.Exists(imagePath) ? File.OpenRead(imagePath) : null;
 
-        return ReadBitmap(image);
+        return image.ReadBitmap();
     }
 
     private async Task<Bitmap?> GetCompressedImageStream()
     {
-        var path = Directory
-            .EnumerateFiles(DirectoryPath, "*.ap", SearchOption.AllDirectories)
-            .FirstOrDefault(f => f.EndsWith("MainContent.ap", StringComparison.OrdinalIgnoreCase));
+        var idealPath = Path.Join(DirectoryPath, "MainContent.ap");
+        var path = Paths.GetActualPathFromInsensitive(idealPath, Paths.GetRoutesDirectory());
 
         if (path is null) return null;
 
-        using var archive = ZipFile.Open(path, ZipArchiveMode.Read);
-
-        var entry = archive.Entries
-            .FirstOrDefault(entry => string.Equals(entry.Name, "Image.png", StringComparison.OrdinalIgnoreCase))?
-            .Open();
-
-        if (entry is null) return null;
-
-        var image = new MemoryStream();
-        await entry.CopyToAsync(image);
-        image.Position = 0;
-
-        return ReadBitmap(image);
-    }
-
-    private static Bitmap? ReadBitmap(Stream? stream)
-    {
-        try
-        {
-            return stream is null ? null : Bitmap.DecodeToWidth(stream, 256);
-        }
-        catch
-        {
-            return null;
-        }
+        return await Archives.GetStreamFromPath(path, "RouteInformation/Image.png", false);
     }
 }
