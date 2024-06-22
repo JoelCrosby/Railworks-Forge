@@ -66,16 +66,16 @@ public class ConsistService
             var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
 
             var name = scenarioNode.QuerySelector("Name");
-            var scenarioBlueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
+            var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
 
-            if (scenarioBlueprint is null) continue;
+            if (blueprint is null) continue;
 
-            var scenarioBlueprintSetId = scenarioBlueprint.QuerySelector("BlueprintID");
-            var scenarioProvider = scenarioBlueprint.QuerySelector("BlueprintSetID Provider");
-            var scenarioProduct = scenarioBlueprint.QuerySelector("BlueprintSetID Product");
+            var scenarioBlueprintId = blueprint.QuerySelector("BlueprintID");
+            var scenarioProvider = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider");
+            var scenarioProduct = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product");
 
 
-            if (scenarioProvider is null || scenarioProduct is null || scenarioBlueprintSetId is null)
+            if (scenarioProvider is null || scenarioProduct is null || scenarioBlueprintId is null)
             {
                 continue;
             }
@@ -87,7 +87,7 @@ public class ConsistService
 
             scenarioProvider.TextContent = blueprintNode.BlueprintIdProvider;
             scenarioProduct.TextContent = blueprintNode.BlueprintIdProduct;
-            scenarioBlueprintSetId.TextContent = blueprintNode.BlueprintId;
+            scenarioBlueprintId.TextContent = blueprintNode.BlueprintId;
         }
 
         return document;

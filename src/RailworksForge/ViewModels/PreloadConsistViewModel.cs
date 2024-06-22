@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,7 +40,7 @@ public partial class PreloadConsistViewModel : ViewModelBase
         return await GetCompressedImageStream();
     }
 
-    private static readonly Dictionary<string, Bitmap?> BitmapCache = new();
+    private static readonly ConcurrentDictionary<string, Bitmap?> BitmapCache = new();
 
     private Bitmap? GetUnCompressedImageStream()
     {
