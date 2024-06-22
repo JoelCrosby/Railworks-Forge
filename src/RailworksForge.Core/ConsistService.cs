@@ -9,7 +9,30 @@ namespace RailworksForge.Core;
 
 public class ConsistService
 {
+
+
     public static async Task ReplaceConsist(Consist target, PreloadConsist preload, Scenario scenario)
+    {
+        var directory = $"{scenario.Name.ToUrlSlug()}-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}";
+        var outputDirectory = Path.Join(Paths.GetHomeDirectory(), "Downloads", directory);
+
+        Directory.CreateDirectory(outputDirectory);
+
+        try
+        {
+            var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
+            var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
+
+            await WriteScenarioDocument(outputDirectory, scenarioDocument);
+            await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
+        }
+        catch
+        {
+            Directory.Delete(outputDirectory);
+        }
+    }
+
+    private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, Consist target, PreloadConsist preload)
     {
         var document = await scenario.GetXmlDocument();
 
@@ -67,11 +90,10 @@ public class ConsistService
             scenarioBlueprintSetId.TextContent = blueprintNode.BlueprintId;
         }
 
-        await UpdateScenarioProperties(scenario, target, preload);
-        await WriteScenarioDocument(document);
+        return document;
     }
 
-    private static async Task UpdateScenarioProperties(Scenario scenario, Consist target, PreloadConsist preload)
+    private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, Consist target, PreloadConsist preload)
     {
         var document = await scenario.GetPropertiesXmlDocument();
 
@@ -114,13 +136,13 @@ public class ConsistService
             filePath.TextContent = packagedPath;
         }
 
-        await WriteScenarioPropertiesDocument(document);
+        return document;
     }
 
-    private static async Task WriteScenarioDocument(IXmlDocument document)
+    private static async Task WriteScenarioDocument(string path, IXmlDocument document)
     {
-        var filename = $"scenario-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.bin.xml";
-        var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
+        const string filename = "Scenario.bin.xml";
+        var outputPath = Path.Join(path, filename);
 
         await using var stream = File.OpenWrite(outputPath);
         await document.ToXmlAsync(stream);
@@ -128,10 +150,10 @@ public class ConsistService
         await Serz.Convert(outputPath);
     }
 
-    private static async Task WriteScenarioPropertiesDocument(IXmlDocument document)
+    private static async Task WriteScenarioPropertiesDocument(string path, IXmlDocument document)
     {
-        var filename = $"scenario-properties-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.xml";
-        var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
+        const string filename = "ScenarioProperties.xml";
+        var outputPath = Path.Join(path, filename);
 
         await using var stream = File.OpenWrite(outputPath);
         await document.ToXmlAsync(stream);
