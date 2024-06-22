@@ -70,7 +70,7 @@ public class ConsistService
 
             if (scenarioBlueprint is null) continue;
 
-            var scenarioBlueprintSetId = scenarioBlueprint.QuerySelector("BlueprintSetID");
+            var scenarioBlueprintSetId = scenarioBlueprint.QuerySelector("BlueprintID");
             var scenarioProvider = scenarioBlueprint.QuerySelector("BlueprintSetID Provider");
             var scenarioProduct = scenarioBlueprint.QuerySelector("BlueprintSetID Product");
 
