@@ -86,7 +86,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         return doc
             .QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == _consist.ServiceId)?
+            .QueryByTextContent("ServiceName Key", _consist.ServiceId)?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
             .Select(ParseConsist)
             .ToList() ?? [];
@@ -106,12 +106,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private static ConsistRailVehicle ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = el.SelectTextContnet("Name");
-        var uniqueNumber = el.SelectTextContnet("UniqueNumber");
-        var blueprintId = el.SelectTextContnet("BlueprintID BlueprintID");
-        var flipped = el.SelectTextContnet("Flipped") == "1";
-        var blueprintSetIdProduct = el.SelectTextContnet("iBlueprintLibrary-cBlueprintSetID Product");
-        var blueprintSetIdProvider = el.SelectTextContnet("iBlueprintLibrary-cBlueprintSetID Provider");
+        var locomotiveName = el.SelectTextContent("Name");
+        var uniqueNumber = el.SelectTextContent("UniqueNumber");
+        var blueprintId = el.SelectTextContent("BlueprintID BlueprintID");
+        var flipped = el.SelectTextContent("Flipped") == "1";
+        var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
 
         return new ConsistRailVehicle
         {

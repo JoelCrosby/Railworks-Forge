@@ -82,7 +82,7 @@ public class RouteService
     {
         var id = Directory.GetParent(path)?.Name ?? string.Empty;
         var doc = XmlParser.ParseDocument(fileContent);
-        var name = doc.SelectTextContnet("DisplayName English");
+        var name = doc.SelectTextContent("DisplayName English");
         var directoryPath = Directory.GetParent(path)?.FullName ?? string.Empty;
 
         return new Route

@@ -1,8 +1,9 @@
 using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+
+using AngleSharp.Xml;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
@@ -109,7 +110,7 @@ public class ScenarioDetailViewModel : ViewModelBase
 
         var vehicles = doc
             .QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == SelectedConsist.ServiceId)?
+            .QueryByTextContent("ServiceName Key", SelectedConsist.ServiceId)?
             .QuerySelector("RailVehicles");
 
         if (vehicles is null)
@@ -117,6 +118,6 @@ public class ScenarioDetailViewModel : ViewModelBase
             throw new Exception("could not find consist in scenario bin");
         }
 
-        return vehicles.OuterHtml;
+        return vehicles.ToXml();
     }
 }

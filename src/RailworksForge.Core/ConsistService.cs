@@ -1,8 +1,8 @@
-using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -13,8 +13,9 @@ public class ConsistService
     {
         var document = await scenario.GetXmlDocument();
 
-        var scenarioConsist = document.QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.SelectTextContnet("Driver ServiceName Key") == target.ServiceId);
+        var scenarioConsist = document
+            .QuerySelectorAll("cConsist")
+            .QueryByTextContent("Driver ServiceName Key", target.ServiceId);
 
         if (scenarioConsist is null)
         {
@@ -39,7 +40,7 @@ public class ConsistService
             var blueprintNode = preload.ConsistEntries[i];
             var blueprintBinDocument = await blueprintNode.GetXmlDocument();
 
-            var blueprintName = blueprintBinDocument.SelectTextContnet("Blueprint Name");
+            var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
 
             var name = scenarioNode.QuerySelector("Name");
             var scenarioBlueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
@@ -76,7 +77,7 @@ public class ConsistService
 
         var serviceElement = document
             .QuerySelectorAll("sDriverFrontEndDetails")
-            .FirstOrDefault(el => el.SelectTextContnet("ServiceName Key") == target.ServiceId);
+            .QueryByTextContent("ServiceName Key", target.ServiceId);
 
         if (serviceElement is null)
         {
@@ -118,11 +119,13 @@ public class ConsistService
 
     private static async Task WriteScenarioDocument(IXmlDocument document)
     {
-        var filename = $"scenario-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.xml";
+        var filename = $"scenario-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}.bin.xml";
         var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
 
         await using var stream = File.OpenWrite(outputPath);
-        await document.ToHtmlAsync(stream);
+        await document.ToXmlAsync(stream);
+
+        await Serz.Convert(outputPath);
     }
 
     private static async Task WriteScenarioPropertiesDocument(IXmlDocument document)
@@ -131,6 +134,6 @@ public class ConsistService
         var outputPath = Path.Join(Paths.GetHomeDirectory(), "Downloads", filename);
 
         await using var stream = File.OpenWrite(outputPath);
-        await document.ToHtmlAsync(stream);
+        await document.ToXmlAsync(stream);
     }
 }

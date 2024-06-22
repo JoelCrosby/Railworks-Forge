@@ -41,13 +41,13 @@ public record Scenario
 
     public static Scenario Parse(IElement el, Route route, string path)
     {
-        var id = el.SelectTextContnet("ID cGUID DevString");
-        var name = el.SelectTextContnet("DisplayName English");
-        var description = el.SelectTextContnet("description English");
-        var briefing = el.SelectTextContnet("Briefing English");
-        var startLocation = el.SelectTextContnet("StartLocation English");
+        var id = el.SelectTextContent("ID cGUID DevString");
+        var name = el.SelectTextContent("DisplayName English");
+        var description = el.SelectTextContent("description English");
+        var briefing = el.SelectTextContent("Briefing English");
+        var startLocation = el.SelectTextContent("StartLocation English");
         var directoryPath = Path.GetDirectoryName(path) ?? string.Empty;
-        var scenarioClass = el.SelectTextContnet("ScenarioClass");
+        var scenarioClass = el.SelectTextContent("ScenarioClass");
 
         var consists = el.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.Parse).ToList();
 

@@ -7,7 +7,7 @@ public class PreloadServiceTests
     [Fact]
     public async Task GetRailVehicles_ReturnsRailVehicles()
     {
-        var results = await new PreloadService().GetRailVehicles();
+        var results = await PreloadService.GetRailVehicles();
 
         Assert.NotEmpty(results);
     }

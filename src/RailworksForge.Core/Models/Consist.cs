@@ -24,15 +24,15 @@ public class Consist : Blueprint
     public static Consist Parse(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = el.SelectTextContnet("LocoName English");
-        var serviceName = el.SelectTextContnet("ServiceName English");
-        var playerDriver = el.SelectTextContnet("PlayerDriver") == "1";
-        var locoAuthor = el.SelectTextContnet("LocoAuthor");
-        var blueprintId = el.SelectTextContnet("BlueprintID");
-        var serviceId = el.SelectTextContnet("ServiceName Key");
-        var locoClass = LocoClassUtils.Parse(el.SelectTextContnet("LocoClass"));
-        var blueprintSetIdProduct = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
-        var blueprintSetIdProvider = el.SelectTextContnet("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
+        var locomotiveName = el.SelectTextContent("LocoName English");
+        var serviceName = el.SelectTextContent("ServiceName English");
+        var playerDriver = el.SelectTextContent("PlayerDriver") == "1";
+        var locoAuthor = el.SelectTextContent("LocoAuthor");
+        var blueprintId = el.SelectTextContent("BlueprintID");
+        var serviceId = el.SelectTextContent("ServiceName Key");
+        var locoClass = LocoClassUtils.Parse(el.SelectTextContent("LocoClass"));
+        var blueprintSetIdProduct = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
         return new Consist
         {

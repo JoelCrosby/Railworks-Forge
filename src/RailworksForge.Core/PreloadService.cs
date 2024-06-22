@@ -1,3 +1,4 @@
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
@@ -5,7 +6,7 @@ namespace RailworksForge.Core;
 
 public class PreloadService
 {
-    public async Task<List<RailVehicle>> GetRailVehicles()
+    public static async Task<List<RailVehicle>> GetRailVehicles()
     {
         var vehicles = new HashSet<RailVehicle>();
         var assetsDir = Paths.GetAssetsDirectory();
@@ -18,8 +19,8 @@ public class PreloadService
             var result = await Serz.Convert(bin);
             var document = result.Parse();
 
-            var locoName = document.QuerySelector("cConsistBlueprint LocoName English")?.TextContent;
-            var displayName = document.QuerySelector("cConsistBlueprint DisplayName English")?.TextContent;
+            var locoName = document.SelectTextContent("cConsistBlueprint LocoName English");
+            var displayName = document.SelectTextContent("cConsistBlueprint DisplayName English");
 
             File.Delete(result.OutputPath);
 
