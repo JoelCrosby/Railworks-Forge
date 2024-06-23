@@ -103,6 +103,11 @@ public class ConsistService
             throw new Exception($"could not find service {target.ServiceName} in scenario properties file.");
         }
 
+        if (serviceElement.QuerySelector("LocoName Key") is {} locoNameId)
+        {
+            locoNameId.SetTextContent(Guid.NewGuid().ToString());
+        }
+
         if (serviceElement.QuerySelector("LocoName English") is {} locoName)
         {
             locoName.SetTextContent(preload.LocomotiveName);
@@ -121,6 +126,16 @@ public class ConsistService
         if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product") is {} blueprintProductId)
         {
             blueprintProductId.SetTextContent(preload.BlueprintIdProduct);
+        }
+
+        if (serviceElement.QuerySelector("LocoClass") is {} locoClass)
+        {
+            locoClass.SetTextContent(LocoClassUtils.ToLongFormString(preload.EngineType));
+        }
+
+        if (serviceElement.QuerySelector("LocoAuthor") is {} locoAuthor)
+        {
+            locoAuthor.SetTextContent(preload.BlueprintIdProvider);
         }
 
         if (serviceElement.QuerySelector("FilePath") is {} filePath)

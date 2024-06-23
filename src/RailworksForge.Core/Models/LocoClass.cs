@@ -23,4 +23,15 @@ public static class LocoClassUtils
             _ => LocoClass.Unknown,
         };
     }
+
+    public static string ToLongFormString(LocoClass locoClass)
+    {
+        return locoClass switch
+        {
+            LocoClass.Diesel => "LOCO_CLASS_DIESEL",
+            LocoClass.Electric => "LOCO_CLASS_ELECTRIC",
+            LocoClass.Steam => "LOCO_CLASS_STEAM",
+            _ => string.Empty,
+        };
+    }
 }
