@@ -1,6 +1,9 @@
+using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Xml;
 using AngleSharp.Xml.Dom;
+
+using RailworksForge.Core.Exceptions;
 
 namespace RailworksForge.Core.Extensions;
 
@@ -16,11 +19,26 @@ public static class AngleSharpExtensions
         return elements.FirstOrDefault(el => el.SelectTextContent(selector) == key);
     }
 
-    public static async Task ToXmlAsync(this IXmlDocument document, Stream stream)
+    public static async Task ToXmlAsync(this IXmlDocument document, string path)
     {
-        var text = document.ToXml();
+        var text = document.ToHtml(new XmlMarkupFormatter
+        {
+            IsAlwaysSelfClosing = true,
+        });
 
-        await using var writer = new StreamWriter(stream);
-        await writer.WriteAsync(text);
+        await File.WriteAllTextAsync(path, text);
+    }
+
+    public static void SetTextContent(this IElement element, string text)
+    {
+        if (element.ChildNodes.Length is 1 && element.FirstChild?.NodeType is NodeType.Text)
+        {
+            element.TextContent = text;
+        }
+        else
+        {
+            XmlException.ThrowInvalidNode(element, "failed to set text content as node does not contain only text");
+        }
+
     }
 }

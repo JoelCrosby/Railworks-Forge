@@ -21,11 +21,11 @@ public record Scenario
 
     public string? StartLocation { get; init; }
 
-    public string? Locomotive { get; init; }
+    public required string Locomotive { get; init; }
 
-    public string? DirectoryPath { get; init; }
+    public required string DirectoryPath { get; init; }
 
-    public string? ScenarioPropertiesPath { get; init; }
+    public required string ScenarioPropertiesPath { get; init; }
 
     public List<Consist> Consists { get; init; } = [];
 

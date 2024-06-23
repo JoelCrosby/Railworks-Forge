@@ -1,6 +1,9 @@
+using System.IO.Compression;
+
 using AngleSharp.Dom;
 using AngleSharp.Xml.Dom;
 
+using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
@@ -9,27 +12,19 @@ namespace RailworksForge.Core;
 
 public class ConsistService
 {
-
-
     public static async Task ReplaceConsist(Consist target, PreloadConsist preload, Scenario scenario)
     {
-        var directory = $"{scenario.Name.ToUrlSlug()}-{DateTimeOffset.UtcNow:yy-MMM-dd-ddd-hh-mm}";
-        var outputDirectory = Path.Join(Paths.GetHomeDirectory(), "Downloads", directory);
+        var outputDirectory = scenario.DirectoryPath;
+        var backupOutputDirectory = Directory.GetParent(outputDirectory)!.FullName;
+        var backupPath = Path.Join(backupOutputDirectory, $"backup-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
 
-        Directory.CreateDirectory(outputDirectory);
+        ZipFile.CreateFromDirectory(outputDirectory, backupPath);
 
-        try
-        {
-            var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
-            var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
+        var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
+        var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
 
-            await WriteScenarioDocument(outputDirectory, scenarioDocument);
-            await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
-        }
-        catch
-        {
-            Directory.Delete(outputDirectory);
-        }
+        await WriteScenarioDocument(outputDirectory, scenarioDocument);
+        await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, Consist target, PreloadConsist preload)
@@ -82,13 +77,15 @@ public class ConsistService
 
             if (name is not null)
             {
-                name.TextContent = blueprintName;
+                name.SetTextContent(blueprintName);
             }
 
-            scenarioProvider.TextContent = blueprintNode.BlueprintIdProvider;
-            scenarioProduct.TextContent = blueprintNode.BlueprintIdProduct;
-            scenarioBlueprintId.TextContent = blueprintNode.BlueprintId;
+            scenarioProvider.SetTextContent(blueprintNode.BlueprintIdProvider);
+            scenarioProduct.SetTextContent(blueprintNode.BlueprintIdProduct);
+            scenarioBlueprintId.SetTextContent(blueprintNode.BlueprintId);
         }
+
+        XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
     }
@@ -108,22 +105,22 @@ public class ConsistService
 
         if (serviceElement.QuerySelector("LocoName English") is {} locoName)
         {
-            locoName.TextContent = preload.LocomotiveName;
+            locoName.SetTextContent(preload.LocomotiveName);
         }
 
-        if (serviceElement.QuerySelector("LocoBP BlueprintID") is {} blueprintId)
+        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID") is {} blueprintId)
         {
-            blueprintId.TextContent = preload.BlueprintId;
+            blueprintId.SetTextContent(preload.BlueprintId);
         }
 
-        if (serviceElement.QuerySelector("LocoBP Provider") is {} blueprintProviderId)
+        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider") is {} blueprintProviderId)
         {
-            blueprintProviderId.TextContent = preload.BlueprintIdProvider;
+            blueprintProviderId.SetTextContent(preload.BlueprintIdProvider);
         }
 
-        if (serviceElement.QuerySelector("LocoBP Product") is {} blueprintProductId)
+        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product") is {} blueprintProductId)
         {
-            blueprintProductId.TextContent = preload.BlueprintIdProduct;
+            blueprintProductId.SetTextContent(preload.BlueprintIdProduct);
         }
 
         if (serviceElement.QuerySelector("FilePath") is {} filePath)
@@ -133,8 +130,10 @@ public class ConsistService
             var blueprintDirectory = string.Join('\\', partsWithoutFilename);
             var packagedPath = $@"{preload.BlueprintIdProvider}\{preload.BlueprintIdProduct}\{blueprintDirectory}";
 
-            filePath.TextContent = packagedPath;
+            filePath.SetTextContent(packagedPath);
         }
+
+        XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
     }
@@ -142,20 +141,24 @@ public class ConsistService
     private static async Task WriteScenarioDocument(string path, IXmlDocument document)
     {
         const string filename = "Scenario.bin.xml";
-        var outputPath = Path.Join(path, filename);
+        var destination = Path.Join(path, filename);
 
-        await using var stream = File.OpenWrite(outputPath);
-        await document.ToXmlAsync(stream);
+        File.Delete(filename);
 
-        await Serz.Convert(outputPath);
+        await document.ToXmlAsync(destination);
+
+        File.Delete(filename.Replace(".bin.xml", ".bin"));
+
+        await Serz.Convert(destination);
     }
 
     private static async Task WriteScenarioPropertiesDocument(string path, IXmlDocument document)
     {
         const string filename = "ScenarioProperties.xml";
-        var outputPath = Path.Join(path, filename);
+        var destination = Path.Join(path, filename);
 
-        await using var stream = File.OpenWrite(outputPath);
-        await document.ToXmlAsync(stream);
+        File.Delete(filename);
+
+        await document.ToXmlAsync(destination);
     }
 }
