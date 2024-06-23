@@ -36,8 +36,6 @@ public class ScenarioDetailViewModel : ViewModelBase
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
-            if (Scenario.DirectoryPath is null) return;
-
             Launcher.Open(Scenario.DirectoryPath);
         });
 
