@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 using AngleSharp.Text;
 
@@ -161,5 +162,32 @@ public static class Paths
         }
 
         return basePath;
+    }
+
+    private static byte[] CalculateMd5Hash(string path)
+    {
+        using var md5 = MD5.Create();
+        using var stream = File.OpenRead(path);
+
+        return md5.ComputeHash(stream);
+    }
+
+    public static async Task CreateMd5HashFile(string path)
+    {
+        var hash = CalculateMd5Hash(path);
+        var filename = $"{Path.GetFileName(path)}.MD5";
+
+        var directory = Directory.GetParent(path)?.Parent?.FullName;
+
+        if (directory is null)
+        {
+            throw new Exception($"could not find parent directory for path {path}");
+        }
+
+        var output = Path.Join(directory, filename);
+
+        File.Delete(output);
+
+        await File.WriteAllBytesAsync(output, hash);
     }
 }

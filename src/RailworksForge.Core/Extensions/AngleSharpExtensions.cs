@@ -39,6 +39,5 @@ public static class AngleSharpExtensions
         {
             XmlException.ThrowInvalidNode(element, "failed to set text content as node does not contain only text");
         }
-
     }
 }

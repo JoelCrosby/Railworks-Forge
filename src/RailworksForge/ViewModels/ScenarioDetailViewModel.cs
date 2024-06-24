@@ -95,6 +95,8 @@ public class ScenarioDetailViewModel : ViewModelBase
             if (result is null) return;
 
             await ConsistService.ReplaceConsist(SelectedConsist, result, Scenario);
+
+
         });
 
         DeleteConsistCommand = ReactiveCommand.Create(() => {});

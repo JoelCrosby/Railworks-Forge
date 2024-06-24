@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Compression;
 
 using AngleSharp.Dom;
@@ -25,6 +26,8 @@ public class ConsistService
 
         await WriteScenarioDocument(outputDirectory, scenarioDocument);
         await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
+
+        ClearCache();
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, Consist target, PreloadConsist preload)
@@ -148,6 +151,39 @@ public class ConsistService
             filePath.SetTextContent(packagedPath);
         }
 
+        if (document.QuerySelector("RBlueprintSetPreLoad") is { } preloadElement)
+        {
+            var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
+            var providerProductSet = preloadElement
+                .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
+                .Aggregate(
+                    new HashSet<string>(), (acc, curr) =>
+                    {
+                        var provider = curr.SelectTextContent("Provider");
+                        var product = curr.SelectTextContent("Product");
+                        var index = $"{provider}:{product}".ToLowerInvariant();
+
+                        acc.Add(index);
+
+                        return acc;
+                    }
+                );
+
+            if (providerProductSet.Contains(needle) is not true)
+            {
+                var randomId = new Random().Next(10000000, 99999999).ToString();
+
+                var markup = $"""
+                              <iBlueprintLibrary-cBlueprintSetID d:id="{randomId}">
+                                 <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
+                                 <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
+                              </iBlueprintLibrary-cBlueprintSetID>
+                              """;
+
+                preloadElement.InnerHtml += markup;
+            }
+        }
+
         XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
@@ -156,15 +192,19 @@ public class ConsistService
     private static async Task WriteScenarioDocument(string path, IXmlDocument document)
     {
         const string filename = "Scenario.bin.xml";
+        const string binFilename = "Scenario.bin";
+
         var destination = Path.Join(path, filename);
+        var binDestination = Path.Join(path, binFilename);
 
         File.Delete(filename);
 
         await document.ToXmlAsync(destination);
 
-        File.Delete(filename.Replace(".bin.xml", ".bin"));
+        File.Delete(binFilename);
 
         await Serz.Convert(destination);
+        await Paths.CreateMd5HashFile(binDestination);
     }
 
     private static async Task WriteScenarioPropertiesDocument(string path, IXmlDocument document)
@@ -172,8 +212,45 @@ public class ConsistService
         const string filename = "ScenarioProperties.xml";
         var destination = Path.Join(path, filename);
 
-        File.Delete(filename);
+        File.Delete(destination);
 
         await document.ToXmlAsync(destination);
+        await Paths.CreateMd5HashFile(destination);
+    }
+
+    private static void ClearCache()
+    {
+        var directory = Paths.GetRoutesDirectory();
+
+        var files = new []
+        {
+            "RVDBCache.bin",
+            "RVDBCache.bin.MD5",
+            "SDBCache.bin",
+            "SDBCache.bin.MD5",
+            "TMCache.dat",
+            "TMCache.dat.MD5",
+        };
+
+        foreach (var file in files)
+        {
+            TryDeleteFile(directory, file);
+        }
+
+        return;
+
+        static void TryDeleteFile(string dir, string filename)
+        {
+            var path = Path.Join(dir, filename);
+
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("failed to delete file at path {path}", e.Message);
+            }
+        }
     }
 }

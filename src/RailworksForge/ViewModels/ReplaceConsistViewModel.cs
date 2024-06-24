@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Threading;
@@ -43,17 +42,14 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         AvailableStock = [];
         FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
 
-        ReplaceConsistCommand = ReactiveCommand.CreateFromObservable(() =>
+        ReplaceConsistCommand = ReactiveCommand.CreateFromTask(() =>
         {
             if (TargetConsist is null || SelectedConsist is null || Scenario is null)
             {
-                return Observable.Empty(Unit.Default);
+                return Task.CompletedTask;
             }
 
-            return Observable.FromAsync(
-                () => ConsistService.ReplaceConsist(TargetConsist, SelectedConsist.Consist, Scenario),
-                RxApp.TaskpoolScheduler
-            );
+            return ConsistService.ReplaceConsist(TargetConsist, SelectedConsist.Consist, Scenario);
         });
     }
 
