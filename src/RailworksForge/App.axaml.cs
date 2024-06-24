@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RailworksForge.Core;
 using RailworksForge.ViewModels;
 using RailworksForge.Views;
+using RailworksForge.Views.Controls;
 
 namespace RailworksForge;
 
@@ -22,6 +23,7 @@ public class App : Application
         var services = new ServiceCollection();
 
         RegisterServices(services);
+        RegisterViews();
 
         var provider = services.BuildServiceProvider();
         var dataContext = provider.GetRequiredService<MainWindowViewModel>();
@@ -35,6 +37,21 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void RegisterViews()
+    {
+        ViewLocator.Register<MainWindowViewModel, MainWindow>();
+        ViewLocator.Register<MainMenuViewModel, MainMenu>();
+        ViewLocator.Register<ConsistDetailViewModel, ConsistDetail>();
+        ViewLocator.Register<FileBrowserViewModel, FileBrowser>();
+        ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
+        ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
+        ViewLocator.Register<RouteDetailViewModel, RouteDetail>();
+        ViewLocator.Register<RoutesListViewModel, RoutesList>();
+        ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
+        ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetail>();
+        ViewLocator.Register<StatusBarViewModel, StatusBar>();
     }
 
     private static void RegisterServices(IServiceCollection services)
