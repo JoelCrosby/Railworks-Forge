@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace RailworksForge.Core.Config;
 
+
 public class Configuration
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
@@ -10,6 +11,7 @@ public class Configuration
         AllowTrailingCommas = true,
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        TypeInfoResolver = SourceGenerationContext.Default
     };
 
     private static readonly ConfigurationOptions DefaultConfigurationOptions = new ()
