@@ -106,87 +106,79 @@ public class ConsistService
             throw new Exception($"could not find service {target.ServiceName} in scenario properties file.");
         }
 
-        if (serviceElement.QuerySelector("LocoName Key") is {} locoNameId)
-        {
-            locoNameId.SetTextContent(Guid.NewGuid().ToString());
-        }
-
-        if (serviceElement.QuerySelector("LocoName English") is {} locoName)
-        {
-            locoName.SetTextContent(preload.LocomotiveName);
-        }
-
-        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID") is {} blueprintId)
-        {
-            blueprintId.SetTextContent(preload.BlueprintId);
-        }
-
-        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider") is {} blueprintProviderId)
-        {
-            blueprintProviderId.SetTextContent(preload.BlueprintIdProvider);
-        }
-
-        if (serviceElement.QuerySelector("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product") is {} blueprintProductId)
-        {
-            blueprintProductId.SetTextContent(preload.BlueprintIdProduct);
-        }
-
-        if (serviceElement.QuerySelector("LocoClass") is {} locoClass)
-        {
-            locoClass.SetTextContent(LocoClassUtils.ToLongFormString(preload.EngineType));
-        }
-
-        if (serviceElement.QuerySelector("LocoAuthor") is {} locoAuthor)
-        {
-            locoAuthor.SetTextContent(preload.BlueprintIdProvider);
-        }
-
-        if (serviceElement.QuerySelector("FilePath") is {} filePath)
-        {
-            var parts = preload.BlueprintId.Split('\\');
-            var partsWithoutFilename = parts[..^1];
-            var blueprintDirectory = string.Join('\\', partsWithoutFilename);
-            var packagedPath = $@"{preload.BlueprintIdProvider}\{preload.BlueprintIdProduct}\{blueprintDirectory}";
-
-            filePath.SetTextContent(packagedPath);
-        }
-
-        if (document.QuerySelector("RBlueprintSetPreLoad") is { } preloadElement)
-        {
-            var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
-            var providerProductSet = preloadElement
-                .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
-                .Aggregate(
-                    new HashSet<string>(), (acc, curr) =>
-                    {
-                        var provider = curr.SelectTextContent("Provider");
-                        var product = curr.SelectTextContent("Product");
-                        var index = $"{provider}:{product}".ToLowerInvariant();
-
-                        acc.Add(index);
-
-                        return acc;
-                    }
-                );
-
-            if (providerProductSet.Contains(needle) is not true)
-            {
-                var randomId = new Random().Next(10000000, 99999999).ToString();
-
-                var markup = $"""
-                              <iBlueprintLibrary-cBlueprintSetID d:id="{randomId}">
-                                 <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
-                                 <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
-                              </iBlueprintLibrary-cBlueprintSetID>
-                              """;
-
-                preloadElement.InnerHtml += markup;
-            }
-        }
+        UpdateBlueprint(serviceElement, preload);
+        UpdateFilePath(serviceElement, preload);
+        UpdatePreloadElement(document, preload);
 
         XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
+    }
+
+    private static void UpdateBlueprint(IElement serviceElement, PreloadConsist preload)
+    {
+        serviceElement.UpdateTextElement("LocoName Key", Guid.NewGuid().ToString());
+        serviceElement.UpdateTextElement("LocoName English", preload.LocomotiveName);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID", preload.BlueprintId);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", preload.BlueprintIdProvider);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", preload.BlueprintIdProduct);
+        serviceElement.UpdateTextElement("LocoClass", LocoClassUtils.ToLongFormString(preload.EngineType));
+        serviceElement.UpdateTextElement("LocoAuthor", preload.BlueprintIdProvider);
+    }
+
+    private static void UpdateFilePath(IElement serviceElement, PreloadConsist preload)
+    {
+        if (serviceElement.QuerySelector("FilePath") is not { } filePath)
+        {
+            return;
+        }
+
+        var parts = preload.BlueprintId.Split('\\');
+        var partsWithoutFilename = parts[..^1];
+        var blueprintDirectory = string.Join('\\', partsWithoutFilename);
+        var packagedPath = $@"{preload.BlueprintIdProvider}\{preload.BlueprintIdProduct}\{blueprintDirectory}";
+
+        filePath.SetTextContent(packagedPath);
+    }
+
+    private static void UpdatePreloadElement(IXmlDocument document, PreloadConsist preload)
+    {
+        if (document.QuerySelector("RBlueprintSetPreLoad") is not {} preloadElement)
+        {
+            return;
+        }
+
+        var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
+        var providerProductSet = preloadElement
+            .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
+            .Aggregate(
+                new HashSet<string>(), (acc, curr) =>
+                {
+                    var provider = curr.SelectTextContent("Provider");
+                    var product = curr.SelectTextContent("Product");
+                    var index = $"{provider}:{product}".ToLowerInvariant();
+
+                    acc.Add(index);
+
+                    return acc;
+                }
+            );
+
+        if (providerProductSet.Contains(needle))
+        {
+            return;
+        }
+
+        var randomId = new Random().Next(10000000, 99999999).ToString();
+        var markup =
+        $"""
+        <iBlueprintLibrary-cBlueprintSetID d:id="{randomId}">
+           <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
+           <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
+        </iBlueprintLibrary-cBlueprintSetID>
+        """;
+
+        preloadElement.InnerHtml += markup;
     }
 
     private static async Task WriteScenarioDocument(string path, IXmlDocument document)

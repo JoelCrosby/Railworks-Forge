@@ -40,4 +40,12 @@ public static class AngleSharpExtensions
             XmlException.ThrowInvalidNode(element, "failed to set text content as node does not contain only text");
         }
     }
+
+    public static void UpdateTextElement(this IElement element, string selector, string text)
+    {
+        if (element.QuerySelector(selector) is {} selectedElement)
+        {
+            selectedElement.SetTextContent(text);
+        }
+    }
 }

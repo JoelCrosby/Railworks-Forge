@@ -84,7 +84,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             MaxDegreeOfParallelism = 8,
         };
 
-        await Parallel.ForEachAsync(items, options, async (route, _) => await route.LoadImage());
+        await Parallel.ForEachAsync(items, options, async (item, _) => await item.LoadImage());
     }
 
     private static string GetPreloadDirectory(BrowserDirectory directory)
