@@ -1,3 +1,5 @@
+using System.Text;
+
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Xml;
@@ -11,7 +13,7 @@ public static class AngleSharpExtensions
 {
     public static string SelectTextContent(this IParentNode node, string selector)
     {
-        return node.QuerySelector(selector)?.TextContent ?? string.Empty;
+        return node.QuerySelector(selector)?.Text() ?? string.Empty;
     }
 
     public static IElement? QueryByTextContent(this IHtmlCollection<IElement> elements, string selector, string key)
@@ -26,7 +28,10 @@ public static class AngleSharpExtensions
             IsAlwaysSelfClosing = false,
         });
 
-        await File.WriteAllTextAsync(path, text);
+        const string xmlTag = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+        var output = new StringBuilder(xmlTag).Append(Environment.NewLine).Append(text).ToString();
+
+        await File.WriteAllTextAsync(path, output);
     }
 
     public static void SetTextContent(this IElement element, string text)
