@@ -78,10 +78,7 @@ public class ConsistService
                 continue;
             }
 
-            if (name is not null)
-            {
-                name.SetTextContent(blueprintName);
-            }
+            name?.SetTextContent(blueprintName);
 
             scenarioProvider.SetTextContent(blueprintNode.BlueprintIdProvider);
             scenarioProduct.SetTextContent(blueprintNode.BlueprintIdProduct);
@@ -143,7 +140,13 @@ public class ConsistService
 
     private static void UpdatePreloadElement(IXmlDocument document, PreloadConsist preload)
     {
-        if (document.QuerySelector("RBlueprintSetPreLoad") is not {} preloadElement)
+        UpdateBlueprintSetCollection(document, preload, "RBlueprintSetPreLoad");
+        UpdateBlueprintSetCollection(document, preload, "RequiredSet");
+    }
+
+    private static void UpdateBlueprintSetCollection(IXmlDocument document, PreloadConsist preload, string tagSelector)
+    {
+        if (document.QuerySelector(tagSelector) is not {} preloadElement)
         {
             return;
         }
@@ -152,31 +155,35 @@ public class ConsistService
         var providerProductSet = preloadElement
             .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
             .Aggregate(
-                new HashSet<string>(), (acc, curr) =>
+                new Dictionary<string, int>(), (acc, curr) =>
                 {
                     var provider = curr.SelectTextContent("Provider");
                     var product = curr.SelectTextContent("Product");
                     var index = $"{provider}:{product}".ToLowerInvariant();
 
-                    acc.Add(index);
+                    var textIdValue = curr.GetAttribute("d:id");
+                    var isIntId = int.TryParse(textIdValue, out var idValue);
+                    var id = isIntId ? idValue : -1;
+
+                    acc.TryAdd(index, id);
 
                     return acc;
                 }
             );
 
-        if (providerProductSet.Contains(needle))
+        if (providerProductSet.ContainsKey(needle))
         {
             return;
         }
 
-        var randomId = new Random().Next(10000000, 99999999).ToString();
+        var entryId = providerProductSet.OrderByDescending(pair => pair.Value).Select(p => p.Value).First() + 2;
         var markup =
-        $"""
-        <iBlueprintLibrary-cBlueprintSetID d:id="{randomId}">
-           <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
-           <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
-        </iBlueprintLibrary-cBlueprintSetID>
-        """;
+            $"""
+             <iBlueprintLibrary-cBlueprintSetID d:id="{entryId}">
+                <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
+                <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
+             </iBlueprintLibrary-cBlueprintSetID>
+             """;
 
         preloadElement.InnerHtml += markup;
     }
@@ -189,11 +196,11 @@ public class ConsistService
         var destination = Path.Join(path, filename);
         var binDestination = Path.Join(path, binFilename);
 
-        File.Delete(filename);
+        File.Delete(destination);
 
         await document.ToXmlAsync(destination);
 
-        File.Delete(binFilename);
+        File.Delete(binDestination);
 
         await Serz.Convert(destination);
         await Paths.CreateMd5HashFile(binDestination);

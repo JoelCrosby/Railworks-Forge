@@ -33,7 +33,14 @@ public class ConsistEntry
         }
 
         var path = await ConvertBinToXml();
-        var text = await File.ReadAllTextAsync(path);
+        var sensitivePath = Paths.GetActualPathFromInsensitive(path);
+
+        if (sensitivePath is null)
+        {
+            throw new Exception($"failed dto find part of path {path}");
+        }
+
+        var text = await File.ReadAllTextAsync(sensitivePath);
         var document = await XmlParser.ParseDocumentAsync(text);
 
         XmlException.ThrowIfNotExists(document, path);

@@ -23,7 +23,7 @@ public static class AngleSharpExtensions
     {
         var text = document.ToHtml(new XmlMarkupFormatter
         {
-            IsAlwaysSelfClosing = true,
+            IsAlwaysSelfClosing = false,
         });
 
         await File.WriteAllTextAsync(path, text);

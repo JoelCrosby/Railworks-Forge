@@ -16,8 +16,8 @@ public class XmlParser
         return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocument(source);
     }
 
-    public static Task<IXmlDocument> ParseDocumentAsync(string source)
+    public static Task<IXmlDocument> ParseDocumentAsync(string source, CancellationToken cancellationToken = default)
     {
-        return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, default);
+        return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, cancellationToken);
     }
 }

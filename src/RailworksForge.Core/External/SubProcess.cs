@@ -6,13 +6,13 @@ using RailworksForge.Core.Proton;
 
 namespace RailworksForge.Core.External;
 
-public class SubProcess
+internal class SubProcess
 {
     private static readonly ProtonService _protonService = new ();
 
-    public record ExecOutput(string StdOut, string StdError);
+    internal record ExecOutput(string StdOut, string StdError);
 
-    public static async Task<ExecOutput> ExecProcess(string path, List<string> arguments, CancellationToken cancellationToken = default)
+    internal static async Task<ExecOutput> ExecProcess(string path, List<string> arguments, CancellationToken cancellationToken = default)
     {
         var proton = _protonService.GetProtonInstance();
         var environmentVariables = GetEnvironmentVariables();
@@ -20,7 +20,7 @@ public class SubProcess
         var stdOutBuffer = new StringBuilder();
         var stdErrBuffer = new StringBuilder();
 
-        var args = new List<string>{ path }.Concat(arguments).ToList();
+        var args = new [] { path }.Concat(arguments).ToArray();
 
         var workingDir = Path.GetDirectoryName(path);
 

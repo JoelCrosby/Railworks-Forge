@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Threading;
@@ -67,8 +68,8 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
         await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
         {
-            var exported = await Serz.Convert(binFile, cancellationToken);
-            var consists = await GetConsistBlueprints(exported.OutputPath);
+            var exported = await Serz.Convert(binFile, false, cancellationToken);
+            var consists = await GetConsistBlueprints(exported.OutputPath, cancellationToken);
             var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
 
             LoadImages(models);
@@ -79,12 +80,10 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     private static async void LoadImages(IEnumerable<PreloadConsistViewModel> items)
     {
-        var options = new ParallelOptions
+        foreach (var item in items)
         {
-            MaxDegreeOfParallelism = 8,
-        };
-
-        await Parallel.ForEachAsync(items, options, async (item, _) => await item.LoadImage());
+            await item.LoadImage();
+        }
     }
 
     private static string GetPreloadDirectory(BrowserDirectory directory)
@@ -104,10 +103,10 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         return preloadDirectory;
     }
 
-    private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
+    private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path, CancellationToken cancellationToken = default)
     {
-        var text = await File.ReadAllTextAsync(path);
-        var doc = await XmlParser.ParseDocumentAsync(text);
+        var text = await File.ReadAllTextAsync(path, cancellationToken);
+        var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
 
         return doc
             .QuerySelectorAll("Blueprint cConsistBlueprint")
