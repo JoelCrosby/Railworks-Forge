@@ -13,7 +13,7 @@ public static class AngleSharpExtensions
 {
     public static string SelectTextContent(this IParentNode node, string selector)
     {
-        return node.QuerySelector(selector)?.Text() ?? string.Empty;
+        return node.QuerySelector(selector)?.Text().ReplaceLineEndings(string.Empty) ?? string.Empty;
     }
 
     public static IElement? QueryByTextContent(this IHtmlCollection<IElement> elements, string selector, string key)
