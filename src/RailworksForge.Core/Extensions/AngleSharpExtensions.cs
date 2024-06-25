@@ -28,7 +28,7 @@ public static class AngleSharpExtensions
             IsAlwaysSelfClosing = false,
         });
 
-        const string xmlTag = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+        const string xmlTag = """<?xml version="1.0" encoding="utf-8"?>""";
         var output = new StringBuilder(xmlTag).Append(Environment.NewLine).Append(text).ToString();
 
         await File.WriteAllTextAsync(path, output);
