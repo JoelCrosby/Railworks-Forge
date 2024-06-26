@@ -13,7 +13,7 @@ namespace RailworksForge.Core;
 
 public class ConsistService
 {
-    public static async Task ReplaceConsist(Consist target, PreloadConsist preload, Scenario scenario)
+    public static async Task ReplaceConsist(TargetConsist target, PreloadConsist preload, Scenario scenario)
     {
         var outputDirectory = scenario.DirectoryPath;
         var backupOutputDirectory = Directory.GetParent(outputDirectory)!.FullName;
@@ -30,59 +30,62 @@ public class ConsistService
         ClearCache();
     }
 
-    private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, Consist target, PreloadConsist preload)
+    private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, TargetConsist target, PreloadConsist preload)
     {
         var document = await scenario.GetXmlDocument();
 
-        var scenarioConsist = document
-            .QuerySelectorAll("cConsist")
-            .QueryByTextContent("Driver ServiceName Key", target.ServiceId);
-
-        if (scenarioConsist is null)
+        foreach (var consist in target.GetConsists())
         {
-            throw new Exception("unable to find scenario consist");
-        }
+            var scenarioConsist = document
+                .QuerySelectorAll("cConsist")
+                .QueryByTextContent("Driver ServiceName Key", consist.ServiceId);
 
-        var blueprintNodes = scenarioConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
-        var nodeCountToKeep = preload.ConsistEntries.Count;
-
-        await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
-
-        for (var i = 0; i < blueprintNodes.Length; i++)
-        {
-            var scenarioNode = blueprintNodes[i];
-
-            if (i >= nodeCountToKeep)
+            if (scenarioConsist is null)
             {
-                scenarioNode.RemoveFromParent();
-                continue;
+                throw new Exception("unable to find scenario consist");
             }
 
-            var blueprintNode = preload.ConsistEntries[i];
-            var blueprintBinDocument = await blueprintNode.GetXmlDocument();
+            var blueprintNodes = scenarioConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
+            var nodeCountToKeep = preload.ConsistEntries.Count;
 
-            var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
+            await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
 
-            var name = scenarioNode.QuerySelector("Name");
-            var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
-
-            if (blueprint is null) continue;
-
-            var scenarioBlueprintId = blueprint.QuerySelector("BlueprintID");
-            var scenarioProvider = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider");
-            var scenarioProduct = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product");
-
-
-            if (scenarioProvider is null || scenarioProduct is null || scenarioBlueprintId is null)
+            for (var i = 0; i < blueprintNodes.Length; i++)
             {
-                continue;
+                var scenarioNode = blueprintNodes[i];
+
+                if (i >= nodeCountToKeep)
+                {
+                    scenarioNode.RemoveFromParent();
+                    continue;
+                }
+
+                var blueprintNode = preload.ConsistEntries[i];
+                var blueprintBinDocument = await blueprintNode.GetXmlDocument();
+
+                var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
+
+                var name = scenarioNode.QuerySelector("Name");
+                var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
+
+                if (blueprint is null) continue;
+
+                var scenarioBlueprintId = blueprint.QuerySelector("BlueprintID");
+                var scenarioProvider = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider");
+                var scenarioProduct = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product");
+
+
+                if (scenarioProvider is null || scenarioProduct is null || scenarioBlueprintId is null)
+                {
+                    continue;
+                }
+
+                name?.SetTextContent(blueprintName);
+
+                scenarioProvider.SetTextContent(blueprintNode.BlueprintIdProvider);
+                scenarioProduct.SetTextContent(blueprintNode.BlueprintIdProduct);
+                scenarioBlueprintId.SetTextContent(blueprintNode.BlueprintId);
             }
-
-            name?.SetTextContent(blueprintName);
-
-            scenarioProvider.SetTextContent(blueprintNode.BlueprintIdProvider);
-            scenarioProduct.SetTextContent(blueprintNode.BlueprintIdProduct);
-            scenarioBlueprintId.SetTextContent(blueprintNode.BlueprintId);
         }
 
         XmlException.ThrowIfDocumentInvalid(document);
@@ -90,22 +93,25 @@ public class ConsistService
         return document;
     }
 
-    private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, Consist target, PreloadConsist preload)
+    private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)
     {
         var document = await scenario.GetPropertiesXmlDocument();
 
-        var serviceElement = document
-            .QuerySelectorAll("sDriverFrontEndDetails")
-            .QueryByTextContent("ServiceName Key", target.ServiceId);
-
-        if (serviceElement is null)
+        foreach (var consist in target.GetConsists())
         {
-            throw new Exception($"could not find service {target.ServiceName} in scenario properties file.");
-        }
+            var serviceElement = document
+                .QuerySelectorAll("sDriverFrontEndDetails")
+                .QueryByTextContent("ServiceName Key", consist.ServiceId);
 
-        UpdateBlueprint(serviceElement, preload);
-        UpdateFilePath(serviceElement, preload);
-        UpdatePreloadElement(document, preload);
+            if (serviceElement is null)
+            {
+                throw new Exception($"could not find service {consist.ServiceName} in scenario properties file.");
+            }
+
+            UpdateBlueprint(serviceElement, preload);
+            UpdateFilePath(serviceElement, preload);
+            UpdatePreloadElement(document, preload);
+        }
 
         XmlException.ThrowIfDocumentInvalid(document);
 

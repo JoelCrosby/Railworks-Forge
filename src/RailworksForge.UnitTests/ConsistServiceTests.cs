@@ -48,6 +48,8 @@ public class ConsistServiceTests
             ],
         };
 
-        await ConsistService.ReplaceConsist(targetConsist, consist, scenario);
+        var target = new TargetConsist(targetConsist);
+
+        await ConsistService.ReplaceConsist(target, consist, scenario);
     }
 }

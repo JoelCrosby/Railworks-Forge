@@ -1,0 +1,44 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="TreeDataGridTextCell">
+        <Setter Property="Padding" Value="16 8" />
+        <Setter Property="Background" Value="{TemplateBinding Background}" />
+        <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DataGridGridLinesBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+
+    <Style Selector="TreeDataGridCellsPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource DataGridGridLinesBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+
+    <Style Selector="TreeDataGridColumnHeadersPresenter">
+        <Setter Property="Background" Value="{DynamicResource DataGridColumnHeaderBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DataGridGridLinesBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="TreeDataGridColumnHeader">
+        <Setter Property="Padding" Value="16 8" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource DataGridColumnHeaderForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TreeDataGridRow:pointerover /template/ TreeDataGridCellsPresenter#PART_CellsPresenter">
+        <Setter Property="Background" Value="{DynamicResource DataGridRowHoveredBackgroundColor}" />
+    </Style>
+
+    <Style Selector="TreeDataGridRow:selected">
+        <Style Selector="^ /template/ TreeDataGridCellsPresenter#PART_CellsPresenter">
+            <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedUnfocusedBackgroundBrush}" />
+        </Style>
+
+        <Style Selector="^:pointerover /template/ TreeDataGridCellsPresenter#PART_CellsPresenter">
+            <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundBrush}" />
+        </Style>
+    </Style>
+
+</Styles>
