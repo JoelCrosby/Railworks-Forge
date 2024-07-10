@@ -102,11 +102,9 @@ public record Scenario
         }
 
         var inputPath = HasBinary ? BinaryPath : ExtractXml();
-        var outputPath = inputPath.Replace(".bin", ".bin.xml");
+        var result = await Serz.Convert(inputPath);
 
-        await Serz.Convert(inputPath);
-
-        return outputPath;
+        return result.OutputPath;
     }
 
     private string ExtractXml()

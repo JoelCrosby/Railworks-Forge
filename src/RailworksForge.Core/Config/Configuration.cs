@@ -11,7 +11,7 @@ public class Configuration
         AllowTrailingCommas = true,
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        TypeInfoResolver = SourceGenerationContext.Default
+        TypeInfoResolver = SourceGenerationContext.Default,
     };
 
     private static readonly ConfigurationOptions DefaultConfigurationOptions = new ()
