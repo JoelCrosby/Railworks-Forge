@@ -8,9 +8,9 @@ using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Controls;
 
-public partial class RoutesList : UserControl
+public partial class RoutesGrid : UserControl
 {
-    public RoutesList()
+    public RoutesGrid()
     {
         InitializeComponent();
     }

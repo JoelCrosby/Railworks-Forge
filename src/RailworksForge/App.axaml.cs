@@ -48,7 +48,8 @@ public class App : Application
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<RouteDetailViewModel, RouteDetail>();
-        ViewLocator.Register<RoutesListViewModel, RoutesList>();
+        ViewLocator.Register<RoutesViewModel, Routes>();
+        ViewLocator.Register<RoutesBaseViewModel, RoutesList>();
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
         ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetail>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();
@@ -58,7 +59,9 @@ public class App : Application
     {
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<MainMenuViewModel>();
-        services.AddTransient<RoutesListViewModel>();
+
+        services.AddTransient<RoutesViewModel>();
+        services.AddTransient<RoutesBaseViewModel>();
 
         services.AddTransient<RouteService>();
     }

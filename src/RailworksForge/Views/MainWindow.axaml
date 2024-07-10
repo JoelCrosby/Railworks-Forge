@@ -16,6 +16,8 @@
         <controls:NavigationBar DockPanel.Dock="Top" DataContext="{Binding NavigationBar}"/>
         <controls:StatusBar DockPanel.Dock="Bottom" DataContext="{Binding StatusBar}"/>
 
-        <ContentControl DockPanel.Dock="Top" Content="{Binding ContentViewModel}" />
+        <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <ContentControl DockPanel.Dock="Top" Content="{Binding ContentViewModel}" />
+        </Border>
     </DockPanel>
 </Window>

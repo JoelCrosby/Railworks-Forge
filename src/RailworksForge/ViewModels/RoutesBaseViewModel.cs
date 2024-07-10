@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
+
+using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Util;
@@ -13,9 +13,9 @@ using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
-public class RoutesListViewModel : ViewModelBase
+public class RoutesBaseViewModel : ViewModelBase
 {
-    public IObservable<ObservableCollection<RouteViewModel>> ListItems { get; }
+    public ObservableCollection<RouteViewModel> ListItems { get; } = [];
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -23,7 +23,9 @@ public class RoutesListViewModel : ViewModelBase
 
     public RouteViewModel? SelectedItem { get; set; }
 
-    public RoutesListViewModel()
+    private List<RouteViewModel>? _cachedRoutes;
+
+    public RoutesBaseViewModel()
     {
         CopyClickedCommand = ReactiveCommand.CreateFromTask(() =>
         {
@@ -45,27 +47,32 @@ public class RoutesListViewModel : ViewModelBase
 
             Utils.GetApplicationViewModel().SelectRoute(SelectedItem);
         });
-
-        ListItems = Observable.Start(LoadRoutes, RxApp.TaskpoolScheduler);
     }
 
-    public ObservableCollection<RouteViewModel> LoadRoutes()
+    public async Task GetAllRoutes(string? searchTerm = null)
+    {
+        var invariant = searchTerm?.ToLowerInvariant();
+        var routes = _cachedRoutes ?? await LoadRoutes();
+        var results = invariant is null ? routes : routes.Where(route => route.SearchIndex.Contains(invariant));
+
+        ListItems.Clear();
+        ListItems.AddRange(results);
+    }
+
+    private async ValueTask<List<RouteViewModel>> LoadRoutes()
     {
         var items = RouteService.GetRoutes();
         var models = items.Select(item => new RouteViewModel(item)).ToList();
 
-        LoadImages(models);
-
-        return new ObservableCollection<RouteViewModel>(models);
-    }
-
-    private async void LoadImages(IEnumerable<RouteViewModel> items)
-    {
         var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = 8,
         };
 
-        await Parallel.ForEachAsync(items, options, async (route, _) => await route.LoadImage());
+        await Parallel.ForEachAsync(models, options, (route, _) => route.LoadImage());
+
+        _cachedRoutes = models;
+
+        return _cachedRoutes;
     }
 }

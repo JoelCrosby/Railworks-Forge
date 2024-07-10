@@ -6,16 +6,15 @@
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesList"
-             x:DataType="vm:RoutesListViewModel">
+             x:DataType="vm:RoutesBaseViewModel">
 
-    <DataGrid ItemsSource="{Binding ListItems^}"
+    <DataGrid ItemsSource="{Binding ListItems}"
               IsReadOnly="True"
               DoubleTapped="DataGrid_OnDoubleTapped"
               GridLinesVisibility="All"
               SelectionMode="Single"
               RowHeight="64"
               SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-              BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
     >
 
         <DataGrid.Columns>

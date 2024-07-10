@@ -14,7 +14,6 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     public MainMenuViewModel MainMenu { get; }
     public NavigationBarViewModel NavigationBar { get; }
-    public RoutesListViewModel RoutesList { get; }
     public StatusBarViewModel StatusBar { get; }
 
     public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
@@ -23,9 +22,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
 
+    private RoutesViewModel Routes { get; }
+
     public MainWindowViewModel(IServiceProvider provider)
     {
-        RoutesList = provider.GetRequiredService<RoutesListViewModel>();
+        Routes = provider.GetRequiredService<RoutesViewModel>();
 
         MainMenu = new MainMenuViewModel();
         NavigationBar = new NavigationBarViewModel();
@@ -34,7 +35,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
 
-        _contentViewModel = RoutesList;
+        _contentViewModel = Routes;
     }
 
     public void SelectRoute(RouteViewModel route)
@@ -50,7 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase
         NavigationBar.Route = null;
         NavigationBar.Scenario = null;
 
-        ContentViewModel = RoutesList;
+        ContentViewModel = Routes;
     }
 
     public void SelectScenario(Scenario scenario)

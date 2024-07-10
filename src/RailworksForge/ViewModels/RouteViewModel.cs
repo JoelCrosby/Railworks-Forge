@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -11,11 +12,14 @@ using RailworksForge.Core.Models;
 
 namespace RailworksForge.ViewModels;
 
+[DebuggerDisplay("{Name}")]
 public partial class RouteViewModel : ViewModelBase
 {
     public string Id { get; init; }
 
     public string Name { get; init; }
+
+    public string SearchIndex { get; init; }
 
     public string RoutePropertiesPath { get; }
 
@@ -32,13 +36,14 @@ public partial class RouteViewModel : ViewModelBase
     {
         Id = route.Id;
         Name = route.Name;
+        SearchIndex = Name.ToLowerInvariant();
         RoutePropertiesPath = route.RoutePropertiesPath;
         DirectoryPath = route.DirectoryPath;
         PackagingType = route.PackagingType;
         Model = route;
     }
 
-    public async Task LoadImage()
+    public async ValueTask LoadImage()
     {
         ImageBitmap = await Task.Run(GetImageBitmap);
     }

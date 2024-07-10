@@ -50,7 +50,10 @@ public class ConsistService
 
             await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
 
-            for (var i = 0; i < blueprintNodes.Length; i++)
+            var length = blueprintNodes.Length;
+            var tasks = new List<Task>(length);
+
+            for (var i = 0; i < length; i++)
             {
                 var scenarioNode = blueprintNodes[i];
 
@@ -60,37 +63,33 @@ public class ConsistService
                     continue;
                 }
 
-                var blueprintNode = preload.ConsistEntries[i];
-                var blueprintBinDocument = await blueprintNode.GetXmlDocument();
+                var consistVehicle = preload.ConsistEntries[i];
 
-                var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
-
-                var name = scenarioNode.QuerySelector("Name");
-                var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
-
-                if (blueprint is null) continue;
-
-                var scenarioBlueprintId = blueprint.QuerySelector("BlueprintID");
-                var scenarioProvider = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider");
-                var scenarioProduct = blueprint.QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product");
-
-
-                if (scenarioProvider is null || scenarioProduct is null || scenarioBlueprintId is null)
-                {
-                    continue;
-                }
-
-                name?.SetTextContent(blueprintName);
-
-                scenarioProvider.SetTextContent(blueprintNode.BlueprintIdProvider);
-                scenarioProduct.SetTextContent(blueprintNode.BlueprintIdProduct);
-                scenarioBlueprintId.SetTextContent(blueprintNode.BlueprintId);
+                tasks.Add(UpdateConsistVehicle(consistVehicle, scenarioNode));
             }
+
+            await Task.WhenAny(tasks);
         }
 
         XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
+    }
+
+    private static async Task UpdateConsistVehicle(ConsistEntry consistVehicle, IElement scenarioNode)
+    {
+        var blueprintBinDocument = await consistVehicle.GetXmlDocument();
+        var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
+
+        var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
+
+        if (blueprint is null) return;
+
+        blueprint.UpdateTextElement("BlueprintID", consistVehicle.BlueprintId);
+        blueprint.UpdateTextElement("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", consistVehicle.BlueprintIdProvider);
+        blueprint.UpdateTextElement("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", consistVehicle.BlueprintIdProduct);
+
+        scenarioNode.UpdateTextElement("Name", blueprintName);
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)
