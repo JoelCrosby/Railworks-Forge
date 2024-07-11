@@ -207,7 +207,10 @@ public class ConsistService
 
         File.Delete(binDestination);
 
-        await Serz.Convert(destination);
+        var converted = await Serz.Convert(destination);
+
+        File.Copy(converted.OutputPath, binDestination);
+
         await Paths.CreateMd5HashFile(binDestination);
     }
 

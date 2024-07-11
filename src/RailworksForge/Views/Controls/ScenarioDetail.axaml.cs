@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Subjects;
@@ -28,13 +27,13 @@ public partial class ScenarioDetail : UserControl
     }
 
     // ReSharper disable once UnusedParameter.Local
-    private void DataGrid_OnSelectionChanging(object? sender, CancelEventArgs e)
+    private void DataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (sender is not TreeDataGrid dataGrid) return;
+        if (sender is not DataGrid dataGrid) return;
         if (DataContext is not ScenarioDetailViewModel context) return;
 
-        if (dataGrid.RowSelection is null) return;
+        if (dataGrid.SelectedItems is null) return;
 
-        context.SelectedConsists = dataGrid.RowSelection.SelectedItems.Cast<Consist>().AsEnumerable();
+        context.SelectedConsists = dataGrid.SelectedItems.Cast<Consist>();
     }
 }

@@ -1,3 +1,5 @@
+using RailworksForge.Core.Types;
+
 namespace RailworksForge.Core.Models.Examples;
 
 public static partial class Example
@@ -17,7 +19,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/ea33df44-8d47-428b-892f-8ffe3641cbbe/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -32,7 +35,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/c06c8c17-0bda-4a8c-9bd9-3c957084c07a/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -47,6 +51,7 @@ public static partial class Example
             Consists = [],
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.FreeRoam,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -61,7 +66,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/456d3787-359d-4d0a-b339-784efff85b97/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -76,7 +82,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/9bedaff9-4956-444b-aac9-d1520f5d2de7/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -91,7 +98,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/69e79fc7-c229-4ab1-8d16-042fd3533c53/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -106,7 +114,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/f9f78911-3818-46ac-a77a-324321c2bc83/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
         new()
         {
@@ -121,7 +130,8 @@ public static partial class Example
             ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/0355f6a3-ffb2-4a48-8001-4125a8253dfc/ScenarioProperties.xml",
             Consists = [],
             PackagingType = PackagingType.Unpacked,
-            ScenarioClass = ScenarioClass.Standard
+            ScenarioClass = ScenarioClass.Standard,
+            AssetPath = AssetPath.Empty,
         },
     ];
 }

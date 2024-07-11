@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core;
 
@@ -20,9 +21,9 @@ public static class ScenarioService
     {
         foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
         {
-            foreach (var scenario in ReadCompressedScenarios(route, package))
+            foreach (var path in ReadCompressedScenarios(package))
             {
-                scenarios.Add(scenario);
+                scenarios.Add(Scenario.New(route, path));
             }
         }
     }
@@ -47,8 +48,7 @@ public static class ScenarioService
 
             if (!File.Exists(scenarioPath)) continue;
 
-            var content = File.ReadAllText(scenarioPath);
-            var scenario = ReadScenarioProperties(route, scenarioPath, content);
+            var scenario = Scenario.New(route, new AssetPath { Path = scenarioPath });
 
             scenarios.Add(scenario);
         }
@@ -65,33 +65,17 @@ public static class ScenarioService
         });
     }
 
-    private static IEnumerable<Scenario> ReadCompressedScenarios(Route route, string path)
+    private static IEnumerable<AssetPath> ReadCompressedScenarios(string path)
     {
         using var archive = ZipFile.Open(path, ZipArchiveMode.Read);
 
         var entries = archive.Entries.Where(entry => entry.Name == "ScenarioProperties.xml");
 
-        foreach (var entry in entries)
+        return entries.Select(e => new AssetPath
         {
-            if (entry is null)
-            {
-                throw new Exception("failed to find route properties file in compressed archive");
-            }
-
-            var content = entry.Open();
-
-            using var reader = new StreamReader(content);
-
-            var file = reader.ReadToEnd();
-
-            yield return ReadScenarioProperties(route, path, file);
-        }
-    }
-
-    private static Scenario ReadScenarioProperties(Route route, string path, string fileContent)
-    {
-        var doc = XmlParser.ParseDocument(fileContent);
-
-        return Scenario.Parse(doc.DocumentElement, route, path);
+            Path = path,
+            IsArchivePath = true,
+            ArchivePath = e.FullName,
+        });
     }
 }

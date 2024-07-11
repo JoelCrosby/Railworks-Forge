@@ -1,3 +1,5 @@
+using RailworksForge.Core.Types;
+
 namespace RailworksForge.Core.Models.Examples;
 
 public static partial class Example
@@ -15,6 +17,7 @@ public static partial class Example
         PackagingType = PackagingType.Unpacked,
         ScenarioPropertiesPath = "/cache/SteamLibrary/steamapps/common/RailWorks/Content/Routes/045911ae-114c-4dfc-8382-4505d0491555/Scenarios/a8a66429-5f23-44e1-bb3c-2ba1f6bcc29b/ScenarioProperties.xml",
         ScenarioClass = ScenarioClass.Standard,
+        AssetPath = AssetPath.Empty,
         Consists =
         [
             new()

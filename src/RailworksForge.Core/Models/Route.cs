@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace RailworksForge.Core.Models;
 
+[DebuggerDisplay("{Name}")]
 public record Route
 {
     public required string Id { get; init; }

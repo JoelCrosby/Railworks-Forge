@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
@@ -5,6 +7,7 @@ using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
+[DebuggerDisplay("{ServiceName}")]
 public class Consist : Blueprint
 {
     public required string Id { get; init; }

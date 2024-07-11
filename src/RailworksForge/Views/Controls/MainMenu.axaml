@@ -10,8 +10,6 @@
 
     <Menu BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
         <MenuItem Header="_Railworks Forge">
-            <MenuItem Header="_Open..."/>
-            <Separator/>
             <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
         </MenuItem>
         <MenuItem Header="_Tools">

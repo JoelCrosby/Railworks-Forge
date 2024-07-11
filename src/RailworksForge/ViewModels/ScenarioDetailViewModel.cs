@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 using AngleSharp.Xml;
 
-using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
@@ -19,11 +23,12 @@ using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
-public class ScenarioDetailViewModel : ViewModelBase
+public partial class ScenarioDetailViewModel : ViewModelBase
 {
-    public Scenario Scenario { get; }
+    [ObservableProperty]
+    private Scenario _scenario;
 
-    public FlatTreeDataGridSource<Consist> Source { get; }
+    public ObservableCollection<Consist> Services { get; } = [];
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, string> ExportBinXmlCommand { get; }
@@ -32,7 +37,7 @@ public class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ClickedConsistCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SaveConsistCommand { get; }
-    public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
+    public ICommand ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
     public IEnumerable<Consist> SelectedConsists { get; set; }
@@ -88,7 +93,7 @@ public class ScenarioDetailViewModel : ViewModelBase
             });
         });
 
-        ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
+        ReplaceConsistCommand = new AsyncRelayCommand(async () =>
         {
             if (SelectedConsists.Any() is false)
             {
@@ -106,24 +111,13 @@ public class ScenarioDetailViewModel : ViewModelBase
             var target = new TargetConsist(SelectedConsists);
 
             await ConsistService.ReplaceConsist(target, result, Scenario);
+
+            Refresh();
         });
 
         DeleteConsistCommand = ReactiveCommand.Create(() => {});
 
-        Source = new FlatTreeDataGridSource<Consist>(scenario.Consists)
-        {
-            Columns =
-            {
-                new TextColumn<Consist, AcquisitionState>("State", x => x.AcquisitionState),
-                new TextColumn<Consist, string>("Locomotive Author", x => x.LocoAuthor),
-                new TextColumn<Consist, bool>("Is Player Driver", x => x.PlayerDriver),
-                new TextColumn<Consist, string>("Locomotive Name", x => x.LocomotiveName),
-                new TextColumn<Consist, LocoClass?>("Locomotive Class", x => x.LocoClass),
-                new TextColumn<Consist, string>("Service Name", x => x.ServiceName),
-            },
-        };
-
-        Source.RowSelection!.SingleSelect = false;
+        Services.AddRange(Scenario.Consists);
     }
 
     private async Task<string> GetSavedConsistRailVehicleElement()
@@ -143,5 +137,13 @@ public class ScenarioDetailViewModel : ViewModelBase
         }
 
         return vehicles.ToXml();
+    }
+
+    private void Refresh()
+    {
+        Scenario = Scenario.Refresh();
+
+        Services.Clear();
+        Services.AddRange(Scenario.Consists);
     }
 }

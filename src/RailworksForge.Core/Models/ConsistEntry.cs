@@ -37,7 +37,7 @@ public class ConsistEntry
 
         if (sensitivePath is null)
         {
-            throw new Exception($"failed dto find part of path {path}");
+            throw new Exception($"failed to find part of path {path}");
         }
 
         var text = await File.ReadAllTextAsync(sensitivePath);
@@ -58,11 +58,9 @@ public class ConsistEntry
         }
 
         var inputPath = HasBinary ? BinaryPath : ExtractBinary();
-        var outputPath = inputPath.Replace(".bin", ".bin.xml");
+        var result = await Serz.Convert(inputPath);
 
-        await Serz.Convert(inputPath);
-
-        return outputPath;
+        return result.OutputPath;
     }
 
     private string ExtractBinary()
