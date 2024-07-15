@@ -18,6 +18,8 @@ public partial class RouteDetail : UserControl
     // ReSharper disable once UnusedParameter.Local
     private void DataGrid_OnDoubleTapped(object? _, TappedEventArgs args)
     {
+        if (args.Source is not Border) return;
+
         if (DataContext is RouteDetailViewModel context)
         {
             context.DetailsClickedCommand.Execute().Subscribe(new Subject<Unit>());

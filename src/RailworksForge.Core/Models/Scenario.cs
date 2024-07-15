@@ -82,6 +82,11 @@ public record Scenario
         return New(Route, AssetPath);
     }
 
+    public string GetBackupDirectory()
+    {
+        return Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
+    }
+
     private static IXmlDocument GetPropertiesDocument(AssetPath path)
     {
         if (path.IsArchivePath)

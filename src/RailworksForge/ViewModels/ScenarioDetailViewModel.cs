@@ -5,12 +5,10 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 using AngleSharp.Xml;
 
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 using DynamicData;
 
@@ -37,7 +35,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ClickedConsistCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SaveConsistCommand { get; }
-    public ICommand ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
     public IEnumerable<Consist> SelectedConsists { get; set; }
@@ -93,7 +91,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             });
         });
 
-        ReplaceConsistCommand = new AsyncRelayCommand(async () =>
+        ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             if (SelectedConsists.Any() is false)
             {

@@ -16,7 +16,10 @@ public class ConsistService
     public static async Task ReplaceConsist(TargetConsist target, PreloadConsist preload, Scenario scenario)
     {
         var outputDirectory = scenario.DirectoryPath;
-        var backupOutputDirectory = Directory.GetParent(outputDirectory)!.FullName;
+        var backupOutputDirectory = scenario.GetBackupDirectory();
+
+        Directory.CreateDirectory(backupOutputDirectory);
+
         var backupPath = Path.Join(backupOutputDirectory, $"backup-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
 
         ZipFile.CreateFromDirectory(outputDirectory, backupPath);
@@ -159,22 +162,20 @@ public class ConsistService
         var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
         var providerProductSet = preloadElement
             .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
-            .Aggregate(
-                new Dictionary<string, int>(), (acc, curr) =>
-                {
-                    var provider = curr.SelectTextContent("Provider");
-                    var product = curr.SelectTextContent("Product");
-                    var index = $"{provider}:{product}".ToLowerInvariant();
+            .Aggregate(new Dictionary<string, int>(), (acc, curr) =>
+            {
+                var provider = curr.SelectTextContent("Provider");
+                var product = curr.SelectTextContent("Product");
+                var index = $"{provider}:{product}".ToLowerInvariant();
 
-                    var textIdValue = curr.GetAttribute("d:id");
-                    var isIntId = int.TryParse(textIdValue, out var idValue);
-                    var id = isIntId ? idValue : -1;
+                var textIdValue = curr.GetAttribute("d:id");
+                var isIntId = int.TryParse(textIdValue, out var idValue);
+                var id = isIntId ? idValue : -1;
 
-                    acc.TryAdd(index, id);
+                acc.TryAdd(index, id);
 
-                    return acc;
-                }
-            );
+                return acc;
+            });
 
         if (providerProductSet.ContainsKey(needle))
         {

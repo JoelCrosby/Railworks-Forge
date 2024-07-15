@@ -1,6 +1,5 @@
+using System;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Subjects;
 
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -20,9 +19,11 @@ public partial class ScenarioDetail : UserControl
     // ReSharper disable once UnusedParameter.Local
     private void DataGrid_OnDoubleTapped(object? _, TappedEventArgs args)
     {
+        if (args.Source is not Border) return;
+
         if (DataContext is ScenarioDetailViewModel context)
         {
-            context.ClickedConsistCommand.Execute().Subscribe(new Subject<Unit>());
+            context.ClickedConsistCommand.Execute().Subscribe();
         }
     }
 
