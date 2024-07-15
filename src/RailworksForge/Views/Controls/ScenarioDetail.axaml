@@ -71,6 +71,7 @@
             <Button Command="{Binding ExportBinXmlCommand}">Export Bin to XML</Button>
             <Button Command="{Binding ExportXmlBinCommand}">Convert XML to Bin</Button>
             <Button Command="{Binding ExtractScenariosCommand}">Extract Scenarios</Button>
+            <Button Command="{Binding LoadAcquisitionStates}">Load Acquisition States</Button>
         </StackPanel>
 
         <DataGrid DockPanel.Dock="Bottom"
@@ -86,6 +87,7 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
+                <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
                 <DataGridTextColumn Header="Locomotive Author" Binding="{Binding LocoAuthor}" />
                 <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
                 <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />

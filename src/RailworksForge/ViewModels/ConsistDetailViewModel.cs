@@ -6,12 +6,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-using AngleSharp.Dom;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
-using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
@@ -73,23 +70,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return [];
         }
 
-        var path = await _scenario.ConvertBinToXml();
-        var consists = await GetConsists(path);
+        var consists = await _scenario.GetConsists(_consist.ServiceId);
 
         return new ObservableCollection<ConsistRailVehicle>(consists);
-    }
-
-    private async Task<List<ConsistRailVehicle>> GetConsists(string path)
-    {
-        var text = await File.ReadAllTextAsync(path);
-        var doc = await XmlParser.ParseDocumentAsync(text);
-
-        return doc
-            .QuerySelectorAll("cConsist")
-            .QueryByTextContent("ServiceName Key", _consist.ServiceId)?
-            .QuerySelectorAll("RailVehicles cOwnedEntity")
-            .Select(ParseConsist)
-            .ToList() ?? [];
     }
 
     private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
@@ -101,27 +84,5 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .QuerySelectorAll("Blueprint")
             .Select(PreloadConsist.Parse)
             .ToList();
-    }
-
-    private static ConsistRailVehicle ParseConsist(IElement el)
-    {
-        var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = el.SelectTextContent("Name");
-        var uniqueNumber = el.SelectTextContent("UniqueNumber");
-        var blueprintId = el.SelectTextContent("BlueprintID BlueprintID");
-        var flipped = el.SelectTextContent("Flipped") == "1";
-        var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
-        var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
-
-        return new ConsistRailVehicle
-        {
-            Id = consistId,
-            LocomotiveName = locomotiveName,
-            UniqueNumber = uniqueNumber,
-            Flipped = flipped,
-            BlueprintId = blueprintId,
-            BlueprintSetIdProduct = blueprintSetIdProduct,
-            BlueprintSetIdProvider = blueprintSetIdProvider,
-        };
     }
 }

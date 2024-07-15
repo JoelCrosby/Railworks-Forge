@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 
+using AngleSharp.Dom;
 using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Exceptions;
@@ -196,5 +197,52 @@ public record Scenario
         await Serz.Convert(path);
 
         return BinaryPath;
+    }
+
+    public async Task<List<ConsistRailVehicle>> GetConsists(string serviceId)
+    {
+        var doc = await GetXmlDocument();
+
+        return doc
+            .QuerySelectorAll("cConsist")
+            .QueryByTextContent("ServiceName Key", serviceId)?
+            .QuerySelectorAll("RailVehicles cOwnedEntity")
+            .Select(ParseConsist)
+            .ToList() ?? [];
+    }
+
+    private static ConsistRailVehicle ParseConsist(IElement el)
+    {
+        var consistId = el.GetAttribute("d:id") ?? string.Empty;
+        var locomotiveName = el.SelectTextContent("Name");
+        var uniqueNumber = el.SelectTextContent("UniqueNumber");
+        var blueprintId = el.SelectTextContent("BlueprintID BlueprintID");
+        var flipped = el.SelectTextContent("Flipped") == "1";
+        var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
+
+        return new ConsistRailVehicle
+        {
+            Id = consistId,
+            LocomotiveName = locomotiveName,
+            UniqueNumber = uniqueNumber,
+            Flipped = flipped,
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+        };
+    }
+
+    public async Task GetConsistStatus()
+    {
+        foreach (var consist in Consists)
+        {
+            var consists = await GetConsists(consist.ServiceId);
+            var state = consists.All(c => c.AcquisitionState == AcquisitionState.Found)
+                ? AcquisitionState.Found
+                : AcquisitionState.Missing;
+
+            consist.ConsistAcquisitionState = state;
+        }
     }
 }

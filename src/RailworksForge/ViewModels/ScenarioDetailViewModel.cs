@@ -37,6 +37,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SaveConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> LoadAcquisitionStates { get; }
 
     public IEnumerable<Consist> SelectedConsists { get; set; }
 
@@ -111,6 +112,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             await ConsistService.ReplaceConsist(target, result, Scenario);
 
             Refresh();
+        });
+
+        LoadAcquisitionStates = ReactiveCommand.CreateFromObservable(() =>
+        {
+            return Observable.StartAsync(() => Scenario.GetConsistStatus(), RxApp.TaskpoolScheduler);
         });
 
         DeleteConsistCommand = ReactiveCommand.Create(() => {});

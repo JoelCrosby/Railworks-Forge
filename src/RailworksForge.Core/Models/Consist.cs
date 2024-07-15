@@ -24,6 +24,8 @@ public class Consist : Blueprint
 
     public required string ServiceId { get; init; }
 
+    public AcquisitionState ConsistAcquisitionState { get; set; }
+
     public static Consist Parse(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
