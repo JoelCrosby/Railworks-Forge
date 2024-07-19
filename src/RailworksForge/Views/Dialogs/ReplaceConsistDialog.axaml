@@ -5,7 +5,7 @@
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
-        x:Class="RailworksForge.Views.Controls.ReplaceConsistDialog"
+        x:Class="RailworksForge.Views.Dialogs.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
         Width="1280"
         Height="720"

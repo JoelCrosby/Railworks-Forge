@@ -44,5 +44,29 @@
       <DependentUpon>RoutesGridaxaml.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Pages\RoutesPage.axaml.cs">
+      <DependentUpon>Routes.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\RouteDetailPage.axaml.cs">
+      <DependentUpon>RouteDetail.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\ScenarioDetailPage.axaml.cs">
+      <DependentUpon>ScenarioDetail.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\ConsistDetailPage.axaml.cs">
+      <DependentUpon>ConsistDetail.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Dialogs\SaveConsistDialog.axaml.cs">
+      <DependentUpon>SaveConsistDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Dialogs\ReplaceConsistDialog.axaml.cs">
+      <DependentUpon>ReplaceConsistDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

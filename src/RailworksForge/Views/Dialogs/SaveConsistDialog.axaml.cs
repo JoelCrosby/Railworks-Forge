@@ -8,7 +8,7 @@ using RailworksForge.ViewModels;
 
 using ReactiveUI;
 
-namespace RailworksForge.Views.Controls;
+namespace RailworksForge.Views.Dialogs;
 
 public partial class SaveConsistDialog : ReactiveWindow<SaveConsistViewModel>
 {

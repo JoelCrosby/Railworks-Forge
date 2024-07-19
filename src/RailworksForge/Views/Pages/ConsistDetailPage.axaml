@@ -6,7 +6,7 @@
              xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
-             x:Class="RailworksForge.Views.Controls.ConsistDetail"
+             x:Class="RailworksForge.Views.Pages.ConsistDetailPage"
              x:DataType="vm:ConsistDetailViewModel">
 
 

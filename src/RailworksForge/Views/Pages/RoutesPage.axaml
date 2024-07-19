@@ -6,7 +6,7 @@
              xmlns:lucide="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="RailworksForge.Views.Controls.Routes"
+             x:Class="RailworksForge.Views.Pages.RoutesPage"
              x:DataType="vm:RoutesViewModel">
 
     <DockPanel>

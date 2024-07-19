@@ -6,11 +6,11 @@ using Avalonia.Input;
 
 using RailworksForge.ViewModels;
 
-namespace RailworksForge.Views.Controls;
+namespace RailworksForge.Views.Pages;
 
-public partial class RouteDetail : UserControl
+public partial class RouteDetailPage : UserControl
 {
-    public RouteDetail()
+    public RouteDetailPage()
     {
         InitializeComponent();
     }

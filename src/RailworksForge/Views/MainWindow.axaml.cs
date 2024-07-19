@@ -5,9 +5,11 @@ using Avalonia.ReactiveUI;
 
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
-using RailworksForge.Views.Controls;
 
 using ReactiveUI;
+
+using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
+using SaveConsistDialog = RailworksForge.Views.Dialogs.SaveConsistDialog;
 
 namespace RailworksForge.Views;
 

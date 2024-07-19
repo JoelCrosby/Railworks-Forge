@@ -9,6 +9,13 @@ using RailworksForge.ViewModels;
 using RailworksForge.Views;
 using RailworksForge.Views.Controls;
 
+using ConsistDetailPage = RailworksForge.Views.Pages.ConsistDetailPage;
+using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
+using RouteDetailPage = RailworksForge.Views.Pages.RouteDetailPage;
+using RoutesPage = RailworksForge.Views.Pages.RoutesPage;
+using SaveConsistDialog = RailworksForge.Views.Dialogs.SaveConsistDialog;
+using ScenarioDetailPage = RailworksForge.Views.Pages.ScenarioDetailPage;
+
 namespace RailworksForge;
 
 public class App : Application
@@ -43,15 +50,15 @@ public class App : Application
     {
         ViewLocator.Register<MainWindowViewModel, MainWindow>();
         ViewLocator.Register<MainMenuViewModel, MainMenu>();
-        ViewLocator.Register<ConsistDetailViewModel, ConsistDetail>();
+        ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
         ViewLocator.Register<FileBrowserViewModel, FileBrowser>();
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
-        ViewLocator.Register<RouteDetailViewModel, RouteDetail>();
-        ViewLocator.Register<RoutesViewModel, Routes>();
+        ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
+        ViewLocator.Register<RoutesViewModel, RoutesPage>();
         ViewLocator.Register<RoutesBaseViewModel, RoutesList>();
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
-        ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetail>();
+        ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();
     }
 

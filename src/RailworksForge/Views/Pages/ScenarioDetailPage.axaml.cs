@@ -7,11 +7,11 @@ using Avalonia.Input;
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
-namespace RailworksForge.Views.Controls;
+namespace RailworksForge.Views.Pages;
 
-public partial class ScenarioDetail : UserControl
+public partial class ScenarioDetailPage : UserControl
 {
-    public ScenarioDetail()
+    public ScenarioDetailPage()
     {
         InitializeComponent();
     }

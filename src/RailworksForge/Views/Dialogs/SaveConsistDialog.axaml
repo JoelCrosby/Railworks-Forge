@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
         mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="232"
-        x:Class="RailworksForge.Views.Controls.SaveConsistDialog"
+        x:Class="RailworksForge.Views.Dialogs.SaveConsistDialog"
         x:DataType="vm:SaveConsistViewModel"
         CanResize="False"
         SizeToContent="WidthAndHeight"

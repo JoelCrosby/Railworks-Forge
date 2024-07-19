@@ -22,7 +22,7 @@ public partial class FileBrowser : UserControl
     {
         if (DataContext is not FileBrowserViewModel viewModel) return;
 
-        var parent = this.FindAncestorOfType<ReplaceConsistDialog>();
+        var parent = this.FindAncestorOfType<Dialogs.ReplaceConsistDialog>();
 
         if (parent is not { DataContext: ReplaceConsistViewModel model }) return;
         if (viewModel.SelectedItem is not { } selected) return;
