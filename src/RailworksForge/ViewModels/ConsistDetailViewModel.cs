@@ -70,7 +70,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return [];
         }
 
-        var consists = await _scenario.GetConsists(_consist.ServiceId);
+        var consists = await _scenario.GetServiceConsistVehicles(_consist.ServiceId);
 
         return new ObservableCollection<ConsistRailVehicle>(consists);
     }

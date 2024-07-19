@@ -7,6 +7,7 @@ using AngleSharp.Xml.Dom;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
+using RailworksForge.Core.Models.Common;
 using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core.Models;
@@ -41,10 +42,11 @@ public record Scenario
     public ScenarioClass ScenarioClass { get; init; }
 
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
-    private string BinaryXmlPath => Path.Join(DirectoryPath, "Scenario.bin.xml");
 
     private bool HasBinary => File.Exists(BinaryPath);
     private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
+
+    public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 
     public static Scenario New(Route route, AssetPath path)
     {
@@ -57,7 +59,7 @@ public record Scenario
         var startLocation = doc.SelectTextContent("StartLocation English");
         var directoryPath = Path.GetDirectoryName(path.Path) ?? string.Empty;
         var scenarioClass = doc.SelectTextContent("ScenarioClass");
-        var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.Parse).ToList();
+        var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.ParseConsist).ToList();
         var locomotive = consists.FirstOrDefault(c => c.PlayerDriver)?.LocomotiveName ?? string.Empty;
 
         return new Scenario
@@ -118,9 +120,9 @@ public record Scenario
         return XmlParser.ParseDocument(file);
     }
 
-    public async Task<IXmlDocument> GetXmlDocument()
+    public async Task<IXmlDocument> GetXmlDocument(bool useCache = true)
     {
-        var path = await ConvertBinToXml();
+        var path = await ConvertBinToXml(useCache);
         var text = await File.ReadAllTextAsync(path);
         var document = await XmlParser.ParseDocumentAsync(text);
 
@@ -142,15 +144,10 @@ public record Scenario
         return document;
     }
 
-    public async Task<string> ConvertBinToXml()
+    public async Task<string> ConvertBinToXml(bool useCache = true)
     {
-        if (File.Exists(BinaryXmlPath))
-        {
-            return BinaryXmlPath;
-        }
-
         var inputPath = HasBinary ? BinaryPath : ExtractXml();
-        var result = await Serz.Convert(inputPath);
+        var result = await Serz.Convert(inputPath, !useCache);
 
         return result.OutputPath;
     }
@@ -199,7 +196,17 @@ public record Scenario
         return BinaryPath;
     }
 
-    public async Task<List<ConsistRailVehicle>> GetConsists(string serviceId)
+    public async Task<List<Blueprint>> GetBlueprintIds()
+    {
+        var doc = await GetXmlDocument();
+
+        return doc
+            .QuerySelectorAll("cConsist RailVehicles cOwnedEntity BlueprintID")
+            .Select(Blueprint.Parse)
+            .ToList();
+    }
+
+    public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(string serviceId)
     {
         var doc = await GetXmlDocument();
 
@@ -237,7 +244,7 @@ public record Scenario
     {
         foreach (var consist in Consists)
         {
-            var consists = await GetConsists(consist.ServiceId);
+            var consists = await GetServiceConsistVehicles(consist.ServiceId);
             var state = consists.All(c => c.AcquisitionState == AcquisitionState.Found)
                 ? AcquisitionState.Found
                 : AcquisitionState.Missing;

@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using AngleSharp.Text;
 
 using RailworksForge.Core.Config;
+using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -189,5 +190,26 @@ public static class Paths
         File.Delete(output);
 
         await File.WriteAllBytesAsync(output, hash);
+    }
+
+    public static string GetLoggingPath()
+    {
+        return Path.Join(GetConfigurationFolder(), "logs");
+    }
+
+    private static readonly string CacheOutputPath = Path.Join(GetConfigurationFolder(), "xml-cache");
+
+    public static string GetAssetCachePath(string path, bool isBin)
+    {
+        var renamedOutput = isBin ? path.Replace(".bin", ".bin.xml") : path.Replace(".bin.xml", ".bin");
+        var flattened = renamedOutput.Replace(GetGameDirectory(), string.Empty);
+
+        var outputPath = Path.Join(CacheOutputPath, flattened);
+        var parentDir = Directory.GetParent(outputPath)?.FullName;
+
+        DirectoryException.ThrowIfNotExists(parentDir);
+        Directory.CreateDirectory(parentDir);
+
+        return outputPath;
     }
 }

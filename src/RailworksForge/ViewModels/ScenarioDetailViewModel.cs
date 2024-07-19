@@ -53,7 +53,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Launcher.Open(Scenario.DirectoryPath);
         });
 
-        ExportBinXmlCommand = ReactiveCommand.CreateFromTask(scenario.ConvertBinToXml);
+        ExportBinXmlCommand = ReactiveCommand.CreateFromTask(() => scenario.ConvertBinToXml(false));
         ExportXmlBinCommand = ReactiveCommand.CreateFromTask(scenario.ConvertXmlToBin);
 
         ExtractScenariosCommand = ReactiveCommand.CreateFromObservable(() =>
@@ -149,5 +149,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         Services.Clear();
         Services.AddRange(Scenario.Consists);
+
+        OnPropertyChanged(nameof(Services));
     }
 }

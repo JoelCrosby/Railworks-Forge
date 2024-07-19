@@ -26,7 +26,7 @@ public class Consist : Blueprint
 
     public AcquisitionState ConsistAcquisitionState { get; set; }
 
-    public static Consist Parse(IElement el)
+    public static Consist ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
         var locomotiveName = el.SelectTextContent("LocoName English");

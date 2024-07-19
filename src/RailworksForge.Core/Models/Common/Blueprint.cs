@@ -1,8 +1,11 @@
+using AngleSharp.Dom;
+
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 
 namespace RailworksForge.Core.Models.Common;
 
-public abstract class Blueprint
+public class Blueprint
 {
     public required string BlueprintId { get; init; }
 
@@ -11,6 +14,8 @@ public abstract class Blueprint
     public required string BlueprintSetIdProduct { get; init; }
 
     public AcquisitionState AcquisitionState => GetAcquisitionState();
+
+    private static Dictionary<string, Blueprint> _blueprtintCache = new ();
 
     public async Task<string> GetBlueprintXml()
     {
@@ -85,5 +90,29 @@ public abstract class Blueprint
         }
 
         return AcquisitionState.Missing;
+    }
+
+    public static Blueprint Parse(IElement el)
+    {
+        var blueprintId = el.SelectTextContent("BlueprintID");
+
+        if (_blueprtintCache.GetValueOrDefault(blueprintId) is {} cached)
+        {
+            return cached;
+        }
+
+        var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
+
+        var result = new Blueprint
+        {
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+        };
+
+        _blueprtintCache.Add(blueprintId, result);
+
+        return result;
     }
 }

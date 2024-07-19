@@ -9,6 +9,8 @@ using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
+using Serilog;
+
 namespace RailworksForge.Core;
 
 public class ConsistService
@@ -30,12 +32,12 @@ public class ConsistService
         await WriteScenarioDocument(outputDirectory, scenarioDocument);
         await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
 
-        ClearCache();
+        ClearCache(scenario);
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, TargetConsist target, PreloadConsist preload)
     {
-        var document = await scenario.GetXmlDocument();
+        var document = await scenario.GetXmlDocument(false);
 
         foreach (var consist in target.GetConsists())
         {
@@ -208,9 +210,10 @@ public class ConsistService
 
         File.Delete(binDestination);
 
-        var converted = await Serz.Convert(destination);
+        var converted = await Serz.Convert(destination, true);
 
         File.Copy(converted.OutputPath, binDestination);
+        File.Delete(converted.OutputPath);
 
         await Paths.CreateMd5HashFile(binDestination);
     }
@@ -226,8 +229,17 @@ public class ConsistService
         await Paths.CreateMd5HashFile(destination);
     }
 
-    private static void ClearCache()
+    private static void ClearCache(Scenario scenario)
     {
+        try
+        {
+            File.Delete(scenario.CachedDocumentPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "failed to delete cached scenario document");
+        }
+
         var directory = Paths.GetRoutesDirectory();
 
         var files = new []

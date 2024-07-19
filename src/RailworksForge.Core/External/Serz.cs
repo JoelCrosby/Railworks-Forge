@@ -1,12 +1,10 @@
 using AngleSharp.Xml.Dom;
 
-using RailworksForge.Core.Exceptions;
-
 namespace RailworksForge.Core.External;
 
 public class Serz
 {
-    private static string OutputPath = Path.Join(Paths.GetConfigurationFolder(), "xml-cache");
+
 
     public record ConvertedSerzFile(string InputPath, string OutputPath)
     {
@@ -25,7 +23,7 @@ public class Serz
         }
 
         var isBin = Path.GetExtension(inputPath) == ".bin";
-        var outputPath = GetOutputPath(inputPath, isBin);
+        var outputPath = Paths.GetAssetCachePath(inputPath, isBin);
 
         if (force is false && File.Exists(outputPath))
         {
@@ -46,19 +44,5 @@ public class Serz
         }
 
         return new ConvertedSerzFile(inputPath, outputPath);
-    }
-
-    private static string GetOutputPath(string path, bool isBin)
-    {
-        var renamedOutput = isBin ? path.Replace(".bin", ".bin.xml") : path.Replace(".bin.xml", ".bin");
-        var flattened = renamedOutput.Replace(Paths.GetGameDirectory(), string.Empty);
-
-        var outputPath = Path.Join(OutputPath, flattened);
-        var parentDir = Directory.GetParent(outputPath)?.FullName;
-
-        DirectoryException.ThrowIfNotExists(parentDir);
-        Directory.CreateDirectory(parentDir);
-
-        return outputPath;
     }
 }
