@@ -8,6 +8,7 @@ using RailworksForge.Core;
 using RailworksForge.ViewModels;
 using RailworksForge.Views;
 using RailworksForge.Views.Controls;
+using RailworksForge.Views.Dialogs;
 
 using ConsistDetailPage = RailworksForge.Views.Pages.ConsistDetailPage;
 using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
@@ -57,6 +58,7 @@ public class App : Application
         ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
         ViewLocator.Register<RoutesViewModel, RoutesPage>();
         ViewLocator.Register<RoutesBaseViewModel, RoutesList>();
+        ViewLocator.Register<ConfirmationDialogViewModel, ConfirmationDialog>();
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
         ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();

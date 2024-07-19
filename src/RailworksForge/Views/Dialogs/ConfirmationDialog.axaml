@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="186"
+        x:Class="RailworksForge.Views.Dialogs.ConfirmationDialog"
+        x:DataType="vm:ConfirmationDialogViewModel"
+        Width="460"
+        Height="186"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding Title}">
+
+    <Design.DataContext>
+        <vm:DesignConfirmationDialogViewModel />
+    </Design.DataContext>
+
+        <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*">
+            <Border Grid.Column="0" Grid.Row="0" DockPanel.Dock="Top" Padding="12">
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" />
+            </Border>
+
+            <Border Grid.Column="0" Grid.Row="1" Padding="12">
+                <TextBlock Text="{Binding BodyText}" />
+            </Border>
+
+            <Border Grid.Column="0" Grid.Row="2" Padding="12">
+                <StackPanel HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
+                    <Button Command="{Binding CancelClickedCommand}" Content="Cancel" />
+                    <Button Command="{Binding AcceptClickedCommand}" Content="{Binding AcceptLabel}" Background="{DynamicResource ToggleButtonBackgroundChecked}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+</Window>

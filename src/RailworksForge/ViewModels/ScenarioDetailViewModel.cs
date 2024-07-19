@@ -126,6 +126,23 @@ public partial class ScenarioDetailViewModel : ViewModelBase
                 return;
             }
 
+            var isBulkSelection = SelectedConsists.Count() > 1;
+            var consistMessage = isBulkSelection ? "consists" : "consist";
+            var summary = isBulkSelection ? $"{SelectedConsists.Count()} consists selected." : $"Consist: {SelectedConsist!.ServiceName} - {SelectedConsist.LocomotiveName}";
+
+            var result = await Utils.GetApplicationViewModel().ShowConfirmationDialog.Handle(new ConfirmationDialogViewModel
+            {
+                AcceptLabel = $"Delete {consistMessage}",
+                Title = "Delete Consist",
+                BodyText = $"""
+                            Are you sure you wish to delete the selected {consistMessage}?
+                            
+                            {summary}
+                            """,
+            });
+
+            if (!result) return;
+
             var target = new TargetConsist(SelectedConsists);
 
             await ConsistService.DeleteConsist(target, Scenario);

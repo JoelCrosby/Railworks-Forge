@@ -18,6 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
     public Interaction<ReplaceConsistViewModel, PreloadConsist?> ShowReplaceConsistDialog { get; }
+    public Interaction<ConfirmationDialogViewModel, bool> ShowConfirmationDialog { get; }
 
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
@@ -34,6 +35,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
+        ShowConfirmationDialog = new Interaction<ConfirmationDialogViewModel, bool>();
 
         _contentViewModel = Routes;
     }

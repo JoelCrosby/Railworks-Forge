@@ -5,6 +5,7 @@ using Avalonia.ReactiveUI;
 
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
+using RailworksForge.Views.Dialogs;
 
 using ReactiveUI;
 
@@ -31,6 +32,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             action(ViewModel.ShowReplaceConsistDialog.RegisterHandler(ShowDialog
                 <ReplaceConsistViewModel, PreloadConsist, ReplaceConsistDialog>));
+
+            action(ViewModel.ShowConfirmationDialog.RegisterHandler(ShowDialog
+                <ConfirmationDialogViewModel, bool, ConfirmationDialog>));
         });
     }
 
