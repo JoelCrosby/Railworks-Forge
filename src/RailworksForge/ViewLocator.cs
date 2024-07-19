@@ -10,10 +10,7 @@ namespace RailworksForge;
 
 public class ViewLocator : IDataTemplate
 {
-    public bool Match(object? data)
-    {
-        return data is ViewModelBase;
-    }
+    public bool Match(object? data) => data is ViewModelBase;
 
     private static readonly Dictionary<Type, Func<Control>> Registration = new ();
 
