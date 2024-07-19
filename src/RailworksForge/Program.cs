@@ -4,6 +4,9 @@ using System;
 using System.Threading.Tasks;
 
 using RailworksForge.Core;
+using RailworksForge.Util;
+
+using ReactiveUI;
 
 using Serilog;
 using Serilog.Events;
@@ -12,9 +15,6 @@ namespace RailworksForge;
 
 internal sealed class Program
 {
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args)
     {
@@ -22,10 +22,12 @@ internal sealed class Program
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console(LogEventLevel.Debug)
-                .WriteTo.File(Paths.GetLoggingPath(), LogEventLevel.Error)
+                .WriteTo.File($"{Paths.GetLoggingPath()}/railworks-forge-.log", LogEventLevel.Error)
                 .CreateLogger();
 
             TaskScheduler.UnobservedTaskException += HandleUnobservedTaskExceptions;
+
+            RxApp.DefaultExceptionHandler = new ExceptionObserver();
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
@@ -35,13 +37,10 @@ internal sealed class Program
         }
         finally
         {
-            // This block is optional.
-            // Use the finally-block if you need to clean things up or similar
             Log.CloseAndFlush();
         }
     }
 
-    // Avalonia configuration, don't remove; also used by visual designer.
     // ReSharper disable once MemberCanBePrivate.Global
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
