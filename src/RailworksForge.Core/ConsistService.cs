@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.IO.Compression;
 
 using AngleSharp.Dom;
 using AngleSharp.Xml.Dom;
@@ -17,22 +16,74 @@ public class ConsistService
 {
     public static async Task ReplaceConsist(TargetConsist target, PreloadConsist preload, Scenario scenario)
     {
-        var outputDirectory = scenario.DirectoryPath;
-        var backupOutputDirectory = scenario.GetBackupDirectory();
-
-        Directory.CreateDirectory(backupOutputDirectory);
-
-        var backupPath = Path.Join(backupOutputDirectory, $"backup-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
-
-        ZipFile.CreateFromDirectory(outputDirectory, backupPath);
+        scenario.MakeBackup();
 
         var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
         var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
 
-        await WriteScenarioDocument(outputDirectory, scenarioDocument);
-        await WriteScenarioPropertiesDocument(outputDirectory, scenarioPropertiesDocument);
+        await WriteScenarioDocument(scenario.DirectoryPath, scenarioDocument);
+        await WriteScenarioPropertiesDocument(scenario.DirectoryPath, scenarioPropertiesDocument);
 
         ClearCache(scenario);
+    }
+
+    public static async Task DeleteConsist(TargetConsist target, Scenario scenario)
+    {
+        scenario.MakeBackup();
+
+        var scenarioDocument = await GetDeleteUpdatedScenario(scenario, target);
+        var scenarioPropertiesDocument = await GetDeleteScenarioProperties(scenario, target);
+
+        await WriteScenarioDocument(scenario.DirectoryPath, scenarioDocument);
+        await WriteScenarioPropertiesDocument(scenario.DirectoryPath, scenarioPropertiesDocument);
+
+        ClearCache(scenario);
+    }
+
+    private static async Task<IXmlDocument> GetDeleteUpdatedScenario(Scenario scenario, TargetConsist target)
+    {
+        var document = await scenario.GetXmlDocument(false);
+
+        foreach (var consist in target.GetConsists())
+        {
+            var consistElement = document
+                .QuerySelectorAll("cConsist")
+                .QueryByTextContent("Driver ServiceName Key", consist.ServiceId);
+
+            if (consistElement is null)
+            {
+                throw new Exception("unable to find scenario consist");
+            }
+
+            consistElement.RemoveFromParent();
+        }
+
+        XmlException.ThrowIfDocumentInvalid(document);
+
+        return document;
+    }
+
+    private static async Task<IXmlDocument> GetDeleteScenarioProperties(Scenario scenario, TargetConsist target)
+    {
+        var document = await scenario.GetPropertiesXmlDocument();
+
+        foreach (var consist in target.GetConsists())
+        {
+            var element = document
+                .QuerySelectorAll("sDriverFrontEndDetails")
+                .QueryByTextContent("ServiceName Key", consist.ServiceId);
+
+            if (element is null)
+            {
+                throw new Exception($"could not find service {consist.ServiceName} in scenario properties file.");
+            }
+
+            element.RemoveFromParent();
+        }
+
+        XmlException.ThrowIfDocumentInvalid(document);
+
+        return document;
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, TargetConsist target, PreloadConsist preload)

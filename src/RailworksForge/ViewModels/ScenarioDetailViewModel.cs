@@ -119,7 +119,19 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             return Observable.StartAsync(() => Scenario.GetConsistStatus(), RxApp.TaskpoolScheduler);
         });
 
-        DeleteConsistCommand = ReactiveCommand.Create(() => {});
+        DeleteConsistCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (SelectedConsists.Any() is false)
+            {
+                return;
+            }
+
+            var target = new TargetConsist(SelectedConsists);
+
+            await ConsistService.DeleteConsist(target, Scenario);
+
+            Refresh();
+        });
 
         Services.AddRange(Scenario.Consists);
     }
@@ -150,6 +162,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         Services.Clear();
         Services.AddRange(Scenario.Consists);
 
-        OnPropertyChanged(nameof(Services));
+        OnPropertyChanging(nameof(Services));
     }
 }
