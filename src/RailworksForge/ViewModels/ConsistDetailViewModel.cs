@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Threading;
+
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
+using RailworksForge.Util;
 
 using ReactiveUI;
 
@@ -21,13 +28,18 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private readonly Scenario _scenario;
     private readonly Consist _consist;
 
-    [ObservableProperty]
-    private FileBrowserViewModel _fileBrowser;
+    public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<PreloadConsist> _availableStock;
+    private ObservableCollection<PreloadConsistViewModel> _availableStock;
+
+    [ObservableProperty]
+    private BrowserDirectory? _selectedDirectory;
 
     public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
+
+    public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
 
     public ConsistDetailViewModel(Scenario scenario, Consist consist)
     {
@@ -35,32 +47,44 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _consist = consist;
 
         AvailableStock = [];
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
+
         RailVehicles = Observable.FromAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
-        FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
+        LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
+        OpenInExplorerCommand = ReactiveCommand.Create(() =>
+        {
+            if (SelectedDirectory is null) return;
+
+            Launcher.Open(SelectedDirectory.FullPath);
+        });
     }
 
-    public async Task LoadAvailableStock(BrowserDirectory directory)
+    private async Task LoadAvailableStock()
     {
-        var preloadDirectory = Path.Join(directory.FullPath, "PreLoad");
-
-        if (!Directory.Exists(preloadDirectory))
+        if (SelectedDirectory?.Level is not AssetBrowserLevel.Product)
         {
             return;
         }
 
-        var binFiles = Directory.EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories);
+        var railVehiclesDirectory = Path.Join(SelectedDirectory.FullPath, "RailVehicles");
 
-        var items = new List<PreloadConsist>();
-
-        foreach (var binFile in binFiles)
+        if (!Paths.Exists(railVehiclesDirectory))
         {
-            var exported = await Serz.Convert(binFile);
-            var consists = await GetConsistBlueprints(exported.OutputPath);
-
-            items.AddRange(consists);
+            return;
         }
 
-        AvailableStock = new ObservableCollection<PreloadConsist>(items);
+        var binFiles = Directory
+            .EnumerateFiles(railVehiclesDirectory, "*.bin", SearchOption.AllDirectories)
+            .Where(f => f.Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase) is not true);
+
+        await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
+        {
+            var exported = await Serz.Convert(binFile, false, cancellationToken);
+            var consists = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
+            var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
+
+            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
+        });
     }
 
     private async Task<ObservableCollection<ConsistRailVehicle>> GetRailVehicles()
@@ -75,10 +99,10 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return new ObservableCollection<ConsistRailVehicle>(consists);
     }
 
-    private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path)
+    private static async Task<List<PreloadConsist>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
     {
-        var text = await File.ReadAllTextAsync(path);
-        var doc = await XmlParser.ParseDocumentAsync(text);
+        var text = await File.ReadAllTextAsync(path, cancellationToken);
+        var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
 
         return doc
             .QuerySelectorAll("Blueprint")

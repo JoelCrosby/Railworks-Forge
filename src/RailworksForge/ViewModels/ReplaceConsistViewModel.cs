@@ -16,6 +16,7 @@ using DynamicData;
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
+using RailworksForge.Util;
 
 using ReactiveUI;
 
@@ -24,6 +25,8 @@ namespace RailworksForge.ViewModels;
 public partial class ReplaceConsistViewModel : ViewModelBase
 {
     public ReactiveCommand<Unit, PreloadConsist?> ReplaceConsistCommand { get; }
+    public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
 
     public required Scenario Scenario { get; init; }
 
@@ -31,26 +34,35 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     private ObservableCollection<PreloadConsistViewModel> _availableStock;
 
     [ObservableProperty]
-    private FileBrowserViewModel _fileBrowser;
+    private PreloadConsistViewModel? _selectedConsist;
 
     [ObservableProperty]
-    private PreloadConsistViewModel? _selectedConsist;
+    private BrowserDirectory? _selectedDirectory;
+
+    public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
 
     public ReplaceConsistViewModel()
     {
         AvailableStock = [];
-        FileBrowser = new FileBrowserViewModel(Paths.GetAssetsDirectory());
-        ReplaceConsistCommand = ReactiveCommand.Create(() =>
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
+
+        ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist?.Consist);
+        LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
+        OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
-            return SelectedConsist?.Consist;
+            if (SelectedDirectory is null) return;
+
+            Launcher.Open(SelectedDirectory.FullPath);
         });
     }
 
-    public async Task LoadAvailableStock(BrowserDirectory directory)
+    private async Task LoadAvailableStock()
     {
         Dispatcher.UIThread.Post(AvailableStock.Clear);
 
-        var preloadDirectory = GetPreloadDirectory(directory);
+        if (SelectedDirectory is null) return;
+
+        var preloadDirectory = GetPreloadDirectory(SelectedDirectory);
 
         if (!Directory.Exists(preloadDirectory)) return;
 

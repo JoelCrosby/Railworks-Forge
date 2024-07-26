@@ -2,7 +2,7 @@ namespace RailworksForge.Core.Models;
 
 public class BrowserDirectory
 {
-    public Task<List<BrowserDirectory>> Subfolders => Task.Run(GetVehicleDirectories);
+    public List<BrowserDirectory> Subfolders => GetVehicleDirectories();
 
     public string Name { get; }
     public string FullPath { get; }

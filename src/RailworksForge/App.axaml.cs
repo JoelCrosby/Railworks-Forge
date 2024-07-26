@@ -52,7 +52,6 @@ public class App : Application
         ViewLocator.Register<MainWindowViewModel, MainWindow>();
         ViewLocator.Register<MainMenuViewModel, MainMenu>();
         ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
-        ViewLocator.Register<FileBrowserViewModel, FileBrowser>();
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();

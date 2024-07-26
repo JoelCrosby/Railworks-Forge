@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
@@ -24,7 +23,34 @@
         </Border>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,4,3*">
-            <controls:FileBrowser Grid.Row="0" DataContext="{Binding FileBrowser}" />
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,0,0,1">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
+                            Available Stock
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Subfolders}">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Opacity="0.72" Width="16" Height="16" Data="{StaticResource folder}" Margin="0,0,12,0" />
+                                <TextBlock Text="{Binding Name}"/>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
+                            <MenuItem Header="Load Consists" Command="{Binding LoadAvailableStockCommand}"  />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+
+                </TreeView>
+            </DockPanel>
 
             <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}"
                           ResizeDirection="Columns" />
