@@ -85,21 +85,20 @@ public record Scenario
         return New(Route, AssetPath);
     }
 
-    public string GetBackupDirectory()
+    private string GetBackupDirectory()
     {
         return Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
     }
 
-    public void MakeBackup()
+    public void CreateBackup()
     {
-        var outputDirectory = DirectoryPath;
         var backupOutputDirectory = GetBackupDirectory();
 
         Directory.CreateDirectory(backupOutputDirectory);
 
         var backupPath = Path.Join(backupOutputDirectory, $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
 
-        ZipFile.CreateFromDirectory(outputDirectory, backupPath);
+        ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
 
     private static IXmlDocument GetPropertiesDocument(AssetPath path)

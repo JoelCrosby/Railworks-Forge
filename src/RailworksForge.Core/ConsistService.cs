@@ -16,7 +16,7 @@ public class ConsistService
 {
     public static async Task ReplaceConsist(TargetConsist target, PreloadConsist preload, Scenario scenario)
     {
-        scenario.MakeBackup();
+        scenario.CreateBackup();
 
         var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
         var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
@@ -29,7 +29,7 @@ public class ConsistService
 
     public static async Task DeleteConsist(TargetConsist target, Scenario scenario)
     {
-        scenario.MakeBackup();
+        scenario.CreateBackup();
 
         var scenarioDocument = await GetDeleteUpdatedScenario(scenario, target);
         var scenarioPropertiesDocument = await GetDeleteScenarioProperties(scenario, target);
@@ -264,7 +264,9 @@ public class ConsistService
         var converted = await Serz.Convert(destination, true);
 
         File.Copy(converted.OutputPath, binDestination);
+
         File.Delete(converted.OutputPath);
+        File.Delete(destination);
 
         await Paths.CreateMd5HashFile(binDestination);
     }
