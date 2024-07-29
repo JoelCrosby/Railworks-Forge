@@ -1,7 +1,5 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -19,7 +17,7 @@ public class RouteDetailViewModel : ViewModelBase
 {
     public RouteViewModel Route { get; }
 
-    public IObservable<ObservableCollection<Scenario>> Scenarios { get; init; }
+    public ObservableCollection<Scenario> Scenarios { get; init; }
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
@@ -58,7 +56,7 @@ public class RouteDetailViewModel : ViewModelBase
             Launcher.Open(SelectedItem.DirectoryPath);
         });
 
-        Scenarios = Observable.Start(GetScenarios, RxApp.TaskpoolScheduler);
+        Scenarios = GetScenarios();
     }
 
     protected RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }

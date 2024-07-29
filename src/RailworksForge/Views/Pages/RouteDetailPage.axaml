@@ -61,17 +61,19 @@
         </StackPanel>
 
 
-        <DataGrid ItemsSource="{Binding Scenarios^}"
+        <DataGrid ItemsSource="{Binding Scenarios}"
                   IsReadOnly="True"
                   DoubleTapped="DataGrid_OnDoubleTapped"
                   GridLinesVisibility="All"
                   SelectionMode="Single"
                   SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                  Name="ScenariosDataGrid"
+                  Sorting="DataGrid_OnSorting"
         >
 
             <DataGrid.Columns>
 
-                <DataGridTemplateColumn Header="Id">
+                <DataGridTemplateColumn Header="Id" SortMemberPath="Id">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border BorderThickness="2"

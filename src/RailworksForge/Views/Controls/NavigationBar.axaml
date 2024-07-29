@@ -30,7 +30,7 @@
 
         <Button Command="{Binding RoutesClickedCommand}">Routes</Button>
         <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" Content="{Binding Route.Route.Name}" />
-        <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" Content="{Binding Scenario.Name}" />
+        <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" Content="{Binding Scenario.Scenario.Name}" />
         <Button Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}" Content="{Binding Consist.ServiceName}" />
     </StackPanel>
 </UserControl>

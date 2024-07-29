@@ -17,6 +17,7 @@ public class Configuration
     private static readonly ConfigurationOptions DefaultConfigurationOptions = new ()
     {
         GameDirectoryPath = string.Empty,
+        DataGrids = new (),
     };
 
     public static ConfigurationOptions Get()
@@ -27,6 +28,11 @@ public class Configuration
         }
 
         return options;
+    }
+
+    public static void Set(ConfigurationOptions options)
+    {
+        SaveConfig("settings", options);
     }
 
     public static TConfig GetConfigFromPath<TConfig>(string filename, TConfig defaultValue)

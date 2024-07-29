@@ -4,15 +4,19 @@ using System.Reactive.Subjects;
 using Avalonia.Controls;
 using Avalonia.Input;
 
+using RailworksForge.Controls;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
-public partial class RouteDetailPage : UserControl
+public partial class RouteDetailPage : DataGridUserControl
 {
+    protected override DataGrid DataGrid => ScenariosDataGrid;
+
     public RouteDetailPage()
     {
         InitializeComponent();
+        SortColumns();
     }
 
     // ReSharper disable once UnusedParameter.Local

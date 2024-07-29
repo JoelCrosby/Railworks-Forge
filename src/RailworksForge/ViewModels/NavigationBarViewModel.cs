@@ -16,7 +16,7 @@ public partial class NavigationBarViewModel : ViewModelBase
     private RouteDetailViewModel? _route;
 
     [ObservableProperty]
-    private Scenario? _scenario;
+    private ScenarioDetailViewModel? _scenario;
 
     [ObservableProperty]
     private Consist? _consist;

@@ -83,6 +83,8 @@
                   DoubleTapped="DataGrid_OnDoubleTapped"
                   BorderThickness="0,1,0,0"
                   BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                  Name="ServicesDataGrid"
+                  Sorting="DataGrid_OnSorting"
         >
 
             <DataGrid.Columns>

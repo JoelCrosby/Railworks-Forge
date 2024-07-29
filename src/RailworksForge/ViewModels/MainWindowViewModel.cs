@@ -58,10 +58,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void SelectScenario(Scenario scenario)
     {
-        NavigationBar.Scenario = scenario;
+        var view = new ScenarioDetailViewModel(scenario);
+
+        NavigationBar.Scenario = view;
         NavigationBar.Consist = null;
 
-        ContentViewModel = new ScenarioDetailViewModel(scenario);
+        ContentViewModel = view;
     }
 
     public void SelectCurrentRoute()
@@ -81,7 +83,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        ContentViewModel = new ScenarioDetailViewModel(NavigationBar.Scenario!);
+        ContentViewModel = NavigationBar.Scenario;
     }
 
     public void SelectScenarioConsist(Scenario scenario, Consist consist)
@@ -98,6 +100,6 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario, NavigationBar.Consist);
+        ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario.Scenario, NavigationBar.Consist);
     }
 }
