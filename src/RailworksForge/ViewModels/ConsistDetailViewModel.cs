@@ -37,6 +37,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
 
     public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
@@ -48,6 +51,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         AvailableStock = [];
         DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
+
+        IsLoading = true;
 
         RailVehicles = Observable.FromAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
@@ -95,6 +100,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
         }
 
         var consists = await _scenario.GetServiceConsistVehicles(_consist.ServiceId);
+
+        Dispatcher.UIThread.Post(() => IsLoading = false);
 
         return new ObservableCollection<ConsistRailVehicle>(consists);
     }

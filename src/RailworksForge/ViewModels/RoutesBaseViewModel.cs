@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using DynamicData;
 
 using RailworksForge.Core;
@@ -13,7 +15,7 @@ using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
-public class RoutesBaseViewModel : ViewModelBase
+public partial class RoutesBaseViewModel : ViewModelBase
 {
     public ObservableCollection<RouteViewModel> ListItems { get; } = [];
 
@@ -25,8 +27,13 @@ public class RoutesBaseViewModel : ViewModelBase
 
     private List<RouteViewModel>? _cachedRoutes;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public RoutesBaseViewModel()
     {
+        IsLoading = true;
+
         CopyClickedCommand = ReactiveCommand.CreateFromTask(() =>
         {
             if (SelectedItem is null) return Task.CompletedTask;
@@ -51,12 +58,16 @@ public class RoutesBaseViewModel : ViewModelBase
 
     public async Task GetAllRoutes(string? searchTerm = null)
     {
+        IsLoading = true;
+
         var invariant = searchTerm?.ToLowerInvariant();
         var routes = _cachedRoutes ?? await LoadRoutes();
         var results = invariant is null ? routes : routes.Where(route => route.SearchIndex.Contains(invariant));
 
         ListItems.Clear();
         ListItems.AddRange(results);
+
+        IsLoading = false;
     }
 
     private async ValueTask<List<RouteViewModel>> LoadRoutes()

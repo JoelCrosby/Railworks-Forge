@@ -3,13 +3,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
              x:DataType="vm:RoutesBaseViewModel">
 
-    <ScrollViewer>
-        <Border Padding="12">
+        <ScrollViewer>
+    <StackPanel>
+        <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+
+            <Border Padding="12" IsVisible="{Binding !IsLoading}">
                 <ListBox
                     ItemsSource="{Binding ListItems}"
                     Background="Transparent"
@@ -37,8 +41,9 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-        </Border>
-    </ScrollViewer>
+            </Border>
+    </StackPanel>
+        </ScrollViewer>
 
 
 </UserControl>

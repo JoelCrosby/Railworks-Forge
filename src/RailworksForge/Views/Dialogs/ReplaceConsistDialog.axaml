@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
@@ -35,9 +36,9 @@
                 <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
                     <TreeView.ItemTemplate>
                         <TreeDataTemplate ItemsSource="{Binding Subfolders}">
-                            <StackPanel Orientation="Horizontal">
-                                <PathIcon Opacity="0.72" Width="16" Height="16" Data="{StaticResource folder}" Margin="0,0,12,0" />
-                                <TextBlock Text="{Binding Name}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <lucideAvalonia:Lucide Icon="Folder" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="1.5" Width="18" Height="18" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}"/>
                             </StackPanel>
                         </TreeDataTemplate>
                     </TreeView.ItemTemplate>

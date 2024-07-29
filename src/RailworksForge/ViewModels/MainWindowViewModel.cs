@@ -52,6 +52,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         NavigationBar.Route = null;
         NavigationBar.Scenario = null;
+        NavigationBar.Consist = null;
 
         ContentViewModel = Routes;
     }
