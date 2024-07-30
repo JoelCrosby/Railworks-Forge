@@ -172,8 +172,9 @@ public record Scenario
 
         var propertiesPath = Path.Join("Scenarios", Id, "Scenario.bin");
         var destination = Path.Join(Route.DirectoryPath, "Scenarios", Id, "Scenario.bin");
+        var archivePath = PackagingType is PackagingType.Packed ? AssetPath.Path : Route.MainContentArchivePath;
 
-        Archives.ExtractFileContentFromPath(Route.MainContentArchivePath, propertiesPath, destination);
+        Archives.ExtractFileContentFromPath(archivePath, propertiesPath, destination);
 
         return destination;
     }
