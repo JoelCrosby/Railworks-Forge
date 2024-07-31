@@ -92,6 +92,9 @@
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
                 <DataGridTextColumn Header="Locomotive" Binding="{Binding Locomotive}" />
                 <DataGridTextColumn Header="Type" Binding="{Binding ScenarioClass}" />
+                <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
+                <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" />
+                <DataGridTextColumn Header="Season" Binding="{Binding Season}" />
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>

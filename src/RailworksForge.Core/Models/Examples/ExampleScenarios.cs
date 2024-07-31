@@ -21,6 +21,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -37,6 +39,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -52,6 +56,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.FreeRoam,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -68,6 +74,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -84,6 +92,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -100,6 +110,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -116,6 +128,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
         new()
         {
@@ -132,6 +146,8 @@ public static partial class Example
             PackagingType = PackagingType.Unpacked,
             ScenarioClass = ScenarioClass.Standard,
             AssetPath = AssetPath.Empty,
+            Duration = 60,
+            Rating = 2,
         },
     ];
 }

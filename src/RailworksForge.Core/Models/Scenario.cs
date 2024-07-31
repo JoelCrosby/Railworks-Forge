@@ -29,6 +29,12 @@ public record Scenario
 
     public required string Locomotive { get; init; }
 
+    public required int Duration { get; init; }
+
+    public required int Rating { get; init; }
+
+    public string? Season { get; init; }
+
     public required string DirectoryPath { get; init; }
 
     public required string ScenarioPropertiesPath { get; init; }
@@ -59,14 +65,19 @@ public record Scenario
         var startLocation = doc.SelectTextContent("StartLocation English");
         var directoryPath = Path.GetDirectoryName(path.Path) ?? string.Empty;
         var scenarioClass = doc.SelectTextContent("ScenarioClass");
+        var season = ParseSeason(doc.SelectTextContent("Season"));
         var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.ParseConsist).ToList();
         var locomotive = consists.FirstOrDefault(c => c.PlayerDriver)?.LocomotiveName ?? string.Empty;
+
+        _ = int.TryParse(doc.SelectTextContent("DurationMins"), out var duration);
+        _ = int.TryParse(doc.SelectTextContent("Rating"), out var rating);
 
         return new Scenario
         {
             Id = id,
             Name = name,
             Description = description,
+            Duration = duration,
             Briefing = briefing,
             StartLocation = startLocation,
             Locomotive = locomotive,
@@ -77,6 +88,8 @@ public record Scenario
             ScenarioClass = ScenarioClassTypes.Parse(scenarioClass),
             PackagingType = path.IsArchivePath ? PackagingType.Packed : PackagingType.Unpacked,
             Route = route,
+            Rating = rating,
+            Season = season,
         };
     }
 
@@ -263,5 +276,17 @@ public record Scenario
 
             consist.ConsistAcquisitionState = state;
         }
+    }
+
+    private static string ParseSeason(string code)
+    {
+        return code switch
+        {
+            "SEASON_SPRING" => "Spring",
+            "SEASON_SUMMER" => "Summer",
+            "SEASON_AUTUMN" => "Autumn",
+            "SEASON_WINTER" => "Winter",
+            _ => string.Empty,
+        };
     }
 }
