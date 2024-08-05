@@ -58,7 +58,7 @@ public record Scenario
     {
         var doc = GetPropertiesDocument(path);
 
-        var id = doc.SelectTextContent("ID cGUID DevString");
+        var id = doc.SelectTextContent("ID cGUID DevString").Trim();
         var name = doc.SelectTextContent("DisplayName English");
         var description = doc.SelectTextContent("description English");
         var briefing = doc.SelectTextContent("Briefing English");
@@ -288,5 +288,15 @@ public record Scenario
             "SEASON_WINTER" => "Winter",
             _ => string.Empty,
         };
+    }
+
+    public virtual bool Equals(Scenario? other)
+    {
+        return string.Equals(Id, other?.Id, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
     }
 }
