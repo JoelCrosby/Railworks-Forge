@@ -26,6 +26,8 @@ public class Consist : Blueprint
 
     public AcquisitionState ConsistAcquisitionState { get; set; }
 
+    public string? Number { get; init; }
+
     public static Consist ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
@@ -38,6 +40,7 @@ public class Consist : Blueprint
         var locoClass = LocoClassUtils.Parse(el.SelectTextContent("LocoClass"));
         var blueprintSetIdProduct = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
+
 
         return new Consist
         {

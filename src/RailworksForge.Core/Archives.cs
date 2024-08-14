@@ -28,6 +28,25 @@ public static class Archives
         return reader.ReadToEnd();
     }
 
+    public static string? TryGetTextFileContentFromPath(string archivePath, string filePath)
+    {
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+
+        var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
+        var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
+
+        if (entry is null)
+        {
+            return null;
+        }
+
+        var content = entry.Open();
+
+        using var reader = new StreamReader(content);
+
+        return reader.ReadToEnd();
+    }
+
     public static async Task<Bitmap?> GetStreamFromPath(string archivePath, string filePath, bool strict = true)
     {
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);

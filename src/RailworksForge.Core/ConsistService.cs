@@ -21,8 +21,8 @@ public class ConsistService
         var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
         var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
 
-        await WriteScenarioDocument(scenario.DirectoryPath, scenarioDocument);
-        await WriteScenarioPropertiesDocument(scenario.DirectoryPath, scenarioPropertiesDocument);
+        await WriteScenarioDocument(scenario, scenarioDocument);
+        await WriteScenarioPropertiesDocument(scenario, scenarioPropertiesDocument);
 
         ClearCache(scenario);
     }
@@ -34,8 +34,8 @@ public class ConsistService
         var scenarioDocument = await GetDeleteUpdatedScenario(scenario, target);
         var scenarioPropertiesDocument = await GetDeleteScenarioProperties(scenario, target);
 
-        await WriteScenarioDocument(scenario.DirectoryPath, scenarioDocument);
-        await WriteScenarioPropertiesDocument(scenario.DirectoryPath, scenarioPropertiesDocument);
+        await WriteScenarioDocument(scenario, scenarioDocument);
+        await WriteScenarioPropertiesDocument(scenario, scenarioPropertiesDocument);
 
         ClearCache(scenario);
     }
@@ -92,39 +92,77 @@ public class ConsistService
 
         foreach (var consist in target.GetConsists())
         {
-            var scenarioConsist = document
+            var serviceConsist = document
                 .QuerySelectorAll("cConsist")
                 .QueryByTextContent("Driver ServiceName Key", consist.ServiceId);
 
-            if (scenarioConsist is null)
+            if (serviceConsist is null)
             {
                 throw new Exception("unable to find scenario consist");
             }
 
-            var blueprintNodes = scenarioConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
-            var nodeCountToKeep = preload.ConsistEntries.Count;
+            var railVehicles = serviceConsist.QuerySelector("RailVehicles");
+
+            if (railVehicles is null)
+            {
+                throw new Exception("unable to find rail vehicles in scenario document");
+            }
+
+            var blueprintNodes = serviceConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
+
+            if (blueprintNodes.First().Clone() is not IElement firstBlueprint)
+            {
+                throw new Exception("unable to clone first blueprint");
+            }
 
             await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
 
-            var length = blueprintNodes.Length;
-            var tasks = new List<Task>(length);
+            var selectedConsistLength = preload.ConsistEntries.Count;
 
-            for (var i = 0; i < length; i++)
+            foreach (var node in blueprintNodes)
             {
-                var scenarioNode = blueprintNodes[i];
-
-                if (i >= nodeCountToKeep)
-                {
-                    scenarioNode.RemoveFromParent();
-                    continue;
-                }
-
-                var consistVehicle = preload.ConsistEntries[i];
-
-                tasks.Add(UpdateConsistVehicle(consistVehicle, scenarioNode));
+                node.RemoveFromParent();
             }
 
-            await Task.WhenAny(tasks);
+            var cDriver = serviceConsist.QuerySelector("Driver cDriver");
+
+            if (cDriver is null)
+            {
+                throw new Exception("driver element not found");
+            }
+
+            var previousVehicle = firstBlueprint;
+            var initialRv = cDriver.QuerySelector("InitialRV");
+
+            if (initialRv is null)
+            {
+                throw new Exception("could not find initialRV element");
+            }
+
+            foreach (var child in initialRv.Children)
+            {
+                child.RemoveFromParent();
+            }
+
+            for (var i = 0; i < selectedConsistLength; i++)
+            {
+                var consistVehicle = preload.ConsistEntries[i];
+                var railVehicle = await AddConsistVehicle(consistVehicle, document, previousVehicle);
+
+                if (railVehicle is null)
+                {
+                    throw new Exception("failed to create rail vehicle for consist");
+                }
+
+                var e = document.CreateElement("e");
+                e.SetAttribute("type", "cDeltaString");
+                e.SetTextContent(railVehicle.Number);
+
+                initialRv.AppendChild(e);
+
+                railVehicles.AppendChild(railVehicle.Element);
+                previousVehicle = railVehicle.Element;
+            }
         }
 
         XmlException.ThrowIfDocumentInvalid(document);
@@ -132,20 +170,12 @@ public class ConsistService
         return document;
     }
 
-    private static async Task UpdateConsistVehicle(ConsistEntry consistVehicle, IElement scenarioNode)
+    private static async Task<GeneratedVehicle> AddConsistVehicle(ConsistEntry consistVehicle, IXmlDocument document, IElement scenarioNode)
     {
-        var blueprintBinDocument = await consistVehicle.GetXmlDocument();
-        var blueprintName = blueprintBinDocument.SelectTextContent("Blueprint Name");
+        var vehicleDocument = await consistVehicle.GetXmlDocument();
+        var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, consistVehicle);
 
-        var blueprint = scenarioNode.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
-
-        if (blueprint is null) return;
-
-        blueprint.UpdateTextElement("BlueprintID", consistVehicle.BlueprintId);
-        blueprint.UpdateTextElement("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", consistVehicle.BlueprintIdProvider);
-        blueprint.UpdateTextElement("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", consistVehicle.BlueprintIdProduct);
-
-        scenarioNode.UpdateTextElement("Name", blueprintName);
+        return VehicleGenerator.GenerateVehicle(document, scenarioNode, scenarioConsist, consistVehicle);
     }
 
     private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)
@@ -247,13 +277,13 @@ public class ConsistService
         preloadElement.InnerHtml += markup;
     }
 
-    private static async Task WriteScenarioDocument(string path, IXmlDocument document)
+    private static async Task WriteScenarioDocument(Scenario scenario, IXmlDocument document)
     {
         const string filename = "Scenario.bin.xml";
         const string binFilename = "Scenario.bin";
 
-        var destination = Path.Join(path, filename);
-        var binDestination = Path.Join(path, binFilename);
+        var destination = GetScenarioPathForFilename(scenario, filename);
+        var binDestination = GetScenarioPathForFilename(scenario, binFilename);
 
         File.Delete(destination);
 
@@ -271,15 +301,23 @@ public class ConsistService
         await Paths.CreateMd5HashFile(binDestination);
     }
 
-    private static async Task WriteScenarioPropertiesDocument(string path, IXmlDocument document)
+    private static async Task WriteScenarioPropertiesDocument(Scenario scenario, IXmlDocument document)
     {
         const string filename = "ScenarioProperties.xml";
-        var destination = Path.Join(path, filename);
+
+        var destination = GetScenarioPathForFilename(scenario, filename);
 
         File.Delete(destination);
 
         await document.ToXmlAsync(destination);
         await Paths.CreateMd5HashFile(destination);
+    }
+
+    private static string GetScenarioPathForFilename(Scenario scenario, string filename)
+    {
+        return scenario.PackagingType is PackagingType.Unpacked
+            ? Path.Join(scenario.DirectoryPath, filename)
+            : Path.Join(scenario.DirectoryPath, "Scenarios", scenario.Id, filename);
     }
 
     private static void ClearCache(Scenario scenario)

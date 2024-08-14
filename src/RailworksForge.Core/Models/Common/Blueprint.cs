@@ -15,7 +15,7 @@ public class Blueprint
 
     public AcquisitionState AcquisitionState => GetAcquisitionState();
 
-    private static Dictionary<string, Blueprint> _blueprtintCache = new ();
+    private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
 
     public async Task<string> GetBlueprintXml()
     {
@@ -96,7 +96,7 @@ public class Blueprint
     {
         var blueprintId = el.SelectTextContent("BlueprintID");
 
-        if (_blueprtintCache.GetValueOrDefault(blueprintId) is {} cached)
+        if (BlueprintCache.GetValueOrDefault(blueprintId) is {} cached)
         {
             return cached;
         }
@@ -111,7 +111,7 @@ public class Blueprint
             BlueprintSetIdProvider = blueprintSetIdProvider,
         };
 
-        _blueprtintCache.Add(blueprintId, result);
+        BlueprintCache.Add(blueprintId, result);
 
         return result;
     }

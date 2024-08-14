@@ -39,7 +39,7 @@ public record Scenario
 
     public required string ScenarioPropertiesPath { get; init; }
 
-    public required AssetPath AssetPath { get; set; }
+    public required AssetPath AssetPath { get; init; }
 
     public List<Consist> Consists { get; init; } = [];
 
@@ -53,6 +53,8 @@ public record Scenario
     private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
+
+    public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
 
     public static Scenario New(Route route, AssetPath path)
     {
@@ -98,18 +100,11 @@ public record Scenario
         return New(Route, AssetPath);
     }
 
-    private string GetBackupDirectory()
-    {
-        return Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
-    }
-
     public void CreateBackup()
     {
-        var backupOutputDirectory = GetBackupDirectory();
+        Directory.CreateDirectory(BackupDirectory);
 
-        Directory.CreateDirectory(backupOutputDirectory);
-
-        var backupPath = Path.Join(backupOutputDirectory, $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
+        var backupPath = Path.Join(BackupDirectory, $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
 
         ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
@@ -204,12 +199,20 @@ public record Scenario
 
     private string GetCompressedPropertiesText()
     {
-        if (!HasMainContentArchive)
+        var productArchives = Directory.EnumerateFiles(DirectoryPath, "*.ap", SearchOption.TopDirectoryOnly);
+
+        foreach (var productArchive in productArchives)
         {
-            throw new NotImplementedException("scenario does not contain a MainContent.ap");
+            var path = Path.Join("Scenarios", Id, "ScenarioProperties.xml");
+            var result =  Archives.TryGetTextFileContentFromPath(productArchive, path);
+
+            if (result is null) continue;
+
+            return result;
         }
 
-        return Archives.GetTextFileContentFromPath(Route.MainContentArchivePath, "ScenarioProperties.xml");
+        throw new Exception("could not find compressed scenario properties file");
+
     }
 
     public async Task<string> ConvertXmlToBin()

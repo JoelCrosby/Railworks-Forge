@@ -29,6 +29,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ObservableCollection<Consist> Services { get; } = [];
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
     public ReactiveCommand<Unit, string> ExportBinXmlCommand { get; }
     public ReactiveCommand<Unit, string> ExportXmlBinCommand { get; }
     public ReactiveCommand<Unit, Unit> ExtractScenariosCommand { get; }
@@ -51,6 +52,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
             Launcher.Open(Scenario.DirectoryPath);
+        });
+
+        OpenBackupsFolder = ReactiveCommand.Create(() =>
+        {
+            Launcher.Open(Scenario.BackupDirectory);
         });
 
         ExportBinXmlCommand = ReactiveCommand.CreateFromTask(() => scenario.ConvertBinToXml(false));

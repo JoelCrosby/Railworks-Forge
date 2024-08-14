@@ -36,7 +36,10 @@ public static class AngleSharpExtensions
 
     public static void SetTextContent(this IElement element, string text)
     {
-        if (element.ChildNodes.Length is 1 && element.FirstChild?.NodeType is NodeType.Text)
+        var isEmpty = element.ChildNodes.Length is 0;
+        var hasTextContent = element.ChildNodes.Length is 1 && element.FirstChild?.NodeType is NodeType.Text;
+
+        if (isEmpty || hasTextContent)
         {
             element.TextContent = text;
         }

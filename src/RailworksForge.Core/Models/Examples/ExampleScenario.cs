@@ -4,7 +4,7 @@ namespace RailworksForge.Core.Models.Examples;
 
 public static partial class Example
 {
-    public static Scenario Scenario => new ()
+    public static Scenario Scenario => new()
     {
         Id = "a8a66429-5f23-44e1-bb3c-2ba1f6bcc29b",
         Route = Route,
@@ -225,7 +225,7 @@ public static partial class Example
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
-            }
+            },
         ],
     };
 }

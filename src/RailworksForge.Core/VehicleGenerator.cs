@@ -1,0 +1,251 @@
+using AngleSharp.Dom;
+using AngleSharp.Xml.Dom;
+
+using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Models;
+
+namespace RailworksForge.Core;
+
+public record GeneratedVehicle(IElement Element, string Number);
+
+public class VehicleGenerator
+{
+    public static GeneratedVehicle GenerateVehicle(IXmlDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
+    {
+        var doc = XmlParser.ParseDocument(VehicleTemplates.GetXml(vehicle.VehicleType));
+        var cOwnedEntity = doc.DocumentElement;
+
+        if (cOwnedEntity is null)
+        {
+            throw new Exception("could not find root element for vehicle type");
+        }
+
+        var typeSpecificElement = vehicle.VehicleType switch
+        {
+            VehicleType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
+            VehicleType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
+            VehicleType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
+              _ =>  throw new Exception("Unknown vehicle type!"),
+        };
+
+        if (typeSpecificElement is null)
+        {
+            throw new Exception("could not find type specific element for vehicle type");
+        }
+
+        if (vehicle.Number is not null)
+        {
+            typeSpecificElement.QuerySelector("UniqueNumber")?.SetTextContent(vehicle.Number);
+        }
+
+
+        AddFollowers(prevElem, typeSpecificElement);
+
+        AddEntityContainers(document, vehicle, cOwnedEntity);
+        AddCargoComponents(document, vehicle, cOwnedEntity);
+
+        UpdateComponentCpos(prevElem, vehicle, cOwnedEntity);
+
+        UpdateEntityId(document, cOwnedEntity);
+
+        UpdateOwnedEntityIds(cOwnedEntity);
+        UpdateBlueprintIds(vehicle, cOwnedEntity);
+
+        UpdateFlipped(cOwnedEntity, consistVehicle);
+
+        if (vehicle.IsReskin)
+        {
+            UpdateReskinBlueprintIds(vehicle, cOwnedEntity);
+        }
+
+        cOwnedEntity.UpdateTextElement("Name", vehicle.Name!);
+
+        var number = GetAvailableNumber(vehicle, consistVehicle);
+
+        cOwnedEntity.UpdateTextElement("UniqueNumber", number);
+
+        return new GeneratedVehicle(cOwnedEntity, number);
+    }
+
+    private static string GetAvailableNumber(ScenarioConsist vehicle, ConsistEntry consistEntry)
+    {
+        var path = vehicle.NumberingListPath;
+
+        if (path is null) throw new Exception("could not find path for numbers csv");
+
+        var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar) + ".dcsv";
+        var filepath = Path.Join(Paths.GetAssetsDirectory(), normalisedPath);
+
+        var text = Paths.Exists(filepath) ? File.ReadAllText(filepath) : GetCompressedText();
+
+        if (text is null)
+        {
+            throw new Exception($"could not find part of path '{path}'");
+        }
+
+        var document = XmlParser.ParseDocument(text);
+        var element = document.QuerySelector("cCSVItem Name");
+
+        return element?.TextContent ?? throw new Exception($"could not read number from csv in path '{filepath}'");
+
+        string? GetCompressedText()
+        {
+            return GetCompressedNumberingList(consistEntry, normalisedPath);
+        }
+    }
+
+    private static string? GetCompressedNumberingList(ConsistEntry consistEntry, string path)
+    {
+        var productPath = Path.Join(consistEntry.BlueprintIdProvider, consistEntry.BlueprintIdProduct);
+        var fullProductPath = Path.Join(Paths.GetAssetsDirectory(), productPath);
+        var productArchives = Directory.EnumerateFiles(fullProductPath, "*.ap", SearchOption.TopDirectoryOnly);
+        var normalisedPath = path.Replace(productPath, string.Empty);
+
+        foreach (var productArchive in productArchives)
+        {
+            var file = Archives.TryGetTextFileContentFromPath(productArchive, normalisedPath);
+
+            if (file is null) continue;
+
+            return file;
+        }
+
+        return null;
+    }
+
+    private static void AddFollowers(IElement prevElem, IElement typeSpecificElement)
+    {
+        var followers = typeSpecificElement.QuerySelector("Followers");
+
+        if (followers is null)
+        {
+            throw new Exception("could not find followers vehicle");
+        }
+
+        var prevFollowers = prevElem
+            .QuerySelector("Component")?
+            .QuerySelectorAll("Followers").FirstOrDefault()?
+            .QuerySelectorAll("Network-cTrackFollower");
+
+        if (prevFollowers is null)
+        {
+            throw new Exception("could not find previous followers vehicle");
+        }
+
+        foreach (var cTrackFollower in prevFollowers)
+        {
+            var newFollower = cTrackFollower.Clone();
+            followers.AppendChild(newFollower);
+        }
+    }
+
+    private static void AddEntityContainers(IXmlDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
+    {
+        var cEntityContainer = cOwnedEntity.QuerySelector("Component cEntityContainer StaticChildrenMatrix");
+
+        if (cEntityContainer is null) return;
+
+        for (var i = 0; i < vehicle.EntityCount; i++)
+        {
+            var newNode = document.GenerateEntityContainerItem();
+            cEntityContainer.AppendChild(newNode);
+        }
+    }
+
+    private static void AddCargoComponents(IXmlDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
+    {
+        var cCargoComponent = cOwnedEntity.QuerySelector("Component cCargoComponent InitialLevel");
+
+        if (cCargoComponent is null) return;
+
+        for (var i = 0; i < vehicle.CargoCount; i++)
+        {
+            var value = vehicle.CargoComponents[i].Value;
+            var altEncoding = vehicle.CargoComponents[i].AltEncoding;
+
+            var newNode = document.GenerateCargoComponentItem(value,altEncoding);
+
+            cCargoComponent.AppendChild(newNode);
+        }
+    }
+
+    private static void UpdateComponentCpos(IElement prevElem, ScenarioConsist vehicle, IElement cOwnedEntity)
+    {
+        var cPosOri = prevElem.QuerySelector("Component cPosOri")?.Clone();
+
+        if (cPosOri is null)
+        {
+            throw new Exception("could not get the cPos from the previous vehicle");
+        }
+
+        cOwnedEntity.QuerySelector("Component")?.AppendChild(cPosOri);
+        cOwnedEntity.QuerySelector("Name")?.SetTextContent(vehicle.Name ?? string.Empty);
+    }
+
+    private static void UpdateBlueprintIds(ScenarioConsist vehicle, IElement cOwnedEntity)
+    {
+        var cAbsoluteBlueprintId = cOwnedEntity
+            .QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
+
+        if (cAbsoluteBlueprintId is null) return;
+
+        cAbsoluteBlueprintId
+            .QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider")?
+            .SetTextContent(vehicle.BlueprintSetIdProvider);
+
+        cAbsoluteBlueprintId
+            .QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product")?
+            .SetTextContent(vehicle.BlueprintSetIdProduct);
+
+        cAbsoluteBlueprintId.QuerySelector("BlueprintID")?.SetTextContent(vehicle.BlueprintId);
+    }
+
+    private static void UpdateFlipped(IElement cOwnedEntity, ConsistEntry consistEntry)
+    {
+        var flipped = consistEntry.Flipped ? "1" : "0";
+
+        cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(flipped);
+    }
+
+    private static void UpdateEntityId(IXmlDocument document, IElement cOwnedEntity)
+    {
+        var entityId = cOwnedEntity.QuerySelector("EntityID");
+        entityId?.AppendChild(document.GenerateCGuid());
+    }
+
+    private static void UpdateOwnedEntityIds(IElement cOwnedEntity)
+    {
+        var idElements = cOwnedEntity
+            .DescendantsAndSelf<IElement>()
+            .Where(elem => elem.GetAttribute(Utilities.DocumentNamespace, "id") == string.Empty);
+
+        var idRandom = new Random();
+
+        foreach (var elem in idElements)
+        {
+            var id = idRandom.Next(100000000, 999999999);
+            elem.RemoveAttribute("d:id");
+            elem.SetAttribute("d:id", id.ToString());
+        }
+    }
+
+    private static void UpdateReskinBlueprintIds(ScenarioConsist vehicle, IElement cOwnedEntity)
+    {
+        var reskinAbsoluteBlueprintId = cOwnedEntity
+            .QuerySelector("ReskinBlueprintID iBlueprintLibrary-cAbsoluteBlueprintID");
+
+        if (reskinAbsoluteBlueprintId is null) return;
+
+        reskinAbsoluteBlueprintId
+            .QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider")?
+            .SetTextContent(vehicle.ReskinBlueprintSetIdProvider!);
+
+        reskinAbsoluteBlueprintId
+            .QuerySelector("BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product")?
+            .SetTextContent(vehicle.ReskinBlueprintSetIdProduct!);
+
+        reskinAbsoluteBlueprintId
+            .QuerySelector("BlueprintID BlueprintID")?
+            .SetTextContent(vehicle.ReskinBlueprintId!);
+    }
+}

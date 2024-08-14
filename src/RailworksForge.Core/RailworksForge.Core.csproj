@@ -18,4 +18,9 @@
       <PackageReference Include="VDFParser.dotnet" Version="1.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Resources\**" />
+      <EmbeddedResource Include="Resources\**" />
+    </ItemGroup>
+
 </Project>

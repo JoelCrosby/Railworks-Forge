@@ -2,7 +2,7 @@ namespace RailworksForge.Core.Models;
 
 public class TargetConsist
 {
-    private List<Consist> _consists = [];
+    private readonly List<Consist> _consists = [];
 
     public TargetConsist(Consist consist)
     {
