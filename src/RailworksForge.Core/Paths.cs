@@ -178,7 +178,7 @@ public static class Paths
         var hash = CalculateMd5Hash(path);
         var filename = $"{Path.GetFileName(path)}.MD5";
 
-        var directory = Directory.GetParent(path)?.Parent?.FullName;
+        var directory = Directory.GetParent(path)?.FullName;
 
         if (directory is null)
         {

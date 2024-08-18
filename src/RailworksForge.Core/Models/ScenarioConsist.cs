@@ -27,6 +27,8 @@ public class ScenarioConsist : Consist
 
     public string? NumberingListPath { get; init; }
 
+    public float? Mass { get; init; }
+
     public static ScenarioConsist ParseConsist(IXmlDocument document, ConsistEntry consistEntry)
     {
         var el = document.DocumentElement;
@@ -38,6 +40,8 @@ public class ScenarioConsist : Consist
 
         var name = el.SelectTextContent("cEngineBlueprint Name");
         var numberList = el.QuerySelector("NumberingList CsvFile")?.Text();
+
+        _ = float.TryParse(el.QuerySelector("Mass")?.Text(), out var mass);
 
         return new ScenarioConsist
         {
@@ -56,6 +60,7 @@ public class ScenarioConsist : Consist
             EntityCount = entityCount,
             CargoComponents = cargoComponents,
             NumberingListPath = numberList,
+            Mass = mass,
         };
     }
 

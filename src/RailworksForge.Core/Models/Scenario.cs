@@ -171,6 +171,19 @@ public record Scenario
         return result.OutputPath;
     }
 
+    public async Task<string> ExportBinToXml()
+    {
+        var inputPath = HasBinary ? BinaryPath : ExtractXml();
+        var result = await Serz.Convert(inputPath, true);
+
+        var filename = Path.GetFileName(result.OutputPath);
+        var destination = Path.Join(DirectoryPath, filename);
+
+        File.Copy(result.OutputPath, destination);
+
+        return destination;
+    }
+
     private string ExtractXml()
     {
         if (!HasMainContentArchive)

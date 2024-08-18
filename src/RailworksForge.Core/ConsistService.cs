@@ -16,10 +16,10 @@ public class ConsistService
 {
     public static async Task ReplaceConsist(TargetConsist target, PreloadConsist preload, Scenario scenario)
     {
-        scenario.CreateBackup();
-
         var scenarioDocument = await GetUpdatedScenario(scenario, target, preload);
         var scenarioPropertiesDocument = await GetUpdatedScenarioProperties(scenario, target, preload);
+
+        scenario.CreateBackup();
 
         await WriteScenarioDocument(scenario, scenarioDocument);
         await WriteScenarioPropertiesDocument(scenario, scenarioPropertiesDocument);
@@ -29,10 +29,10 @@ public class ConsistService
 
     public static async Task DeleteConsist(TargetConsist target, Scenario scenario)
     {
-        scenario.CreateBackup();
-
         var scenarioDocument = await GetDeleteUpdatedScenario(scenario, target);
         var scenarioPropertiesDocument = await GetDeleteScenarioProperties(scenario, target);
+
+        scenario.CreateBackup();
 
         await WriteScenarioDocument(scenario, scenarioDocument);
         await WriteScenarioPropertiesDocument(scenario, scenarioPropertiesDocument);
@@ -154,7 +154,7 @@ public class ConsistService
                     throw new Exception("failed to create rail vehicle for consist");
                 }
 
-                var e = document.CreateElement("e");
+                var e = document.CreateXmlElement("e");
                 e.SetAttribute("type", "cDeltaString");
                 e.SetTextContent(railVehicle.Number);
 
@@ -237,13 +237,13 @@ public class ConsistService
 
     private static void UpdateBlueprintSetCollection(IXmlDocument document, PreloadConsist preload, string tagSelector)
     {
-        if (document.QuerySelector(tagSelector) is not {} preloadElement)
+        if (document.QuerySelector(tagSelector) is not {} collectionElement)
         {
             return;
         }
 
         var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
-        var providerProductSet = preloadElement
+        var providerProductSet = collectionElement
             .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
             .Aggregate(new Dictionary<string, int>(), (acc, curr) =>
             {
@@ -265,16 +265,32 @@ public class ConsistService
             return;
         }
 
-        var entryId = providerProductSet.OrderByDescending(pair => pair.Value).Select(p => p.Value).First() + 2;
-        var markup =
-            $"""
-             <iBlueprintLibrary-cBlueprintSetID d:id="{entryId}">
-                <Provider d:type="cDeltaString">{preload.BlueprintIdProvider}</Provider>
-                <Product d:type="cDeltaString">{preload.BlueprintIdProduct}</Product>
-             </iBlueprintLibrary-cBlueprintSetID>
-             """;
+        var currentEntryId = providerProductSet.OrderByDescending(pair => pair.Value).Select(p => p.Value).FirstOrDefault();
+        var initialId = currentEntryId == 0 ? new Random().Next(10000, 99999) : currentEntryId;
+        var entryId = initialId + 2;
 
-        preloadElement.InnerHtml += markup;
+        var setElement = CreateBlueprintSetElement(document, preload, entryId);
+
+        collectionElement.AppendChild(setElement);
+    }
+
+    private static IElement CreateBlueprintSetElement(IXmlDocument document, PreloadConsist preload, int entryId)
+    {
+        var setElement = document.CreateXmlElement("iBlueprintLibrary-cBlueprintSetID");
+        setElement.SetAttribute("d:id", entryId.ToString());
+
+        var providerElement = document.CreateXmlElement("Provider");
+        providerElement.SetAttribute("d:type", "cDeltaString");
+        providerElement.SetTextContent(preload.BlueprintIdProvider);
+
+        var productElement = document.CreateXmlElement("Product");
+        productElement.SetAttribute("d:type", "cDeltaString");
+        productElement.SetTextContent(preload.BlueprintIdProduct);
+
+        setElement.AppendChild(providerElement);
+        setElement.AppendChild(productElement);
+
+        return setElement;
     }
 
     private static async Task WriteScenarioDocument(Scenario scenario, IXmlDocument document)

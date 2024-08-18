@@ -2,6 +2,7 @@ using System.Text;
 
 using AngleSharp;
 using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AngleSharp.Xml;
 using AngleSharp.Xml.Dom;
 
@@ -13,7 +14,7 @@ public static class AngleSharpExtensions
 {
     public static string SelectTextContent(this IParentNode node, string selector)
     {
-        return node.QuerySelector(selector)?.Text().ReplaceLineEndings(string.Empty) ?? string.Empty;
+        return node.QuerySelector(selector)?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;
     }
 
     public static IElement? QueryByTextContent(this IHtmlCollection<IElement> elements, string selector, string key)
@@ -55,5 +56,15 @@ public static class AngleSharpExtensions
         {
             selectedElement.SetTextContent(text);
         }
+    }
+
+    public static IElement CreateXmlElement(this IDocument document, string selector)
+    {
+        if (document is not Document doc)
+        {
+            throw new Exception("cannot create xml element, invalid document");
+        }
+
+        return new HtmlElement(doc, selector);
     }
 }

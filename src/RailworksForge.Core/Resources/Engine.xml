@@ -3,14 +3,13 @@
         <cEngine d:id="">
             <PantographInfo d:type="cDeltaString">PANTO_UNKNOWN</PantographInfo>
             <PantographIsDirectional d:type="bool">0</PantographIsDirectional>
-            <LastPantographControlValue d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1
-            </LastPantographControlValue>
+            <LastPantographControlValue d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1</LastPantographControlValue>
             <Flipped d:type="bool">0</Flipped>
             <UniqueNumber d:type="cDeltaString"></UniqueNumber>
             <GUID d:type="cDeltaString"></GUID>
             <Followers>
             </Followers>
-            <TotalMass d:type="sFloat32" d:alt_encoding="0000000000405440" d:precision="string">81</TotalMass>
+            <TotalMass d:type="sFloat32" d:alt_encoding="0000000000405440" d:precision="string">50</TotalMass>
             <Speed d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</Speed>
             <Velocity>
                 <cHcRVector4>
@@ -32,9 +31,9 @@
             <DetailLevel d:type="sInt32">10</DetailLevel>
             <Global d:type="bool">0</Global>
             <Saved d:type="bool">1</Saved>
-            <Palette0Index d:type="sUInt8">151</Palette0Index>
-            <Palette1Index d:type="sUInt8">83</Palette1Index>
-            <Palette2Index d:type="sUInt8">159</Palette2Index>
+            <Palette0Index d:type="sUInt8">0</Palette0Index>
+            <Palette1Index d:type="sUInt8">0</Palette1Index>
+            <Palette2Index d:type="sUInt8">0</Palette2Index>
         </cAnimObjectRender>
         <cEngineSimContainer d:id=""/>
         <cControlContainer d:id="">
@@ -79,6 +78,5 @@
         </iBlueprintLibrary-cAbsoluteBlueprintID>
     </ReskinBlueprintID>
     <Name d:type="cDeltaString"></Name>
-    <EntityID>
-    </EntityID>
+    <EntityID></EntityID>
 </cOwnedEntity>

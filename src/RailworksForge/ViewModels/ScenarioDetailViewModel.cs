@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using AngleSharp.Xml;
+
+using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -30,7 +33,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
-    public ReactiveCommand<Unit, string> ExportBinXmlCommand { get; }
+    public ReactiveCommand<Unit, Unit> ExportBinXmlCommand { get; }
     public ReactiveCommand<Unit, string> ExportXmlBinCommand { get; }
     public ReactiveCommand<Unit, Unit> ExtractScenariosCommand { get; }
     public ReactiveCommand<Unit, Unit> ClickedConsistCommand { get; }
@@ -59,7 +62,16 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Launcher.Open(Scenario.BackupDirectory);
         });
 
-        ExportBinXmlCommand = ReactiveCommand.CreateFromTask(() => scenario.ConvertBinToXml(false));
+        ExportBinXmlCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            var path = await scenario.ExportBinToXml();
+
+            if (Path.GetDirectoryName(path) is {} dirname)
+            {
+                Launcher.Open(dirname);
+            }
+        });
+
         ExportXmlBinCommand = ReactiveCommand.CreateFromTask(scenario.ConvertXmlToBin);
 
         ExtractScenariosCommand = ReactiveCommand.CreateFromObservable(() =>
@@ -122,7 +134,12 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         LoadAcquisitionStates = ReactiveCommand.CreateFromObservable(() =>
         {
-            return Observable.StartAsync(() => Scenario.GetConsistStatus(), RxApp.TaskpoolScheduler);
+            return Observable.StartAsync(async () =>
+            {
+                await Scenario.GetConsistStatus();
+
+                Dispatcher.UIThread.InvokeAsync(() => OnPropertyChanged(nameof(Services)));
+            }, RxApp.TaskpoolScheduler);
         });
 
         DeleteConsistCommand = ReactiveCommand.CreateFromTask(async () =>

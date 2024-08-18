@@ -11,7 +11,7 @@ public static class Utilities
 
     public static IElement GenerateEntityContainerItem(this IXmlDocument document)
     {
-        var node = document.CreateElement("e");
+        var node = document.CreateXmlElement("e");
         node.SetAttribute("numElements", "16");
         node.SetAttribute("elementType", "sFloat32");
         node.SetAttribute("precision", "string");
@@ -21,7 +21,7 @@ public static class Utilities
 
     public static IElement GenerateCargoComponentItem(this IXmlDocument document, string val, string altEncoding)
     {
-        var node = document.CreateElement("e");
+        var node = document.CreateXmlElement("e");
         node.SetAttribute("type", "sFloat32");
         node.SetAttribute("alt_encoding", altEncoding);
         node.SetAttribute("precision", "string");
@@ -42,20 +42,20 @@ public static class Utilities
     {
         var guid = Guid.NewGuid();
         var ulongs = GetUuidLongs(guid);
-        var cGuid = document.CreateElement("cGUID");
-        var uuid = document.CreateElement("UUID");
+        var cGuid = document.CreateXmlElement("cGUID");
+        var uuid = document.CreateXmlElement("UUID");
 
-        var e1 = document.CreateElement("e");
+        var e1 = document.CreateXmlElement("e");
         e1.SetAttribute("type", "sUInt64");
         e1.SetTextContent(ulongs.Item1.ToString());
 
-        var e2 = document.CreateElement("e");
+        var e2 = document.CreateXmlElement("e");
         e2.SetAttribute("type", "sUInt64");
         e2.SetTextContent(ulongs.Item2.ToString());
 
         uuid.AppendNodes(e1, e2);
 
-        var devString = document.CreateElement("DevString");
+        var devString = document.CreateXmlElement("DevString");
         devString.SetAttribute("type", "cDeltaString");
         devString.SetTextContent(guid.ToString());
 

@@ -25,7 +25,7 @@ public class VehicleGenerator
             VehicleType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
             VehicleType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
             VehicleType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
-              _ =>  throw new Exception("Unknown vehicle type!"),
+              _ =>  throw new Exception("encountered unknown vehicle type"),
         };
 
         if (typeSpecificElement is null)
@@ -33,25 +33,16 @@ public class VehicleGenerator
             throw new Exception("could not find type specific element for vehicle type");
         }
 
-        if (vehicle.Number is not null)
-        {
-            typeSpecificElement.QuerySelector("UniqueNumber")?.SetTextContent(vehicle.Number);
-        }
-
-
         AddFollowers(prevElem, typeSpecificElement);
-
         AddEntityContainers(document, vehicle, cOwnedEntity);
         AddCargoComponents(document, vehicle, cOwnedEntity);
 
         UpdateComponentCpos(prevElem, vehicle, cOwnedEntity);
-
         UpdateEntityId(document, cOwnedEntity);
-
         UpdateOwnedEntityIds(cOwnedEntity);
         UpdateBlueprintIds(vehicle, cOwnedEntity);
-
         UpdateFlipped(cOwnedEntity, consistVehicle);
+        UpdateMass(cOwnedEntity, vehicle);
 
         if (vehicle.IsReskin)
         {
@@ -60,11 +51,38 @@ public class VehicleGenerator
 
         cOwnedEntity.UpdateTextElement("Name", vehicle.Name!);
 
-        var number = GetAvailableNumber(vehicle, consistVehicle);
+        var originalNumber = cOwnedEntity.SelectTextContent("UniqueNumber");
+        var number = vehicle.Number ?? GetAvailableNumber(vehicle, consistVehicle);
 
         cOwnedEntity.UpdateTextElement("UniqueNumber", number);
 
+        UpdateOperationNumbers(doc, number, originalNumber);
+
         return new GeneratedVehicle(cOwnedEntity, number);
+    }
+
+    private static void UpdateOperationNumbers(IXmlDocument doc, string number, string originalNumber)
+    {
+        var cConsistOperations = doc.QuerySelector("cConsistOperations");
+
+        if (cConsistOperations is null) return;
+
+        var operationTargetNumbers = cConsistOperations
+            .QuerySelectorAll("DeltaTarget cDriverInstructionTarget RailVehicleNumber e")
+            .Where(item => item.Text() == originalNumber);
+
+        foreach (var targetNumber in operationTargetNumbers)
+        {
+            targetNumber.SetTextContent(number);
+        }
+    }
+
+    private static void UpdateMass(IElement cOwnedEntity, ScenarioConsist consist)
+    {
+        if (consist.Mass.ToString() is {} mass)
+        {
+            cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(mass);
+        }
     }
 
     private static string GetAvailableNumber(ScenarioConsist vehicle, ConsistEntry consistEntry)
@@ -178,7 +196,15 @@ public class VehicleGenerator
             throw new Exception("could not get the cPos from the previous vehicle");
         }
 
-        cOwnedEntity.QuerySelector("Component")?.AppendChild(cPosOri);
+        var cAnimObjectRender = cOwnedEntity.QuerySelector("cAnimObjectRender");
+
+        if (cAnimObjectRender is null)
+        {
+            throw new Exception("could not get cAnimObjectRender from template vehicle document");
+        }
+
+        cAnimObjectRender.InsertAfter(cPosOri);
+
         cOwnedEntity.QuerySelector("Name")?.SetTextContent(vehicle.Name ?? string.Empty);
     }
 

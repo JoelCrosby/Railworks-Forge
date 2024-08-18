@@ -41,8 +41,7 @@ internal sealed class Program
         }
     }
 
-    // ReSharper disable once MemberCanBePrivate.Global
-    public static AppBuilder BuildAvaloniaApp()
+    private static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()

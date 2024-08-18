@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 
 using Avalonia.Controls;
@@ -18,6 +19,11 @@ public partial class ScenarioDetailPage : DataGridUserControl
     {
         InitializeComponent();
         SortColumns();
+
+        if (DataContext is ScenarioDetailViewModel context)
+        {
+            context.PropertyChanged += ViewModel_PropertyChanged;
+        }
     }
 
     // ReSharper disable once UnusedParameter.Local
@@ -40,5 +46,17 @@ public partial class ScenarioDetailPage : DataGridUserControl
         if (dataGrid.SelectedItems is null) return;
 
         context.SelectedConsists = dataGrid.SelectedItems.Cast<Consist>();
+    }
+
+    // ReSharper disable once UnusedParameter.Local
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs? e)
+    {
+        if (e?.PropertyName != "Services")
+        {
+            return;
+        }
+
+        ServicesDataGrid.CollectionView.Refresh();
+        ServicesDataGrid.UpdateLayout();
     }
 }
