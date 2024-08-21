@@ -12,6 +12,7 @@ using RailworksForge.Views.Dialogs;
 
 using ConsistDetailPage = RailworksForge.Views.Pages.ConsistDetailPage;
 using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
+using ReplaceTrackDialog = RailworksForge.Views.Dialogs.ReplaceTrackDialog;
 using RouteDetailPage = RailworksForge.Views.Pages.RouteDetailPage;
 using RoutesPage = RailworksForge.Views.Pages.RoutesPage;
 using SaveConsistDialog = RailworksForge.Views.Dialogs.SaveConsistDialog;
@@ -54,6 +55,7 @@ public class App : Application
         ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
+        ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
         ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
         ViewLocator.Register<RoutesViewModel, RoutesPage>();
         ViewLocator.Register<RoutesBaseViewModel, RoutesList>();

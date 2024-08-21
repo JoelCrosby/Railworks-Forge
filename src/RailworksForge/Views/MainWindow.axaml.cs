@@ -9,9 +9,6 @@ using RailworksForge.Views.Dialogs;
 
 using ReactiveUI;
 
-using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
-using SaveConsistDialog = RailworksForge.Views.Dialogs.SaveConsistDialog;
-
 namespace RailworksForge.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
@@ -35,6 +32,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             action(ViewModel.ShowConfirmationDialog.RegisterHandler(ShowDialog
                 <ConfirmationDialogViewModel, bool, ConfirmationDialog>));
+
+            action(ViewModel.ShowReplaceTrackDialog.RegisterHandler(ShowDialog
+                <ReplaceTrackViewModel, bool, ReplaceTrackDialog>));
         });
     }
 

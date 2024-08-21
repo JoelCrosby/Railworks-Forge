@@ -50,6 +50,7 @@
 
         <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
             <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>
+            <Button Command="{Binding ReplaceTrackCommand}">Replace Track</Button>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">

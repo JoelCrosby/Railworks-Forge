@@ -15,15 +15,15 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainMenuViewModel MainMenu { get; }
     public NavigationBarViewModel NavigationBar { get; }
     public StatusBarViewModel StatusBar { get; }
+    private RoutesViewModel Routes { get; }
 
     public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
     public Interaction<ReplaceConsistViewModel, PreloadConsist?> ShowReplaceConsistDialog { get; }
     public Interaction<ConfirmationDialogViewModel, bool> ShowConfirmationDialog { get; }
+    public Interaction<ReplaceTrackViewModel, bool> ShowReplaceTrackDialog { get; }
 
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
-
-    private RoutesViewModel Routes { get; }
 
     public MainWindowViewModel(IServiceProvider provider)
     {
@@ -36,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
         ShowConfirmationDialog = new Interaction<ConfirmationDialogViewModel, bool>();
+        ShowReplaceTrackDialog = new Interaction<ReplaceTrackViewModel, bool>();
 
         _contentViewModel = Routes;
     }

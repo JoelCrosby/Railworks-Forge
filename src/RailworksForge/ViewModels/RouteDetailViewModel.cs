@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -23,6 +24,7 @@ public class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenScenarioInExplorerCommand { get; }
+    public ReactiveCommand<Unit, Unit> ReplaceTrackCommand { get; }
 
     public Scenario? SelectedItem { get; set; }
 
@@ -54,6 +56,14 @@ public class RouteDetailViewModel : ViewModelBase
             if (SelectedItem?.DirectoryPath is null) return;
 
             Launcher.Open(SelectedItem.DirectoryPath);
+        });
+
+        ReplaceTrackCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await Utils.GetApplicationViewModel().ShowReplaceTrackDialog.Handle(new ReplaceTrackViewModel
+            {
+                Route = Route.Model,
+            });
         });
 
         Scenarios = GetScenarios();
