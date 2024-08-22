@@ -25,8 +25,28 @@ public class TrackService
         }
 
         var updatedDocument = UpdateTracks(document, request);
+        var updatedPropertiesDocument = UpdateProperties(propertiesDocument, request);
+
+        route.CreateBackup();
 
         await WriteTracksDocument(updatedDocument, route);
+        await WriteRoutePropertiesDocument(updatedPropertiesDocument, route);
+    }
+
+    private static IXmlDocument UpdateProperties(IXmlDocument document, ReplaceTracksRequest request)
+    {
+        foreach (var replacement in request.GetSelectedReplacements())
+        {
+            if (replacement.ReplacementBlueprint is null)
+            {
+                continue;
+            }
+
+            document.UpdateBlueprintSetCollection(replacement.ReplacementBlueprint, "RBlueprintSetPreLoad");
+            document.UpdateBlueprintSetCollection(replacement.ReplacementBlueprint, "RequiredSet");
+        }
+
+        return document;
     }
 
     private static IXmlDocument UpdateTracks(IXmlDocument document, ReplaceTracksRequest request)
@@ -70,9 +90,32 @@ public class TrackService
 
     private static async Task WriteTracksDocument(IXmlDocument document, Route route)
     {
-        var destination = Path.Join(Paths.GetHomeDirectory(), "Downloads", "Tracks.bin.xml");
+        Directory.CreateDirectory(Paths.GetCacheFolder());
+
+        var destination = Path.Join(Paths.GetCacheFolder(), "Tracks.bin.xml");
 
         await document.ToXmlAsync(destination);
-        await Serz.Convert(destination, true);
+
+        var output = await Serz.Convert(destination, true);
+        var destinationDirectory = Path.Join(route.DirectoryPath, "Networks");
+
+        Directory.CreateDirectory(destinationDirectory);
+
+        var binaryDestination = Path.Join(destinationDirectory, "Tracks.bin");
+
+        File.Copy(output.OutputPath, binaryDestination, true);
+    }
+
+    private static async Task WriteRoutePropertiesDocument(IXmlDocument document, Route route)
+    {
+        Directory.CreateDirectory(Paths.GetCacheFolder());
+
+        var destination = Path.Join(Paths.GetCacheFolder(), "RouteProperties.xml");
+
+        await document.ToXmlAsync(destination);
+
+        var documentDestination = Path.Join(route.DirectoryPath, "RouteProperties.xml");
+
+        File.Copy(destination, documentDestination, true);
     }
 }

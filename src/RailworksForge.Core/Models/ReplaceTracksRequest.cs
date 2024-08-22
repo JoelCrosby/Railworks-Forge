@@ -5,6 +5,11 @@ namespace RailworksForge.Core.Models;
 public record ReplaceTracksRequest
 {
     public required List<TrackReplacement> Replacements { get; init; }
+
+    public IEnumerable<TrackReplacement> GetSelectedReplacements()
+    {
+        return Replacements.Where(r => r.ReplacementBlueprint is not null);
+    }
 }
 
 public record TrackReplacement

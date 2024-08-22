@@ -104,7 +104,7 @@ public record Scenario
     {
         Directory.CreateDirectory(BackupDirectory);
 
-        var backupPath = Path.Join(BackupDirectory, $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip");
+        var backupPath = Path.Join(BackupDirectory, Utilities.GetBackupArchiveName());
 
         ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }

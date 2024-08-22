@@ -116,8 +116,8 @@ public partial class SelectTrackViewModel : ViewModelBase
         var networkTracksPath = Path.Join(value.FullName, "RailNetwork");
         var tracksPath = Path.Join(value.FullName, "Track");
 
-        var networkBinaries = Paths.Exists(networkTracksPath) ? Directory.EnumerateFiles(networkTracksPath, "*.XSec", SearchOption.AllDirectories) : [];
-        var trackBinaries = Paths.Exists(tracksPath) ? Directory.EnumerateFiles(tracksPath, "*.XSec", SearchOption.AllDirectories) : [];
+        var networkBinaries = Paths.Exists(networkTracksPath) ? Directory.EnumerateFiles(networkTracksPath, "*.bin", SearchOption.AllDirectories) : [];
+        var trackBinaries = Paths.Exists(tracksPath) ? Directory.EnumerateFiles(tracksPath, "*.bin", SearchOption.AllDirectories) : [];
 
         var tracks = new List<Blueprint>();
 
@@ -125,7 +125,11 @@ public partial class SelectTrackViewModel : ViewModelBase
             .Concat(trackBinaries)
             .Select(path =>
             {
-                var blueprintId = path.Replace(value.FullName, string.Empty).Replace(".XSec", ".xml");
+                var blueprintId = path
+                    .Replace(value.FullName, string.Empty)
+                    .TrimStart('/')
+                    .Replace('/', '\\')
+                    .Replace(".bin", ".xml");
 
                 return new Blueprint
                 {
@@ -142,8 +146,8 @@ public partial class SelectTrackViewModel : ViewModelBase
 
         foreach (var archive in archives)
         {
-            var networkFiles = Archives.ListFilesInPath(archive, "RailNetwork", ".XSec");
-            var trackFiles = Archives.ListFilesInPath(archive, "Track", ".XSec");
+            var networkFiles = Archives.ListFilesInPath(archive, "RailNetwork", ".bin");
+            var trackFiles = Archives.ListFilesInPath(archive, "Track", ".bin");
 
             var binaries = networkFiles.Concat(trackFiles).Select(file => new Blueprint
             {

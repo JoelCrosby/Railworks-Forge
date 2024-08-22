@@ -62,4 +62,9 @@ public static class Utilities
         cGuid.AppendNodes(uuid, devString);
         return cGuid;
     }
+
+    public static string GetBackupArchiveName()
+    {
+        return $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip";
+    }
 }

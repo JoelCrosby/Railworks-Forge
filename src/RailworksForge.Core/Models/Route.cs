@@ -26,6 +26,8 @@ public record Route
 
     public string TracksBinaryPath => Path.Join(DirectoryPath, "Networks", "Tracks.bin");
 
+    public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "routes", Id);
+
     public virtual bool Equals(Route? other)
     {
         if (other is null) return false;
@@ -46,6 +48,15 @@ public record Route
         {
             Archives.ExtractDirectory(archive, "Scenarios");
         }
+    }
+
+    public void CreateBackup()
+    {
+        Directory.CreateDirectory(BackupDirectory);
+
+        var backupPath = Path.Join(BackupDirectory, Utilities.GetBackupArchiveName());
+
+        ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
 
     public async Task<List<Blueprint>> GetTrackBlueprints()
@@ -82,7 +93,7 @@ public record Route
 
         if (Paths.Exists(path))
         {
-            var output = await Serz.Convert(path);
+            var output = await Serz.Convert(path, true);
             var xml = await File.ReadAllTextAsync(output.OutputPath);
 
             return await XmlParser.ParseDocumentAsync(xml);

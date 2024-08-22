@@ -1,5 +1,6 @@
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Models.Common;
 using RailworksForge.Core.Models.Examples;
 
 namespace RailworksForge.UnitTests;
@@ -14,9 +15,12 @@ public class ConsistServiceTests
 
         var consist = new PreloadConsist
         {
-            BlueprintIdProduct = "WCML-South",
-            BlueprintIdProvider = "DTG",
-            BlueprintId = @"RailVehicles\Electric\Class390\Default\DMSO\Class390DMSO.xml",
+            Blueprint = new Blueprint
+            {
+                BlueprintSetIdProduct = "WCML-South",
+                BlueprintSetIdProvider = "DTG",
+                BlueprintId = @"RailVehicles\Electric\Class390\Default\DMSO\Class390DMSO.xml",
+            },
             LocomotiveName = "Class 390 'Pendolino'",
             DisplayName = "Class 390 'Pendolino' Avanti - 9 Car Set",
             EraStartYear = "2002",

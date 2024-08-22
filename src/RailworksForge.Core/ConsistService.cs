@@ -7,6 +7,7 @@ using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Models.Common;
 
 using Serilog;
 
@@ -195,7 +196,8 @@ public class ConsistService
 
             UpdateBlueprint(serviceElement, preload);
             UpdateFilePath(serviceElement, preload);
-            UpdatePreloadElement(document, preload);
+
+            UpdateBlueprintElements(document, preload.Blueprint);
         }
 
         XmlException.ThrowIfDocumentInvalid(document);
@@ -207,11 +209,11 @@ public class ConsistService
     {
         serviceElement.UpdateTextElement("LocoName Key", Guid.NewGuid().ToString());
         serviceElement.UpdateTextElement("LocoName English", preload.LocomotiveName);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID", preload.BlueprintId);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", preload.BlueprintIdProvider);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", preload.BlueprintIdProduct);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID", preload.Blueprint.BlueprintId);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", preload.Blueprint.BlueprintSetIdProvider);
+        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", preload.Blueprint.BlueprintSetIdProduct);
         serviceElement.UpdateTextElement("LocoClass", LocoClassUtils.ToLongFormString(preload.EngineType));
-        serviceElement.UpdateTextElement("LocoAuthor", preload.BlueprintIdProvider);
+        serviceElement.UpdateTextElement("LocoAuthor", preload.Blueprint.BlueprintSetIdProvider);
     }
 
     private static void UpdateFilePath(IElement serviceElement, PreloadConsist preload)
@@ -221,76 +223,18 @@ public class ConsistService
             return;
         }
 
-        var parts = preload.BlueprintId.Split('\\');
+        var parts = preload.Blueprint.BlueprintId.Split('\\');
         var partsWithoutFilename = parts[..^1];
         var blueprintDirectory = string.Join('\\', partsWithoutFilename);
-        var packagedPath = $@"{preload.BlueprintIdProvider}\{preload.BlueprintIdProduct}\{blueprintDirectory}";
+        var packagedPath = $@"{preload.Blueprint.BlueprintSetIdProvider}\{preload.Blueprint.BlueprintSetIdProduct}\{blueprintDirectory}";
 
         filePath.SetTextContent(packagedPath);
     }
 
-    private static void UpdatePreloadElement(IXmlDocument document, PreloadConsist preload)
+    private static void UpdateBlueprintElements(IXmlDocument document, Blueprint blueprint)
     {
-        UpdateBlueprintSetCollection(document, preload, "RBlueprintSetPreLoad");
-        UpdateBlueprintSetCollection(document, preload, "RequiredSet");
-    }
-
-    private static void UpdateBlueprintSetCollection(IXmlDocument document, PreloadConsist preload, string tagSelector)
-    {
-        if (document.QuerySelector(tagSelector) is not {} collectionElement)
-        {
-            return;
-        }
-
-        var needle = $"{preload.BlueprintIdProvider}:{preload.BlueprintIdProduct}".ToLowerInvariant();
-        var providerProductSet = collectionElement
-            .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
-            .Aggregate(new Dictionary<string, int>(), (acc, curr) =>
-            {
-                var provider = curr.SelectTextContent("Provider");
-                var product = curr.SelectTextContent("Product");
-                var index = $"{provider}:{product}".ToLowerInvariant();
-
-                var textIdValue = curr.GetAttribute("d:id");
-                var isIntId = int.TryParse(textIdValue, out var idValue);
-                var id = isIntId ? idValue : -1;
-
-                acc.TryAdd(index, id);
-
-                return acc;
-            });
-
-        if (providerProductSet.ContainsKey(needle))
-        {
-            return;
-        }
-
-        var currentEntryId = providerProductSet.OrderByDescending(pair => pair.Value).Select(p => p.Value).FirstOrDefault();
-        var initialId = currentEntryId == 0 ? new Random().Next(10000, 99999) : currentEntryId;
-        var entryId = initialId + 2;
-
-        var setElement = CreateBlueprintSetElement(document, preload, entryId);
-
-        collectionElement.AppendChild(setElement);
-    }
-
-    private static IElement CreateBlueprintSetElement(IXmlDocument document, PreloadConsist preload, int entryId)
-    {
-        var setElement = document.CreateXmlElement("iBlueprintLibrary-cBlueprintSetID");
-        setElement.SetAttribute("d:id", entryId.ToString());
-
-        var providerElement = document.CreateXmlElement("Provider");
-        providerElement.SetAttribute("d:type", "cDeltaString");
-        providerElement.SetTextContent(preload.BlueprintIdProvider);
-
-        var productElement = document.CreateXmlElement("Product");
-        productElement.SetAttribute("d:type", "cDeltaString");
-        productElement.SetTextContent(preload.BlueprintIdProduct);
-
-        setElement.AppendChild(providerElement);
-        setElement.AppendChild(productElement);
-
-        return setElement;
+        document.UpdateBlueprintSetCollection(blueprint, "RBlueprintSetPreLoad");
+        document.UpdateBlueprintSetCollection(blueprint, "RequiredSet");
     }
 
     private static async Task WriteScenarioDocument(Scenario scenario, IXmlDocument document)

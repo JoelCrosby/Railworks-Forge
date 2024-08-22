@@ -7,6 +7,7 @@ using AngleSharp.Xml;
 using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Exceptions;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Extensions;
 
@@ -66,5 +67,63 @@ public static class AngleSharpExtensions
         }
 
         return new HtmlElement(doc, selector);
+    }
+
+    public static void UpdateBlueprintSetCollection(this IXmlDocument document, Blueprint blueprint, string tagSelector)
+    {
+        if (document.QuerySelector(tagSelector) is not {} collectionElement)
+        {
+            return;
+        }
+
+        var needle = $"{blueprint.BlueprintSetIdProvider}:{blueprint.BlueprintSetIdProduct}".ToLowerInvariant();
+        var providerProductSet = collectionElement
+            .QuerySelectorAll("iBlueprintLibrary-cBlueprintSetID")
+            .Aggregate(new Dictionary<string, int>(), (acc, curr) =>
+            {
+                var provider = curr.SelectTextContent("Provider");
+                var product = curr.SelectTextContent("Product");
+                var index = $"{provider}:{product}".ToLowerInvariant();
+
+                var textIdValue = curr.GetAttribute("d:id");
+                var isIntId = int.TryParse(textIdValue, out var idValue);
+                var id = isIntId ? idValue : -1;
+
+                acc.TryAdd(index, id);
+
+                return acc;
+            });
+
+        if (providerProductSet.ContainsKey(needle))
+        {
+            return;
+        }
+
+        var currentEntryId = providerProductSet.OrderByDescending(pair => pair.Value).Select(p => p.Value).FirstOrDefault();
+        var initialId = currentEntryId == 0 ? new Random().Next(10000, 99999) : currentEntryId;
+        var entryId = initialId + 2;
+
+        var setElement = CreateBlueprintSetElement(document, blueprint, entryId);
+
+        collectionElement.AppendChild(setElement);
+    }
+
+    private static IElement CreateBlueprintSetElement(this IXmlDocument document, Blueprint blueprint, int entryId)
+    {
+        var setElement = document.CreateXmlElement("iBlueprintLibrary-cBlueprintSetID");
+        setElement.SetAttribute("d:id", entryId.ToString());
+
+        var providerElement = document.CreateXmlElement("Provider");
+        providerElement.SetAttribute("d:type", "cDeltaString");
+        providerElement.SetTextContent(blueprint.BlueprintSetIdProvider);
+
+        var productElement = document.CreateXmlElement("Product");
+        productElement.SetAttribute("d:type", "cDeltaString");
+        productElement.SetTextContent(blueprint.BlueprintSetIdProduct);
+
+        setElement.AppendChild(providerElement);
+        setElement.AppendChild(productElement);
+
+        return setElement;
     }
 }

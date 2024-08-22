@@ -1,6 +1,7 @@
 using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
@@ -18,11 +19,7 @@ public class PreloadConsist
 
     public required List<ConsistEntry> ConsistEntries { get; init; }
 
-    public required string BlueprintId { get; init; }
-
-    public required string BlueprintIdProvider { get; init; }
-
-    public required string BlueprintIdProduct { get; init; }
+    public required Blueprint Blueprint { get; init; }
 
     public static PreloadConsist Parse(IElement el)
     {
@@ -47,9 +44,12 @@ public class PreloadConsist
 
         return new PreloadConsist
         {
-            BlueprintId = locomotive.BlueprintId,
-            BlueprintIdProduct = locomotive.BlueprintIdProduct,
-            BlueprintIdProvider = locomotive.BlueprintIdProvider,
+            Blueprint = new Blueprint
+            {
+                BlueprintId = locomotive.BlueprintId,
+                BlueprintSetIdProduct = locomotive.BlueprintIdProduct,
+                BlueprintSetIdProvider = locomotive.BlueprintIdProvider,
+            },
             LocomotiveName = locomotiveName,
             DisplayName = displayName,
             EngineType = LocoClassUtils.Parse(engineType),
