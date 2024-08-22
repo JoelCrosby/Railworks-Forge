@@ -138,7 +138,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             {
                 await Scenario.GetConsistStatus();
 
-                Dispatcher.UIThread.InvokeAsync(() => OnPropertyChanged(nameof(Services)));
+                Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Services)));
             }, RxApp.TaskpoolScheduler);
         });
 
