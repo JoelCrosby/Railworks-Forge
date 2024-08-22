@@ -5,7 +5,7 @@ using RailworksForge.Core.External;
 
 namespace RailworksForge.Core.Models.Common;
 
-public class Blueprint
+public record Blueprint
 {
     public required string BlueprintId { get; init; }
 

@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceTrackDialog"
         x:DataType="vm:ReplaceTrackViewModel"
@@ -10,4 +11,98 @@
         Height="720"
         WindowStartupLocation="CenterOwner"
         Title="Replace Track">
+
+    <Design.DataContext>
+        <vm:DesignReplaceTrackViewModel />
+    </Design.DataContext>
+
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel Spacing="4">
+                <TextBlock FontWeight="SemiBold" FontSize="16">Replace Tracks</TextBlock>
+            </StackPanel>
+        </Border>
+
+        <li:LoadingIndicator Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,12,*" IsVisible="{Binding !IsLoading}" Margin="12,24,12,12">
+
+            <Grid.Styles>
+                <Style Selector="TextBlock">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Opacity" Value="0.7" />
+                </Style>
+            </Grid.Styles>
+
+            <TextBlock Grid.Column="0" Text="Route Track" Margin="8,0,0,0" />
+            <Grid Grid.Column="2" ColumnDefinitions="*,8,*,8,2*">
+                <TextBlock Grid.Column="0" Text="Provider" />
+                <TextBlock Grid.Column="2" Text="Product" />
+                <TextBlock Grid.Column="4" Text="Track Blueprint" />
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="12" IsVisible="{Binding !IsLoading}">
+            <ScrollViewer>
+                <Border Margin="0,0,24,0">
+                    <ItemsControl ItemsSource="{Binding RouteTracks^}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                                    <Grid ColumnDefinitions="*,12,*">
+                                        <StackPanel Grid.Column="0" Spacing="8" Orientation="Horizontal">
+                                            <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProvider}" />
+                                            <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProduct}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintId}" />
+                                        </StackPanel>
+
+                                        <Grid ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
+                                            <ComboBox
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Stretch"
+                                                ItemsSource="{Binding Providers}"
+                                                SelectedItem="{Binding SelectedProvider}"
+                                                DisplayMemberBinding="{Binding Name}"
+                                                PlaceholderText="Provider"
+                                            />
+
+                                            <ComboBox
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Stretch"
+                                                ItemsSource="{Binding Products}"
+                                                SelectedItem="{Binding SelectedProduct}"
+                                                DisplayMemberBinding="{Binding Name}"
+                                                PlaceholderText="Product"
+                                            />
+
+                                            <ComboBox
+                                                Grid.Column="4"
+                                                HorizontalAlignment="Stretch"
+                                                ItemsSource="{Binding Tracks}"
+                                                SelectedItem="{Binding SelectedTrack}"
+                                                DisplayMemberBinding="{Binding BlueprintId}"
+                                                PlaceholderText="Track Blueprint"
+                                                PlaceholderForeground="Black"
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </ScrollViewer>
+        </Border>
+
+        <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Click="CancelButtonOnClick">Cancel</Button>
+                <Button Command="{Binding ReplaceTracksCommand}">
+                    Replace Tracks
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
 </Window>

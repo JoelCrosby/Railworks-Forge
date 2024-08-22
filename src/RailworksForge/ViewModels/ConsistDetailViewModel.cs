@@ -40,7 +40,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
 
-    public IObservable<ObservableCollection<ConsistRailVehicle>> RailVehicles { get; }
+    public IObservable<List<ConsistRailVehicle>> RailVehicles { get; }
 
     public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
 
@@ -92,7 +92,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         });
     }
 
-    private async Task<ObservableCollection<ConsistRailVehicle>> GetRailVehicles()
+    private async Task<List<ConsistRailVehicle>> GetRailVehicles()
     {
         if (string.IsNullOrWhiteSpace(_consist.BlueprintId))
         {
@@ -103,7 +103,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
 
-        return new ObservableCollection<ConsistRailVehicle>(consists);
+        return consists;
     }
 
     private static async Task<List<PreloadConsist>> GetConsistBlueprint(string path, CancellationToken cancellationToken)

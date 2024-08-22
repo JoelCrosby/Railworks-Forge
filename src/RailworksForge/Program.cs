@@ -21,12 +21,12 @@ internal sealed class Program
         try
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console(LogEventLevel.Debug)
-                .WriteTo.File($"{Paths.GetLoggingPath()}/railworks-forge-.log", LogEventLevel.Error)
+                .WriteTo.Console(LogEventLevel.Fatal)
+                .WriteTo.File($"{Paths.GetLoggingPath()}/railworks-forge-.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             TaskScheduler.UnobservedTaskException += HandleUnobservedTaskExceptions;
-
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             RxApp.DefaultExceptionHandler = new ExceptionObserver();
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
@@ -57,5 +57,10 @@ internal sealed class Program
             Log.Error("Unobserved task exception type: {ExceptionType}", ex.GetType());
             return true;
         });
+    }
+
+    private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        Log.Error("Unobserved task exception type: {ExceptionType}", e.ExceptionObject.GetType());
     }
 }

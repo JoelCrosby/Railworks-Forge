@@ -47,7 +47,7 @@ public static class Archives
         return reader.ReadToEnd();
     }
 
-    public static async Task<Bitmap?> GetStreamFromPath(string archivePath, string filePath, bool strict = true)
+    public static async Task<Bitmap?> GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
     {
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
 
@@ -122,5 +122,15 @@ public static class Archives
     {
         using var archive = ZipFile.OpenRead(archivePath);
         return archive.Entries.Any(entry => string.Equals(entry.FullName, agnosticBlueprintIdPath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static List<string> ListFilesInPath(string archivePath, string directoryPath, string extension)
+    {
+        using var archive = ZipFile.OpenRead(archivePath);
+
+        return archive.Entries
+            .Where(entry => entry.FullName.StartsWith(directoryPath) && entry.FullName.EndsWith(extension))
+            .Select(entry => entry.FullName)
+            .ToList();
     }
 }

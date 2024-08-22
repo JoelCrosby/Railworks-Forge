@@ -9,14 +9,7 @@ using RailworksForge.ViewModels;
 using RailworksForge.Views;
 using RailworksForge.Views.Controls;
 using RailworksForge.Views.Dialogs;
-
-using ConsistDetailPage = RailworksForge.Views.Pages.ConsistDetailPage;
-using ReplaceConsistDialog = RailworksForge.Views.Dialogs.ReplaceConsistDialog;
-using ReplaceTrackDialog = RailworksForge.Views.Dialogs.ReplaceTrackDialog;
-using RouteDetailPage = RailworksForge.Views.Pages.RouteDetailPage;
-using RoutesPage = RailworksForge.Views.Pages.RoutesPage;
-using SaveConsistDialog = RailworksForge.Views.Dialogs.SaveConsistDialog;
-using ScenarioDetailPage = RailworksForge.Views.Pages.ScenarioDetailPage;
+using RailworksForge.Views.Pages;
 
 namespace RailworksForge;
 

@@ -159,7 +159,7 @@ public class ProtonService
         return apps.OrderBy(app => app.Name).ToList();
     }
 
-    private string? GetSteamappsSubdirectory(string path)
+    private static string? GetSteamappsSubdirectory(string path)
     {
         return GetSubDir(path, "steamapps");
     }
@@ -172,7 +172,7 @@ public class ProtonService
         return ParseLibraryFolders(foldersVdfPath);
     }
 
-    private List<string> ParseLibraryFolders(string path)
+    private static List<string> ParseLibraryFolders(string path)
     {
         var content = File.ReadAllText(path);
         var libraryVdf = VdfConvert.Deserialize(content).ToJson();
@@ -201,7 +201,7 @@ public class ProtonService
         var paths = new List<string>
         {
             "/usr/share/steam/compatibilitytools.d",
-            "/usr/local/share/steam/compatibilitytools.d"
+            "/usr/local/share/steam/compatibilitytools.d",
         };
 
         if (Environment.GetEnvironmentVariable("STEAM_EXTRA_COMPAT_TOOLS_PATHS") is { } extra)
@@ -243,19 +243,19 @@ public class ProtonService
         return apps;
     }
 
-    private bool HasSteamAppsDir(string path)
+    private static bool HasSteamAppsDir(string path)
     {
         return GetSubDir(path, "steamapps") is not null;
     }
 
-    private string? GetSubDir(string path, string subdirectory)
+    private static string? GetSubDir(string path, string subdirectory)
     {
         return Directory
             .EnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly)
             .FirstOrDefault(dir => string.Equals(Path.GetFileName(dir), subdirectory, StringComparison.OrdinalIgnoreCase));
     }
 
-    private SteamApp FindProtonApp(string steamPath, List<SteamApp> steamApps, string appId)
+    private static SteamApp FindProtonApp(string steamPath, List<SteamApp> steamApps, string appId)
     {
         if (Environment.GetEnvironmentVariable("PROTON_VERSION") is { } protonVersion)
         {

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using Avalonia.Controls;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Examples;
@@ -14,9 +16,10 @@ using ReactiveUI;
 
 namespace RailworksForge.ViewModels;
 
-public class RouteDetailViewModel : ViewModelBase
+public partial class RouteDetailViewModel : ViewModelBase
 {
-    public RouteViewModel Route { get; }
+    [ObservableProperty]
+    private RouteViewModel _route;
 
     public ObservableCollection<Scenario> Scenarios { get; init; }
 
@@ -60,10 +63,7 @@ public class RouteDetailViewModel : ViewModelBase
 
         ReplaceTrackCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            await Utils.GetApplicationViewModel().ShowReplaceTrackDialog.Handle(new ReplaceTrackViewModel
-            {
-                Route = Route.Model,
-            });
+            await Utils.GetApplicationViewModel().ShowReplaceTrackDialog.Handle(new ReplaceTrackViewModel(Route.Model));
         });
 
         Scenarios = GetScenarios();

@@ -5,7 +5,7 @@ using RailworksForge.Core.Extensions;
 
 namespace RailworksForge.Core.Models;
 
-public class ScenarioConsist : Consist
+public record ScenarioConsist : Consist
 {
     public string? Name { get; init; }
 

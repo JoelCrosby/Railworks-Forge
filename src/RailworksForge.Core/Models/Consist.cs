@@ -8,7 +8,7 @@ using RailworksForge.Core.Models.Common;
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{ServiceName}")]
-public class Consist : Blueprint
+public record Consist : Blueprint
 {
     public required string Id { get; init; }
 

@@ -81,7 +81,7 @@ public partial class PreloadConsistViewModel : ViewModelBase
         {
             var directory = Path.GetDirectoryName(consist.BlueprintIdPath);
             var idealPath = Path.Join(directory, "LocoInformation", "Image.png");
-            var result = await Archives.GetStreamFromPath(archive, idealPath, false);
+            var result = await Archives.GetBitmapStreamFromPath(archive, idealPath, false);
 
             if (result is not null) return result;
         }

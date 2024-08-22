@@ -5,6 +5,7 @@ using AngleSharp.Text;
 
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Exceptions;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -211,5 +212,25 @@ public static class Paths
         Directory.CreateDirectory(parentDir);
 
         return outputPath;
+    }
+
+    public static List<DirectoryInfo> GetAssetProviders()
+    {
+        return Directory
+            .EnumerateDirectories(GetAssetsDirectory(), "*", SearchOption.TopDirectoryOnly)
+            .ToDirectoryInfoList();
+    }
+
+    public static List<DirectoryInfo> GetAssetProviderProducts(string provider)
+    {
+        var directory = Path.Join(GetAssetsDirectory(), provider);
+
+        if (!Exists(directory))
+        {
+            throw new DirectoryNotFoundException($"Directory {directory} not found");
+        }
+
+        return Directory.EnumerateDirectories(directory, "*", SearchOption.TopDirectoryOnly)
+            .ToDirectoryInfoList();
     }
 }
