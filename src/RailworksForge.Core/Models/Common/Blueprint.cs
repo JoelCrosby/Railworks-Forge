@@ -13,6 +13,20 @@ public record Blueprint
 
     public required string BlueprintSetIdProduct { get; init; }
 
+    public virtual bool Equals(Blueprint? other)
+    {
+        if (other is null) return false;
+
+        return other.BlueprintId == BlueprintId
+               && other.BlueprintSetIdProvider == BlueprintSetIdProvider
+               && other.BlueprintSetIdProduct == BlueprintSetIdProduct;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(BlueprintId, BlueprintSetIdProvider, BlueprintSetIdProduct);
+    }
+
     public AcquisitionState AcquisitionState => GetAcquisitionState();
 
     private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
@@ -24,7 +38,6 @@ public record Blueprint
             var converted = await Serz.Convert(BlueprintPath);
             return await File.ReadAllTextAsync(converted.OutputPath);
         }
-
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
 

@@ -7,16 +7,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-using AngleSharp.Xml.Dom;
-
 using Avalonia.Controls;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
-using RailworksForge.Core.Extensions;
-using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
@@ -32,26 +28,22 @@ public partial class ReplaceTrackViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
 
-    public ReactiveCommand<Unit, ReplaceTracksRequest> ReplaceTracksCommand { get; }
+    [ObservableProperty]
+    private List<SelectTrackViewModel> _routeTracks;
 
-    public IObservable<List<SelectTrackViewModel>> RouteTracks { get; init; }
+    public ReactiveCommand<Unit, ReplaceTracksRequest> ReplaceTracksCommand { get; }
 
     public ReplaceTrackViewModel(Route route)
     {
         Route = route;
         IsLoading = true;
-        ReplaceTracksCommand = ReactiveCommand.CreateFromTask(async () =>
+        RouteTracks = [];
+
+        ReplaceTracksCommand = ReactiveCommand.Create(() =>
         {
-            if (RouteTracks is null)
-            {
-                ArgumentNullException.ThrowIfNull(RouteTracks);
-            }
-
-            var tracks = await RouteTracks.FirstAsync();
-
             return new ReplaceTracksRequest
             {
-                Replacements = tracks.ConvertAll(r => new TrackReplacement
+                Replacements = RouteTracks.ConvertAll(r => new TrackReplacement
                 {
                     Blueprint = r.RouteBlueprint,
                     ReplacementBlueprint = r.SelectedTrack,
@@ -59,79 +51,28 @@ public partial class ReplaceTrackViewModel : ViewModelBase
             };
         });
 
-        RouteTracks = Observable.Return(new List<SelectTrackViewModel>());
-
         if (Design.IsDesignMode is false)
         {
-            RouteTracks = Observable.FromAsync(GetRouteTracks, RxApp.TaskpoolScheduler);
+            Observable.FromAsync(GetRouteTracks, RxApp.TaskpoolScheduler).Subscribe(tracks =>
+            {
+                Dispatcher.UIThread.Post(() => RouteTracks = tracks);
+            });
         }
     }
 
     private async Task<List<SelectTrackViewModel>> GetRouteTracks()
     {
-        var document = await GetRouteTracksDocument();
+        var blueprints = await Route.GetTrackBlueprints();
 
-        if (document is null)
-        {
-            throw new Exception("could not read route tracks file");
-        }
-
-        var models = await Task.Run(() =>
-        {
-            var blueprints = document
-                .QuerySelectorAll("Network-cSectionGenericProperties BlueprintID")
-                .Select(element =>
-                {
-                    var provider = element.SelectTextContent("Provider");
-                    var product = element.SelectTextContent("Product");
-                    var blueprintId = element.SelectTextContent("BlueprintID");
-
-                    return new Blueprint
-                    {
-                        BlueprintId = blueprintId,
-                        BlueprintSetIdProduct = product,
-                        BlueprintSetIdProvider = provider,
-                    };
-                });
-
-            return blueprints
-                .ToHashSet()
-                .Where(blueprint => string.IsNullOrEmpty(blueprint.BlueprintId) is false)
-                .Select(track => new SelectTrackViewModel { RouteBlueprint = track })
-                .ToList();
-        });
+        var  models = blueprints
+            .ToHashSet()
+            .Where(blueprint => string.IsNullOrEmpty(blueprint.BlueprintId) is false)
+            .Select(track => new SelectTrackViewModel { RouteBlueprint = track })
+            .ToList();
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
 
         return models;
-    }
-
-    private async Task<IXmlDocument?> GetRouteTracksDocument()
-    {
-        var trackBinPath = Path.Join(Route.DirectoryPath, "Networks", "Tracks.bin");
-
-        if (Paths.Exists(trackBinPath))
-        {
-            var output = await Serz.Convert(trackBinPath);
-            var xml = await File.ReadAllTextAsync(output.OutputPath);
-
-            return await XmlParser.ParseDocumentAsync(xml);
-        }
-
-        var archivePath = Route.MainContentArchivePath;
-        var destination = Paths.GetAssetCachePath(trackBinPath, false);
-
-        Archives.ExtractFileContentFromPath(archivePath, "Networks/Tracks.bin", destination);
-
-        var compressedOutput = await Serz.Convert(destination);
-
-        if (Paths.Exists(compressedOutput.OutputPath))
-        {
-            var xml = await File.ReadAllTextAsync(compressedOutput.OutputPath);
-            return await XmlParser.ParseDocumentAsync(xml);
-        }
-
-        return null;
     }
 }
 

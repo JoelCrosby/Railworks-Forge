@@ -34,7 +34,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 <ConfirmationDialogViewModel, bool, ConfirmationDialog>));
 
             action(ViewModel.ShowReplaceTrackDialog.RegisterHandler(ShowDialog
-                <ReplaceTrackViewModel, bool, ReplaceTrackDialog>));
+                <ReplaceTrackViewModel, ReplaceTracksRequest?, ReplaceTrackDialog>));
         });
     }
 

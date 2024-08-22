@@ -47,7 +47,7 @@
         <Border Grid.Row="2" Margin="12" IsVisible="{Binding !IsLoading}">
             <ScrollViewer>
                 <Border Margin="0,0,24,0">
-                    <ItemsControl ItemsSource="{Binding RouteTracks^}">
+                    <ItemsControl ItemsSource="{Binding RouteTracks}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
@@ -84,7 +84,6 @@
                                                 SelectedItem="{Binding SelectedTrack}"
                                                 DisplayMemberBinding="{Binding BlueprintId}"
                                                 PlaceholderText="Track Blueprint"
-                                                PlaceholderForeground="Black"
                                             />
                                         </Grid>
                                     </Grid>

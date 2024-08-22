@@ -45,7 +45,7 @@ public class DesignReplaceTrackViewModel : ReplaceTrackViewModel
     {
         var models =_tracks.Select(track => new SelectTrackViewModel { RouteBlueprint = track});
 
-        RouteTracks = Observable.Return(models.ToList());
+        RouteTracks = models.ToList();
         IsLoading = false;
     }
 }

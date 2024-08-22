@@ -1,4 +1,11 @@
 using System.Diagnostics;
+using System.IO.Compression;
+
+using AngleSharp.Xml.Dom;
+
+using RailworksForge.Core.Extensions;
+using RailworksForge.Core.External;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
@@ -16,6 +23,8 @@ public record Route
     public required PackagingType PackagingType { get; init; }
 
     public string MainContentArchivePath => Path.Join(DirectoryPath, "MainContent.ap");
+
+    public string TracksBinaryPath => Path.Join(DirectoryPath, "Networks", "Tracks.bin");
 
     public virtual bool Equals(Route? other)
     {
@@ -37,5 +46,92 @@ public record Route
         {
             Archives.ExtractDirectory(archive, "Scenarios");
         }
+    }
+
+    public async Task<List<Blueprint>> GetTrackBlueprints()
+    {
+        var document = await GetTrackDocument();
+
+        if (document is null)
+        {
+            throw new Exception("could not read route tracks file");
+        }
+
+        var blueprints = document
+                .QuerySelectorAll("Network-cSectionGenericProperties BlueprintID")
+                .Select(element =>
+                {
+                    var provider = element.SelectTextContent("Provider");
+                    var product = element.SelectTextContent("Product");
+                    var blueprintId = element.SelectTextContent("BlueprintID");
+
+                    return new Blueprint
+                    {
+                        BlueprintId = blueprintId,
+                        BlueprintSetIdProduct = product,
+                        BlueprintSetIdProvider = provider,
+                    };
+                });
+
+        return blueprints.ToList();
+    }
+
+    public async Task<IXmlDocument?> GetTrackDocument()
+    {
+        var path = TracksBinaryPath;
+
+        if (Paths.Exists(path))
+        {
+            var output = await Serz.Convert(path);
+            var xml = await File.ReadAllTextAsync(output.OutputPath);
+
+            return await XmlParser.ParseDocumentAsync(xml);
+        }
+
+        var archivePath = MainContentArchivePath;
+        var destination = Paths.GetAssetCachePath(path, false);
+
+        Archives.ExtractFileContentFromPath(archivePath, "Networks/Tracks.bin", destination);
+
+        var compressedOutput = await Serz.Convert(destination);
+
+        if (Paths.Exists(compressedOutput.OutputPath))
+        {
+            var xml = await File.ReadAllTextAsync(compressedOutput.OutputPath);
+            return await XmlParser.ParseDocumentAsync(xml);
+        }
+
+        return null;
+    }
+
+    public async Task<IXmlDocument?> GetRoutePropertiesDocument()
+    {
+        if (PackagingType is PackagingType.Packed)
+        {
+            return await GetArchivedPropertiesDocument();
+        }
+
+        var text = await File.ReadAllTextAsync(RoutePropertiesPath);
+        return await XmlParser.ParseDocumentAsync(text);
+    }
+
+    private Task<IXmlDocument> GetArchivedPropertiesDocument()
+    {
+        var archivePath = Path.Join(DirectoryPath, "MainContent.ap");
+
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+        var entry = archive.Entries.FirstOrDefault(e => e.FullName == "RouteProperties.xml");
+
+        if (entry is null)
+        {
+            throw new Exception("could not file scenario properties entry in archive");
+        }
+
+        var content = entry.Open();
+
+        using var reader = new StreamReader(content);
+
+        var file = reader.ReadToEnd();
+        return XmlParser.ParseDocumentAsync(file);
     }
 }

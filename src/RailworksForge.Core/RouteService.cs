@@ -9,7 +9,11 @@ public class RouteService
     {
         var baseDir = Paths.GetRoutesDirectory();
         var routeFiles = Directory
-            .EnumerateFiles(baseDir, "*",  SearchOption.AllDirectories)
+            .EnumerateFiles(baseDir, "*",  new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                MaxRecursionDepth = 1,
+            })
             .Where(file => file.EndsWith("RouteProperties.xml") || file.EndsWith("MainContent.ap"))
             .Aggregate(new Dictionary<string, List<string>>(), (acc, route) =>
             {

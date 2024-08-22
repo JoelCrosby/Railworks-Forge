@@ -63,7 +63,11 @@ public partial class RouteDetailViewModel : ViewModelBase
 
         ReplaceTrackCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            await Utils.GetApplicationViewModel().ShowReplaceTrackDialog.Handle(new ReplaceTrackViewModel(Route.Model));
+            var result = await Utils.GetApplicationViewModel().ShowReplaceTrackDialog.Handle(new ReplaceTrackViewModel(Route.Model));
+
+            if (result is null) return;
+
+            await TrackService.ReplaceTracks(Route.Model, result);
         });
 
         Scenarios = GetScenarios();
