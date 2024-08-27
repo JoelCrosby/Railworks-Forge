@@ -234,8 +234,12 @@ public record Scenario
     public async Task<string> ConvertXmlToBin()
     {
         var path = Path.Join(DirectoryPath, "Scenario.bin.xml");
+        var result = await Serz.Convert(path, true);
 
-        await Serz.Convert(path);
+        var filename = Path.GetFileName(result.OutputPath);
+        var destination = Path.Join(DirectoryPath, filename);
+
+        File.Copy(result.OutputPath, destination);
 
         return BinaryPath;
     }

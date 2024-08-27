@@ -47,7 +47,7 @@ public class MainMenuViewModel : ViewModelBase
 
             var result = await Serz.Convert(path, true);
 
-            File.Copy(result.OutputPath, path.Replace(".bin.xml", ".xml"));
+            File.Copy(result.OutputPath, path.Replace(".bin.xml", ".bin"));
         });
 
         OpenSettingsDirectoryCommand = ReactiveCommand.Create(() =>
