@@ -41,7 +41,6 @@ public record Consist : Blueprint
         var blueprintSetIdProduct = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
-
         return new Consist
         {
             Id = consistId,

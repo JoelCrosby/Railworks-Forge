@@ -9,9 +9,11 @@ public record GeneratedVehicle(IElement Element, string Number);
 
 public class VehicleGenerator
 {
-    public static GeneratedVehicle GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
+    public static async Task<GeneratedVehicle> GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
     {
-        var doc = XmlParser.ParseDocument(VehicleTemplates.GetXml(vehicle.VehicleType));
+        var vehicleType = await GetConsistEntryVehicleType(consistVehicle);
+        var xml = VehicleTemplates.GetXml(vehicleType);
+        var doc = await XmlParser.ParseDocumentAsync(xml);
         var cOwnedEntity = doc.DocumentElement;
 
         if (cOwnedEntity is null)
@@ -19,7 +21,13 @@ public class VehicleGenerator
             throw new Exception("could not find root element for vehicle type");
         }
 
-        var typeSpecificElement = cOwnedEntity.QuerySelector("Component")?.FirstElementChild;
+        var typeSpecificElement = vehicle.VehicleType switch
+        {
+            VehicleType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
+            VehicleType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
+            VehicleType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
+            _ =>  throw new Exception("encountered unknown vehicle type"),
+        };
 
         if (typeSpecificElement is null)
         {
@@ -52,6 +60,14 @@ public class VehicleGenerator
         UpdateOperationNumbers(doc, number, originalNumber);
 
         return new GeneratedVehicle(cOwnedEntity, number);
+    }
+
+    private static async Task<VehicleType> GetConsistEntryVehicleType(ConsistEntry consistVehicle)
+    {
+        var document = await consistVehicle.GetXmlDocument();
+        var elementName = document.QuerySelector("Blueprint")?.FirstElementChild?.NodeName;
+
+        return Utilities.ParseVehicleType(elementName);
     }
 
     private static void UpdateOperationNumbers(IDocument doc, string number, string originalNumber)

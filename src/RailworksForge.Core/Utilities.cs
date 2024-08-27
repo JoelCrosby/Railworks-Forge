@@ -66,4 +66,18 @@ public static class Utilities
     {
         return $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip";
     }
+
+    public static VehicleType ParseVehicleType(string? tagName)
+    {
+        return tagName?.ToLowerInvariant() switch
+        {
+            "cengine" => VehicleType.Engine,
+            "cengineblueprint" => VehicleType.Engine,
+            "cwagon" => VehicleType.Wagon,
+            "cwagonblueprint" => VehicleType.Wagon,
+            "ctender" => VehicleType.Tender,
+            "ctenderblueprint" => VehicleType.Tender,
+            _ => throw new Exception($"unknown vehicle type for tag name {tagName}"),
+        };
+    }
 }

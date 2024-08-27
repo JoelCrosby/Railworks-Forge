@@ -175,7 +175,7 @@ public class ConsistService
         var vehicleDocument = await consistVehicle.GetXmlDocument();
         var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, consistVehicle);
 
-        return VehicleGenerator.GenerateVehicle(document, scenarioNode, scenarioConsist, consistVehicle);
+        return await VehicleGenerator.GenerateVehicle(document, scenarioNode, scenarioConsist, consistVehicle);
     }
 
     private static async Task<IDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)

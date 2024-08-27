@@ -3,8 +3,8 @@ namespace RailworksForge.Core;
 public class VehicleTemplates
 {
     private static string EngineTemplate => GetTextResource("Engine.xml");
-    private static string WagonTemplate => GetTextResource("Engine.xml");
-    private static string TenderTemplate => GetTextResource("Engine.xml");
+    private static string WagonTemplate => GetTextResource("Wagon.xml");
+    private static string TenderTemplate => GetTextResource("Tender.xml");
 
     private static string GetTextResource(string name)
     {

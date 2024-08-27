@@ -39,7 +39,7 @@ public record ScenarioConsist : Consist
 
         var consist = Consist.ParseConsist(el);
 
-        var vehicleType = ParseVehicleType(el.QuerySelector("Blueprint")?.FirstElementChild?.NodeName);
+        var vehicleType = Utilities.ParseVehicleType(el.QuerySelector("Blueprint")?.FirstElementChild?.NodeName);
         var entityCount = el.QuerySelectorAll("cEntityContainerBlueprint-sChild").Length;
         var cargoComponents = GetCargoComponents(el);
 
@@ -66,20 +66,6 @@ public record ScenarioConsist : Consist
             CargoComponents = cargoComponents,
             NumberingListPath = numberList,
             Mass = mass,
-        };
-    }
-
-    private static VehicleType ParseVehicleType(string? tagName)
-    {
-        return tagName?.ToLowerInvariant() switch
-        {
-            "cengine" => VehicleType.Engine,
-            "cengineblueprint" => VehicleType.Engine,
-            "cwagon" => VehicleType.Wagon,
-            "cwagonblueprint" => VehicleType.Wagon,
-            "ctender" => VehicleType.Tender,
-            "ctenderblueprint" => VehicleType.Tender,
-            _ => throw new Exception($"unknown vehicle type for tag name {tagName}"),
         };
     }
 
