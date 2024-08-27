@@ -6,7 +6,6 @@ using AngleSharp.Dom;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
-using RailworksForge.Core.Models.Common;
 using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core.Models;
@@ -242,16 +241,6 @@ public record Scenario
         File.Copy(result.OutputPath, destination);
 
         return BinaryPath;
-    }
-
-    public async Task<List<Blueprint>> GetBlueprintIds()
-    {
-        var doc = await GetXmlDocument();
-
-        return doc
-            .QuerySelectorAll("cConsist RailVehicles cOwnedEntity BlueprintID")
-            .Select(Blueprint.Parse)
-            .ToList();
     }
 
     public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(string serviceId)

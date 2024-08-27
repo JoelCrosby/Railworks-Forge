@@ -4,7 +4,7 @@ namespace RailworksForge.Core.External;
 
 public class Serz
 {
-    public record ConvertedSerzFile(string InputPath, string OutputPath)
+    public record ConvertedSerzFile(string OutputPath)
     {
         public IDocument Parse()
         {
@@ -25,7 +25,7 @@ public class Serz
 
         if (force is false && File.Exists(outputPath))
         {
-            return new ConvertedSerzFile(inputPath, outputPath);
+            return new ConvertedSerzFile(outputPath);
         }
 
         var exe = Path.Join(Paths.GetGameDirectory(), "serz64.exe");
@@ -41,6 +41,6 @@ public class Serz
             throw new Exception($"serz execution failed: {commandOutput.StdError}");
         }
 
-        return new ConvertedSerzFile(inputPath, outputPath);
+        return new ConvertedSerzFile(outputPath);
     }
 }
