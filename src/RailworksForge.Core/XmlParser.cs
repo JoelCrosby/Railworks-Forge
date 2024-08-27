@@ -7,7 +7,7 @@ public class XmlParser
 {
     private static readonly XmlParserOptions Options = new()
     {
-        IsSuppressingErrors = false,
+        IsSuppressingErrors = true,
         IsKeepingSourceReferences = true,
     };
 

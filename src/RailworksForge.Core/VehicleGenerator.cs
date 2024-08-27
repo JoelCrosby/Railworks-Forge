@@ -19,13 +19,7 @@ public class VehicleGenerator
             throw new Exception("could not find root element for vehicle type");
         }
 
-        var typeSpecificElement = vehicle.VehicleType switch
-        {
-            VehicleType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
-            VehicleType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
-            VehicleType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
-              _ =>  throw new Exception("encountered unknown vehicle type"),
-        };
+        var typeSpecificElement = cOwnedEntity.QuerySelector("Component")?.FirstElementChild;
 
         if (typeSpecificElement is null)
         {
