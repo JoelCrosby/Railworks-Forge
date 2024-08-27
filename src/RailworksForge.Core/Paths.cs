@@ -95,23 +95,37 @@ public static class Paths
         return path.Replace("/", @"\").ReplaceFirst(@"\", @"z:\");
     }
 
-    public static List<BrowserDirectory> GetTopLevelRailVehicleDirectories()
+    public static List<BrowserDirectory> GetTopLevelPreloadDirectories()
     {
         var assetsPath = GetAssetsDirectory();
         var assetDirectories = Directory.GetDirectories(assetsPath);
 
-        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 2).Any());
+        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 1, "PreLoad").Any());
 
         var sorted = directories
-            .Select(dir => new BrowserDirectory(dir))
+            .Select(dir => new BrowserDirectory(dir, "PreLoad"))
             .OrderBy(dir => dir.Name);
 
         return [..sorted];
     }
 
-    public static IEnumerable<string> EnumerateRailVehicles(string dir, int depth)
+    public static List<BrowserDirectory> GetTopLevelRailVehicleDirectories()
     {
-        return Directory.EnumerateFileSystemEntries(dir, "RailVehicles", new EnumerationOptions
+        var assetsPath = GetAssetsDirectory();
+        var assetDirectories = Directory.GetDirectories(assetsPath);
+
+        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 1, "RailVehicles").Any());
+
+        var sorted = directories
+            .Select(dir => new BrowserDirectory(dir, "RailVehicles"))
+            .OrderBy(dir => dir.Name);
+
+        return [..sorted];
+    }
+
+    public static IEnumerable<string> EnumerateRailVehicles(string dir, int depth, string target)
+    {
+        return Directory.EnumerateFileSystemEntries(dir, target, new EnumerationOptions
         {
             MaxRecursionDepth = depth,
             IgnoreInaccessible = true,

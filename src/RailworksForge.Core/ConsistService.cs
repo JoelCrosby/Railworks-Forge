@@ -196,7 +196,10 @@ public class ConsistService
             UpdateBlueprint(serviceElement, preload);
             UpdateFilePath(serviceElement, preload);
 
-            UpdateBlueprintElements(document, preload.Blueprint);
+            foreach (var entry in preload.ConsistEntries)
+            {
+                UpdateBlueprintElements(document, entry.Blueprint);
+            }
         }
 
         return document;

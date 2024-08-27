@@ -8,32 +8,40 @@ public class BrowserDirectory
     public string FullPath { get; }
     public AssetBrowserLevel Level { get; }
 
-    public BrowserDirectory(string fullPath)
+    private string SubFolderPath { get; }
+
+    private static readonly string AssetsDir = Paths.GetAssetsDirectory();
+
+    public BrowserDirectory(string fullPath, string subFolderPath)
     {
         FullPath = fullPath;
         Name = Path.GetFileName(fullPath);
         Level = GetAssetLevel();
+        SubFolderPath = subFolderPath;
     }
 
     private AssetBrowserLevel GetAssetLevel()
     {
-        var relativeGamePath = FullPath[Paths.GetAssetsDirectory().Length..];
+        var relativeGamePath = FullPath.AsSpan().Slice(AssetsDir.Length, FullPath.Length - AssetsDir.Length);
+        var parts = relativeGamePath.Count('/');
 
-        return relativeGamePath.Split("/").Length switch
+        return parts switch
         {
-            2 => AssetBrowserLevel.Provider,
-            3 => AssetBrowserLevel.Product,
+            1 => AssetBrowserLevel.Provider,
+            2 => AssetBrowserLevel.Product,
             _ => AssetBrowserLevel.ProductAsset,
         };
     }
 
     private List<BrowserDirectory> GetVehicleDirectories()
     {
+        if (Level > AssetBrowserLevel.Provider) return [];
+
         var directories = Directory.GetDirectories(FullPath);
-        var vehicleDirectories = directories.Where(dir => Paths.EnumerateRailVehicles(dir, 1).Any());
+        var vehicleDirectories = directories.Where(dir => Paths.EnumerateRailVehicles(dir, 1, SubFolderPath).Any());
 
         var sorted = vehicleDirectories
-            .Select(dir => new BrowserDirectory(dir))
+            .Select(dir => new BrowserDirectory(dir, SubFolderPath))
             .OrderBy(dir => Directory.EnumerateFileSystemEntries(dir.FullPath).Any())
             .ThenBy(dir => dir.Name);
 

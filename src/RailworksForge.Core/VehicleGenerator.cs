@@ -21,11 +21,11 @@ public class VehicleGenerator
             throw new Exception("could not find root element for vehicle type");
         }
 
-        var typeSpecificElement = vehicle.VehicleType switch
+        var typeSpecificElement = vehicle.BlueprintType switch
         {
-            VehicleType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
-            VehicleType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
-            VehicleType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
+            BlueprintType.Engine => cOwnedEntity.QuerySelector("Component cEngine"),
+            BlueprintType.Wagon => cOwnedEntity.QuerySelector("Component cWagon"),
+            BlueprintType.Tender => cOwnedEntity.QuerySelector("Component cTender"),
             _ =>  throw new Exception("encountered unknown vehicle type"),
         };
 
@@ -62,12 +62,12 @@ public class VehicleGenerator
         return new GeneratedVehicle(cOwnedEntity, number);
     }
 
-    private static async Task<VehicleType> GetConsistEntryVehicleType(ConsistEntry consistVehicle)
+    private static async Task<BlueprintType> GetConsistEntryVehicleType(ConsistEntry consistVehicle)
     {
         var document = await consistVehicle.GetXmlDocument();
         var elementName = document.QuerySelector("Blueprint")?.FirstElementChild?.NodeName;
 
-        return Utilities.ParseVehicleType(elementName);
+        return Utilities.ParseBlueprintType(elementName);
     }
 
     private static void UpdateOperationNumbers(IDocument doc, string number, string originalNumber)
@@ -123,7 +123,7 @@ public class VehicleGenerator
 
     private static string? GetCompressedNumberingList(ConsistEntry consistEntry, string path)
     {
-        var productPath = Path.Join(consistEntry.BlueprintIdProvider, consistEntry.BlueprintIdProduct);
+        var productPath = Path.Join(consistEntry.Blueprint.BlueprintSetIdProvider, consistEntry.Blueprint.BlueprintSetIdProduct);
         var fullProductPath = Path.Join(Paths.GetAssetsDirectory(), productPath);
         var productArchives = Directory.EnumerateFiles(fullProductPath, "*.ap", SearchOption.TopDirectoryOnly);
         var normalisedPath = path.Replace(productPath, string.Empty);

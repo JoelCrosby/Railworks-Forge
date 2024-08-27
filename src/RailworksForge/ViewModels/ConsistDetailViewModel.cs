@@ -30,15 +30,22 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddToConsistCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<PreloadConsistViewModel> _availableStock;
+    private ObservableCollection<RollingStockEntry> _availableStock;
 
     [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
     [ObservableProperty]
+    private RollingStockEntry? _selectedVehicle;
+
+    [ObservableProperty]
     private bool _isLoading;
+
+    [ObservableProperty]
+    private int _loadAvailableStockProgress;
 
     public IObservable<List<ConsistRailVehicle>> RailVehicles { get; }
 
@@ -62,6 +69,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
             Launcher.Open(SelectedDirectory.FullPath);
         });
+
+        AddToConsistCommand = ReactiveCommand.Create(() =>
+        {
+            if (SelectedVehicle is null) return;
+
+            Console.WriteLine(SelectedVehicle.Blueprint.BlueprintId);
+        });
     }
 
     private async Task LoadAvailableStock()
@@ -80,15 +94,37 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         var binFiles = Directory
             .EnumerateFiles(railVehiclesDirectory, "*.bin", SearchOption.AllDirectories)
-            .Where(f => f.Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase) is not true);
+            .Where(path =>
+            {
+                if (Utilities.RollingStockFolders.Any(path.Contains))
+                {
+                    return true;
+                }
+
+                return path.Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase) is not true;
+            })
+            .ToList();
+
+        Dispatcher.UIThread.Post(() => AvailableStock.Clear());
+
+        LoadAvailableStockProgress = 0;
+
+        var processedCount = 0;
+        var processed = binFiles.Count;
 
         await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
         {
             var exported = await Serz.Convert(binFile, false, cancellationToken);
-            var consists = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
-            var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
+            var models = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
 
-            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
+            processedCount++;
+
+            LoadAvailableStockProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                AvailableStock.AddRange(models);
+            });
         });
     }
 
@@ -106,14 +142,15 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return consists;
     }
 
-    private static async Task<List<PreloadConsist>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
+    private static async Task<List<RollingStockEntry>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
     {
         var text = await File.ReadAllTextAsync(path, cancellationToken);
         var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
 
         return doc
             .QuerySelectorAll("Blueprint")
-            .Select(PreloadConsist.Parse)
+            .Select(RollingStockEntry.Parse)
+            .Where(e => e.BlueprintType is BlueprintType.Engine or BlueprintType.Tender or BlueprintType.Wagon)
             .ToList();
     }
 }

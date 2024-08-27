@@ -1,9 +1,11 @@
 using System;
+using System.ComponentModel;
 
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
+using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
 using ReactiveUI;
@@ -32,5 +34,15 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
     private void CancelButtonOnClick(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void ContextMenu_OnOpening(object? sender, CancelEventArgs e)
+    {
+        if (ViewModel is not {} model) return;
+
+        if (model.SelectedDirectory?.Level is AssetBrowserLevel.Provider)
+        {
+            e.Cancel = true;
+        }
     }
 }

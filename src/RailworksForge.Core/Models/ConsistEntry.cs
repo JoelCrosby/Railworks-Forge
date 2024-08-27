@@ -2,24 +2,21 @@ using AngleSharp.Dom;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.External;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
 public class ConsistEntry
 {
-    public required string BlueprintId { get; init; }
-
-    public required string BlueprintIdProduct { get; init; }
-
-    public required string BlueprintIdProvider { get; init; }
+    public required Blueprint Blueprint { get; init; }
 
     public required bool Flipped { get; init; }
 
     private string BinaryXmlPath => BinaryPath.Replace(".bin", ".bin.xml");
 
-    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
+    public string BlueprintIdPath => Blueprint.BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
-    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintIdProvider, BlueprintIdProduct);
+    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), Blueprint.BlueprintSetIdProvider, Blueprint.BlueprintSetIdProduct);
 
     public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
 

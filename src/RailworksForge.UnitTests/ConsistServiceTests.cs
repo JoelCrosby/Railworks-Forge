@@ -26,28 +26,38 @@ public class ConsistServiceTests
             EraStartYear = "2002",
             EraEndYear = "2050",
             EngineType = LocoClass.Electric,
+            IsReskin = false,
             ConsistEntries =
             [
                 new ()
                 {
-                    BlueprintId = @"RailVehicles\Electric\Class390\Default\DMSO\Class390DMSO.xml",
-                    BlueprintIdProvider = "DTG",
-                    BlueprintIdProduct = "WCML-South",
                     Flipped = false,
+                    Blueprint = new Blueprint
+                    {
+                        BlueprintId = @"RailVehicles\Electric\Class390\Default\DMSO\Class390DMSO.xml",
+                        BlueprintSetIdProvider = "DTG",
+                        BlueprintSetIdProduct = "WCML-South",
+                    }
                 },
                 new ()
                 {
-                    BlueprintId = @"RailVehicles\Electric\Class390\Default\MS\MS_b.xml",
-                    BlueprintIdProvider = "DTG",
-                    BlueprintIdProduct = "WCML-South",
                     Flipped = true,
+                    Blueprint = new Blueprint
+                    {
+                        BlueprintId = @"RailVehicles\Electric\Class390\Default\MS\MS_b.xml",
+                        BlueprintSetIdProvider = "DTG",
+                        BlueprintSetIdProduct = "WCML-South",
+                    }
                 },
                 new ()
                 {
-                    BlueprintId = @"RailVehicles\Electric\Class390\Default\PTSRMB\PTSRMB.xml",
-                    BlueprintIdProvider = "DTG",
-                    BlueprintIdProduct = "WCML-South",
                     Flipped = true,
+                    Blueprint = new Blueprint
+                    {
+                        BlueprintId = @"RailVehicles\Electric\Class390\Default\PTSRMB\PTSRMB.xml",
+                        BlueprintSetIdProvider = "DTG",
+                        BlueprintSetIdProduct = "WCML-South",
+                    }
                 },
             ],
         };

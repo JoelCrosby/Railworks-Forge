@@ -21,6 +21,8 @@ public class PreloadConsist
 
     public required Blueprint Blueprint { get; init; }
 
+    public required bool IsReskin { get; init; }
+
     public static PreloadConsist Parse(IElement el)
     {
         var locomotiveName = el.SelectTextContent("LocoName English");
@@ -28,28 +30,35 @@ public class PreloadConsist
         var engineType = el.SelectTextContent("EngineType");
         var eraStartYear = el.SelectTextContent("EraStartYear");
         var eraEndYear = el.SelectTextContent("EraEndYear");
+        var isReskin = el.FirstElementChild?.NodeName == "cReskinBlueprint";
 
         var entries = el
             .QuerySelectorAll("cConsistEntry")
-            .Select(entry => new ConsistEntry
+            .Select(entry =>  new ConsistEntry
             {
-                BlueprintIdProvider = entry.SelectTextContent("Provider"),
-                BlueprintIdProduct = entry.SelectTextContent("Product"),
-                BlueprintId = entry.SelectTextContent("BlueprintID"),
                 Flipped = entry.SelectTextContent("Flipped") is "eTrue",
+                Blueprint = new Blueprint
+                {
+                    BlueprintSetIdProvider = entry.SelectTextContent("Provider"),
+                    BlueprintSetIdProduct = entry.SelectTextContent("Product"),
+                    BlueprintId = entry.SelectTextContent("BlueprintID"),
+                },
             })
             .ToList();
 
         var locomotive = entries.First();
 
+        var blueprint = new Blueprint
+        {
+            BlueprintId = locomotive.Blueprint.BlueprintId,
+            BlueprintSetIdProduct = locomotive.Blueprint.BlueprintSetIdProduct,
+            BlueprintSetIdProvider = locomotive.Blueprint.BlueprintSetIdProvider,
+        };
+
         return new PreloadConsist
         {
-            Blueprint = new Blueprint
-            {
-                BlueprintId = locomotive.BlueprintId,
-                BlueprintSetIdProduct = locomotive.BlueprintIdProduct,
-                BlueprintSetIdProvider = locomotive.BlueprintIdProvider,
-            },
+            IsReskin = isReskin,
+            Blueprint = blueprint,
             LocomotiveName = locomotiveName,
             DisplayName = displayName,
             EngineType = LocoClassUtils.Parse(engineType),
@@ -58,4 +67,6 @@ public class PreloadConsist
             ConsistEntries = entries,
         };
     }
+
+
 }

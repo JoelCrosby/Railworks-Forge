@@ -8,7 +8,7 @@ public record ScenarioConsist : Consist
 {
     public string? Name { get; init; }
 
-    public required VehicleType VehicleType { get; init; }
+    public required BlueprintType BlueprintType { get; init; }
 
     public required int EntityCount { get; init; }
 
@@ -39,7 +39,7 @@ public record ScenarioConsist : Consist
 
         var consist = Consist.ParseConsist(el);
 
-        var vehicleType = Utilities.ParseVehicleType(el.QuerySelector("Blueprint")?.FirstElementChild?.NodeName);
+        var vehicleType = Utilities.ParseBlueprintType(el.QuerySelector("Blueprint")?.FirstElementChild?.NodeName);
         var entityCount = el.QuerySelectorAll("cEntityContainerBlueprint-sChild").Length;
         var cargoComponents = GetCargoComponents(el);
 
@@ -57,10 +57,10 @@ public record ScenarioConsist : Consist
             LocoClass = consist.LocoClass,
             ServiceName = consist.ServiceName,
             PlayerDriver = consist.PlayerDriver,
-            BlueprintId = consistEntry.BlueprintId,
-            BlueprintSetIdProduct = consistEntry.BlueprintIdProduct,
-            BlueprintSetIdProvider = consistEntry.BlueprintIdProvider,
-            VehicleType = vehicleType,
+            BlueprintId = consistEntry.Blueprint.BlueprintId,
+            BlueprintSetIdProduct = consistEntry.Blueprint.BlueprintSetIdProduct,
+            BlueprintSetIdProvider = consistEntry.Blueprint.BlueprintSetIdProvider,
+            BlueprintType = vehicleType,
             ServiceId = consist.ServiceId,
             EntityCount = entityCount,
             CargoComponents = cargoComponents,

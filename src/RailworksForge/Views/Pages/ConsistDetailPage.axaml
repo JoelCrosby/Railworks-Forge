@@ -83,6 +83,10 @@
 
                <DockPanel Grid.Row="2">
                    <StackPanel DockPanel.Dock="Top">
+                        <ProgressBar HorizontalAlignment="Stretch" CornerRadius="0" Value="{Binding LoadAvailableStockProgress}" Minimum="0" Maximum="100" Height="12" />
+                   </StackPanel>
+
+                   <StackPanel DockPanel.Dock="Top">
                        <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}">
                            <TextBlock Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" FontSize="12">Consist</TextBlock>
                        </Border>
@@ -93,12 +97,24 @@
                               ItemsSource="{Binding AvailableStock}"
                               GridLinesVisibility="All"
                               SelectionMode="Single"
-                              IsReadOnly="True">
+                              IsReadOnly="True"
+                              CanUserResizeColumns="True"
+                              CanUserReorderColumns="True"
+                              CanUserSortColumns="True"
+                              SelectedItem="{Binding SelectedVehicle}">
                        <DataGrid.Columns>
-                           <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
-                           <DataGridTextColumn Header="Display Name" Binding="{Binding Consist.DisplayName}" />
+                           <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
+                           <DataGridTextColumn Header="Type" Binding="{Binding BlueprintType}" />
+                           <DataGridTextColumn Header="Blueprint Id" Binding="{Binding Blueprint.BlueprintId}" />
                        </DataGrid.Columns>
+
+                       <DataGrid.ContextMenu>
+                           <ContextMenu>
+                               <MenuItem Header="Add to Consist" Command="{Binding AddToConsistCommand}"  />
+                           </ContextMenu>
+                       </DataGrid.ContextMenu>
                    </DataGrid>
+
                </DockPanel>
            </Grid>
         </Border>

@@ -44,7 +44,7 @@
                     </TreeView.ItemTemplate>
 
                     <TreeView.ContextMenu>
-                        <ContextMenu>
+                        <ContextMenu Opening="ContextMenu_OnOpening">
                             <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
                             <MenuItem Header="Load Consists" Command="{Binding LoadAvailableStockCommand}"  />
                         </ContextMenu>
@@ -53,8 +53,10 @@
                 </TreeView>
             </DockPanel>
 
-            <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}"
-                          ResizeDirection="Columns" />
+            <GridSplitter Grid.Column="1"
+                          Background="{DynamicResource SystemChromeDisabledHighColor}"
+                          ResizeDirection="Columns"
+            />
 
             <Border Grid.Column="2">
                 <DockPanel>

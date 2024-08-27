@@ -44,7 +44,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public ReplaceConsistViewModel()
     {
         AvailableStock = [];
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelPreloadDirectories());
 
         ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist?.Consist);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);

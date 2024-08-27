@@ -21,13 +21,13 @@ public class VehicleTemplates
         return reader.ReadToEnd();
     }
 
-    public static string GetXml(VehicleType type)
+    public static string GetXml(BlueprintType type)
     {
         return type switch
         {
-            VehicleType.Engine => EngineTemplate,
-            VehicleType.Wagon => WagonTemplate,
-            VehicleType.Tender => TenderTemplate,
+            BlueprintType.Engine => EngineTemplate,
+            BlueprintType.Wagon => WagonTemplate,
+            BlueprintType.Tender => TenderTemplate,
             _ => throw new Exception("Unknown vehicle type."),
         };
     }

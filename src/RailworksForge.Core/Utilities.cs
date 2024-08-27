@@ -67,17 +67,52 @@ public static class Utilities
         return $"backup-{Guid.NewGuid().ToString()[..6]}-{DateTimeOffset.UtcNow:dd-MMM-yy_hh-mm}.zip";
     }
 
-    public static VehicleType ParseVehicleType(string? tagName)
+    public static BlueprintType ParseBlueprintType(string? tagName)
     {
-        return tagName?.ToLowerInvariant() switch
+        return tagName switch
         {
-            "cengine" => VehicleType.Engine,
-            "cengineblueprint" => VehicleType.Engine,
-            "cwagon" => VehicleType.Wagon,
-            "cwagonblueprint" => VehicleType.Wagon,
-            "ctender" => VehicleType.Tender,
-            "ctenderblueprint" => VehicleType.Tender,
-            _ => throw new Exception($"unknown vehicle type for tag name {tagName}"),
+            "cEngine" => BlueprintType.Engine,
+            "cEngineBlueprint" => BlueprintType.Engine,
+            "cWagon" => BlueprintType.Wagon,
+            "cWagonBlueprint" => BlueprintType.Wagon,
+            "cTender" => BlueprintType.Tender,
+            "cTenderBlueprint" => BlueprintType.Tender,
+            "cNamedTextureSetBlueprint" => BlueprintType.TextureSet,
+            "cReskinBlueprint" => BlueprintType.Reskin,
+            "cSpotLightBlueprint" => BlueprintType.Spotlight,
+            "cBogeyBlueprint" => BlueprintType.Bogey,
+            "cSceneryBlueprint" => BlueprintType.Scenery,
+            "cAnimSceneryBlueprint" => BlueprintType.AnimatedScenery,
+            "cEngineSimBlueprint" => BlueprintType.EngineSim,
+            "cCouplingTypeBlueprint" => BlueprintType.CouplingType,
+            "cHeadOutCameraBlueprint" => BlueprintType.HeadOutCamera,
+            "cCabCameraBlueprint" => BlueprintType.CabCamera,
+            "cPointLightBlueprint" => BlueprintType.PointLight,
+            "cEmitterBlueprint" => BlueprintType.Emitter,
+            "cHeadLightBlueprint" => BlueprintType.HeadLight,
+            "cProceduralShapeBlueprint" => BlueprintType.ProceduralShape,
+            "cSoundBlueprint" => BlueprintType.Sound,
+            "cCabOcclusionBlueprint" => BlueprintType.CabOcclusion,
+            "cAnimProceduralSceneryBlueprint" => BlueprintType.AnimProceduralScenery,
+            "cInputMapperBlueprint" => BlueprintType.InputMapper,
+            "cDriverBlueprint" => BlueprintType.Driver,
+            "cEngineSimSubSystemBlueprint" => BlueprintType.EngineSimSubSystem,
+            "cFiremanBlueprint" => BlueprintType.Fireman,
+            "cEditorShapeBlueprint" => BlueprintType.EditorShape,
+            "cAnalogClockBlueprint" => BlueprintType.AnalogClock,
+            "cDigitalClockBlueprint" => BlueprintType.DigitalClock,
+            _ => throw new Exception($"unknown blueprint type for tag with the following name '{tagName}'"),
         };
     }
+
+    private static readonly char Sp = Path.DirectorySeparatorChar;
+
+    public static readonly string[] RollingStockFolders =
+    [
+        $"{Sp}Electric{Sp}",
+        $"{Sp}Diesel{Sp}",
+        $"{Sp}Steam{Sp}",
+        $"{Sp}Wagon{Sp}",
+        $"{Sp}Tender{Sp}",
+    ];
 }
