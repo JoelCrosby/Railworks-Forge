@@ -197,11 +197,16 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private void Refresh()
     {
-        Scenario = Scenario.Refresh();
+        var updatedScenario = Scenario.Refresh();
 
-        Services.Clear();
-        Services.AddRange(Scenario.Consists);
+        Dispatcher.UIThread.Post(() =>
+        {
+            Scenario = updatedScenario;
 
-        OnPropertyChanging(nameof(Services));
+            Services.Clear();
+            Services.AddRange(updatedScenario.Consists);
+
+            OnPropertyChanged(nameof(Services));
+        });
     }
 }

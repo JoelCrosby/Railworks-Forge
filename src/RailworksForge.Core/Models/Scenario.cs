@@ -110,14 +110,18 @@ public record Scenario
 
     private static IDocument GetPropertiesDocument(AssetPath path)
     {
+        if (Paths.Exists(path.Path) && path.Path.EndsWith(".xml"))
+        {
+            var content = File.ReadAllText(path.Path);
+            return XmlParser.ParseDocument(content);
+        }
+
         if (path.IsArchivePath)
         {
             return GetArchivedPropertiesDocument(path);
         }
 
-        var content = File.ReadAllText(path.Path);
-
-        return XmlParser.ParseDocument(content);
+        throw new Exception("failed to get properties document");
     }
 
     private static IDocument GetArchivedPropertiesDocument(AssetPath path)
