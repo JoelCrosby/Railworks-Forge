@@ -1,4 +1,4 @@
-<cOwnedEntity xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0" d:id="">
+<cOwnedEntity xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:id="">
     <Component>
         <cTender d:id="">
             <PantographInfo d:type="cDeltaString">PANTO_UNKNOWN</PantographInfo>

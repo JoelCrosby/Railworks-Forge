@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.IO.Compression;
 
 using AngleSharp.Dom;
-using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
@@ -109,7 +108,7 @@ public record Scenario
         ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
 
-    private static IXmlDocument GetPropertiesDocument(AssetPath path)
+    private static IDocument GetPropertiesDocument(AssetPath path)
     {
         if (path.IsArchivePath)
         {
@@ -121,7 +120,7 @@ public record Scenario
         return XmlParser.ParseDocument(content);
     }
 
-    private static IXmlDocument GetArchivedPropertiesDocument(AssetPath path)
+    private static IDocument GetArchivedPropertiesDocument(AssetPath path)
     {
         using var archive = ZipFile.Open(path.Path, ZipArchiveMode.Read);
         var entry = archive.Entries.FirstOrDefault(e => e.FullName == path.ArchivePath);
@@ -139,7 +138,7 @@ public record Scenario
         return XmlParser.ParseDocument(file);
     }
 
-    public async Task<IXmlDocument> GetXmlDocument(bool useCache = true)
+    public async Task<IDocument> GetXmlDocument(bool useCache = true)
     {
         var path = await ConvertBinToXml(useCache);
         var text = await File.ReadAllTextAsync(path);
@@ -150,7 +149,7 @@ public record Scenario
         return document;
     }
 
-    public async Task<IXmlDocument> GetPropertiesXmlDocument()
+    public async Task<IDocument> GetPropertiesXmlDocument()
     {
         var text = GetPropertiesText() ?? GetCompressedPropertiesText();
         var document = await XmlParser.ParseDocumentAsync(text);

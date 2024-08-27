@@ -1,4 +1,4 @@
-using AngleSharp.Xml.Dom;
+using AngleSharp.Dom;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.External;
@@ -23,9 +23,9 @@ public class ConsistEntry
 
     public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
 
-    private IXmlDocument? _xmlDocument;
+    private IDocument? _xmlDocument;
 
-    public async Task<IXmlDocument> GetXmlDocument()
+    public async Task<IDocument> GetXmlDocument()
     {
         if (_xmlDocument is not null)
         {

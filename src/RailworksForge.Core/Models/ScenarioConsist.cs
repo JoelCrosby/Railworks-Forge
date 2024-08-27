@@ -1,5 +1,4 @@
 using AngleSharp.Dom;
-using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Extensions;
 
@@ -29,9 +28,15 @@ public record ScenarioConsist : Consist
 
     public float? Mass { get; init; }
 
-    public static ScenarioConsist ParseConsist(IXmlDocument document, ConsistEntry consistEntry)
+    public static ScenarioConsist ParseConsist(IDocument document, ConsistEntry consistEntry)
     {
         var el = document.DocumentElement;
+
+        if (el is null)
+        {
+            throw new Exception("could not find cBlueprintLoader element in document");
+        }
+
         var consist = Consist.ParseConsist(el);
 
         var vehicleType = ParseVehicleType(el.QuerySelector("Blueprint")?.FirstElementChild?.NodeName);
@@ -66,14 +71,14 @@ public record ScenarioConsist : Consist
 
     private static VehicleType ParseVehicleType(string? tagName)
     {
-        return tagName switch
+        return tagName?.ToLowerInvariant() switch
         {
-            "cEngine" => VehicleType.Engine,
-            "cEngineBlueprint" => VehicleType.Engine,
-            "cWagon" => VehicleType.Wagon,
-            "cWagonBlueprint" => VehicleType.Wagon,
-            "cTender" => VehicleType.Tender,
-            "cTenderBlueprint" => VehicleType.Tender,
+            "cengine" => VehicleType.Engine,
+            "cengineblueprint" => VehicleType.Engine,
+            "cwagon" => VehicleType.Wagon,
+            "cwagonblueprint" => VehicleType.Wagon,
+            "ctender" => VehicleType.Tender,
+            "ctenderblueprint" => VehicleType.Tender,
             _ => throw new Exception($"unknown vehicle type for tag name {tagName}"),
         };
     }

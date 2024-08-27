@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 
-using AngleSharp.Xml.Dom;
+using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
@@ -87,7 +87,7 @@ public record Route
         return blueprints.ToList();
     }
 
-    public async Task<IXmlDocument?> GetTrackDocument()
+    public async Task<IDocument?> GetTrackDocument()
     {
         var path = TracksBinaryPath;
 
@@ -115,7 +115,7 @@ public record Route
         return null;
     }
 
-    public async Task<IXmlDocument?> GetRoutePropertiesDocument()
+    public async Task<IDocument?> GetRoutePropertiesDocument()
     {
         if (PackagingType is PackagingType.Packed)
         {
@@ -126,7 +126,7 @@ public record Route
         return await XmlParser.ParseDocumentAsync(text);
     }
 
-    private Task<IXmlDocument> GetArchivedPropertiesDocument()
+    private Task<IDocument> GetArchivedPropertiesDocument()
     {
         var archivePath = Path.Join(DirectoryPath, "MainContent.ap");
 

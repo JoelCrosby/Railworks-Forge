@@ -1,4 +1,4 @@
-using AngleSharp.Xml.Dom;
+using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
@@ -33,7 +33,7 @@ public class TrackService
         await WriteRoutePropertiesDocument(updatedPropertiesDocument, route);
     }
 
-    private static IXmlDocument UpdateProperties(IXmlDocument document, ReplaceTracksRequest request)
+    private static IDocument UpdateProperties(IDocument document, ReplaceTracksRequest request)
     {
         foreach (var replacement in request.GetSelectedReplacements())
         {
@@ -49,7 +49,7 @@ public class TrackService
         return document;
     }
 
-    private static IXmlDocument UpdateTracks(IXmlDocument document, ReplaceTracksRequest request)
+    private static IDocument UpdateTracks(IDocument document, ReplaceTracksRequest request)
     {
         var blueprints = document.QuerySelectorAll("Network-cSectionGenericProperties BlueprintID").ToList();
 
@@ -88,7 +88,7 @@ public class TrackService
         return document;
     }
 
-    private static async Task WriteTracksDocument(IXmlDocument document, Route route)
+    private static async Task WriteTracksDocument(IDocument document, Route route)
     {
         Directory.CreateDirectory(Paths.GetCacheFolder());
 
@@ -106,7 +106,7 @@ public class TrackService
         File.Copy(output.OutputPath, binaryDestination, true);
     }
 
-    private static async Task WriteRoutePropertiesDocument(IXmlDocument document, Route route)
+    private static async Task WriteRoutePropertiesDocument(IDocument document, Route route)
     {
         Directory.CreateDirectory(Paths.GetCacheFolder());
 

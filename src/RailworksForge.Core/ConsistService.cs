@@ -1,9 +1,7 @@
 using System.Diagnostics;
 
 using AngleSharp.Dom;
-using AngleSharp.Xml.Dom;
 
-using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
@@ -41,7 +39,7 @@ public class ConsistService
         ClearCache(scenario);
     }
 
-    private static async Task<IXmlDocument> GetDeleteUpdatedScenario(Scenario scenario, TargetConsist target)
+    private static async Task<IDocument> GetDeleteUpdatedScenario(Scenario scenario, TargetConsist target)
     {
         var document = await scenario.GetXmlDocument(false);
 
@@ -59,12 +57,10 @@ public class ConsistService
             consistElement.RemoveFromParent();
         }
 
-        XmlException.ThrowIfDocumentInvalid(document);
-
         return document;
     }
 
-    private static async Task<IXmlDocument> GetDeleteScenarioProperties(Scenario scenario, TargetConsist target)
+    private static async Task<IDocument> GetDeleteScenarioProperties(Scenario scenario, TargetConsist target)
     {
         var document = await scenario.GetPropertiesXmlDocument();
 
@@ -82,12 +78,10 @@ public class ConsistService
             element.RemoveFromParent();
         }
 
-        XmlException.ThrowIfDocumentInvalid(document);
-
         return document;
     }
 
-    private static async Task<IXmlDocument> GetUpdatedScenario(Scenario scenario, TargetConsist target, PreloadConsist preload)
+    private static async Task<IDocument> GetUpdatedScenario(Scenario scenario, TargetConsist target, PreloadConsist preload)
     {
         var document = await scenario.GetXmlDocument(false);
 
@@ -156,22 +150,27 @@ public class ConsistService
                 }
 
                 var e = document.CreateXmlElement("e");
-                e.SetAttribute("type", "cDeltaString");
+                e.SetAttribute(Utilities.NS, "d:type", "cDeltaString");
                 e.SetTextContent(railVehicle.Number);
 
                 initialRv.AppendChild(e);
 
-                railVehicles.AppendChild(railVehicle.Element);
-                previousVehicle = railVehicle.Element;
+                var element = railVehicle.Element;
+
+                if (element is null)
+                {
+                    throw new Exception("could not find body in rail vehicle element");
+                }
+
+                railVehicles.AppendChild(element);
+                previousVehicle = element;
             }
         }
-
-        XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
     }
 
-    private static async Task<GeneratedVehicle> AddConsistVehicle(ConsistEntry consistVehicle, IXmlDocument document, IElement scenarioNode)
+    private static async Task<GeneratedVehicle> AddConsistVehicle(ConsistEntry consistVehicle, IDocument document, IElement scenarioNode)
     {
         var vehicleDocument = await consistVehicle.GetXmlDocument();
         var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, consistVehicle);
@@ -179,7 +178,7 @@ public class ConsistService
         return VehicleGenerator.GenerateVehicle(document, scenarioNode, scenarioConsist, consistVehicle);
     }
 
-    private static async Task<IXmlDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)
+    private static async Task<IDocument> GetUpdatedScenarioProperties(Scenario scenario, TargetConsist target, PreloadConsist preload)
     {
         var document = await scenario.GetPropertiesXmlDocument();
 
@@ -199,8 +198,6 @@ public class ConsistService
 
             UpdateBlueprintElements(document, preload.Blueprint);
         }
-
-        XmlException.ThrowIfDocumentInvalid(document);
 
         return document;
     }
@@ -231,13 +228,13 @@ public class ConsistService
         filePath.SetTextContent(packagedPath);
     }
 
-    private static void UpdateBlueprintElements(IXmlDocument document, Blueprint blueprint)
+    private static void UpdateBlueprintElements(IDocument document, Blueprint blueprint)
     {
         document.UpdateBlueprintSetCollection(blueprint, "RBlueprintSetPreLoad");
         document.UpdateBlueprintSetCollection(blueprint, "RequiredSet");
     }
 
-    private static async Task WriteScenarioDocument(Scenario scenario, IXmlDocument document)
+    private static async Task WriteScenarioDocument(Scenario scenario, IDocument document)
     {
         const string filename = "Scenario.bin.xml";
         const string binFilename = "Scenario.bin";
@@ -261,7 +258,7 @@ public class ConsistService
         await Paths.CreateMd5HashFile(binDestination);
     }
 
-    private static async Task WriteScenarioPropertiesDocument(Scenario scenario, IXmlDocument document)
+    private static async Task WriteScenarioPropertiesDocument(Scenario scenario, IDocument document)
     {
         const string filename = "ScenarioProperties.xml";
 

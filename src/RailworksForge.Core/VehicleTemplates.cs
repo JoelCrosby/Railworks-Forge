@@ -28,7 +28,7 @@ public class VehicleTemplates
             VehicleType.Engine => EngineTemplate,
             VehicleType.Wagon => WagonTemplate,
             VehicleType.Tender => TenderTemplate,
-            _ => throw new Exception("Unknown vehicle type.")
+            _ => throw new Exception("Unknown vehicle type."),
         };
     }
 }

@@ -1,14 +1,12 @@
-using AngleSharp.Xml.Dom;
+using AngleSharp.Dom;
 
 namespace RailworksForge.Core.External;
 
 public class Serz
 {
-
-
     public record ConvertedSerzFile(string InputPath, string OutputPath)
     {
-        public IXmlDocument Parse()
+        public IDocument Parse()
         {
             var content = File.ReadAllText(OutputPath);
             return XmlParser.ParseDocument(content);

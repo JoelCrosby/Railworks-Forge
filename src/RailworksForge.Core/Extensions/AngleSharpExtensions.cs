@@ -4,7 +4,6 @@ using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Xml;
-using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Models.Common;
@@ -13,9 +12,14 @@ namespace RailworksForge.Core.Extensions;
 
 public static class AngleSharpExtensions
 {
-    public static string SelectTextContent(this IParentNode node, string selector)
+    public static string SelectTextContent(this IElement node, string selector)
     {
         return node.QuerySelector(selector)?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;
+    }
+
+    public static string SelectTextContent(this IDocument document, string selector)
+    {
+        return document.QuerySelector(selector)?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;
     }
 
     public static IElement? QueryByTextContent(this IHtmlCollection<IElement> elements, string selector, string key)
@@ -23,7 +27,7 @@ public static class AngleSharpExtensions
         return elements.FirstOrDefault(el => el.SelectTextContent(selector) == key);
     }
 
-    public static async Task ToXmlAsync(this IXmlDocument document, string path)
+    public static async Task ToXmlAsync(this IDocument document, string path)
     {
         var text = document.ToHtml(new XmlMarkupFormatter
         {
@@ -69,7 +73,7 @@ public static class AngleSharpExtensions
         return new HtmlElement(doc, selector);
     }
 
-    public static void UpdateBlueprintSetCollection(this IXmlDocument document, Blueprint blueprint, string tagSelector)
+    public static void UpdateBlueprintSetCollection(this IDocument document, Blueprint blueprint, string tagSelector)
     {
         if (document.QuerySelector(tagSelector) is not {} collectionElement)
         {
@@ -108,17 +112,17 @@ public static class AngleSharpExtensions
         collectionElement.AppendChild(setElement);
     }
 
-    private static IElement CreateBlueprintSetElement(this IXmlDocument document, Blueprint blueprint, int entryId)
+    private static IElement CreateBlueprintSetElement(this IDocument document, Blueprint blueprint, int entryId)
     {
         var setElement = document.CreateXmlElement("iBlueprintLibrary-cBlueprintSetID");
-        setElement.SetAttribute("d:id", entryId.ToString());
+        setElement.SetAttribute(Utilities.NS, "d:id", entryId.ToString());
 
         var providerElement = document.CreateXmlElement("Provider");
-        providerElement.SetAttribute("d:type", "cDeltaString");
+        providerElement.SetAttribute(Utilities.NS, "d:type", "cDeltaString");
         providerElement.SetTextContent(blueprint.BlueprintSetIdProvider);
 
         var productElement = document.CreateXmlElement("Product");
-        productElement.SetAttribute("d:type", "cDeltaString");
+        productElement.SetAttribute(Utilities.NS, "d:type", "cDeltaString");
         productElement.SetTextContent(blueprint.BlueprintSetIdProduct);
 
         setElement.AppendChild(providerElement);

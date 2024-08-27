@@ -1,4 +1,4 @@
-using AngleSharp.Xml.Dom;
+using AngleSharp.Dom;
 using AngleSharp.Xml.Parser;
 
 namespace RailworksForge.Core;
@@ -11,13 +11,15 @@ public class XmlParser
         IsKeepingSourceReferences = true,
     };
 
-    public static IXmlDocument ParseDocument(string source)
+    public static IDocument ParseDocument(string source)
     {
         return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocument(source);
     }
 
-    public static Task<IXmlDocument> ParseDocumentAsync(string source, CancellationToken cancellationToken = default)
+    public static async Task<IDocument> ParseDocumentAsync(string source, CancellationToken cancellationToken = default)
     {
-        return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, cancellationToken);
+        var document = await new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, cancellationToken);
+
+        return document;
     }
 }

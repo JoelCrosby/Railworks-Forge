@@ -1,5 +1,4 @@
 using AngleSharp.Dom;
-using AngleSharp.Xml.Dom;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
@@ -10,7 +9,7 @@ public record GeneratedVehicle(IElement Element, string Number);
 
 public class VehicleGenerator
 {
-    public static GeneratedVehicle GenerateVehicle(IXmlDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
+    public static GeneratedVehicle GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
     {
         var doc = XmlParser.ParseDocument(VehicleTemplates.GetXml(vehicle.VehicleType));
         var cOwnedEntity = doc.DocumentElement;
@@ -61,7 +60,7 @@ public class VehicleGenerator
         return new GeneratedVehicle(cOwnedEntity, number);
     }
 
-    private static void UpdateOperationNumbers(IXmlDocument doc, string number, string originalNumber)
+    private static void UpdateOperationNumbers(IDocument doc, string number, string originalNumber)
     {
         var cConsistOperations = doc.QuerySelector("cConsistOperations");
 
@@ -81,7 +80,7 @@ public class VehicleGenerator
     {
         if (consist.Mass.ToString() is {} mass)
         {
-            cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(mass);
+            cOwnedEntity.QuerySelector("TotalMass")?.SetTextContent(mass);
         }
     }
 
@@ -157,7 +156,7 @@ public class VehicleGenerator
         }
     }
 
-    private static void AddEntityContainers(IXmlDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
+    private static void AddEntityContainers(IDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
     {
         var cEntityContainer = cOwnedEntity.QuerySelector("Component cEntityContainer StaticChildrenMatrix");
 
@@ -170,7 +169,7 @@ public class VehicleGenerator
         }
     }
 
-    private static void AddCargoComponents(IXmlDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
+    private static void AddCargoComponents(IDocument document, ScenarioConsist vehicle, IElement cOwnedEntity)
     {
         var cCargoComponent = cOwnedEntity.QuerySelector("Component cCargoComponent InitialLevel");
 
@@ -233,7 +232,7 @@ public class VehicleGenerator
         cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(flipped);
     }
 
-    private static void UpdateEntityId(IXmlDocument document, IElement cOwnedEntity)
+    private static void UpdateEntityId(IDocument document, IElement cOwnedEntity)
     {
         var entityId = cOwnedEntity.QuerySelector("EntityID");
         entityId?.AppendChild(document.GenerateCGuid());
@@ -243,7 +242,7 @@ public class VehicleGenerator
     {
         var idElements = cOwnedEntity
             .DescendantsAndSelf<IElement>()
-            .Where(elem => elem.GetAttribute(Utilities.DocumentNamespace, "id") == string.Empty);
+            .Where(elem => elem.GetAttribute("d:id") == string.Empty);
 
         var idRandom = new Random();
 
@@ -251,7 +250,7 @@ public class VehicleGenerator
         {
             var id = idRandom.Next(100000000, 999999999);
             elem.RemoveAttribute("d:id");
-            elem.SetAttribute("d:id", id.ToString());
+            elem.SetAttribute(Utilities.NS, "d:id", id.ToString());
         }
     }
 

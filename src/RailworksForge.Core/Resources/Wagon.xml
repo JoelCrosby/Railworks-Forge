@@ -1,10 +1,9 @@
-<cOwnedEntity xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0" d:id="">
+<cOwnedEntity xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:id="">
     <Component>
         <cWagon d:id="">
             <PantographInfo d:type="cDeltaString">PANTO_UNKNOWN</PantographInfo>
             <PantographIsDirectional d:type="bool">0</PantographIsDirectional>
-            <LastPantographControlValue d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1
-            </LastPantographControlValue>
+            <LastPantographControlValue d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1</LastPantographControlValue>
             <Flipped d:type="bool">0</Flipped>
             <UniqueNumber d:type="cDeltaString"></UniqueNumber>
             <GUID d:type="cDeltaString"></GUID>
