@@ -44,6 +44,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         Route = route;
         IsLoading = true;
         Blueprints = [];
+        LoadingMessage = string.Empty;
 
         Observable.Start(GetMissingAssets, RxApp.TaskpoolScheduler);
     }
@@ -75,6 +76,11 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
             foreach (var blueprint in blueprints)
             {
+                if (string.IsNullOrWhiteSpace(blueprint.BlueprintId))
+                {
+                    continue;
+                }
+
                 results.Add(blueprint);
             }
 

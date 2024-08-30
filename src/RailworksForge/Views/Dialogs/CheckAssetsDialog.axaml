@@ -20,7 +20,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="16">Replace Tracks</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="16">Check Route Asset Availability</TextBlock>
             </StackPanel>
         </Border>
 
@@ -28,7 +28,7 @@
             <li:LoadingIndicator IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
             <Border Padding="48">
                 <StackPanel>
-                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" />
+                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" MaxHeight="128" MaxWidth="128" />
                     <TextBlock Margin="12" Text="{Binding LoadingMessage}" />
                 </StackPanel>
             </Border>
@@ -50,7 +50,6 @@
                     <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
                     <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
                     <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
-
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
