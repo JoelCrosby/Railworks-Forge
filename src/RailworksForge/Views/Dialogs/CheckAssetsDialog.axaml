@@ -17,20 +17,45 @@
     </Design.DataContext>
 
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
                 <TextBlock FontWeight="SemiBold" FontSize="16">Replace Tracks</TextBlock>
             </StackPanel>
         </Border>
 
-        <li:LoadingIndicator Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+        <StackPanel Grid.Row="1" IsVisible="{Binding IsLoading}">
+            <li:LoadingIndicator IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+            <Border Padding="48">
+                <StackPanel>
+                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" />
+                    <TextBlock Margin="12" Text="{Binding LoadingMessage}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
 
-        <Border Grid.Row="2" Margin="12" IsVisible="{Binding !IsLoading}">
+        <Border Grid.Row="1" IsVisible="{Binding !IsLoading}">
+            <DataGrid BorderThickness="0,1,0,0"
+                      BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                      ItemsSource="{Binding Blueprints}"
+                      GridLinesVisibility="All"
+                      SelectionMode="Single"
+                      IsReadOnly="True"
+                      CanUserResizeColumns="True"
+                      CanUserReorderColumns="True"
+                      CanUserSortColumns="True"
+            >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Availablity State" Binding="{Binding AcquisitionState}" />
+                    <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
+                    <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
+                    <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
 
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
-        <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Click="CloseButtonOnClick">Close</Button>
             </StackPanel>
