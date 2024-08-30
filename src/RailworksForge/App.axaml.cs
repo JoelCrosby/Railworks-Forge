@@ -49,6 +49,7 @@ public class App : Application
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
+        ViewLocator.Register<CheckAssetsViewModel, CheckAssetsDialog>();
         ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
         ViewLocator.Register<RoutesViewModel, RoutesPage>();
         ViewLocator.Register<RoutesBaseViewModel, RoutesList>();

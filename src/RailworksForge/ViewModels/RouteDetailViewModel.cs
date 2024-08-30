@@ -28,6 +28,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenScenarioInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> ReplaceTrackCommand { get; }
+    public ReactiveCommand<Unit, Unit> CheckAssetsCommand { get; }
 
     public Scenario? SelectedItem { get; set; }
 
@@ -68,6 +69,11 @@ public partial class RouteDetailViewModel : ViewModelBase
             if (result is null) return;
 
             await TrackService.ReplaceTracks(Route.Model, result);
+        });
+
+        CheckAssetsCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await Utils.GetApplicationViewModel().ShowCheckAssetsDialog.Handle(new CheckAssetsViewModel(Route.Model));
         });
 
         Scenarios = GetScenarios();

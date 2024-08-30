@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -21,6 +22,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public Interaction<ReplaceConsistViewModel, PreloadConsist?> ShowReplaceConsistDialog { get; }
     public Interaction<ConfirmationDialogViewModel, bool> ShowConfirmationDialog { get; }
     public Interaction<ReplaceTrackViewModel, ReplaceTracksRequest?> ShowReplaceTrackDialog { get; }
+    public Interaction<CheckAssetsViewModel, Unit?> ShowCheckAssetsDialog { get; }
 
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
@@ -37,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
         ShowConfirmationDialog = new Interaction<ConfirmationDialogViewModel, bool>();
         ShowReplaceTrackDialog = new Interaction<ReplaceTrackViewModel, ReplaceTracksRequest?>();
+        ShowCheckAssetsDialog = new Interaction<CheckAssetsViewModel, Unit?>();
 
         _contentViewModel = Routes;
     }

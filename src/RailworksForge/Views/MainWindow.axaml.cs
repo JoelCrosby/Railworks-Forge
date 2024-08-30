@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Threading.Tasks;
 
 using Avalonia.ReactiveUI;
@@ -35,6 +36,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             action(ViewModel.ShowReplaceTrackDialog.RegisterHandler(ShowDialog
                 <ReplaceTrackViewModel, ReplaceTracksRequest?, ReplaceTrackDialog>));
+
+            action(ViewModel.ShowCheckAssetsDialog.RegisterHandler(ShowDialog
+                <CheckAssetsViewModel, Unit?, CheckAssetsDialog>));
         });
     }
 

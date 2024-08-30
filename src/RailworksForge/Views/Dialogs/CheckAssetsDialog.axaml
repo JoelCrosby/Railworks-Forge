@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+        x:Class="RailworksForge.Views.Dialogs.CheckAssetsDialog"
+        x:DataType="vm:CheckAssetsViewModel"
+        Width="1280"
+        Height="720"
+        WindowStartupLocation="CenterOwner"
+        Title="Check Route Assets">
+
+    <Design.DataContext>
+        <vm:DesignCheckAssetsViewModel />
+    </Design.DataContext>
+
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel Spacing="4">
+                <TextBlock FontWeight="SemiBold" FontSize="16">Replace Tracks</TextBlock>
+            </StackPanel>
+        </Border>
+
+        <li:LoadingIndicator Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+
+        <Border Grid.Row="2" Margin="12" IsVisible="{Binding !IsLoading}">
+
+        </Border>
+
+        <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Click="CloseButtonOnClick">Close</Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

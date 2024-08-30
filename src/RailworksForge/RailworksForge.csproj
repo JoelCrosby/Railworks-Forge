@@ -69,5 +69,9 @@
       <DependentUpon>ReplaceConsistDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Dialogs\CheckAssetsDialog.axaml.cs">
+      <DependentUpon>CheckAssetsDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
