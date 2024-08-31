@@ -31,8 +31,8 @@ public record Consist : Blueprint
     public static Consist ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = el.SelectTextContent("LocoName English");
-        var serviceName = el.SelectTextContent("ServiceName English");
+        var locomotiveName = el.SelectLocalisedStringContent("LocoName");
+        var serviceName = el.SelectLocalisedStringContent("ServiceName");
         var playerDriver = el.SelectTextContent("PlayerDriver") == "1";
         var locoAuthor = el.SelectTextContent("LocoAuthor");
         var blueprintId = el.SelectTextContent("BlueprintID");

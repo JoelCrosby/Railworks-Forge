@@ -59,10 +59,10 @@ public record Scenario
         var doc = GetPropertiesDocument(path);
 
         var id = doc.SelectTextContent("ID cGUID DevString").Trim();
-        var name = doc.SelectTextContent("DisplayName English");
-        var description = doc.SelectTextContent("description English");
-        var briefing = doc.SelectTextContent("Briefing English");
-        var startLocation = doc.SelectTextContent("StartLocation English");
+        var name = doc.SelectLocalisedStringContent("DisplayName");
+        var description = doc.SelectLocalisedStringContent("Description");
+        var briefing = doc.SelectLocalisedStringContent("Briefing");
+        var startLocation = doc.SelectLocalisedStringContent("StartLocation");
         var directoryPath = Path.GetDirectoryName(path.Path) ?? string.Empty;
         var scenarioClass = doc.SelectTextContent("ScenarioClass");
         var season = ParseSeason(doc.SelectTextContent("Season"));

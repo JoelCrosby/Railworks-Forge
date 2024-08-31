@@ -19,7 +19,27 @@ public static class AngleSharpExtensions
 
     public static string SelectTextContent(this IDocument document, string selector)
     {
-        return document.QuerySelector(selector)?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;
+        return document.DocumentElement.SelectTextContent(selector);
+    }
+
+    public static string SelectLocalisedStringContent(this IElement node, string selector)
+    {
+        var localisedSelector = $"{selector} Localisation-cUserLocalisedString";
+        var localisationElement = node.QuerySelector(localisedSelector);
+
+        if (localisationElement is null) return string.Empty;
+
+        return localisationElement
+            .Children
+            .FirstOrDefault(child => string.IsNullOrWhiteSpace(child.TextContent) is false)?
+            .Text()
+            .Trim()
+            .ReplaceLineEndings(string.Empty) ?? string.Empty;
+    }
+
+    public static string SelectLocalisedStringContent(this IDocument document, string selector)
+    {
+        return SelectLocalisedStringContent(document.DocumentElement, selector);
     }
 
     public static IElement? QueryByTextContent(this IHtmlCollection<IElement> elements, string selector, string key)

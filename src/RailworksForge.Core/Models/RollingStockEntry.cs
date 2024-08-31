@@ -19,7 +19,7 @@ public class RollingStockEntry
     {
         var blueprint = ParseBlueprint(el);
         var locomotiveName = el.SelectTextContent("Name");
-        var displayName = el.SelectTextContent("DisplayName English");
+        var displayName = el.SelectLocalisedStringContent("DisplayName");
         var blueprintType = Utilities.ParseBlueprintType(el.FirstElementChild?.NodeName);
 
         return new RollingStockEntry

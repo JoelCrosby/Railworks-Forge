@@ -19,8 +19,8 @@ public class PreloadService
             var result = await Serz.Convert(bin);
             var document = result.Parse();
 
-            var locoName = document.SelectTextContent("cConsistBlueprint LocoName English");
-            var displayName = document.SelectTextContent("cConsistBlueprint DisplayName English");
+            var locoName = document.SelectLocalisedStringContent("cConsistBlueprint LocoName");
+            var displayName = document.SelectLocalisedStringContent("cConsistBlueprint DisplayName");
 
             File.Delete(result.OutputPath);
 

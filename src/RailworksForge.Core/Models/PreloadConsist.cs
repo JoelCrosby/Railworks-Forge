@@ -25,8 +25,8 @@ public class PreloadConsist
 
     public static PreloadConsist Parse(IElement el)
     {
-        var locomotiveName = el.SelectTextContent("LocoName English");
-        var displayName = el.SelectTextContent("DisplayName English");
+        var locomotiveName = el.SelectLocalisedStringContent("LocoName");
+        var displayName = el.SelectLocalisedStringContent("DisplayName");
         var engineType = el.SelectTextContent("EngineType");
         var eraStartYear = el.SelectTextContent("EraStartYear");
         var eraEndYear = el.SelectTextContent("EraEndYear");
