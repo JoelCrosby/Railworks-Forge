@@ -28,6 +28,7 @@ public record Consist : Blueprint
 
     public string? Number { get; init; }
 
+
     public static Consist ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
@@ -41,6 +42,8 @@ public record Consist : Blueprint
         var blueprintSetIdProduct = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
+        Cache.AcquisitionStates.TryGetValue(consistId, out var cachedState);
+
         return new Consist
         {
             Id = consistId,
@@ -53,6 +56,7 @@ public record Consist : Blueprint
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
+            ConsistAcquisitionState = cachedState,
         };
     }
 }
