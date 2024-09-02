@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
+using Avalonia.Controls;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -46,6 +47,11 @@ public partial class CheckAssetsViewModel : ViewModelBase
         Blueprints = [];
         LoadingMessage = string.Empty;
 
+        if (Design.IsDesignMode)
+        {
+            return;
+        }
+
         Observable.Start(GetMissingAssets, RxApp.TaskpoolScheduler);
     }
 
@@ -81,13 +87,21 @@ public partial class CheckAssetsViewModel : ViewModelBase
                     continue;
                 }
 
+                if (blueprint.AcquisitionState is AcquisitionState.Found)
+                {
+                    continue;
+                }
+
                 results.Add(blueprint);
             }
 
             processedCount++;
 
-            LoadingProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
-            LoadingMessage = $"Processed {processedCount} of {processed} files ( %{LoadingProgress} )";
+            Dispatcher.UIThread.Post(() =>
+            {
+                LoadingProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
+                LoadingMessage = $"Processed {processedCount} of {processed} files ( %{LoadingProgress} )";
+            });
         });
 
         Dispatcher.UIThread.Post(() =>

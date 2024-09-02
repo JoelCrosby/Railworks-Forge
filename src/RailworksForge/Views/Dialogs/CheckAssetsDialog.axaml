@@ -24,13 +24,13 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="1" IsVisible="{Binding IsLoading}">
-            <li:LoadingIndicator IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+        <StackPanel Grid.Row="1" IsVisible="{Binding IsLoading}" VerticalAlignment="Bottom">
             <Border Padding="48">
-                <StackPanel>
-                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" MaxHeight="128" MaxWidth="128" />
-                    <TextBlock Margin="12" Text="{Binding LoadingMessage}" />
-                </StackPanel>
+                <Grid RowDefinitions="*,Auto,Auto">
+                    <li:LoadingIndicator Grid.Row="0" HorizontalAlignment="Center" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" Height="256" />
+                    <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" MaxHeight="128" />
+                    <TextBlock Grid.Row="2" Margin="0,12,0,0" Text="{Binding LoadingMessage}" HorizontalAlignment="Stretch" />
+                </Grid>
             </Border>
         </StackPanel>
 
