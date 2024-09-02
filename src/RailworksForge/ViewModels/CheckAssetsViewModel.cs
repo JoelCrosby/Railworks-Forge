@@ -100,7 +100,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             });
         });
 
-        var missing = results.Where(r => r.AcquisitionState is not AcquisitionState.Found);
+        var missing = results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList();
 
         Dispatcher.UIThread.Post(() =>
         {
