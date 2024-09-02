@@ -69,7 +69,8 @@ public partial class CheckAssetsViewModel : ViewModelBase
         {
             var serialised = await Serz.Convert(path, true, cancellationToken);
             var xml  = await File.ReadAllTextAsync(serialised.OutputPath, cancellationToken);
-            var document = await XmlParser.ParseDocumentAsync(xml, cancellationToken);
+
+            using var document = await XmlParser.ParseDocumentAsync(xml, cancellationToken);
 
             var entities = document.QuerySelectorAll("cDynamicEntity BlueprintID");
 
@@ -87,11 +88,6 @@ public partial class CheckAssetsViewModel : ViewModelBase
                     continue;
                 }
 
-                if (blueprint.AcquisitionState is AcquisitionState.Found)
-                {
-                    continue;
-                }
-
                 results.Add(blueprint);
             }
 
@@ -104,9 +100,11 @@ public partial class CheckAssetsViewModel : ViewModelBase
             });
         });
 
+        var missing = results.Where(r => r.AcquisitionState is not AcquisitionState.Found);
+
         Dispatcher.UIThread.Post(() =>
         {
-            Blueprints.AddRange(results);
+            Blueprints.AddRange(missing);
             IsLoading = false;
         });
     }
