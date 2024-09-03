@@ -67,7 +67,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
         await Parallel.ForEachAsync(binFiles, async (path, cancellationToken) =>
         {
-            var serialised = await Serz.Convert(path, true, cancellationToken);
+            var serialised = await Serz.Convert(path, false, cancellationToken);
             var xml  = await File.ReadAllTextAsync(serialised.OutputPath, cancellationToken);
 
             using var document = await XmlParser.ParseDocumentAsync(xml, cancellationToken);
