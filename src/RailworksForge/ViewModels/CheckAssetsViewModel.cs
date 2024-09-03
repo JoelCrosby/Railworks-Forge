@@ -65,7 +65,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         var processedCount = 0;
         var processed = binFiles.Count;
 
-        await Parallel.ForEachAsync(binFiles, async (path, cancellationToken) =>
+        await Parallel.ForEachAsync(binFiles, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (path, cancellationToken) =>
         {
             var serialised = await Serz.Convert(path, false, cancellationToken);
             var xml  = await File.ReadAllTextAsync(serialised.OutputPath, cancellationToken);

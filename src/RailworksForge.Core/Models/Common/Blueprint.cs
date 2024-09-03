@@ -69,6 +69,7 @@ public record Blueprint
     private string AgnosticBlueprintIdPath => BlueprintId.Replace('\\', Path.DirectorySeparatorChar);
     private string BinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
     private string BlueprintPath => Path.Join(ProductDirectory, BinaryPath);
+    private string XmlDocumentPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
     private AcquisitionState GetAcquisitionState()
     {
@@ -84,6 +85,11 @@ public record Blueprint
     private AcquisitionState LoadAcquisitionState()
     {
         if (Paths.Exists(BlueprintPath, Paths.GetAssetsDirectory()))
+        {
+            return AcquisitionState.Found;
+        }
+
+        if (Paths.Exists(XmlDocumentPath, Paths.GetAssetsDirectory()))
         {
             return AcquisitionState.Found;
         }
