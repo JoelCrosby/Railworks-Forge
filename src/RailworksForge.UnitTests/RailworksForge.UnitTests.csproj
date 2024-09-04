@@ -26,4 +26,10 @@
       <ProjectReference Include="..\RailworksForge.Core\RailworksForge.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Resources\" />
+      <None Remove="Resources\**" />
+      <EmbeddedResource Include="Resources\**" />
+    </ItemGroup>
+
 </Project>
