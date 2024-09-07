@@ -15,7 +15,9 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Commands;
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.models;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
 
@@ -126,7 +128,19 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             var target = new TargetConsist(SelectedConsists);
 
-            await ConsistService.ReplaceConsist(target, result, Scenario);
+            var request = new ReplaceConsistRequest
+            {
+                Target = target,
+                PreloadConsist = result,
+            };
+
+            var runner = new ConsistCommandRunner
+            {
+                Scenario = _scenario,
+                Commands = [new ReplaceConsist(request)],
+            };
+
+            await runner.Run();
 
             Refresh();
         });
@@ -167,7 +181,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             var target = new TargetConsist(SelectedConsists);
 
-            await ConsistService.DeleteConsist(target, Scenario);
+            var runner = new ConsistCommandRunner
+            {
+                Scenario = _scenario,
+                Commands = [new DeleteConsist(target)],
+            };
+
+            await runner.Run();
 
             Refresh();
         });

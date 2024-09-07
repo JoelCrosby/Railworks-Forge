@@ -26,10 +26,11 @@
 
             <DataGrid
                       IsVisible="{Binding !IsLoading}"
-                      ItemsSource="{Binding RailVehicles^}"
+                      ItemsSource="{Binding RailVehicles}"
                       IsReadOnly="True"
                       GridLinesVisibility="All"
                       SelectionMode="Single"
+                      SelectedItem="{Binding SelectedConsistVehicle}"
                       BorderThickness="0,1,0,0"
                       BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
             >
@@ -43,6 +44,14 @@
                     <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
                     <DataGridTextColumn Header="BlueprintId" Binding="{Binding BlueprintId}" />
                 </DataGrid.Columns>
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Replace Vehicle With Selected" Command="{Binding ReplaceVehicleCommand}"  />
+                        <MenuItem Header="Delete Vehicle" Command="{Binding DeleteVehicleCommand}"  />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
             </DataGrid>
         </DockPanel>
 
@@ -110,7 +119,7 @@
 
                        <DataGrid.ContextMenu>
                            <ContextMenu>
-                               <MenuItem Header="Add to Consist" Command="{Binding AddToConsistCommand}"  />
+                               <MenuItem Header="Add to Consist" Command="{Binding AddVehicleCommand}"  />
                            </ContextMenu>
                        </DataGrid.ContextMenu>
                    </DataGrid>

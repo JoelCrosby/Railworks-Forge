@@ -15,6 +15,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Commands;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
@@ -30,7 +31,10 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
-    public ReactiveCommand<Unit, Unit> AddToConsistCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> AddVehicleCommand { get; }
+    public ReactiveCommand<Unit, Unit> DeleteVehicleCommand { get; }
+    public ReactiveCommand<Unit, Unit> ReplaceVehicleCommand { get; }
 
     [ObservableProperty]
     private ObservableCollection<RollingStockEntry> _availableStock;
@@ -42,12 +46,15 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private RollingStockEntry? _selectedVehicle;
 
     [ObservableProperty]
+    private ConsistRailVehicle? _selectedConsistVehicle;
+
+    [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
     private int _loadAvailableStockProgress;
 
-    public IObservable<List<ConsistRailVehicle>> RailVehicles { get; }
+    public ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
 
     public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
 
@@ -61,7 +68,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         IsLoading = true;
 
-        RailVehicles = Observable.FromAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
@@ -70,12 +76,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
             Launcher.Open(SelectedDirectory.FullPath);
         });
 
-        AddToConsistCommand = ReactiveCommand.Create(() =>
-        {
-            if (SelectedVehicle is null) return;
+        RailVehicles = [];
 
-            Console.WriteLine(SelectedVehicle.Blueprint.BlueprintId);
-        });
+        AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehcile);
+        DeleteVehicleCommand = ReactiveCommand.CreateFromTask(DeleteVehicle);
+        ReplaceVehicleCommand = ReactiveCommand.CreateFromTask(ReplaceVehicle);
+
+        Observable.StartAsync(async () => await GetRailVehicles(), RxApp.TaskpoolScheduler);
     }
 
     private async Task LoadAvailableStock()
@@ -125,18 +132,22 @@ public partial class ConsistDetailViewModel : ViewModelBase
         });
     }
 
-    private async Task<List<ConsistRailVehicle>> GetRailVehicles()
+    private async Task GetRailVehicles()
     {
         if (string.IsNullOrWhiteSpace(_consist.BlueprintId))
         {
-            return [];
+            return;
         }
 
         var consists = await _scenario.GetServiceConsistVehicles(_consist.ServiceId);
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
 
-        return consists;
+        Dispatcher.UIThread.Post(() =>
+        {
+            RailVehicles.Clear();
+            RailVehicles.AddRange(consists);
+        });
     }
 
     private static async Task<List<RollingStockEntry>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
@@ -149,5 +160,71 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .Select(RollingStockEntry.Parse)
             .Where(e => e.BlueprintType is BlueprintType.Engine or BlueprintType.Tender or BlueprintType.Wagon)
             .ToList();
+    }
+
+    private async Task AddVehcile()
+    {
+        if (SelectedVehicle is null) return;
+
+        var request = new AddConsistVehicleRequest
+        {
+            VehicleToAdd = SelectedVehicle,
+        };
+
+        var runner = new ConsistCommandRunner
+        {
+            Scenario = _scenario,
+            Commands = [new AddConsistVehicle(request)],
+        };
+
+        await runner.Run();
+    }
+
+    private async Task ReplaceVehicle()
+    {
+        if (SelectedVehicle is null || SelectedConsistVehicle is null)
+        {
+            return;
+        }
+
+        var request = new ReplaceVehiclesRequest
+        {
+            Consist = _consist,
+            Replacements =
+            [
+                new()
+                {
+                    Replacement = SelectedVehicle,
+                    Target = SelectedConsistVehicle,
+                },
+            ],
+        };
+
+        var runner = new ConsistCommandRunner
+        {
+            Scenario = _scenario,
+            Commands = [new ReplaceConsistVehicles(request)],
+        };
+
+        await runner.Run();
+    }
+
+    private async Task DeleteVehicle()
+    {
+        if (SelectedConsistVehicle is null) return;
+
+        var request = new DeleteConsistVehicleRequest
+        {
+            Consist = _consist,
+            VehicleToDelete = SelectedConsistVehicle,
+        };
+
+        var runner = new ConsistCommandRunner
+        {
+            Scenario = _scenario,
+            Commands = [new DeleteConsistVehicle(request)],
+        };
+
+        await runner.Run();
     }
 }

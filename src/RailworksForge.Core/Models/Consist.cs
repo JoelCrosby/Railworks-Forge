@@ -16,7 +16,7 @@ public record Consist : Blueprint
 
     public string? LocoAuthor { get; init; }
 
-    public LocoClass? LocoClass { get; set; }
+    public LocoClass? LocoClass { get; init; }
 
     public required string ServiceName { get; init; }
 
