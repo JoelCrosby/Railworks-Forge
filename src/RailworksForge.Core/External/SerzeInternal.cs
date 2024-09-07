@@ -1,6 +1,12 @@
-using System.Collections;
 using System.Text;
-using System.Xml;
+
+using AngleSharp.Dom;
+
+using RailworksForge.Core.Extensions;
+
+
+// ReSharper disable NotAccessedField.Local
+// ReSharper disable UnusedMember.Local
 
 namespace RailworksForge.Core.External;
 
@@ -24,11 +30,12 @@ public class SerzInternal
         _mData = data;
     }
 
-    public XmlDocument ToXml()
+    public IDocument ToXml()
     {
-        var xmlDoc = new XmlDocument();
+        var xmlDoc = XmlParser.ParseDocument("<root></root>");
+        var currentXmlNode = xmlDoc.DocumentElement;
 
-        if (xmlDoc is not XmlNode currentXmlNode)
+        if (currentXmlNode is null)
         {
             throw new Exception("could not create xml doc");
         }
@@ -64,12 +71,17 @@ public class SerzInternal
 
                 _lastChunkCacheIx = _chunkCache.Count;
             }
-            else if (index1 <= _chunkCache.Count)
+            else
             {
                 sChunk = _chunkCache.ElementAtOrDefault(index1);
                 _chunkKind = sChunk.MKind;
                 _chunkName = _stringCache.ElementAtOrDefault(sChunk.MNameIx);
                 _typeName = _stringCache.ElementAtOrDefault(sChunk.MTypeNameIx) ?? string.Empty;
+            }
+
+            if (currentXmlNode is null)
+            {
+                throw new Exception("could get currentXmlNode");
             }
 
             switch (_chunkKind)
@@ -81,18 +93,11 @@ public class SerzInternal
                     for (var index2 = 0; index2 < num1; ++index2)
                         str = str + ReadValue(_typeName) + " ";
 
-                    var element1 = xmlDoc.CreateElement(_chunkName);
-                    var textNode1 = xmlDoc.CreateTextNode(str.Trim());
-                    element1.AppendChild(textNode1);
-                    var attribute1 = xmlDoc.CreateAttribute("d:numElements");
-                    attribute1.Value = num1.ToString();
-                    element1.Attributes.Append(attribute1);
-                    var attribute2 = xmlDoc.CreateAttribute("d:elementType");
-                    attribute2.Value = _typeName;
-                    element1.Attributes.Append(attribute2);
-                    var attribute3 = xmlDoc.CreateAttribute("d:precision");
-                    attribute3.Value = "string";
-                    element1.Attributes.Append(attribute3);
+                    var element1 = xmlDoc.CreateXmlElement(_chunkName ?? "e");
+                    element1.SetTextContent(str.Trim());
+                    element1.SetAttribute("d:numElements", num1.ToString());
+                    element1.SetAttribute("d:elementType", _typeName);
+                    element1.SetAttribute("d:precision", "string");
                     currentXmlNode.AppendChild(element1);
                     continue;
                 case EChunkKind.Control:
@@ -102,29 +107,30 @@ public class SerzInternal
                     ++_parentCount;
                     var num2 = ReadInt32();
                     _childCount = ReadInt32();
-                    XmlNode element2 = xmlDoc.CreateElement(_chunkName.Replace("::", "-"));
+                    var element2 = xmlDoc.CreateXmlElement(_chunkName.Replace("::", "-"));
 
                     if (num2 != 0)
                     {
-                        var attribute4 = xmlDoc.CreateAttribute("d:id");
-                        attribute4.Value = num2.ToString();
-                        element2.Attributes.Append(attribute4);
+                        element2.SetAttribute("d:id", num2.ToString());
                     }
 
                     currentXmlNode.AppendChild(element2);
                     currentXmlNode = element2;
                     continue;
                 case EChunkKind.Value:
-                    XmlNode element3 = xmlDoc.CreateElement(_chunkName.Length == 0 ? "e" : _chunkName);
-                    var textNode2 = xmlDoc.CreateTextNode(ReadValue(_typeName));
-                    var attribute5 = xmlDoc.CreateAttribute("d", "type", null);
-                    attribute5.Value = _typeName;
-                    element3.Attributes.Append(attribute5);
-                    element3.AppendChild(textNode2);
+                    var element3 = xmlDoc.CreateXmlElement(_chunkName?.Length == 0 ? "e" : _chunkName ?? "e");
+                    element3.SetTextContent(ReadValue(_typeName));
+                    element3.SetAttribute("d:type", _typeName);
                     currentXmlNode.AppendChild(element3);
                     continue;
                 case EChunkKind.EndParent:
-                    currentXmlNode = currentXmlNode.ParentNode;
+                    currentXmlNode = currentXmlNode.ParentElement ?? currentXmlNode;
+                    --_parentCount;
+                    continue;
+                case EChunkKind.Nil:
+                    var nilElement = xmlDoc.CreateXmlElement("d:nil");
+                    currentXmlNode.AppendChild(nilElement);
+                    currentXmlNode = currentXmlNode.ParentElement ?? currentXmlNode;
                     --_parentCount;
                     continue;
                 default:
@@ -138,7 +144,6 @@ public class SerzInternal
 
     private string ReadString()
     {
-        var utF8 = Encoding.UTF8;
         var index = _mData[_dataIx++] | (_mData[_dataIx++] << 8);
 
         string? str;
@@ -146,12 +151,12 @@ public class SerzInternal
         if (index == ushort.MaxValue)
         {
             var count = ReadInt32();
-            str = utF8.GetString(_mData, _dataIx, count);
+            str = Encoding.UTF8.GetString(_mData, _dataIx, count);
             _dataIx += count;
 
             _stringCache.Add(str);
 
-            _lastStringCacheIx = _stringCache.Count;
+            _lastStringCacheIx = _stringCache.Count - 1;
         }
         else
         {
@@ -167,7 +172,17 @@ public class SerzInternal
         return _mData[_dataIx++] | (_mData[_dataIx++] << 8) | (_mData[_dataIx++] << 16) | (_mData[_dataIx++] << 24);
     }
 
-    private string? ReadValue(string? deltaType)
+    private int ReadInt16()
+    {
+        return _mData[_dataIx++] | (_mData[_dataIx++] << 8);
+    }
+
+    private int ReadUInt8()
+    {
+        return _mData[_dataIx++];
+    }
+
+    private string ReadValue(string? deltaType)
     {
         switch (deltaType)
         {
@@ -182,10 +197,16 @@ public class SerzInternal
                 return single.ToString();
             case "sInt32":
                 return ReadInt32().ToString();
+            case "sUInt32":
+                var num32 = (ulong)ReadInt16();
+                return (((ulong)ReadInt16() << 32) | num32).ToString();
+            case "sUInt8":
+                var value = ReadUInt8().ToString();
+                return value;
             case "bool":
-                var boolean = BitConverter.ToBoolean(_mData, _dataIx).ToString();
+                var boolean = BitConverter.ToBoolean(_mData, _dataIx);
                 _dataIx += 1;
-                return boolean;
+                return boolean ? "1" : "0";
             default:
                 Console.WriteLine("unhandled value type: " + deltaType);
                 return "ARSE";
@@ -203,6 +224,7 @@ public class SerzInternal
         UnusedChunkCache = 85, // 0x00000055
         Value = 86, // 0x00000056
         EndParent = 112, // 0x00000070
+        Unknown = 255,
         EndOfFile = 256, // 0x00000100
     }
 

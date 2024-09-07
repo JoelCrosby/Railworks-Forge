@@ -1,6 +1,8 @@
-namespace RailworksForge.Core.Models.Examples;
+using RailworksForge.Core.Models;
 
-public static partial class Example
+namespace RailworksForge.DesignData;
+
+public static partial class DesignData
 {
     public static Route Route => new()
     {

@@ -1,8 +1,11 @@
+using System;
+
+using RailworksForge.Core.Models;
 using RailworksForge.Core.Types;
 
-namespace RailworksForge.Core.Models.Examples;
+namespace RailworksForge.DesignData;
 
-public static partial class Example
+public static partial class DesignData
 {
     public static Scenario Scenario => new()
     {

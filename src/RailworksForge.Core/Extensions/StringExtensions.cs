@@ -26,4 +26,9 @@ public static partial class StringExtensions
 
         return withoutDoubles;
     }
+
+    public static string NormalisePath(this string value)
+    {
+        return value.Normalize().ToLowerInvariant();
+    }
 }

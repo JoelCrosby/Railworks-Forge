@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RailworksForge.Core\RailworksForge.Core.csproj" />
+      <ProjectReference Include="..\RailworksForge\RailworksForge.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -5,17 +5,27 @@ namespace RailworksForge.UnitTests;
 public class SerzInternalTests
 {
     [Fact]
-    public void SerzInternal_CreatesDocument()
+    public void SerzInternal_ScenarioNetworkProperties_CreatesDocument()
     {
-        var data = GetResource("Scenario.bin");
+        var data = GetResourceStream("ScenarioNetworkProperties.bin");
         var document = new SerzInternal(ref data).ToXml();
 
-        Assert.NotNull(document);
+        Assert.NotNull(document.DocumentElement);
     }
 
-    private static byte[] GetResource(string name)
+    [Fact]
+    public void SerzInternal_Scenario_CreatesDocument()
+    {
+        var data = GetResourceStream("Scenario.bin");
+        var document = new SerzInternal(ref data).ToXml();
+
+        Assert.NotNull(document.DocumentElement);
+    }
+
+    private static byte[] GetResourceStream(string name)
     {
         var assembly = typeof(SerzInternalTests).Assembly;
+
         using var resource = assembly.GetManifestResourceStream($"RailworksForge.UnitTests.Resources.{name}");
 
         if (resource is null)

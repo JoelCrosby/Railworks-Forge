@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
-using RailworksForge.Core.Models.Examples;
 using RailworksForge.Util;
 
 using ReactiveUI;
@@ -85,7 +84,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     {
         if (Design.IsDesignMode)
         {
-            return new (Example.Scenarios);
+            return new (DesignData.DesignData.Scenarios);
         }
 
         var items = ScenarioService.GetScenarios(Route.Model);

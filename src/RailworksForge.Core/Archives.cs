@@ -120,8 +120,55 @@ public static class Archives
 
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
-        using var archive = ZipFile.OpenRead(archivePath);
-        return archive.Entries.Any(entry => string.Equals(entry.FullName, agnosticBlueprintIdPath, StringComparison.OrdinalIgnoreCase));
+        var normalisedArchivePath = archivePath.NormalisePath();
+        var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
+        var cachedArchiveFiles = Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath);
+
+        if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
+        {
+            return true;
+        }
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(archivePath);
+
+            foreach (var entry in archive.Entries)
+            {
+                if (entry.FullName.Contains('.', StringComparison.Ordinal) is false)
+                {
+                    continue;
+                }
+
+                var normalisedEntry = entry.FullName.NormalisePath();
+
+                if (Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath) is {} files)
+                {
+                    files.Add(normalisedEntry);
+                }
+                else
+                {
+                    // ReSharper disable once UnusedParameter.Local
+                    HashSet<string> UpdateEntry(string _, HashSet<string> value)
+                    {
+                        value.Add(normalisedEntry);
+                        return value;
+                    }
+
+                    HashSet<string> CreateEntry(string _) => [normalisedEntry];
+
+                    Cache.ArchiveFileCache.AddOrUpdate(normalisedArchivePath, CreateEntry,  UpdateEntry);
+                }
+            }
+
+            return Cache.ArchiveFileCache[normalisedArchivePath].Contains(normalisedBlueprintPath);
+        }
+        catch (Exception e)
+        {
+            ArchiveException.ThrowReadFailedForArchive(e, archivePath);
+
+            throw new InvalidOperationException();
+        }
     }
 
     public static List<string> ListFilesInPath(string archivePath, string directoryPath, string extension)

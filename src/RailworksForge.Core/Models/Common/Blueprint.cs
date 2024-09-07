@@ -101,14 +101,9 @@ public record Blueprint
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
 
-        foreach (var archive in archives)
+        if (archives.Select(archive => Archives.EntryExists(archive, BinaryPath)).Any(found => found))
         {
-            var found = Archives.EntryExists(archive, BinaryPath);
-
-            if (found)
-            {
-                return AcquisitionState.Found;
-            }
+            return AcquisitionState.Found;
         }
 
         return AcquisitionState.Missing;

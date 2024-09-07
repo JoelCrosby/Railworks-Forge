@@ -1,7 +1,6 @@
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
-using RailworksForge.Core.Models.Examples;
 
 namespace RailworksForge.UnitTests;
 
@@ -10,8 +9,8 @@ public class ConsistServiceTests
     [Fact]
     public async Task ReplaceConsistsReturnsCorrectly()
     {
-        var scenario = Example.Scenario;
-        var targetConsist = Example.Scenario.Consists.First();
+        var scenario = DesignData.DesignData.Scenario;
+        var targetConsist = DesignData.DesignData.Scenario.Consists.First();
 
         var consist = new PreloadConsist
         {

@@ -121,10 +121,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
             LoadAvailableStockProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
 
-            Dispatcher.UIThread.Post(() =>
-            {
-                AvailableStock.AddRange(models);
-            });
+            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
         });
     }
 

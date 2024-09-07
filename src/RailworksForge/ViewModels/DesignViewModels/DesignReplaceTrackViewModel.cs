@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using RailworksForge.Core.Models.Common;
-using RailworksForge.Core.Models.Examples;
 
 namespace RailworksForge.ViewModels;
 
@@ -10,28 +9,28 @@ public class DesignReplaceTrackViewModel : ReplaceTrackViewModel
 {
     private readonly List<Blueprint> _tracks =
     [
-        new Blueprint
+        new()
         {
             BlueprintSetIdProvider = "DTG",
             BlueprintSetIdProduct = "HamburgLubeck",
             BlueprintId = @"RailNetwork\Track\HL_Track_Concrete01.xml",
         },
 
-        new Blueprint
+        new()
         {
             BlueprintSetIdProvider = "DTG",
             BlueprintSetIdProduct = "HamburgLubeck",
             BlueprintId = @"RailNetwork\Track\HL_Track_Concrete02.xml",
         },
 
-        new Blueprint
+        new()
         {
             BlueprintSetIdProvider = "DTG",
             BlueprintSetIdProduct = "HamburgLubeck",
             BlueprintId = @"RailNetwork\Track\HL_Track_ConcreteNW.xml",
         },
 
-        new Blueprint
+        new()
         {
             BlueprintSetIdProvider = "DTG",
             BlueprintSetIdProduct = "HamburgLubeck",
@@ -40,7 +39,7 @@ public class DesignReplaceTrackViewModel : ReplaceTrackViewModel
 
     ];
 
-    public DesignReplaceTrackViewModel() : base(Example.Route)
+    public DesignReplaceTrackViewModel() : base(DesignData.DesignData.Route)
     {
         var models =_tracks.Select(track => new SelectTrackViewModel { RouteBlueprint = track});
 

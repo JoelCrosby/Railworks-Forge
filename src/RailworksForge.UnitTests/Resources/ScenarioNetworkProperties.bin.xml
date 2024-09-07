@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cRecordSet xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0" d:id="1259951080">
+	<Record>
+		<cScenarioNetworkProperties d:id="1170784440">
+			<Property>
+				<cScenarioNetworkProperties-cUnlinkedPropertyPair d:id="1371925592">
+					<ID>
+						<cGUID>
+							<UUID>
+								<e d:type="sUInt64">5685744822967537716</e>
+								<e d:type="sUInt64">1453966485662464166</e>
+							</UUID>
+							<DevString d:type="cDeltaString">c87f1034-d2ca-4ee7-a6f8-3bb5d0862d14</DevString>
+						</cGUID>
+					</ID>
+					<Property>
+						<Network-cSpawnPointProperty d:id="1266667104">
+							<ScenarioOwned d:type="bool">1</ScenarioOwned>
+							<Entity>
+								<cOwnedEntity d:id="1374142728">
+									<Component>
+										<Network-cSpawnPointComponent d:id="1374901216">
+											<FriendlyStartName d:type="cDeltaString">Manchester</FriendlyStartName>
+											<SpawnPointOffset d:type="cDeltaString">eSpawnPointOffsetBack</SpawnPointOffset>
+											<AllowOverheadWireConsists d:type="cDeltaString">eTrue</AllowOverheadWireConsists>
+											<Allow3rdRailConsists d:type="cDeltaString">eFalse</Allow3rdRailConsists>
+											<Allow4thRailConsists d:type="cDeltaString">eFalse</Allow4thRailConsists>
+											<MaximumConsistLength d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</MaximumConsistLength>
+											<Destination>
+												<Network-cSpawnPointDestination d:id="1299843392">
+													<EntityTargetName d:type="cDeltaString">Platform5</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Ardwick</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843404">
+													<EntityTargetName d:type="cDeltaString">Platform17</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Ashburys</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843416">
+													<EntityTargetName d:type="cDeltaString">Platform54</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Gorton</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843428">
+													<EntityTargetName d:type="cDeltaString">Platform48</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Fairfield</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843440">
+													<EntityTargetName d:type="cDeltaString">Platform44</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Guide Bridge</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843452">
+													<EntityTargetName d:type="cDeltaString">Platform6</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Newton</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843464">
+													<EntityTargetName d:type="cDeltaString">Platform7</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Godley</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843476">
+													<EntityTargetName d:type="cDeltaString">Platform8</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Broadbottom</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843488">
+													<EntityTargetName d:type="cDeltaString">Platform9</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Mottram Halt</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843500">
+													<EntityTargetName d:type="cDeltaString">Platform10</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Dinting</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843512">
+													<EntityTargetName d:type="cDeltaString">Platform11</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Hadfield</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843524">
+													<EntityTargetName d:type="cDeltaString">Platform65</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Crowden</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843536">
+													<EntityTargetName d:type="cDeltaString">Platform12</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Woodhead</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843548">
+													<EntityTargetName d:type="cDeltaString">Platform13</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Dunford Bridge</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843560">
+													<EntityTargetName d:type="cDeltaString">Platform25</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Penistone</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843572">
+													<EntityTargetName d:type="cDeltaString">Platform3</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Wombwell</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843584">
+													<EntityTargetName d:type="cDeltaString">Platform1</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Wath Central</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843596">
+													<EntityTargetName d:type="cDeltaString">Platform63</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Wortley</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843608">
+													<EntityTargetName d:type="cDeltaString">Platform67</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Deepcar</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843620">
+													<EntityTargetName d:type="cDeltaString">Platform23</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Oughty Bridge</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843632">
+													<EntityTargetName d:type="cDeltaString">Platform21</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Wadsley Bridge</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+												<Network-cSpawnPointDestination d:id="1299843644">
+													<EntityTargetName d:type="cDeltaString">Platform20</EntityTargetName>
+													<FriendlyName d:type="cDeltaString">Sheffield</FriendlyName>
+													<AlwaysGoVia d:type="bool">0</AlwaysGoVia>
+												</Network-cSpawnPointDestination>
+											</Destination>
+											<ConsistSpawnChance/>
+										</Network-cSpawnPointComponent>
+										<cEditorSceneryRender d:id="1380792432">
+											<DetailLevel d:type="sInt32">10</DetailLevel>
+											<Global d:type="bool">0</Global>
+										</cEditorSceneryRender>
+										<cPosOri d:id="1379619616">
+											<RFarMatrix>
+												<cFarMatrix d:id="1379619628">
+													<Height d:type="sFloat32" d:alt_encoding="00000060AF534940" d:precision="string">50.6538</Height>
+													<RXAxis d:numElements="4" d:elementType="sFloat32" d:precision="string">1.0000000 0.0000000 0.0000000 0.0000000</RXAxis>
+													<RYAxis d:numElements="4" d:elementType="sFloat32" d:precision="string">0.0000000 1.0000000 0.0000000 0.0000000</RYAxis>
+													<RZAxis d:numElements="4" d:elementType="sFloat32" d:precision="string">0.0000000 0.0000000 1.0000000 0.0000000</RZAxis>
+													<RFarPosition>
+														<cFarVector2 d:id="1379619680">
+															<X>
+																<cFarCoordinate>
+																	<RouteCoordinate>
+																		<cRouteCoordinate>
+																			<Distance d:type="sInt32">-26</Distance>
+																		</cRouteCoordinate>
+																	</RouteCoordinate>
+																	<TileCoordinate>
+																		<cTileCoordinate>
+																			<Distance d:type="sFloat32" d:alt_encoding="000000A030015440" d:precision="string">80.0186</Distance>
+																		</cTileCoordinate>
+																	</TileCoordinate>
+																</cFarCoordinate>
+															</X>
+															<Z>
+																<cFarCoordinate>
+																	<RouteCoordinate>
+																		<cRouteCoordinate>
+																			<Distance d:type="sInt32">-3</Distance>
+																		</cRouteCoordinate>
+																	</RouteCoordinate>
+																	<TileCoordinate>
+																		<cTileCoordinate>
+																			<Distance d:type="sFloat32" d:alt_encoding="00000000023F8840" d:precision="string">775.876</Distance>
+																		</cTileCoordinate>
+																	</TileCoordinate>
+																</cFarCoordinate>
+															</Z>
+														</cFarVector2>
+													</RFarPosition>
+												</cFarMatrix>
+											</RFarMatrix>
+										</cPosOri>
+									</Component>
+									<BlueprintID>
+										<iBlueprintLibrary-cAbsoluteBlueprintID>
+											<BlueprintSetID>
+												<iBlueprintLibrary-cBlueprintSetID>
+													<Provider d:type="cDeltaString">Kuju</Provider>
+													<Product d:type="cDeltaString">RailSimulatorCore</Product>
+												</iBlueprintLibrary-cBlueprintSetID>
+											</BlueprintSetID>
+											<BlueprintID d:type="cDeltaString">railnetwork\markers\player spawn marker.xml</BlueprintID>
+										</iBlueprintLibrary-cAbsoluteBlueprintID>
+									</BlueprintID>
+									<ReskinBlueprintID>
+										<iBlueprintLibrary-cAbsoluteBlueprintID>
+											<BlueprintSetID>
+												<iBlueprintLibrary-cBlueprintSetID>
+													<Provider d:type="cDeltaString"></Provider>
+													<Product d:type="cDeltaString"></Product>
+												</iBlueprintLibrary-cBlueprintSetID>
+											</BlueprintSetID>
+											<BlueprintID d:type="cDeltaString"></BlueprintID>
+										</iBlueprintLibrary-cAbsoluteBlueprintID>
+									</ReskinBlueprintID>
+									<Name d:type="cDeltaString">Marker - Player Spawn Point</Name>
+									<EntityID>
+										<cGUID>
+											<UUID>
+												<e d:type="sUInt64">5109787847871162628</e>
+												<e d:type="sUInt64">16511361645544862616</e>
+											</UUID>
+											<DevString d:type="cDeltaString">8df7e904-9cf9-46e9-98f3-b588ef2324e5</DevString>
+										</cGUID>
+									</EntityID>
+								</cOwnedEntity>
+							</Entity>
+							<_offset d:type="sFloat32" d:alt_encoding="00000040D9BD1C40" d:precision="string">7.1854</_offset>
+							<PointDirectionType d:type="cDeltaString">e1Way</PointDirectionType>
+							<_direction>
+								<Network-cDirection>
+									<_dir d:type="cDeltaString">forwards</_dir>
+								</Network-cDirection>
+							</_direction>
+						</Network-cSpawnPointProperty>
+					</Property>
+				</cScenarioNetworkProperties-cUnlinkedPropertyPair>
+			</Property>
+			<SimpleValuePropertyReplacement>
+				<cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement d:id="1166692576">
+					<ID>
+						<cGUID>
+							<UUID>
+								<e d:type="sUInt64">4619405973078759565</e>
+								<e d:type="sUInt64">10352426511420660377</e>
+							</UUID>
+							<DevString d:type="cDeltaString">02ad588d-6d42-401b-999a-90081035ab8f</DevString>
+						</cGUID>
+					</ID>
+					<SimpleValuePropertyEditFlag d:type="sUInt32">93</SimpleValuePropertyEditFlag>
+					<RibbonLength d:type="sFloat32" d:alt_encoding="0000002011B46B40" d:precision="string">221.627</RibbonLength>
+					<RibbonStartPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-26</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000C05EC57540" d:precision="string">348.336</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-3</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="00000020279D8540" d:precision="string">691.644</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonStartPosition>
+					<RibbonEndPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-26</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="0000004055706140" d:precision="string">139.51</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-3</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="0000002005EF8740" d:precision="string">765.878</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonEndPosition>
+					<RibbonExplicitDirection>
+						<Network-cDirection>
+							<_dir d:type="cDeltaString">either</_dir>
+						</Network-cDirection>
+					</RibbonExplicitDirection>
+					<Property>
+						<Network-cSectionGenericProperties d:id="1380703840">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="0000002011B46B40" d:precision="string">221.627</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<BlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">railnetwork\track\wd_track01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</BlueprintID>
+							<SecondaryBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString"></Provider>
+											<Product d:type="cDeltaString"></Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString"></BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</SecondaryBlueprintID>
+							<ElectrificationBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">scenery\procedural\wd_catenary01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</ElectrificationBlueprintID>
+							<LoftScaleFactor d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1</LoftScaleFactor>
+						</Network-cSectionGenericProperties>
+						<Network-cTrackNetworkTrackRule d:id="893688392">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="0000002011B46B40" d:precision="string">221.627</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkTrackRule-cPropertyValue>
+									<TrackRule>
+										<iBlueprintLibrary-cAbsoluteBlueprintID>
+											<BlueprintSetID>
+												<iBlueprintLibrary-cBlueprintSetID>
+													<Provider d:type="cDeltaString">RSC</Provider>
+													<Product d:type="cDeltaString">Woodhead</Product>
+												</iBlueprintLibrary-cBlueprintSetID>
+											</BlueprintSetID>
+											<BlueprintID d:type="cDeltaString">railnetwork\trackrules\wd trackrule.xml</BlueprintID>
+										</iBlueprintLibrary-cAbsoluteBlueprintID>
+									</TrackRule>
+								</Network-iTrackNetworkTrackRule-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkTrackRule>
+						<Network-cTrackNetworkSpeedLimit d:id="893688344">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="0000002011B46B40" d:precision="string">221.627</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkSpeedLimit-cPropertyValue>
+									<Primary d:type="sInt32">15</Primary>
+									<Secondary d:type="sInt32">15</Secondary>
+								</Network-iTrackNetworkSpeedLimit-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkSpeedLimit>
+						<Network-cTrackNetworkRideQuality d:id="1380519264">
+							<_start d:type="sFloat32" d:alt_encoding="000000C0F4A95340" d:precision="string">78.6556</_start>
+							<_end d:type="sFloat32" d:alt_encoding="000000C05D826540" d:precision="string">172.074</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkRideQuality-cPropertyValue>
+									<LineUnevenness d:type="sFloat32" d:alt_encoding="0000000000002E40" d:precision="string">15</LineUnevenness>
+								</Network-iTrackNetworkRideQuality-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkRideQuality>
+					</Property>
+				</cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement>
+				<cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement d:id="1166692464">
+					<ID>
+						<cGUID>
+							<UUID>
+								<e d:type="sUInt64">4730823229476591744</e>
+								<e d:type="sUInt64">3349930868146916524</e>
+							</UUID>
+							<DevString d:type="cDeltaString">881e5880-42a9-41a7-ac4c-033a60587d2e</DevString>
+						</cGUID>
+					</ID>
+					<SimpleValuePropertyEditFlag d:type="sUInt32">61</SimpleValuePropertyEditFlag>
+					<RibbonLength d:type="sFloat32" d:alt_encoding="00000080ED506540" d:precision="string">170.529</RibbonLength>
+					<RibbonStartPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">24</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000008C737540" d:precision="string">343.222</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-12</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="00000060DE1E8940" d:precision="string">803.859</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonStartPosition>
+					<RibbonEndPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">24</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="0000002012C77E40" d:precision="string">492.442</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-12</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000608B8B8640" d:precision="string">721.443</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonEndPosition>
+					<RibbonExplicitDirection>
+						<Network-cDirection>
+							<_dir d:type="cDeltaString">backwards</_dir>
+						</Network-cDirection>
+					</RibbonExplicitDirection>
+					<Property>
+						<Network-cSectionGenericProperties d:id="1380703912">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="00000080ED506540" d:precision="string">170.529</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<BlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">railnetwork\track\wd_track01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</BlueprintID>
+							<SecondaryBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString"></Provider>
+											<Product d:type="cDeltaString"></Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString"></BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</SecondaryBlueprintID>
+							<ElectrificationBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">scenery\procedural\wd_catenary01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</ElectrificationBlueprintID>
+							<LoftScaleFactor d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1</LoftScaleFactor>
+						</Network-cSectionGenericProperties>
+						<Network-cTrackNetworkTrackRule d:id="1380507648">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="00000080ED506540" d:precision="string">170.529</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkTrackRule-cPropertyValue>
+									<TrackRule>
+										<iBlueprintLibrary-cAbsoluteBlueprintID>
+											<BlueprintSetID>
+												<iBlueprintLibrary-cBlueprintSetID>
+													<Provider d:type="cDeltaString">RSC</Provider>
+													<Product d:type="cDeltaString">Woodhead</Product>
+												</iBlueprintLibrary-cBlueprintSetID>
+											</BlueprintSetID>
+											<BlueprintID d:type="cDeltaString">railnetwork\trackrules\wd trackrule.xml</BlueprintID>
+										</iBlueprintLibrary-cAbsoluteBlueprintID>
+									</TrackRule>
+								</Network-iTrackNetworkTrackRule-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkTrackRule>
+						<Network-cTrackNetworkSpeedLimit d:id="1380519216">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="00000080ED506540" d:precision="string">170.529</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkSpeedLimit-cPropertyValue>
+									<Primary d:type="sInt32">15</Primary>
+									<Secondary d:type="sInt32">10</Secondary>
+								</Network-iTrackNetworkSpeedLimit-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkSpeedLimit>
+						<Network-cTrackNetworkRideQuality d:id="1380507696">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="000000803B583240" d:precision="string">18.3447</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkRideQuality-cPropertyValue>
+									<LineUnevenness d:type="sFloat32" d:alt_encoding="0000000000003E40" d:precision="string">30</LineUnevenness>
+								</Network-iTrackNetworkRideQuality-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkRideQuality>
+						<Network-cTrackNetworkRideQuality d:id="1380532416">
+							<_start d:type="sFloat32" d:alt_encoding="000000803B583240" d:precision="string">18.3447</_start>
+							<_end d:type="sFloat32" d:alt_encoding="0000000094216440" d:precision="string">161.049</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkRideQuality-cPropertyValue>
+									<LineUnevenness d:type="sFloat32" d:alt_encoding="0000000000002E40" d:precision="string">15</LineUnevenness>
+								</Network-iTrackNetworkRideQuality-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkRideQuality>
+						<Network-cTrackNetworkRideQuality d:id="1380532464">
+							<_start d:type="sFloat32" d:alt_encoding="0000000094216440" d:precision="string">161.049</_start>
+							<_end d:type="sFloat32" d:alt_encoding="00000080ED506540" d:precision="string">170.529</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkRideQuality-cPropertyValue>
+									<LineUnevenness d:type="sFloat32" d:alt_encoding="0000000000003940" d:precision="string">25</LineUnevenness>
+								</Network-iTrackNetworkRideQuality-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkRideQuality>
+					</Property>
+				</cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement>
+				<cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement d:id="1802500144">
+					<ID>
+						<cGUID>
+							<UUID>
+								<e d:type="sUInt64">5685744822967537716</e>
+								<e d:type="sUInt64">1453966485662464166</e>
+							</UUID>
+							<DevString d:type="cDeltaString">c87f1034-d2ca-4ee7-a6f8-3bb5d0862d14</DevString>
+						</cGUID>
+					</ID>
+					<SimpleValuePropertyEditFlag d:type="sUInt32">7</SimpleValuePropertyEditFlag>
+					<RibbonLength d:type="sFloat32" d:alt_encoding="000000A0FD6C5040" d:precision="string">65.703</RibbonLength>
+					<RibbonStartPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-26</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000207BA45240" d:precision="string">74.57</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-3</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000A08E4E8840" d:precision="string">777.82</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonStartPosition>
+					<RibbonEndPosition>
+						<cFarVector2>
+							<X>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-26</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="00000060470F6140" d:precision="string">136.477</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</X>
+							<Z>
+								<cFarCoordinate>
+									<RouteCoordinate>
+										<cRouteCoordinate>
+											<Distance d:type="sInt32">-3</Distance>
+										</cRouteCoordinate>
+									</RouteCoordinate>
+									<TileCoordinate>
+										<cTileCoordinate>
+											<Distance d:type="sFloat32" d:alt_encoding="000000607E9E8740" d:precision="string">755.812</Distance>
+										</cTileCoordinate>
+									</TileCoordinate>
+								</cFarCoordinate>
+							</Z>
+						</cFarVector2>
+					</RibbonEndPosition>
+					<RibbonExplicitDirection>
+						<Network-cDirection>
+							<_dir d:type="cDeltaString">either</_dir>
+						</Network-cDirection>
+					</RibbonExplicitDirection>
+					<Property>
+						<Network-cTrackNetworkTrackRule d:id="1153311184">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="000000A0FD6C5040" d:precision="string">65.703</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkTrackRule-cPropertyValue>
+									<TrackRule>
+										<iBlueprintLibrary-cAbsoluteBlueprintID>
+											<BlueprintSetID>
+												<iBlueprintLibrary-cBlueprintSetID>
+													<Provider d:type="cDeltaString">RSC</Provider>
+													<Product d:type="cDeltaString">Woodhead</Product>
+												</iBlueprintLibrary-cBlueprintSetID>
+											</BlueprintSetID>
+											<BlueprintID d:type="cDeltaString">railnetwork\trackrules\wd trackrule.xml</BlueprintID>
+										</iBlueprintLibrary-cAbsoluteBlueprintID>
+									</TrackRule>
+								</Network-iTrackNetworkTrackRule-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkTrackRule>
+						<Network-cTrackNetworkSpeedLimit d:id="1153311136">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="000000A0FD6C5040" d:precision="string">65.703</_end>
+							<ScenarioOwned d:type="bool">0</ScenarioOwned>
+							<Property>
+								<Network-iTrackNetworkSpeedLimit-cPropertyValue>
+									<Primary d:type="sInt32">15</Primary>
+									<Secondary d:type="sInt32">15</Secondary>
+								</Network-iTrackNetworkSpeedLimit-cPropertyValue>
+							</Property>
+						</Network-cTrackNetworkSpeedLimit>
+						<Network-cSectionGenericProperties d:id="1152106208">
+							<_start d:type="sFloat32" d:alt_encoding="0000000000000000" d:precision="string">0</_start>
+							<_end d:type="sFloat32" d:alt_encoding="000000A0FD6C5040" d:precision="string">65.703</_end>
+							<ScenarioOwned d:type="bool">1</ScenarioOwned>
+							<BlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">railnetwork\track\wd_track01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</BlueprintID>
+							<SecondaryBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString"></Provider>
+											<Product d:type="cDeltaString"></Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString"></BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</SecondaryBlueprintID>
+							<ElectrificationBlueprintID>
+								<iBlueprintLibrary-cAbsoluteBlueprintID>
+									<BlueprintSetID>
+										<iBlueprintLibrary-cBlueprintSetID>
+											<Provider d:type="cDeltaString">RSC</Provider>
+											<Product d:type="cDeltaString">Woodhead</Product>
+										</iBlueprintLibrary-cBlueprintSetID>
+									</BlueprintSetID>
+									<BlueprintID d:type="cDeltaString">scenery\procedural\wd_catenary01.xml</BlueprintID>
+								</iBlueprintLibrary-cAbsoluteBlueprintID>
+							</ElectrificationBlueprintID>
+							<LoftScaleFactor d:type="sFloat32" d:alt_encoding="000000000000F03F" d:precision="string">1</LoftScaleFactor>
+						</Network-cSectionGenericProperties>
+					</Property>
+				</cScenarioNetworkProperties-cNetworkRibbonSimplePropertyReplacement>
+			</SimpleValuePropertyReplacement>
+		</cScenarioNetworkProperties>
+	</Record>
+</cRecordSet>
