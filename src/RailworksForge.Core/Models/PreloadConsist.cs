@@ -55,6 +55,17 @@ public class PreloadConsist
             BlueprintSetIdProvider = locomotive.Blueprint.BlueprintSetIdProvider,
         };
 
+        if (string.IsNullOrEmpty(locomotiveName))
+        {
+            var locoDocument = blueprint.GetBlueprintXml().GetAwaiter().GetResult();
+
+            locomotiveName = locoDocument.SelectLocalisedStringContent("LocoName");
+            displayName = locoDocument.SelectLocalisedStringContent("DisplayName");
+            engineType = locoDocument.SelectTextContent("EngineType");
+            eraStartYear = locoDocument.SelectTextContent("EraStartYear");
+            eraEndYear = locoDocument.SelectTextContent("EraEndYear");
+        }
+
         return new PreloadConsist
         {
             IsReskin = isReskin,

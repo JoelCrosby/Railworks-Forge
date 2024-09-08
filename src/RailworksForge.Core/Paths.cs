@@ -130,6 +130,7 @@ public static class Paths
             MaxRecursionDepth = depth,
             IgnoreInaccessible = true,
             RecurseSubdirectories = true,
+            MatchCasing = MatchCasing.CaseInsensitive,
         });
     }
 

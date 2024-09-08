@@ -7,6 +7,8 @@ using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AngleSharp.Dom;
+
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -64,7 +66,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
         var preloadDirectory = GetPreloadDirectory(SelectedDirectory);
 
-        if (!Directory.Exists(preloadDirectory)) return;
+        if (!Paths.Exists(preloadDirectory)) return;
 
         var binFiles = Directory
             .EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories)
@@ -92,9 +94,15 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     private static string GetPreloadDirectory(BrowserDirectory directory)
     {
-        var preloadDirectory = Path.Join(directory.FullPath, "PreLoad");
+        var assetDirectories = Directory.GetDirectories(directory.FullPath);
+        var preloadDirectory = assetDirectories.FirstOrDefault(d => d.Contains("PreLoad", StringComparison.OrdinalIgnoreCase));
 
-        if (Directory.Exists(preloadDirectory))
+        if (preloadDirectory is null)
+        {
+            throw new Exception($"Could not find preload directory {directory.FullPath}");
+        }
+
+        if (Paths.Exists(preloadDirectory))
         {
             return preloadDirectory;
         }
@@ -112,9 +120,32 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         var text = await File.ReadAllTextAsync(path, cancellationToken);
         var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
 
-        return doc
-            .QuerySelectorAll("Blueprint cConsistBlueprint")
-            .Select(PreloadConsist.Parse)
-            .ToList();
+        var blueprints = doc.QuerySelectorAll("Blueprint cConsistBlueprint").ToList();
+
+        var consists = new List<PreloadConsist>();
+
+        await Inner(blueprints);
+
+        return consists;
+
+        async Task Inner(List<IElement> elements)
+        {
+            foreach (var element in elements)
+            {
+                var parsed = PreloadConsist.Parse(element);
+
+                if (parsed.Blueprint.BlueprintId.Contains("fragment", StringComparison.OrdinalIgnoreCase))
+                {
+                    var fragmentDocument = await parsed.Blueprint.GetBlueprintXml();
+                    var fragmentBlueprints = fragmentDocument.QuerySelectorAll("Blueprint cConsistFragmentBlueprint").ToList();
+
+                    await Inner(fragmentBlueprints);
+                }
+                else
+                {
+                    consists.Add(parsed);
+                }
+            }
+        }
     }
 }

@@ -247,7 +247,7 @@ public record Scenario
 
     public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(string serviceId)
     {
-        var doc = await GetXmlDocument();
+        var doc = await GetXmlDocument(false);
 
         return doc
             .QuerySelectorAll("cConsist")
