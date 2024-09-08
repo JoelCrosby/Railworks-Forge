@@ -5,6 +5,8 @@ using Avalonia.Media.Imaging;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 
+using Serilog;
+
 namespace RailworksForge.Core;
 
 public static class Archives
@@ -165,9 +167,9 @@ public static class Archives
         }
         catch (Exception e)
         {
-            ArchiveException.ThrowReadFailedForArchive(e, archivePath);
+            Log.Error(e, "Failed to read archive");
 
-            throw new InvalidOperationException();
+            return false;
         }
     }
 
