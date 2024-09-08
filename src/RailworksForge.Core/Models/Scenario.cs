@@ -54,9 +54,11 @@ public record Scenario
 
     public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
 
-    public static Scenario New(Route route, AssetPath path)
+    public static Scenario? New(Route route, AssetPath path)
     {
         var doc = GetPropertiesDocument(path);
+
+        if (doc.DocumentElement.FirstElementChild is null) return null;
 
         var id = doc.SelectTextContent("ID cGUID DevString").Trim();
         var name = doc.SelectLocalisedStringContent("DisplayName");
@@ -93,7 +95,7 @@ public record Scenario
         };
     }
 
-    public Scenario Refresh()
+    public Scenario? Refresh()
     {
         return New(Route, AssetPath);
     }

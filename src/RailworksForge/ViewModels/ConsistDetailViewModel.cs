@@ -49,6 +49,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private ConsistRailVehicle? _selectedConsistVehicle;
 
     [ObservableProperty]
+    private List<ConsistRailVehicle> _selectedConsistVehicles;
+
+    [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
@@ -64,6 +67,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _consist = consist;
 
         AvailableStock = [];
+        SelectedConsistVehicles = [];
+
         DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
 
         IsLoading = true;
@@ -78,11 +83,16 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         RailVehicles = [];
 
-        AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehcile);
+        AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehicle);
         DeleteVehicleCommand = ReactiveCommand.CreateFromTask(DeleteVehicle);
         ReplaceVehicleCommand = ReactiveCommand.CreateFromTask(ReplaceVehicle);
 
-        Observable.StartAsync(async () => await GetRailVehicles(), RxApp.TaskpoolScheduler);
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        Observable.StartAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
     }
 
     private async Task LoadAvailableStock()
@@ -162,7 +172,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .ToList();
     }
 
-    private async Task AddVehcile()
+    private async Task AddVehicle()
     {
         if (SelectedVehicle is null) return;
 
@@ -178,26 +188,27 @@ public partial class ConsistDetailViewModel : ViewModelBase
         };
 
         await runner.Run();
+
+        Refresh();
     }
 
     private async Task ReplaceVehicle()
     {
-        if (SelectedVehicle is null || SelectedConsistVehicle is null)
+        if (SelectedVehicle is null || SelectedConsistVehicles.Any() is false)
         {
             return;
         }
 
+        var replacements = SelectedConsistVehicles.ConvertAll(target => new VehicleReplacement
+        {
+            Replacement = SelectedVehicle,
+            Target = target,
+        });
+
         var request = new ReplaceVehiclesRequest
         {
             Consist = _consist,
-            Replacements =
-            [
-                new()
-                {
-                    Replacement = SelectedVehicle,
-                    Target = SelectedConsistVehicle,
-                },
-            ],
+            Replacements = replacements,
         };
 
         var runner = new ConsistCommandRunner
@@ -207,6 +218,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
         };
 
         await runner.Run();
+
+        Refresh();
     }
 
     private async Task DeleteVehicle()
@@ -226,5 +239,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         };
 
         await runner.Run();
+
+        Refresh();
     }
 }

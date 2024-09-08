@@ -34,12 +34,14 @@ public record Blueprint
 
     private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
 
-    public async Task<string> GetBlueprintXml()
+    public async Task<IDocument> GetBlueprintXml()
     {
         if (File.Exists(BlueprintPath))
         {
             var converted = await Serz.Convert(BlueprintPath);
-            return await File.ReadAllTextAsync(converted.OutputPath);
+            var text = await File.ReadAllTextAsync(converted.OutputPath);
+
+            return await XmlParser.ParseDocumentAsync(text);
         }
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
@@ -51,7 +53,9 @@ public record Blueprint
             if (extracted)
             {
                 var result = await Serz.Convert(BlueprintPath);
-                return await File.ReadAllTextAsync(result.OutputPath);
+                var text = await File.ReadAllTextAsync(result.OutputPath);
+
+                return await XmlParser.ParseDocumentAsync(text);
             }
         }
 

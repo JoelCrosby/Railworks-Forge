@@ -230,6 +230,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         var updatedScenario = Scenario.Refresh();
 
+        if (updatedScenario is null) return;
+
         Dispatcher.UIThread.Post(() =>
         {
             Scenario = updatedScenario;

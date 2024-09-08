@@ -26,11 +26,11 @@ public class ConsistCommandRunner
             await command.Run(context);
         }
 
-        Scenario.CreateBackup();
-
-        await ScenarioWriter.WriteBinary(context.Scenario, scenarioDocument);
-        await ScenarioWriter.WritePropertiesDocument(context.Scenario, scenarioPropertiesDocument);
-
-        Cache.ClearScenarioCache(Scenario);
+        // Scenario.CreateBackup();
+        //
+        // await ScenarioWriter.WriteBinary(context.Scenario, scenarioDocument);
+        // await ScenarioWriter.WritePropertiesDocument(context.Scenario, scenarioPropertiesDocument);
+        //
+        // Cache.ClearScenarioCache(Scenario);
     }
 }

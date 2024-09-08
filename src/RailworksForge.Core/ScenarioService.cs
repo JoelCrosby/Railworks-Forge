@@ -23,7 +23,11 @@ public static class ScenarioService
         {
             foreach (var path in ReadCompressedScenarios(package))
             {
-                scenarios.Add(Scenario.New(route, path));
+                var scenario = Scenario.New(route, path);
+
+                if (scenario is null) continue;
+
+                scenarios.Add(scenario);
             }
         }
     }
@@ -46,9 +50,11 @@ public static class ScenarioService
         {
             var scenarioPath = Path.Join(scenarioDir, "ScenarioProperties.xml");
 
-            if (!File.Exists(scenarioPath)) continue;
+            if (!Paths.Exists(scenarioPath)) continue;
 
             var scenario = Scenario.New(route, new AssetPath { Path = scenarioPath });
+
+            if (scenario is null) continue;
 
             scenarios.Add(scenario);
         }
