@@ -134,6 +134,8 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             {
                 var parsed = PreloadConsist.Parse(element);
 
+                if (parsed is null) continue;
+
                 if (parsed.Blueprint.BlueprintId.Contains("fragment", StringComparison.OrdinalIgnoreCase))
                 {
                     var fragmentDocument = await parsed.Blueprint.GetBlueprintXml();

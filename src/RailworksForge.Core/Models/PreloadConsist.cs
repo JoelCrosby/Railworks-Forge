@@ -23,7 +23,7 @@ public class PreloadConsist
 
     public required bool IsReskin { get; init; }
 
-    public static PreloadConsist Parse(IElement el)
+    public static PreloadConsist? Parse(IElement el)
     {
         var locomotiveName = el.SelectLocalisedStringContent("LocoName");
         var displayName = el.SelectLocalisedStringContent("DisplayName");
@@ -46,7 +46,9 @@ public class PreloadConsist
             })
             .ToList();
 
-        var locomotive = entries.First();
+        var locomotive = entries.FirstOrDefault();
+
+        if (locomotive is null) return null;
 
         var blueprint = new Blueprint
         {
