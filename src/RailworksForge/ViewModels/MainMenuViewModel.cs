@@ -4,6 +4,7 @@ using System.Reactive;
 
 using RailworksForge.Core;
 using RailworksForge.Core.External;
+using RailworksForge.Core.Packaging;
 using RailworksForge.Util;
 
 using ReactiveUI;
@@ -17,6 +18,7 @@ public class MainMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConvertBinToXmlCommand { get; }
     public ReactiveCommand<Unit, Unit> ConvertXmlToBinCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenSettingsDirectoryCommand { get; }
+    public ReactiveCommand<Unit, Unit> InstallPackageCommand { get; }
 
     public MainMenuViewModel()
     {
@@ -53,6 +55,20 @@ public class MainMenuViewModel : ViewModelBase
         OpenSettingsDirectoryCommand = ReactiveCommand.Create(() =>
         {
             Launcher.Open(Paths.GetConfigurationFolder());
+        });
+
+        InstallPackageCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            var files = await Utils.OpenMultiFilePickerAsync("Select .rwp or .rpk file");
+
+            if (files.Count is 0) return;
+
+            foreach (var file in files)
+            {
+                var packager = new Packager();
+
+                await packager.InstallPackage(file.Path.AbsolutePath);
+            }
         });
     }
 }

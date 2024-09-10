@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Avalonia;
@@ -43,9 +45,24 @@ public class Utils
         {
             Title = title,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.All]
+            FileTypeFilter = [FilePickerFileTypes.All],
         });
 
         return files.Count >= 1 ? files[0] : null;
+    }
+
+    public static async Task<List<IStorageFile>> OpenMultiFilePickerAsync(string title)
+    {
+        var window = GetApplicationWindow();
+        var provider = window.StorageProvider;
+
+        var files = await provider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = true,
+            FileTypeFilter = [FilePickerFileTypes.All],
+        });
+
+        return files.ToList();
     }
 }

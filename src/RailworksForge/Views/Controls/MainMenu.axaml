@@ -17,6 +17,9 @@
             <MenuItem Command="{Binding ConvertBinToXmlCommand}" Header="Convert .bin to .xml"/>
             <MenuItem Command="{Binding ConvertXmlToBinCommand}" Header="Convert .xml to .bin"/>
         </MenuItem>
+        <MenuItem Header="_Packages">
+            <MenuItem Command="{Binding InstallPackageCommand}" Header="Install Package"/>
+        </MenuItem>
     </Menu>
 
 </UserControl>
