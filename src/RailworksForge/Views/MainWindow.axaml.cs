@@ -2,6 +2,7 @@ using System;
 using System.Reactive;
 using System.Threading.Tasks;
 
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 
 using RailworksForge.Core.Models;
@@ -20,6 +21,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         this.WhenActivated(action =>
         {
+            if (Design.IsDesignMode)
+            {
+                return;
+            }
+
             if (ViewModel is null)
             {
                 throw new Exception("view model not instantiated");

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reactive;
 
+
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Packaging;
@@ -63,12 +64,20 @@ public class MainMenuViewModel : ViewModelBase
 
             if (files.Count is 0) return;
 
+            var packager = new Packager();
+            var mainWindow = Utils.GetApplicationViewModel();
+
+            packager.PackageInstallProgressSubject.Subscribe(args =>
+            {
+                mainWindow.UpdateProgressIndicator(args);
+            });
+
             foreach (var file in files)
             {
-                var packager = new Packager();
-
                 await packager.InstallPackage(file.Path.AbsolutePath);
             }
+
+            mainWindow.ClearProgressIndicator();
         });
     }
 }

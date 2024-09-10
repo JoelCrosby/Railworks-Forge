@@ -7,4 +7,6 @@ public record InstallProgress
     public required  string CurrentTask { get; init; }
 
     public required  string Message { get; init; }
+
+    public required bool IsLoading { get; set; }
 }

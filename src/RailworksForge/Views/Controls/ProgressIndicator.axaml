@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+             xmlns:vm="clr-namespace:RailworksForge.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="64"
+             x:Class="RailworksForge.Views.Controls.ProgressIndicator"
+             x:DataType="vm:ProgressIndicatorViewModel">
+
+    <Design.DataContext>
+        <vm:DesignProgressIndicatorViewModel />
+    </Design.DataContext>
+
+
+    <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" VerticalAlignment="Bottom">
+        <Grid
+            ColumnDefinitions="Auto,Auto,*,Auto"
+            Height="48"
+        >
+            <li:LoadingIndicator
+                Margin="16,0"
+                Grid.Column="0"
+                IsVisible="{Binding IsLoading}"
+                IsActive="{Binding IsLoading}"
+                Mode="Arc"
+                SpeedRatio="1.2"
+                VerticalAlignment="Center"
+            />
+
+            <StackPanel IsVisible="{Binding IsLoading}" Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="32,0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="%" FontSize="12" FontWeight="SemiBold" />
+                    <Run Text="{Binding Progress}" FontSize="12" FontWeight="SemiBold" />
+                    <Run Text="{Binding ProgressMessage}" FontSize="12" FontWeight="Regular" />
+                </TextBlock>
+            </StackPanel>
+
+            <ProgressBar IsVisible="{Binding IsLoading}" Grid.Column="2" VerticalAlignment="Center" Height="6" Value="{Binding Progress}" Minimum="0" Maximum="100" HorizontalAlignment="Stretch" />
+
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="280" Margin="32,0">
+                <Border Background="{DynamicResource SystemChromeDisabledHighColor}" CornerRadius="32" Padding="32,4" HorizontalAlignment="Left">
+                    <TextBlock VerticalAlignment="Center"  Text="{Binding StatusMessage}" FontSize="12" FontWeight="SemiBold" />
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+</UserControl>

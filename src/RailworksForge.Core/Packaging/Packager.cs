@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Reactive.Subjects;
 using System.Text;
 
 using Serilog;
@@ -7,7 +8,7 @@ namespace RailworksForge.Core.Packaging;
 
 public class Packager
 {
-    public event EventHandler<InstallProgress>? PackageInstallProgress;
+    public Subject<InstallProgress> PackageInstallProgressSubject { get; } = new();
 
     private string _currentTask = string.Empty;
 
@@ -25,12 +26,16 @@ public class Packager
 
         RaisePackageInstallProgress($"Installing {packageName}");
 
+        await Task.Delay(200).ConfigureAwait(false);
+
         var packageInfo = Path.Join(Paths.GetGameDirectory(), "PackageInfo", $"{packageName}.pi");
         var installed = Paths.Exists(packageInfo);
 
         if (installed)
         {
             RaisePackageInstallProgress($"Package {packageName} is already installed, aborting.");
+
+            await Task.Delay(2000).ConfigureAwait(false);
 
             Log.Information("package {Package} already installed", packageName);
             return;
@@ -46,12 +51,13 @@ public class Packager
             Progress = progress,
             Message = message ?? string.Empty,
             CurrentTask = _currentTask,
+            IsLoading = true,
         };
 
-        PackageInstallProgress?.Invoke(this, args);
+        PackageInstallProgressSubject.OnNext(args);
     }
 
-    private void RaisePackageInstallProgress(string currentTask)
+    private void RaisePackageInstallProgress(string currentTask, bool isLoading = true)
     {
         _currentTask = currentTask;
 
@@ -60,9 +66,10 @@ public class Packager
             Progress = 0,
             Message = string.Empty,
             CurrentTask = _currentTask,
+            IsLoading = isLoading,
         };
 
-        PackageInstallProgress?.Invoke(this, args);
+        PackageInstallProgressSubject.OnNext(args);
     }
 
     private async Task ProcessPackage(string filename)
@@ -126,10 +133,19 @@ public class Packager
 
         RaisePackageInstallProgress("Clearing blueprint .pak cache files...");
 
+        await Task.Delay(200).ConfigureAwait(false);
+
         DeleteAllBlueprintsPak();
 
-        foreach (var entry in archive.Entries)
+        var entryCount = archive.Entries.Count;
+
+        for (var i = 0; i < entryCount; i++)
         {
+            var entry = archive.Entries[i];
+            var progress = (int) Math.Ceiling((double)(100 * i) / entryCount);
+
+            RaisePackageInstallProgress(progress, $"Processing File {i + 1} of {entryCount}");
+
             var entryArchivePath = entry.FullName[entryNameIndex..].Replace('\\', Path.DirectorySeparatorChar);
             var entryFilename = Path.GetFileName(entryArchivePath);
             var assets = new List<string>();
@@ -165,6 +181,10 @@ public class Packager
                 package.Assets[key] = null;
             }
         }
+
+        RaisePackageInstallProgress($"Successfully Installed package {package.Name}", false);
+
+        await Task.Delay(6000).ConfigureAwait(false);
     }
 
     private static async Task<List<string>> ExtractRouteDotXml(ZipArchiveEntry rpkEntry, int pathOffset)

@@ -11,13 +11,15 @@
         Icon="/Assets/railworks-forge-icon.png"
         Title="Railworks Forge">
 
-    <DockPanel>
-        <controls:MainMenu DockPanel.Dock="Top" DataContext="{Binding MainMenu}" />
-        <controls:NavigationBar DockPanel.Dock="Top" DataContext="{Binding NavigationBar}"/>
-        <controls:StatusBar DockPanel.Dock="Bottom" DataContext="{Binding StatusBar}"/>
+    <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
+        <controls:MainMenu Grid.Row="0" DataContext="{Binding MainMenu}" />
+        <controls:NavigationBar Grid.Row="1" DataContext="{Binding NavigationBar}"/>
 
-        <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-            <ContentControl DockPanel.Dock="Top" Content="{Binding ContentViewModel}" />
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <ContentControl Content="{Binding ContentViewModel}" />
         </Border>
-    </DockPanel>
+
+        <controls:ProgressIndicator Grid.Row="3" DataContext="{Binding ProgressIndicator}" IsVisible="{Binding IsVisible}" />
+        <controls:StatusBar Grid.Row="4" DataContext="{Binding StatusBar}"/>
+    </Grid>
 </Window>

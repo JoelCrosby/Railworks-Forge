@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Views.Controls;
 
 using ReactiveUI;
 
@@ -16,6 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainMenuViewModel MainMenu { get; }
     public NavigationBarViewModel NavigationBar { get; }
     public StatusBarViewModel StatusBar { get; }
+    public ProgressIndicatorViewModel ProgressIndicator { get; }
     private RoutesViewModel Routes { get; }
 
     public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
@@ -34,6 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase
         MainMenu = new MainMenuViewModel();
         NavigationBar = new NavigationBarViewModel();
         StatusBar = new StatusBarViewModel();
+        ProgressIndicator = new ProgressIndicatorViewModel();
 
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
@@ -106,5 +110,15 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario.Scenario, NavigationBar.Consist);
+    }
+
+    public void UpdateProgressIndicator(InstallProgress model)
+    {
+        ProgressIndicator.UpdateProgress(model);
+    }
+
+    public void ClearProgressIndicator()
+    {
+        ProgressIndicator.ClearProgress();
     }
 }
