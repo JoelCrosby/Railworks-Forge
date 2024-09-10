@@ -74,7 +74,7 @@ public class MainMenuViewModel : ViewModelBase
 
             foreach (var file in files)
             {
-                await packager.InstallPackage(file.Path.AbsolutePath);
+                await packager.InstallPackage(file.Path.LocalPath);
             }
 
             mainWindow.ClearProgressIndicator();
