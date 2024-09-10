@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Packaging;
-using RailworksForge.Views.Controls;
 
 using ReactiveUI;
 

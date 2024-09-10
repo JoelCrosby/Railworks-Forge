@@ -8,5 +8,5 @@ public record InstallProgress
 
     public required  string Message { get; init; }
 
-    public required bool IsLoading { get; set; }
+    public required bool IsLoading { get; init; }
 }
