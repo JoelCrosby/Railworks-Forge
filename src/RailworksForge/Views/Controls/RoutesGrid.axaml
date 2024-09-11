@@ -9,17 +9,20 @@
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
              x:DataType="vm:RoutesBaseViewModel">
 
-        <ScrollViewer>
-    <StackPanel>
-        <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+    <ScrollViewer>
+        <StackPanel VerticalAlignment="Center">
+            <li:LoadingIndicator IsVisible="{Binding IsLoading}"
+                                 IsActive="{Binding IsLoading}"
+                                 Mode="Arcs"
+                                 SpeedRatio="1.2"
+                                 MaxHeight="256" />
 
             <Border Padding="12" IsVisible="{Binding !IsLoading}">
                 <ListBox
                     ItemsSource="{Binding ListItems}"
                     Background="Transparent"
                     DoubleTapped="DataGrid_OnDoubleTapped"
-                    SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                >
+                    SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
@@ -34,7 +37,7 @@
                                 <StackPanel Orientation="Vertical">
                                     <Image Height="128" Source="{Binding ImageBitmap}" />
                                     <Border Padding="12,8">
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" />
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -42,8 +45,8 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
-    </StackPanel>
-        </ScrollViewer>
+        </StackPanel>
+    </ScrollViewer>
 
 
 </UserControl>

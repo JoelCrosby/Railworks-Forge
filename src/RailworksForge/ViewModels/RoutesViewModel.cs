@@ -6,8 +6,6 @@ using Avalonia.Controls;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using RailworksForge.Views.Controls;
 
 using ReactiveUI;
@@ -16,6 +14,8 @@ namespace RailworksForge.ViewModels;
 
 public partial class RoutesViewModel : ViewModelBase
 {
+    private readonly RoutesBaseViewModel _context;
+
     public ReactiveCommand<Unit, Unit> ShowListCommand { get; }
     public ReactiveCommand<Unit, Unit> ShowGridCommand { get; }
 
@@ -25,9 +25,9 @@ public partial class RoutesViewModel : ViewModelBase
     [ObservableProperty]
     private UserControl _contentControl;
 
-    public RoutesViewModel(IServiceProvider provider)
+    public RoutesViewModel(RoutesBaseViewModel context)
     {
-        var context = provider.GetRequiredService<RoutesBaseViewModel>();
+        _context = context;
 
         var grid = new RoutesGrid
         {
@@ -58,6 +58,10 @@ public partial class RoutesViewModel : ViewModelBase
 
         ContentControl = grid;
 
-        Observable.FromAsync(() => context.GetAllRoutes(), RxApp.TaskpoolScheduler).Subscribe();
+    }
+
+    public void LoadRoutes()
+    {
+        Observable.FromAsync(() => _context.GetAllRoutes(), RxApp.TaskpoolScheduler).Subscribe();
     }
 }
