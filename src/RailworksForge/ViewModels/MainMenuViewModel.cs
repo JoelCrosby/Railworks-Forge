@@ -29,7 +29,7 @@ public class MainMenuViewModel : ViewModelBase
 
             if (storageFile is null) return;
 
-            var path = storageFile.Path.AbsolutePath;
+            var path = storageFile.Path.LocalPath;
 
             if (Path.GetExtension(path) != ".bin") return;
 
@@ -44,7 +44,7 @@ public class MainMenuViewModel : ViewModelBase
 
             if (storageFile is null) return;
 
-            var path = storageFile.Path.AbsolutePath;
+            var path = storageFile.Path.LocalPath;
 
             if (Path.GetExtension(path) != ".xml") return;
 
