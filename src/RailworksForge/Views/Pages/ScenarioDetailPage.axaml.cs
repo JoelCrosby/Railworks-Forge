@@ -5,17 +5,20 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 
+using RailworksForge.Controls;
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
-public partial class ScenarioDetailPage : UserControl
+public partial class ScenarioDetailPage : DataGridUserControl
 {
+    protected override DataGrid DataGrid => ServicesDataGrid;
 
     public ScenarioDetailPage()
     {
         InitializeComponent();
+        SortColumns();
 
         if (DataContext is ScenarioDetailViewModel context)
         {
@@ -26,6 +29,8 @@ public partial class ScenarioDetailPage : UserControl
     // ReSharper disable once UnusedParameter.Local
     private void DataGrid_OnDoubleTapped(object? _, TappedEventArgs args)
     {
+        if (args.Source is not Border) return;
+
         if (DataContext is ScenarioDetailViewModel context)
         {
             context.ClickedConsistCommand.Execute().Subscribe();
@@ -52,14 +57,5 @@ public partial class ScenarioDetailPage : UserControl
         }
 
         ServicesDataGrid.UpdateLayout();
-    }
-
-    private void ServicesDataGrid_OnSelectionChanging(object? sender, CancelEventArgs e)
-    {
-        if (DataContext is not ScenarioDetailViewModel context) return;
-
-        var selectedItems = ServicesDataGrid.RowSelection?.SelectedItems.Cast<Consist>();
-
-        context.SelectedConsists = selectedItems ?? [];
     }
 }

@@ -91,6 +91,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        NavigationBar.Scenario.Refresh();
         ContentViewModel = NavigationBar.Scenario;
     }
 

@@ -75,24 +75,39 @@
             <Button Command="{Binding LoadAcquisitionStates}">Check Consist States</Button>
         </StackPanel>
 
-        <TreeDataGrid Source="{Binding ServicesSource}"
-                      BorderThickness="0,0,0,0"
-                      BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                      DoubleTapped="DataGrid_OnDoubleTapped"
-                      CanUserSortColumns="True"
-                      Name="ServicesDataGrid"
-                      SelectionChanging="ServicesDataGrid_OnSelectionChanging"
+        <DataGrid DockPanel.Dock="Bottom"
+                  ItemsSource="{Binding Services}"
+                  IsReadOnly="True"
+                  GridLinesVisibility="All"
+                  SelectionMode="Extended"
+                  SelectionChanged="DataGrid_OnSelectionChanged"
+                  DoubleTapped="DataGrid_OnDoubleTapped"
+                  BorderThickness="0,1,0,0"
+                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                  Name="ServicesDataGrid"
+                  Sorting="DataGrid_OnSorting"
         >
 
-            <TreeDataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Locomotive State" Binding="{Binding AcquisitionState}" />
+                <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
+                <DataGridTextColumn Header="Locomotive Author" Binding="{Binding LocoAuthor}" />
+                <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
+                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                <DataGridTextColumn Header="Locomotive Class" Binding="{Binding LocoClass}" />
+                <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
+            </DataGrid.Columns>
+
+            <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
                     <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
                     <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
                     <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
                 </ContextMenu>
-            </TreeDataGrid.ContextMenu>
-        </TreeDataGrid>
+            </DataGrid.ContextMenu>
+
+        </DataGrid>
 
     </DockPanel>
 

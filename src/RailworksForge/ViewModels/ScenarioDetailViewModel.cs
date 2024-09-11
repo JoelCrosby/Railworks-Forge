@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -8,11 +9,11 @@ using System.Threading.Tasks;
 
 using AngleSharp.Xml;
 
-using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
@@ -30,7 +31,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [ObservableProperty]
     private Scenario _scenario;
 
-    public FlatTreeDataGridSource<Consist> ServicesSource { get; }
+    public ObservableCollection<Consist> Services { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
@@ -151,7 +152,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             {
                 await Scenario.GetConsistStatus();
 
-                Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(ServicesSource)));
+                Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Services)));
             }, RxApp.TaskpoolScheduler);
         });
 
@@ -192,19 +193,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Refresh();
         });
 
-        ServicesSource = new FlatTreeDataGridSource<Consist>(Scenario.Consists)
-        {
-            Columns =
-            {
-                new TextColumn<Consist, AcquisitionState>("Locomotive State", c => c.AcquisitionState),
-                new TextColumn<Consist, AcquisitionState>("Consist State", c => c.ConsistAcquisitionState),
-                new TextColumn<Consist, string>("Locomotive Author", c => c.LocoAuthor),
-                new TextColumn<Consist, bool>("Is Player Driver", c => c.PlayerDriver),
-                new TextColumn<Consist, string>("Locomotive Name", c => c.LocomotiveName),
-                new TextColumn<Consist, LocoClass?>("Locomotive Class", c => c.LocoClass),
-                new TextColumn<Consist, string>("Service Name", c => c.ServiceName),
-            },
-        };
+        Services = new (Scenario.Consists);
     }
 
     private async Task<string> GetSavedConsistRailVehicleElement()
@@ -226,7 +215,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         return vehicles.ToXml();
     }
 
-    private void Refresh()
+    public void Refresh()
     {
         var updatedScenario = Scenario.Refresh();
 
@@ -235,9 +224,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         Dispatcher.UIThread.Post(() =>
         {
             Scenario = updatedScenario;
-            ServicesSource.Items = updatedScenario.Consists;
 
-            OnPropertyChanged(nameof(ServicesSource));
+            Services.Clear();
+            Services.AddRange(updatedScenario.Consists);
+
+            OnPropertyChanged(nameof(Services));
         });
     }
 }
