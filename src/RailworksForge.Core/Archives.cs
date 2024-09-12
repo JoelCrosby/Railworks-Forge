@@ -150,7 +150,6 @@ public static class Archives
                 }
                 else
                 {
-                    // ReSharper disable once UnusedParameter.Local
                     HashSet<string> UpdateEntry(string _, HashSet<string> value)
                     {
                         value.Add(normalisedEntry);

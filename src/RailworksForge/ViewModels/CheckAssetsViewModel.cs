@@ -57,8 +57,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
     private async Task GetMissingAssets()
     {
-        var sceneryPath = Path.Join(Route.DirectoryPath, "Scenery");
-        var binFiles = Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+        var binFiles = GetBinFiles();
 
         var results = new HashSet<Blueprint>();
 
@@ -107,5 +106,31 @@ public partial class CheckAssetsViewModel : ViewModelBase
             Blueprints.AddRange(missing);
             IsLoading = false;
         });
+    }
+
+    private List<string> GetBinFiles()
+    {
+        var sceneryPath = Path.Join(Route.DirectoryPath, "Scenery");
+
+        if (Paths.Exists(sceneryPath))
+        {
+            return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+        }
+
+        var archivePath = Route.MainContentArchivePath;
+
+        if (Paths.Exists(archivePath) is false)
+        {
+            throw new Exception($"Could not find archive at {archivePath}");
+        }
+
+        Archives.ExtractDirectory(archivePath, "Scenery");
+
+        if (Paths.Exists(sceneryPath))
+        {
+            return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+        }
+
+        return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
     }
 }
