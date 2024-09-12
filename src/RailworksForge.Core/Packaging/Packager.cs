@@ -107,7 +107,6 @@ public class Packager
             Assets = [],
         };
 
-
         using var archiveStream = new MemoryStream();
         await filestream.CopyToAsync(archiveStream);
 
@@ -148,39 +147,44 @@ public class Packager
 
             var entryArchivePath = entry.FullName[entryNameIndex..].Replace('\\', Path.DirectorySeparatorChar);
             var entryFilename = Path.GetFileName(entryArchivePath);
-            var assets = new List<string>();
 
-            if (entry.Length == 0)
+            if (entry.Length is 0)
             {
                 continue;
             }
 
-            if (entryFilename != "Scenarios.bin")
+            foreach (var key in await GetAssetKeys())
             {
-                if (entryFilename == "Route.xml")
-                {
-                    assets = await ExtractRouteDotXml(entry, entryNameIndex);
-                }
-                else if (Path.GetFileName(entryArchivePath) == "ScenarioInfo.xml")
-                {
-                    assets = await ExtractScenarioInfoDotXml(entry, entryNameIndex);
-                }
-                else
-                {
-                    if (ForbiddenExtensions.Contains(Path.GetExtension(entryArchivePath)) == false)
-                    {
-                        ExtractRpkEntry(entry, entryArchivePath);
-                    }
-
-                    assets = [entryArchivePath];
-                }
+                package.Assets.Add(key);
             }
 
-            foreach (var key in assets)
+            continue;
+
+            async Task<List<string>> GetAssetKeys()
             {
-                package.Assets[key] = null;
+                switch (entryFilename)
+                {
+                    case "Scenarios.bin":
+                        return [];
+                    case "Route.xml":
+                        return await ExtractRouteDotXml(entry, entryNameIndex);
+                }
+
+                if (Path.GetFileName(entryArchivePath) == "ScenarioInfo.xml")
+                {
+                    return await ExtractScenarioInfoDotXml(entry, entryNameIndex);
+                }
+
+                if (ForbiddenExtensions.Contains(Path.GetExtension(entryArchivePath)) == false)
+                {
+                    ExtractRpkEntry(entry, entryArchivePath);
+                }
+
+                return  [entryArchivePath];
             }
         }
+
+        package.SavePackageInfo();
 
         RaisePackageInstallProgress($"Successfully Installed package {package.Name}", false);
 
