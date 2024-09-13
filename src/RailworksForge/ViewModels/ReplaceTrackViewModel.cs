@@ -77,42 +77,50 @@ public partial class ReplaceTrackViewModel : ViewModelBase
     }
 }
 
+public record DirectoryItem(string Name, DirectoryInfo Directory)
+{
+    public override string ToString() => Name;
+}
+
 public partial class SelectTrackViewModel : ViewModelBase
 {
-    public static List<DirectoryInfo> Providers => Paths.GetAssetProviders();
+    public static List<DirectoryItem> Providers => Paths.GetAssetProviders().ConvertAll(d => new DirectoryItem(d.Name, d));
 
     [ObservableProperty]
-    private ObservableCollection<DirectoryInfo> _products = [];
+    private ObservableCollection<DirectoryItem> _products = [];
 
     [ObservableProperty]
     private ObservableCollection<Track> _tracks = [];
 
     [ObservableProperty]
-    private DirectoryInfo? _selectedProvider;
+    private DirectoryItem? _selectedProvider;
 
     [ObservableProperty]
-    private DirectoryInfo? _selectedProduct;
+    private DirectoryItem? _selectedProduct;
 
     [ObservableProperty]
     private Track? _selectedTrack;
 
     public required Blueprint RouteBlueprint { get; init; }
 
-    partial void OnSelectedProviderChanged(DirectoryInfo? value)
+    partial void OnSelectedProviderChanged(DirectoryItem? value)
     {
         if (value is null) return;
 
         var products = Paths.GetAssetProviderProducts(value.Name);
+        var items = products.ConvertAll(p => new DirectoryItem(p.Name, p));
 
-        Products = new ObservableCollection<DirectoryInfo>(products);
+        Products = new ObservableCollection<DirectoryItem>(items);
     }
 
-    partial void OnSelectedProductChanged(DirectoryInfo? value)
+    partial void OnSelectedProductChanged(DirectoryItem? item)
     {
-        if (value is null || SelectedProvider is null || SelectedProduct is null)
+        if (item is null || SelectedProvider is null || SelectedProduct is null)
         {
             return;
         }
+
+        var value = item.Directory;
 
         var networkTracksPath = Path.Join(value.FullName, "RailNetwork");
         var tracksPath = Path.Join(value.FullName, "Track");

@@ -234,6 +234,7 @@ public static class Paths
         return Directory
             .EnumerateDirectories(GetAssetsDirectory(), "*", SearchOption.TopDirectoryOnly)
             .ToDirectoryInfoList();
+
     }
 
     public static List<DirectoryInfo> GetAssetProviderProducts(string provider)

@@ -4,6 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+        xmlns:bh="using:RailworksForge.Behaviours"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceTrackDialog"
         x:DataType="vm:ReplaceTrackViewModel"
@@ -51,7 +53,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                                    <Grid ColumnDefinitions="*,12,*">
+                                    <Grid ColumnDefinitions="460,12,*">
                                         <StackPanel Grid.Column="0" Spacing="8" Orientation="Horizontal">
                                             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProvider}" />
                                             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProduct}" />
@@ -68,23 +70,65 @@
                                                 PlaceholderText="Provider"
                                             />
 
-                                            <ComboBox
+                                            <AutoCompleteBox
+                                                Grid.Column="0"
+                                                Height="32"
+                                                IsTextCompletionEnabled="True"
+                                                FilterMode="Contains"
+                                                Watermark="Select Provider"
+                                                ItemsSource="{Binding Providers}"
+                                                SelectedItem="{Binding SelectedProvider}"
+                                            >
+                                                <i:Interaction.Behaviors>
+                                                    <bh:AutoCompleteBehaviour/>
+                                                </i:Interaction.Behaviors>
+                                            </AutoCompleteBox>
+
+                                            <AutoCompleteBox
                                                 Grid.Column="2"
-                                                HorizontalAlignment="Stretch"
+                                                Height="32"
+                                                IsTextCompletionEnabled="True"
+                                                FilterMode="Contains"
+                                                Watermark="Select Product"
                                                 ItemsSource="{Binding Products}"
                                                 SelectedItem="{Binding SelectedProduct}"
-                                                DisplayMemberBinding="{Binding Name}"
-                                                PlaceholderText="Product"
-                                            />
+                                            >
+                                                <i:Interaction.Behaviors>
+                                                    <bh:AutoCompleteBehaviour/>
+                                                </i:Interaction.Behaviors>
+                                            </AutoCompleteBox>
 
-                                            <ComboBox
+                                            <!-- <ComboBox -->
+                                            <!--     Grid.Column="2" -->
+                                            <!--     HorizontalAlignment="Stretch" -->
+                                            <!--     ItemsSource="{Binding Products}" -->
+                                            <!--     SelectedItem="{Binding SelectedProduct}" -->
+                                            <!--     DisplayMemberBinding="{Binding Name}" -->
+                                            <!--     PlaceholderText="Product" -->
+                                            <!-- /> -->
+
+                                            <AutoCompleteBox
                                                 Grid.Column="4"
-                                                HorizontalAlignment="Stretch"
+                                                Height="32"
+                                                IsTextCompletionEnabled="True"
+                                                FilterMode="Contains"
+                                                Watermark="Select Track Blueprint"
                                                 ItemsSource="{Binding Tracks}"
                                                 SelectedItem="{Binding SelectedTrack}"
-                                                DisplayMemberBinding="{Binding DisplayName}"
-                                                PlaceholderText="Track Blueprint"
-                                            />
+                                            >
+                                                <i:Interaction.Behaviors>
+                                                    <bh:AutoCompleteBehaviour/>
+                                                </i:Interaction.Behaviors>
+                                            </AutoCompleteBox>
+
+                                            <!-- <ComboBox -->
+                                            <!--     Grid.Column="4" -->
+                                            <!--     HorizontalAlignment="Stretch" -->
+                                            <!--     ItemsSource="{Binding Tracks}" -->
+                                            <!--     SelectedItem="{Binding SelectedTrack}" -->
+                                            <!--     DisplayMemberBinding="{Binding DisplayName}" -->
+                                            <!--     PlaceholderText="Track Blueprint" -->
+                                            <!-- /> -->
                                         </Grid>
                                     </Grid>
                                 </Border>

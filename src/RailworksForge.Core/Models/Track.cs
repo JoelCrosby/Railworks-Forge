@@ -8,5 +8,5 @@ public record Track
 
     public required Blueprint Blueprint { get; init; }
 
-    public string DisplayName => string.IsNullOrEmpty(Name) is false ? Name : Blueprint.BlueprintId;
+    public override string ToString() => string.IsNullOrEmpty(Name) is false ? Name : Blueprint.BlueprintId;
 }

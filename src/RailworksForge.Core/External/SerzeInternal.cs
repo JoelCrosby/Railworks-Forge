@@ -1,4 +1,7 @@
+using System.Globalization;
 using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 
 using AngleSharp.Dom;
 
@@ -134,7 +137,7 @@ public class SerzInternal
                     --_parentCount;
                     continue;
                 default:
-                    Console.WriteLine("ERK " + _chunkKind);
+                    Console.WriteLine("ERK " + _chunkKind, _mData);
                     continue;
             }
         }
@@ -194,7 +197,7 @@ public class SerzInternal
             case "sFloat32":
                 var single = BitConverter.ToSingle(_mData, _dataIx);
                 _dataIx += 4;
-                return single.ToString();
+                return single.ToString(CultureInfo.InvariantCulture);
             case "sInt32":
                 return ReadInt32().ToString();
             case "sUInt32":
