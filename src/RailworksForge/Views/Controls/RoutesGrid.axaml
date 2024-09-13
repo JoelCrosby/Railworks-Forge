@@ -10,8 +10,9 @@
              x:DataType="vm:RoutesBaseViewModel">
 
     <ScrollViewer>
-        <StackPanel VerticalAlignment="Center">
-            <li:LoadingIndicator IsVisible="{Binding IsLoading}"
+        <Panel>
+            <li:LoadingIndicator VerticalAlignment="Center"
+                                 IsVisible="{Binding IsLoading}"
                                  IsActive="{Binding IsLoading}"
                                  Mode="Arcs"
                                  SpeedRatio="1.2"
@@ -19,6 +20,7 @@
 
             <Border Padding="12" IsVisible="{Binding !IsLoading}">
                 <ListBox
+                    VerticalAlignment="Top"
                     ItemsSource="{Binding ListItems}"
                     Background="Transparent"
                     DoubleTapped="DataGrid_OnDoubleTapped"
@@ -45,7 +47,7 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
-        </StackPanel>
+        </Panel>
     </ScrollViewer>
 
 

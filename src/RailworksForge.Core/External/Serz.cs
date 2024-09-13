@@ -13,7 +13,10 @@ public class Serz
         }
     }
 
-    public static async Task<ConvertedSerzFile> Convert(string inputPath, bool force = false, CancellationToken cancellationToken = default)
+    public static async Task<ConvertedSerzFile> Convert(
+        string inputPath,
+        bool force = false,
+        CancellationToken cancellationToken = default)
     {
         if (Paths.Exists(inputPath) is false)
         {

@@ -82,7 +82,7 @@
                                                 HorizontalAlignment="Stretch"
                                                 ItemsSource="{Binding Tracks}"
                                                 SelectedItem="{Binding SelectedTrack}"
-                                                DisplayMemberBinding="{Binding BlueprintId}"
+                                                DisplayMemberBinding="{Binding DisplayName}"
                                                 PlaceholderText="Track Blueprint"
                                             />
                                         </Grid>

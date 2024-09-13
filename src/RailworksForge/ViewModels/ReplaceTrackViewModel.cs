@@ -13,6 +13,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
@@ -46,7 +47,7 @@ public partial class ReplaceTrackViewModel : ViewModelBase
                 Replacements = RouteTracks.ConvertAll(r => new TrackReplacement
                 {
                     Blueprint = r.RouteBlueprint,
-                    ReplacementBlueprint = r.SelectedTrack,
+                    ReplacementBlueprint = r.SelectedTrack?.Blueprint,
                 }),
             };
         });
@@ -84,7 +85,7 @@ public partial class SelectTrackViewModel : ViewModelBase
     private ObservableCollection<DirectoryInfo> _products = [];
 
     [ObservableProperty]
-    private ObservableCollection<Blueprint> _tracks = [];
+    private ObservableCollection<Track> _tracks = [];
 
     [ObservableProperty]
     private DirectoryInfo? _selectedProvider;
@@ -93,7 +94,7 @@ public partial class SelectTrackViewModel : ViewModelBase
     private DirectoryInfo? _selectedProduct;
 
     [ObservableProperty]
-    private Blueprint? _selectedTrack;
+    private Track? _selectedTrack;
 
     public required Blueprint RouteBlueprint { get; init; }
 
@@ -116,10 +117,10 @@ public partial class SelectTrackViewModel : ViewModelBase
         var networkTracksPath = Path.Join(value.FullName, "RailNetwork");
         var tracksPath = Path.Join(value.FullName, "Track");
 
-        var networkBinaries = Paths.Exists(networkTracksPath) ? Directory.EnumerateFiles(networkTracksPath, "*.bin", SearchOption.AllDirectories) : [];
-        var trackBinaries = Paths.Exists(tracksPath) ? Directory.EnumerateFiles(tracksPath, "*.bin", SearchOption.AllDirectories) : [];
+        var networkBinaries = GetTrackBinaryPaths(networkTracksPath);
+        var trackBinaries = GetTrackBinaryPaths(tracksPath);
 
-        var tracks = new List<Blueprint>();
+        var blueprints = new List<Blueprint>();
 
         var set = networkBinaries
             .Concat(trackBinaries)
@@ -140,7 +141,7 @@ public partial class SelectTrackViewModel : ViewModelBase
             })
             .ToHashSet();
 
-        tracks.AddRange(set);
+        blueprints.AddRange(set);
 
         var archives = Directory.EnumerateFiles(value.FullName, "*.ap", SearchOption.TopDirectoryOnly);
 
@@ -156,9 +157,44 @@ public partial class SelectTrackViewModel : ViewModelBase
                 BlueprintSetIdProvider = SelectedProvider.Name,
             });
 
-            tracks.AddRange(binaries);
+            blueprints.AddRange(binaries);
         }
 
-        Tracks = new ObservableCollection<Blueprint>(tracks);
+        var tracks = new List<Track>();
+
+        foreach (var blueprint in blueprints)
+        {
+            var document = blueprint.GetBlueprintXmlInternal();
+            var displayName = document.SelectLocalisedStringContent("cTrackSectionBlueprint DisplayName");
+            var name = document.SelectTextContent("Name");
+
+            var track = new Track
+            {
+                Blueprint = blueprint,
+                Name = string.IsNullOrEmpty(displayName) ? name : displayName,
+            };
+
+            tracks.Add(track);
+        }
+
+        var sorted = tracks.OrderBy(t => t.Name);
+
+        Tracks = new ObservableCollection<Track>(sorted);
+    }
+
+    private static List<string> GetTrackBinaryPaths(string path)
+    {
+        if (Paths.Exists(path) is false) return [];
+
+        var xsecs = Directory.EnumerateFiles(path, "*.XSec", SearchOption.AllDirectories);
+
+        var directories = xsecs
+            .Select(Path.GetDirectoryName)
+            .Where(x => string.IsNullOrEmpty(x) is false)!
+            .ToHashSet<string>();
+
+        return directories
+            .SelectMany(d => Directory.EnumerateFiles(d, "*.bin", SearchOption.TopDirectoryOnly))
+            .ToList();
     }
 }

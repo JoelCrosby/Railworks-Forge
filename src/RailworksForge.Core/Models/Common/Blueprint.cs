@@ -34,11 +34,11 @@ public record Blueprint
 
     private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
 
-    public async Task<IDocument> GetBlueprintXml()
+    public async Task<IDocument> GetBlueprintXml(bool force = false)
     {
         if (File.Exists(BlueprintPath))
         {
-            var converted = await Serz.Convert(BlueprintPath);
+            var converted = await Serz.Convert(BlueprintPath, force);
             var text = await File.ReadAllTextAsync(converted.OutputPath);
 
             return await XmlParser.ParseDocumentAsync(text);
@@ -56,6 +56,30 @@ public record Blueprint
                 var text = await File.ReadAllTextAsync(result.OutputPath);
 
                 return await XmlParser.ParseDocumentAsync(text);
+            }
+        }
+
+        throw new Exception($"unable to get blueprint xml for path {BlueprintPath}");
+    }
+
+    public IDocument GetBlueprintXmlInternal()
+    {
+        if (File.Exists(BlueprintPath))
+        {
+            var data = File.ReadAllBytes(BlueprintPath);
+            return new SerzInternal(ref data).ToXml();
+        }
+
+        var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
+
+        foreach (var archive in archives)
+        {
+            var extracted = Archives.ExtractFileContentFromPath(archive, BinaryPath, BlueprintPath);
+
+            if (extracted)
+            {
+                var data = File.ReadAllBytes(BlueprintPath);
+                return new SerzInternal(ref data).ToXml();
             }
         }
 
