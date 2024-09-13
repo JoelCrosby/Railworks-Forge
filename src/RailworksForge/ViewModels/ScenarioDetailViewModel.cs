@@ -31,6 +31,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [ObservableProperty]
     private Scenario _scenario;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public ObservableCollection<Consist> Services { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -53,6 +56,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         Scenario = scenario;
         SelectedConsists = [];
+        IsLoading = true;
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
@@ -193,7 +197,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Refresh();
         });
 
-        Services = new (Scenario.Consists);
+        Services = [];
+
+        Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
     }
 
     private async Task<string> GetSavedConsistRailVehicleElement()
@@ -221,14 +227,19 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         if (updatedScenario is null) return;
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            Scenario = updatedScenario;
+        Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
+        Dispatcher.UIThread.Post(() => Scenario = updatedScenario);
+    }
 
-            Services.Clear();
-            Services.AddRange(updatedScenario.Consists);
+    private async Task GetAllScenarioConsists()
+    {
+        var document = await Scenario.GetXmlDocument(false);
+        var consists = document.QuerySelectorAll("cConsist");
+        var results = consists.Select(Consist.ParseScenarioConsist);
 
-            OnPropertyChanged(nameof(Services));
-        });
+        Services.Clear();
+        Services.AddRange(results);
+
+        IsLoading = false;
     }
 }

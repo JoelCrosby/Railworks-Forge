@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
@@ -75,9 +76,12 @@
             <Button Command="{Binding LoadAcquisitionStates}">Check Consist States</Button>
         </StackPanel>
 
+        <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+
         <DataGrid DockPanel.Dock="Bottom"
                   ItemsSource="{Binding Services}"
                   IsReadOnly="True"
+                  IsVisible="{Binding !IsLoading}"
                   GridLinesVisibility="All"
                   SelectionMode="Extended"
                   SelectionChanged="DataGrid_OnSelectionChanged"
@@ -91,11 +95,12 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Locomotive State" Binding="{Binding AcquisitionState}" />
                 <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
-                <DataGridTextColumn Header="Locomotive Author" Binding="{Binding LocoAuthor}" />
                 <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
                 <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                <DataGridTextColumn Header="Locomotive Class" Binding="{Binding LocoClass}" />
                 <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
+                <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
+                <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
+                <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>

@@ -59,4 +59,48 @@ public record Consist : Blueprint
             ConsistAcquisitionState = cachedState,
         };
     }
+
+    public static Consist ParseScenarioConsist(IElement el)
+    {
+        var railVehicles = el.QuerySelector("RailVehicles");
+
+        if (railVehicles is null)
+        {
+            throw new Exception("could not RailVehicles element");
+        }
+
+        var lead = railVehicles.QuerySelector("cOwnedEntity");
+
+        if (lead is null)
+        {
+            throw new Exception("could not find leadVehicle element");
+        }
+
+        var consistId = lead.GetAttribute("d:id") ?? string.Empty;
+        var locomotiveName = lead.SelectTextContent("Name");
+        var playerDriver = el.SelectTextContent("Driver PlayerDriver") == "1";
+        var blueprintId = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID");
+        var serviceName = el.SelectLocalisedStringContent("Driver ServiceName");
+        var serviceId = el.SelectTextContent("Driver ServiceName Key");
+        var locoClass = LocoClassUtils.Parse(lead.SelectTextContent("LocoClass"));
+        var blueprintSetIdProduct = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Provider");
+
+        Cache.AcquisitionStates.TryGetValue(consistId, out var cachedState);
+
+        return new Consist
+        {
+            Id = consistId,
+            LocomotiveName = locomotiveName,
+            LocoAuthor = blueprintSetIdProvider,
+            LocoClass = locoClass,
+            ServiceName = serviceName,
+            PlayerDriver = playerDriver,
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+            ServiceId = serviceId,
+            ConsistAcquisitionState = cachedState,
+        };
+    }
 }

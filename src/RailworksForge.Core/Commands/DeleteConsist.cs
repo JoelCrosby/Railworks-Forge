@@ -51,12 +51,7 @@ public class DeleteConsist : IConsistCommand
                 .QuerySelectorAll("sDriverFrontEndDetails")
                 .QueryByTextContent("ServiceName Key", consist.ServiceId);
 
-            if (element is null)
-            {
-                throw new Exception($"could not find service {consist.ServiceName} in scenario properties file.");
-            }
-
-            element.RemoveFromParent();
+            element?.RemoveFromParent();
         }
     }
 }
