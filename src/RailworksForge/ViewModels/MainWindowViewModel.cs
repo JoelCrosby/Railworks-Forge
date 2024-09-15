@@ -61,6 +61,8 @@ public partial class MainWindowViewModel : ViewModelBase
         NavigationBar.Scenario = null;
         NavigationBar.Consist = null;
 
+        Routes.LoadRoutes();
+
         ContentViewModel = Routes;
     }
 
@@ -79,7 +81,9 @@ public partial class MainWindowViewModel : ViewModelBase
         NavigationBar.Scenario = null;
         NavigationBar.Consist = null;
 
-        ContentViewModel = NavigationBar.Route!;
+        if (NavigationBar.Route is null) return;
+
+        SelectRoute(NavigationBar.Route.Route);
     }
 
     public void SelectCurrentScenario()

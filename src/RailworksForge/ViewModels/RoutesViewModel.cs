@@ -62,6 +62,6 @@ public partial class RoutesViewModel : ViewModelBase
 
     public void LoadRoutes()
     {
-        Observable.FromAsync(() => _context.GetAllRoutes(), RxApp.TaskpoolScheduler).Subscribe();
+        Observable.FromAsync(() => _context.GetAllRoutes(SearchTerm), RxApp.TaskpoolScheduler).Subscribe();
     }
 }

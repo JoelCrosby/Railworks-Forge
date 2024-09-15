@@ -223,6 +223,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public void Refresh()
     {
+        IsLoading = true;
+
         var updatedScenario = Scenario.Refresh();
 
         if (updatedScenario is null) return;
@@ -241,9 +243,12 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             .Where(r => r is not null)
             .Cast<Consist>();
 
-        Services.Clear();
-        Services.AddRange(results);
+        Dispatcher.UIThread.Post(() =>
+        {
+            Services.Clear();
+            Services.AddRange(results);
 
-        IsLoading = false;
+            IsLoading = false;
+        });
     }
 }
