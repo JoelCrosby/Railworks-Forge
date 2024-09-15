@@ -5,6 +5,8 @@ using AngleSharp.Dom;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models.Common;
 
+using Serilog;
+
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{ServiceName}")]
@@ -60,20 +62,22 @@ public record Consist : Blueprint
         };
     }
 
-    public static Consist ParseScenarioConsist(IElement el)
+    public static Consist? ParseScenarioConsist(IElement el)
     {
         var railVehicles = el.QuerySelector("RailVehicles");
 
         if (railVehicles is null)
         {
-            throw new Exception("could not RailVehicles element");
+            Log.Information("could not RailVehicles element");
+            return null;
         }
 
         var lead = railVehicles.QuerySelector("cOwnedEntity");
 
         if (lead is null)
         {
-            throw new Exception("could not find leadVehicle element");
+            Log.Information("could not find leadVehicle element");
+            return null;
         }
 
         var consistId = lead.GetAttribute("d:id") ?? string.Empty;

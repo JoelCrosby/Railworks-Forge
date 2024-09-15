@@ -235,7 +235,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         var document = await Scenario.GetXmlDocument(false);
         var consists = document.QuerySelectorAll("cConsist");
-        var results = consists.Select(Consist.ParseScenarioConsist);
+
+        var results = consists
+            .Select(Consist.ParseScenarioConsist)
+            .Where(r => r is not null)
+            .Cast<Consist>();
 
         Services.Clear();
         Services.AddRange(results);
