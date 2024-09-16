@@ -15,6 +15,11 @@ public partial class CheckAssetsDialog : ReactiveWindow<CheckAssetsViewModel>
     // ReSharper disable UnusedParameter.Local
     private void CloseButtonOnClick(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is CheckAssetsViewModel model)
+        {
+            model.OnClose();
+        }
+
         Close();
     }
 }

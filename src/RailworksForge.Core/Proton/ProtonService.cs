@@ -1,10 +1,7 @@
 using System.Diagnostics;
 
 using Gameloop.Vdf;
-using Gameloop.Vdf.JsonConverter;
-
-using VdfParser;
-
+using Gameloop.Vdf.Linq;
 
 namespace RailworksForge.Core.Proton;
 
@@ -107,7 +104,7 @@ public class ProtonService
         }
     }
 
-    private List<SteamApp> FindSteamApps(string steamRoot, List<string> steamLibraryPaths)
+    private static List<SteamApp> FindSteamApps(string steamRoot, List<string> steamLibraryPaths)
     {
         var apps = new HashSet<SteamApp>();
 
@@ -129,7 +126,7 @@ public class ProtonService
                 try
                 {
                     var content = File.ReadAllText(appManifestPath);
-                    var manifestVdf = VdfConvert.Deserialize(content).ToJson();
+                    var manifestVdf = VdfConvert.Deserialize(content, VdfSerializerSettings);
                     var root = manifestVdf.Value;
 
                     var appId = root.Value<string>("appid");
@@ -164,7 +161,7 @@ public class ProtonService
         return GetSubDir(path, "steamapps");
     }
 
-    private List<string> FindSteamLibraryPaths(string steamPath)
+    private static List<string> FindSteamLibraryPaths(string steamPath)
     {
         var steamAppsDir = GetSteamappsSubdirectory(steamPath);
         var foldersVdfPath = Path.Join(steamAppsDir, "libraryfolders.vdf");
@@ -175,12 +172,12 @@ public class ProtonService
     private static List<string> ParseLibraryFolders(string path)
     {
         var content = File.ReadAllText(path);
-        var libraryVdf = VdfConvert.Deserialize(content).ToJson();
+        var libraryVdf = VdfConvert.Deserialize(content, VdfSerializerSettings);
 
-        return libraryVdf.Value.Select(child => child.Children().First().Value<string>("path")).ToList();
+        return libraryVdf.Value.Children().Select(c => c.Value<VProperty>().Value["path"]?.Value<string>()).ToList()!;
     }
 
-    private List<SteamApp> GetCustomCompatToolInstallations(string steamRoot)
+    private static List<SteamApp> GetCustomCompatToolInstallations(string steamRoot)
     {
         var customToolApps = new List<SteamApp>();
 
@@ -196,7 +193,7 @@ public class ProtonService
         return customToolApps;
     }
 
-    private List<string> GetCompatToolDirs(string steamRoot)
+    private static List<string> GetCompatToolDirs(string steamRoot)
     {
         var paths = new List<string>
         {
@@ -227,12 +224,22 @@ public class ProtonService
 
         foreach (var vdfPath in compToolFiles)
         {
-            var data = new VdfDeserializer().Deserialize(File.OpenRead(vdfPath));
-            var compatTools = (IDictionary<string, object>) data.compatibilitytools.compat_tools;
+
+            var data = VdfConvert.Deserialize(File.ReadAllText(vdfPath), VdfSerializerSettings);
+            var name = data.Value["compat_tools"]?
+                .Children<VToken>()
+                .FirstOrDefault()?
+                .ToString()
+                .Split("\"")
+                .Skip(1)
+                .FirstOrDefault()?
+                .Replace("\"", string.Empty);
+
+            if (name is null) continue;
 
             var app = new SteamApp
             {
-                Name = compatTools.Keys.ElementAt(0),
+                Name = name,
                 AppId = Guid.NewGuid().ToString(),
                 InstallDir = Directory.GetParent(vdfPath)!.FullName,
             };
@@ -255,6 +262,12 @@ public class ProtonService
             .FirstOrDefault(dir => string.Equals(Path.GetFileName(dir), subdirectory, StringComparison.OrdinalIgnoreCase));
     }
 
+    private static readonly VdfSerializerSettings VdfSerializerSettings = new()
+    {
+        UsesEscapeSequences = true,
+        MaximumTokenSize = 8192,
+    };
+
     private static SteamApp FindProtonApp(string steamPath, List<SteamApp> steamApps, string appId)
     {
         if (Environment.GetEnvironmentVariable("PROTON_VERSION") is { } protonVersion)
@@ -268,11 +281,8 @@ public class ProtonService
 
         var configVdfPath = Path.Join(steamPath, "config", "config.vdf");
 
-        var result = new VdfDeserializer().Deserialize(File.OpenRead(configVdfPath));
-        var toolMapping = result.InstallConfigStore.Software.Valve.Steam.CompatToolMapping;
-        var appMapping = (dynamic)((IDictionary<string, object>)toolMapping)[appId];
-
-        var appName = appMapping.name as string;
+        var result = VdfConvert.Deserialize(File.ReadAllText(configVdfPath), VdfSerializerSettings);
+        var appName = result.Value["Software"]?["Valve"]?["Steam"]?["CompatToolMapping"]?[appId]?["name"]?.Value<string>();
 
         return steamApps.FirstOrDefault(app => app.Name == appName) ?? throw new Exception("could not find proton app");
     }

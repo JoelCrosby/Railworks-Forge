@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -20,6 +21,8 @@ using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
 using ReactiveUI;
+
+using Serilog;
 
 namespace RailworksForge.ViewModels;
 
@@ -40,6 +43,8 @@ public partial class CheckAssetsViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<Blueprint> _blueprints;
 
+    private readonly CancellationTokenSource _cts = new ();
+
     public CheckAssetsViewModel(Route route)
     {
         Route = route;
@@ -52,7 +57,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             return;
         }
 
-        Observable.Start(GetMissingAssets, RxApp.TaskpoolScheduler);
+        Observable.StartAsync(GetMissingAssets, RxApp.TaskpoolScheduler);
     }
 
     private async Task GetMissingAssets()
@@ -64,39 +69,46 @@ public partial class CheckAssetsViewModel : ViewModelBase
         var processedCount = 0;
         var processed = binFiles.Count;
 
-        await Parallel.ForEachAsync(binFiles, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (path, cancellationToken) =>
+        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, cancellationToken) =>
         {
-            var serialised = await Serz.Convert(path, false, cancellationToken);
-            var xml  = await File.ReadAllTextAsync(serialised.OutputPath, cancellationToken);
-
-            using var document = await XmlParser.ParseDocumentAsync(xml, cancellationToken);
-
-            var entities = document.QuerySelectorAll("cDynamicEntity BlueprintID");
-
-            var blueprints = entities.Select(el => new Blueprint
+            try
             {
-                BlueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Provider"),
-                BlueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Product"),
-                BlueprintId = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID"),
-            });
+                var serialised = await Serz.Convert(path, false, cancellationToken);
+                var xml  = File.ReadAllText(serialised.OutputPath);
 
-            foreach (var blueprint in blueprints)
-            {
-                if (string.IsNullOrWhiteSpace(blueprint.BlueprintId))
+                using var document = XmlParser.ParseDocument(xml);
+
+                var entities = document.QuerySelectorAll("cDynamicEntity BlueprintID");
+
+                var blueprints = entities.Select(el => new Blueprint
                 {
-                    continue;
+                    BlueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Provider"),
+                    BlueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Product"),
+                    BlueprintId = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID"),
+                });
+
+                foreach (var blueprint in blueprints)
+                {
+                    if (string.IsNullOrWhiteSpace(blueprint.BlueprintId))
+                    {
+                        continue;
+                    }
+
+                    results.Add(blueprint);
                 }
 
-                results.Add(blueprint);
+                processedCount++;
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    LoadingProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
+                    LoadingMessage = $"Processed {processedCount} of {processed} files ( %{LoadingProgress} )";
+                });
             }
-
-            processedCount++;
-
-            Dispatcher.UIThread.Post(() =>
+            catch (Exception e)
             {
-                LoadingProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
-                LoadingMessage = $"Processed {processedCount} of {processed} files ( %{LoadingProgress} )";
-            });
+                Log.Error(e, "check assets for path path failed");
+            }
         });
 
         var missing = results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList();
@@ -132,5 +144,10 @@ public partial class CheckAssetsViewModel : ViewModelBase
         }
 
         return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+    }
+
+    public void OnClose()
+    {
+        _cts.Cancel();
     }
 }

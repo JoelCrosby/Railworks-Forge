@@ -1,5 +1,3 @@
-using System.Text;
-
 using CliWrap;
 
 using RailworksForge.Core.Proton;
@@ -8,17 +6,12 @@ namespace RailworksForge.Core.External;
 
 internal class SubProcess
 {
-    private static readonly ProtonService _protonService = new ();
+    private static readonly ProtonService ProtonService = new ();
 
-    internal record ExecOutput(string StdOut, string StdError);
-
-    internal static async Task<ExecOutput> ExecProcess(string path, List<string> arguments, CancellationToken cancellationToken = default)
+    internal static async Task ExecProcess(string path, List<string> arguments, CancellationToken cancellationToken = default)
     {
-        var proton = _protonService.GetProtonInstance();
+        var proton = ProtonService.GetProtonInstance();
         var environmentVariables = GetEnvironmentVariables();
-
-        var stdOutBuffer = new StringBuilder();
-        var stdErrBuffer = new StringBuilder();
 
         var args = new [] { path }.Concat(arguments).ToArray();
 
@@ -33,20 +26,13 @@ internal class SubProcess
             .WithEnvironmentVariables(environmentVariables)
             .WithArguments(args)
             .WithWorkingDirectory(workingDir)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
             .WithValidation(CommandResultValidation.None)
             .ExecuteAsync(cancellationToken);
-
-        var output = stdOutBuffer.ToString();
-        var error = stdErrBuffer.ToString();
-
-        return new ExecOutput(output, error);
     }
 
-    private static IReadOnlyDictionary<string, string?> GetEnvironmentVariables()
+    private static Dictionary<string, string?> GetEnvironmentVariables()
     {
-        var proton = _protonService.GetProtonInstance();
+        var proton = ProtonService.GetProtonInstance();
 
         return new Dictionary<string, string?>
         {

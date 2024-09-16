@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ namespace RailworksForge.Behaviours;
 
 public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
 {
+    [RequiresUnreferencedCode("This functionality is not compatible with trimming.")]
     protected override void OnAttached()
     {
         if (AssociatedObject is not null)
