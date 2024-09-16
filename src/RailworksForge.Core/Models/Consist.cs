@@ -80,7 +80,7 @@ public record Consist : Blueprint
             return null;
         }
 
-        var consistId = lead.GetAttribute("d:id") ?? string.Empty;
+        var consistId = el.GetAttribute("d:id") ?? string.Empty;
         var locomotiveName = lead.SelectTextContent("Name");
         var playerDriver = el.SelectTextContent("Driver PlayerDriver") == "1";
         var blueprintId = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID");

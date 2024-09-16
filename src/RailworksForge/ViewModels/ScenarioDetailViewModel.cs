@@ -131,6 +131,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             if (result is null) return;
 
+            IsLoading = true;
+
             var target = new TargetConsist(SelectedConsists);
 
             var request = new ReplaceConsistRequest
@@ -183,6 +185,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             });
 
             if (!result) return;
+
+            IsLoading = true;
 
             var target = new TargetConsist(SelectedConsists);
 

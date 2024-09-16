@@ -4,6 +4,8 @@ using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
+using Serilog;
+
 namespace RailworksForge.Core.Commands;
 
 public class DeleteConsistVehicle : IConsistCommand
@@ -24,9 +26,7 @@ public class DeleteConsistVehicle : IConsistCommand
     {
         var document = context.ScenarioDocument;
 
-        var serviceConsist = document
-            .QuerySelectorAll("cConsist")
-            .QueryByTextContent("Driver ServiceName Key", _request.Consist.ServiceId);
+        var serviceConsist = GetServiceConsist(document, _request.Consist);
 
         if (serviceConsist is null)
         {
@@ -63,6 +63,11 @@ public class DeleteConsistVehicle : IConsistCommand
         }
     }
 
+    private static IElement? GetServiceConsist(IDocument document, Consist consist)
+    {
+        return document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
+    }
+
     private void UpdateScenarioProperties(ConsistCommandContext context, RollingStockEntry vehicle)
     {
         var document = context.ScenarioPropertiesDocument;
@@ -74,7 +79,8 @@ public class DeleteConsistVehicle : IConsistCommand
 
         if (serviceElement is null)
         {
-            throw new Exception($"could not find service {consist.ServiceName} in scenario properties file.");
+            Log.Warning("Could not find service {Service} in scenario properties file", consist.ServiceName);
+            return;
         }
 
         UpdateBlueprint(serviceElement, vehicle);

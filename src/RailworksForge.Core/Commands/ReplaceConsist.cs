@@ -5,6 +5,8 @@ using RailworksForge.Core.models;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
+using Serilog;
+
 namespace RailworksForge.Core.Commands;
 
 public class ReplaceConsist : IConsistCommand
@@ -32,9 +34,7 @@ public class ReplaceConsist : IConsistCommand
 
         foreach (var consist in target.GetConsists())
         {
-            var serviceConsist = document
-                .QuerySelectorAll("cConsist")
-                .QueryByTextContent("Driver ServiceName Key", consist.ServiceId);
+            var serviceConsist = GetServiceConsist(document, consist);
 
             if (serviceConsist is null)
             {
@@ -45,7 +45,8 @@ public class ReplaceConsist : IConsistCommand
 
             if (railVehicles is null)
             {
-                throw new Exception("unable to find rail vehicles in scenario document");
+                Log.Warning("unable to find rail vehicles in scenario document");
+                continue;
             }
 
             var blueprintNodes = serviceConsist.QuerySelectorAll("RailVehicles cOwnedEntity");
@@ -66,22 +67,15 @@ public class ReplaceConsist : IConsistCommand
 
             var cDriver = serviceConsist.QuerySelector("Driver cDriver");
 
-            if (cDriver is null)
-            {
-                throw new Exception("driver element not found");
-            }
-
             var previousVehicle = firstBlueprint;
-            var initialRv = cDriver.QuerySelector("InitialRV");
+            var initialRv = cDriver?.QuerySelector("InitialRV");
 
-            if (initialRv is null)
+            if (initialRv is not null)
             {
-                throw new Exception("could not find initialRV element");
-            }
-
-            foreach (var child in initialRv.Children)
-            {
-                child.RemoveFromParent();
+                foreach (var child in initialRv.Children)
+                {
+                    child.RemoveFromParent();
+                }
             }
 
             for (var i = 0; i < selectedConsistLength; i++)
@@ -98,7 +92,7 @@ public class ReplaceConsist : IConsistCommand
                 e.SetAttribute(Utilities.NS, "d:type", "cDeltaString");
                 e.SetTextContent(railVehicle.Number);
 
-                initialRv.AppendChild(e);
+                initialRv?.AppendChild(e);
 
                 var element = railVehicle.Element;
 
@@ -111,6 +105,11 @@ public class ReplaceConsist : IConsistCommand
                 previousVehicle = element;
             }
         }
+    }
+
+    private static IElement? GetServiceConsist(IDocument document, Consist consist)
+    {
+        return document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
     }
 
     private void GetUpdatedScenarioProperties(ConsistCommandContext context)
@@ -128,7 +127,8 @@ public class ReplaceConsist : IConsistCommand
 
             if (serviceElement is null)
             {
-                throw new Exception($"could not find service {consist.ServiceName} in scenario properties file.");
+                Log.Warning("could not find service {Service} in scenario properties file", consist.ServiceName);
+                continue;
             }
 
             UpdateBlueprint(serviceElement, preload);
