@@ -90,7 +90,9 @@ public record Consist : Blueprint
         var blueprintSetIdProduct = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Provider");
 
-        Cache.AcquisitionStates.TryGetValue(consistId, out var cachedState);
+        var vehicles = el.QuerySelectorAll("RailVehicles BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID").Select(Parse).ToList();
+        var consistAcquisitionState = vehicles.All(v => v.AcquisitionState is AcquisitionState.Found)
+            ? AcquisitionState.Found : AcquisitionState.Missing;
 
         return new Consist
         {
@@ -104,7 +106,7 @@ public record Consist : Blueprint
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
-            ConsistAcquisitionState = cachedState,
+            ConsistAcquisitionState = consistAcquisitionState,
         };
     }
 }

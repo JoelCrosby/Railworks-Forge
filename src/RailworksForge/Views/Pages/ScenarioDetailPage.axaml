@@ -93,7 +93,6 @@
         >
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Locomotive State" Binding="{Binding AcquisitionState}" />
                 <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
                 <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
                 <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
