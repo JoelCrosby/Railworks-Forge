@@ -149,7 +149,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
-        var consists = await _scenario.GetServiceConsistVehicles(_consist.ServiceId);
+        var consists = await _scenario.GetServiceConsistVehicles(_consist.Id);
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
 
