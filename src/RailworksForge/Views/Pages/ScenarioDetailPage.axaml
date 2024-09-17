@@ -73,7 +73,6 @@
             <Button Command="{Binding ExportBinXmlCommand}">Export Bin to XML</Button>
             <Button Command="{Binding ExportXmlBinCommand}">Convert XML to Bin</Button>
             <Button Command="{Binding ExtractScenariosCommand}">Extract Scenarios</Button>
-            <Button Command="{Binding LoadAcquisitionStates}">Check Consist States</Button>
         </StackPanel>
 
         <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />

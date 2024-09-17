@@ -279,28 +279,6 @@ public record Scenario
         };
     }
 
-
-
-    public async Task GetConsistStatus()
-    {
-        foreach (var consist in Consists)
-        {
-            if (consist.ConsistAcquisitionState is AcquisitionState.Found)
-            {
-                continue;
-            }
-
-            var consists = await GetServiceConsistVehicles(consist.ServiceId);
-            var state = consists.All(c => c.AcquisitionState == AcquisitionState.Found)
-                ? AcquisitionState.Found
-                : AcquisitionState.Missing;
-
-            consist.ConsistAcquisitionState = state;
-
-            Cache.AcquisitionStates[consist.ServiceId] = state;
-        }
-    }
-
     private static string ParseSeason(string code)
     {
         return code switch
