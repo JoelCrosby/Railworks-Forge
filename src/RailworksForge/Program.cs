@@ -9,7 +9,6 @@ using RailworksForge.Util;
 using ReactiveUI;
 
 using Serilog;
-using Serilog.Events;
 
 namespace RailworksForge;
 
@@ -21,7 +20,7 @@ internal sealed class Program
         try
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console(LogEventLevel.Fatal)
+                .WriteTo.Console()
                 .WriteTo.File($"{Paths.GetLoggingPath()}/railworks-forge-.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 

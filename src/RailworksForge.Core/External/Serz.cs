@@ -6,10 +6,7 @@ public class Serz
 
     private static readonly string ExePath = Path.Join(Paths.GetGameDirectory(), "serz64.exe");
 
-    public static async Task<ConvertedSerzFile> Convert(
-        string inputPath,
-        bool force = false,
-        CancellationToken cancellationToken = default)
+    public static async Task<ConvertedSerzFile> Convert(string inputPath, bool force = false)
     {
         if (Paths.Exists(inputPath) is false)
         {
@@ -28,7 +25,7 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
-        await SubProcess.ExecProcess(ExePath, [inputArg, outputArg], cancellationToken);
+        await SubProcess.ExecProcess(ExePath, [inputArg, outputArg]);
 
         var isSuccess = Paths.Exists(outputPath);
 

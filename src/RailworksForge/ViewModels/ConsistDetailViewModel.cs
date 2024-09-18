@@ -131,7 +131,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
         {
-            var exported = await Serz.Convert(binFile, false, cancellationToken);
+            var exported = await Serz.Convert(binFile);
             var models = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
 
             processedCount++;

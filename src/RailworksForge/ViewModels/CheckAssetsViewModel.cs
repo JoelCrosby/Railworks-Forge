@@ -69,11 +69,11 @@ public partial class CheckAssetsViewModel : ViewModelBase
         var processedCount = 0;
         var processed = binFiles.Count;
 
-        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, cancellationToken) =>
+        foreach (var path in binFiles)
         {
             try
             {
-                var serialised = await Serz.Convert(path, false, cancellationToken);
+                var serialised = await Serz.Convert(path);
                 var xml  = File.ReadAllText(serialised.OutputPath);
 
                 using var document = XmlParser.ParseDocument(xml);
@@ -99,19 +99,21 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
                 processedCount++;
 
+                var count = processedCount;
+
                 Dispatcher.UIThread.Post(() =>
                 {
-                    LoadingProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
-                    LoadingMessage = $"Processed {processedCount} of {processed} files ( %{LoadingProgress} )";
+                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / processed);
+                    LoadingMessage = $"Processed {count} of {processed} files ( %{LoadingProgress} )";
                 });
             }
             catch (Exception e)
             {
                 Log.Error(e, "check assets for path path failed");
             }
-        });
+        }
 
-        var missing = results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList();
+        var missing = await Task.Run(() => results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList());
 
         Dispatcher.UIThread.Post(() =>
         {
