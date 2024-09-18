@@ -57,7 +57,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             return;
         }
 
-        Observable.StartAsync(GetMissingAssets, RxApp.TaskpoolScheduler);
+        Observable.Start(GetMissingAssets, RxApp.TaskpoolScheduler);
     }
 
     private async Task GetMissingAssets()
@@ -69,7 +69,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         var processedCount = 0;
         var processed = binFiles.Count;
 
-        foreach (var path in binFiles)
+        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, _) =>
         {
             try
             {
@@ -111,7 +111,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             {
                 Log.Error(e, "check assets for path path failed");
             }
-        }
+        });
 
         var missing = await Task.Run(() => results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList());
 

@@ -166,7 +166,7 @@ public static class Archives
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to read archive");
+            Log.Error(e, "Failed to read entry {Entry} inside archive at path {Path}", agnosticBlueprintIdPath, archivePath);
 
             return false;
         }
