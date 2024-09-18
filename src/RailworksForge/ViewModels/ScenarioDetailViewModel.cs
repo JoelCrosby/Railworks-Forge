@@ -199,7 +199,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         ArgumentNullException.ThrowIfNull(SelectedConsist);
 
-        var doc = await Scenario.GetXmlDocument();
+        using var doc = await Scenario.GetXmlDocument();
 
         var vehicles = doc
             .QuerySelectorAll("cConsist")
@@ -228,7 +228,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private async Task GetAllScenarioConsists()
     {
-        var document = await Scenario.GetXmlDocument(false);
+        using var document = await Scenario.GetXmlDocument(false);
         var consists = document.QuerySelectorAll("cConsist");
 
         var results = consists
