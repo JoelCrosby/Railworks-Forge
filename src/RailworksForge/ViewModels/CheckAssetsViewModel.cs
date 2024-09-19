@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -64,16 +65,16 @@ public partial class CheckAssetsViewModel : ViewModelBase
     {
         var binFiles = GetBinFiles();
 
-        var results = new HashSet<Blueprint>();
+        var results = new ConcurrentDictionary<Blueprint, byte>();
 
         var processedCount = 0;
         var processed = binFiles.Count;
 
-        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, _) =>
+        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, token) =>
         {
             try
             {
-                var serialised = await Serz.Convert(path);
+                var serialised = await Serz.Convert(path, token);
                 var xml  = File.ReadAllText(serialised.OutputPath);
 
                 using var document = XmlParser.ParseDocument(xml);
@@ -94,7 +95,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
                         continue;
                     }
 
-                    results.Add(blueprint);
+                    results.TryAdd(blueprint, byte.MinValue);
                 }
 
                 processedCount++;
@@ -113,7 +114,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             }
         });
 
-        var missing = await Task.Run(() => results.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList());
+        var missing = await Task.Run(() => results.Keys.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList());
 
         Dispatcher.UIThread.Post(() =>
         {

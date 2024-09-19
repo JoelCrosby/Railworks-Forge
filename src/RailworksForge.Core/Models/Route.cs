@@ -93,7 +93,7 @@ public record Route
 
         if (Paths.Exists(path))
         {
-            var output = await Serz.Convert(path, true);
+            var output = await Serz.Convert(path, force: true);
             var xml = await File.ReadAllTextAsync(output.OutputPath);
 
             return await XmlParser.ParseDocumentAsync(xml);

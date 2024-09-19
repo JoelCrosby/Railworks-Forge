@@ -3,13 +3,11 @@ using CliWrap;
 using Polly;
 using Polly.Retry;
 
-using RailworksForge.Core.Proton;
-
 using Serilog;
 
-namespace RailworksForge.Core.External;
+namespace RailworksForge.Core.Proton;
 
-internal class SubProcess
+internal static class SubProcess
 {
     private static readonly ProtonInstance ProtonInstance = new ProtonService().GetProtonInstance();
 
@@ -24,6 +22,15 @@ internal class SubProcess
             return default;
         },
     };
+
+    static SubProcess()
+    {
+        Task.Run(() => Cli.Wrap(ProtonInstance.WineServerPath)
+            .WithArguments(["-p"])
+            .WithEnvironmentVariables(GetEnvironmentVariables())
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteAsync());
+    }
 
     internal static async Task ExecProcess(string path, List<string> arguments)
     {

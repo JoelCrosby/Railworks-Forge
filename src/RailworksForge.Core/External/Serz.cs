@@ -1,3 +1,5 @@
+using CliWrap;
+
 namespace RailworksForge.Core.External;
 
 public class Serz
@@ -6,7 +8,7 @@ public class Serz
 
     private static readonly string ExePath = Path.Join(Paths.GetGameDirectory(), "serz64.exe");
 
-    public static async Task<ConvertedSerzFile> Convert(string inputPath, bool force = false)
+    public static async Task<ConvertedSerzFile> Convert(string inputPath, CancellationToken token = default, bool force = false)
     {
         if (Paths.Exists(inputPath) is false)
         {
@@ -25,7 +27,7 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
-        await SubProcess.ExecProcess(ExePath, [inputArg, outputArg]);
+        await Cli.Wrap("wine64").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
 
         var isSuccess = Paths.Exists(outputPath);
 

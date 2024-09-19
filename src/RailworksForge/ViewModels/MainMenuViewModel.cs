@@ -23,7 +23,7 @@ public class MainMenuViewModel : ViewModelBase
 
     public MainMenuViewModel()
     {
-        ConvertBinToXmlCommand = ReactiveCommand.CreateFromTask(async () =>
+        ConvertBinToXmlCommand = ReactiveCommand.CreateFromTask(async (token) =>
         {
             var storageFile = await Utils.OpenFilePickerAsync("Select .bin file");
 
@@ -33,12 +33,12 @@ public class MainMenuViewModel : ViewModelBase
 
             if (Path.GetExtension(path) != ".bin") return;
 
-            var result = await Serz.Convert(path, true);
+            var result = await Serz.Convert(path, token, true);
 
             File.Copy(result.OutputPath, path.Replace(".bin", ".bin.xml"));
         });
 
-        ConvertXmlToBinCommand = ReactiveCommand.CreateFromTask(async () =>
+        ConvertXmlToBinCommand = ReactiveCommand.CreateFromTask(async (token) =>
         {
             var storageFile = await Utils.OpenFilePickerAsync("Select .bin file");
 
@@ -48,7 +48,7 @@ public class MainMenuViewModel : ViewModelBase
 
             if (Path.GetExtension(path) != ".xml") return;
 
-            var result = await Serz.Convert(path, true);
+            var result = await Serz.Convert(path, token, true);
 
             File.Copy(result.OutputPath, path.Replace(".bin.xml", ".bin"));
         });

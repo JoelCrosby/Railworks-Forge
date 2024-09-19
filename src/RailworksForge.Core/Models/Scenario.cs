@@ -170,7 +170,7 @@ public record Scenario
     public async Task<string> ConvertBinToXml(bool useCache = true)
     {
         var inputPath = HasBinary ? BinaryPath : ExtractXml();
-        var result = await Serz.Convert(inputPath, !useCache);
+        var result = await Serz.Convert(inputPath, force: !useCache);
 
         return result.OutputPath;
     }
@@ -178,7 +178,7 @@ public record Scenario
     public async Task<string> ExportBinToXml()
     {
         var inputPath = HasBinary ? BinaryPath : ExtractXml();
-        var result = await Serz.Convert(inputPath, true);
+        var result = await Serz.Convert(inputPath, force: true);
 
         var filename = Path.GetFileName(result.OutputPath);
         var destination = Path.Join(DirectoryPath, filename);
@@ -235,7 +235,7 @@ public record Scenario
     public async Task<string> ConvertXmlToBin()
     {
         var path = Path.Join(DirectoryPath, "Scenario.bin.xml");
-        var result = await Serz.Convert(path, true);
+        var result = await Serz.Convert(path, force: true);
 
         var filename = Path.GetFileName(result.OutputPath);
         var destination = Path.Join(DirectoryPath, filename);

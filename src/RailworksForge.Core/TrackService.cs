@@ -96,7 +96,7 @@ public class TrackService
 
         await document.ToXmlAsync(destination);
 
-        var output = await Serz.Convert(destination, true);
+        var output = await Serz.Convert(destination, force: true);
         var destinationDirectory = Path.Join(route.DirectoryPath, "Networks");
 
         Directory.CreateDirectory(destinationDirectory);

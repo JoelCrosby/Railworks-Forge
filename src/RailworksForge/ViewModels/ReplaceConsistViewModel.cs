@@ -74,7 +74,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
         await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
         {
-            var exported = await Serz.Convert(binFile);
+            var exported = await Serz.Convert(binFile, cancellationToken);
             var consists = await GetConsistBlueprints(exported.OutputPath, cancellationToken);
             var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
 

@@ -22,7 +22,7 @@ public static class ScenarioWriter
 
         File.Delete(binDestination);
 
-        var converted = await Serz.Convert(destination, true);
+        var converted = await Serz.Convert(destination, force: true);
 
         File.Copy(converted.OutputPath, binDestination);
 

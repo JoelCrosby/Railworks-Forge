@@ -38,7 +38,7 @@ public record Blueprint
     {
         if (File.Exists(BlueprintPath))
         {
-            var converted = await Serz.Convert(BlueprintPath, force);
+            var converted = await Serz.Convert(BlueprintPath, force: force);
             var text = await File.ReadAllTextAsync(converted.OutputPath);
 
             return await XmlParser.ParseDocumentAsync(text);
