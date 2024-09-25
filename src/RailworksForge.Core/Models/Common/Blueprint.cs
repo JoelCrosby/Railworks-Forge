@@ -101,12 +101,13 @@ public record Blueprint
 
     private AcquisitionState GetAcquisitionState()
     {
-        if (_cachedAcquisitionState is not AcquisitionState.Unknown)
+        if (_cachedAcquisitionState is AcquisitionState.Found)
         {
-            return _cachedAcquisitionState;
+            return AcquisitionState.Found;
         }
 
         _cachedAcquisitionState = LoadAcquisitionState();
+
         return _cachedAcquisitionState;
     }
 
