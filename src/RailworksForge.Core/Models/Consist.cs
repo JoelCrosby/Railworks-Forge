@@ -109,4 +109,13 @@ public record Consist : Blueprint
             ConsistAcquisitionState = consistAcquisitionState,
         };
     }
+
+    public static IElement? GetServiceConsist(IDocument document, Consist consist)
+    {
+        var byId = document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
+
+        if (byId is not null) return byId;
+
+        return document.QuerySelectorAll("cConsist").QueryByTextContent("ServiceName Key", consist.ServiceId);
+    }
 }

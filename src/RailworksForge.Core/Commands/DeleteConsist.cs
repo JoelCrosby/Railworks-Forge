@@ -28,7 +28,7 @@ public class DeleteConsist : IConsistCommand
 
         foreach (var consist in _target.GetConsists())
         {
-            var consistElement = GetServiceConsist(document, consist);
+            var consistElement = Consist.GetServiceConsist(document, consist);
 
             if (consistElement is null)
             {
@@ -51,10 +51,5 @@ public class DeleteConsist : IConsistCommand
 
             element?.RemoveFromParent();
         }
-    }
-
-    private static IElement? GetServiceConsist(IDocument document, Consist consist)
-    {
-        return document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
     }
 }

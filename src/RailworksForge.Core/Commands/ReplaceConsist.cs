@@ -34,7 +34,7 @@ public class ReplaceConsist : IConsistCommand
 
         foreach (var consist in target.GetConsists())
         {
-            var serviceConsist = GetServiceConsist(document, consist);
+            var serviceConsist = Consist.GetServiceConsist(document, consist);
 
             if (serviceConsist is null)
             {
@@ -105,11 +105,6 @@ public class ReplaceConsist : IConsistCommand
                 previousVehicle = element;
             }
         }
-    }
-
-    private static IElement? GetServiceConsist(IDocument document, Consist consist)
-    {
-        return document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
     }
 
     private void GetUpdatedScenarioProperties(ConsistCommandContext context)
