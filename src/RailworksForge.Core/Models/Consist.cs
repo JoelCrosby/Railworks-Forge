@@ -30,6 +30,7 @@ public record Consist : Blueprint
 
     public string? Number { get; init; }
 
+    public int Length { get; init; }
 
     public static Consist ParseConsist(IElement el)
     {
@@ -107,6 +108,7 @@ public record Consist : Blueprint
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
             ConsistAcquisitionState = consistAcquisitionState,
+            Length = vehicles.Count,
         };
     }
 

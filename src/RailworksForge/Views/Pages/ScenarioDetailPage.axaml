@@ -95,6 +95,7 @@
                 <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
                 <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
                 <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                <DataGridTextColumn Header="Consist Length" Binding="{Binding Length}" />
                 <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
                 <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
                 <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
