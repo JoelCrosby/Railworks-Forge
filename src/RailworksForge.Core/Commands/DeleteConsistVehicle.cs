@@ -26,7 +26,7 @@ public class DeleteConsistVehicle : IConsistCommand
     {
         var document = context.ScenarioDocument;
 
-        var serviceConsist = GetServiceConsist(document, _request.Consist);
+        var serviceConsist = Consist.GetServiceConsist(document, _request.Consist);
 
         if (serviceConsist is null)
         {
@@ -55,17 +55,12 @@ public class DeleteConsistVehicle : IConsistCommand
                 BlueprintId = entry.SelectTextContent("BlueprintID"),
             };
 
-            var vehicleDocument = await blueprint.GetBlueprintXml();
+            var vehicleDocument = await blueprint.GetXmlDocument();
             var vehicleElement = vehicleDocument.DocumentElement;
-            var consistVehicle = RollingStockEntry.Parse(vehicleElement);
+            var consistVehicle = RollingStockEntry.Parse(vehicleElement, blueprint);
 
             UpdateScenarioProperties(context, consistVehicle);
         }
-    }
-
-    private static IElement? GetServiceConsist(IDocument document, Consist consist)
-    {
-        return document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
     }
 
     private void UpdateScenarioProperties(ConsistCommandContext context, RollingStockEntry vehicle)

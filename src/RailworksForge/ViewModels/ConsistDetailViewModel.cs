@@ -18,6 +18,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Models.Common;
 using RailworksForge.Util;
 
 using ReactiveUI;
@@ -73,7 +74,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         IsLoading = true;
 
-        LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
+        LoadAvailableStockCommand = ReactiveCommand.CreateFromObservable(() => Observable.StartAsync(LoadAvailableStock));
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
             if (SelectedDirectory is null) return;
@@ -164,10 +165,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var text = await File.ReadAllTextAsync(path, cancellationToken);
         var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
+        var blueprint = Blueprint.FromPath(path);
 
         return doc
             .QuerySelectorAll("Blueprint")
-            .Select(RollingStockEntry.Parse)
+            .Select((el) => RollingStockEntry.Parse(el, blueprint))
             .Where(e => e.BlueprintType is BlueprintType.Engine or BlueprintType.Tender or BlueprintType.Wagon)
             .ToList();
     }

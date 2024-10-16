@@ -15,29 +15,18 @@ public class RollingStockEntry
 
     public required BlueprintType BlueprintType { get; init; }
 
-    public static RollingStockEntry Parse(IElement el)
+    public static RollingStockEntry Parse(IElement el, Blueprint blueprint)
     {
-        var blueprint = ParseBlueprint(el);
         var locomotiveName = el.SelectTextContent("Name");
         var displayName = el.SelectLocalisedStringContent("DisplayName");
         var blueprintType = Utilities.ParseBlueprintType(el.FirstElementChild?.NodeName);
 
         return new RollingStockEntry
         {
+            Blueprint = blueprint,
             LocomotiveName = locomotiveName,
             DisplayName = displayName,
-            Blueprint = blueprint,
             BlueprintType = blueprintType,
-        };
-    }
-
-    private static Blueprint ParseBlueprint(IElement el)
-    {
-        return new Blueprint
-        {
-            BlueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Provider"),
-            BlueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Product"),
-            BlueprintId = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID"),
         };
     }
 }

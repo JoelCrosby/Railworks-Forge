@@ -171,8 +171,14 @@ public class ReplaceConsist : IConsistCommand
     private static async Task<GeneratedVehicle> AddConsistVehicle(ConsistEntry consistVehicle, IDocument document, IElement scenarioNode)
     {
         var vehicleDocument = await consistVehicle.GetXmlDocument();
-        var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, consistVehicle);
+        var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, consistVehicle.Blueprint);
 
-        return await VehicleGenerator.GenerateVehicle(document, scenarioNode, scenarioConsist, consistVehicle);
+        return await VehicleGenerator.GenerateVehicle(
+            document,
+            scenarioNode,
+            scenarioConsist,
+            consistVehicle.Blueprint,
+            consistVehicle.Flipped
+        );
     }
 }

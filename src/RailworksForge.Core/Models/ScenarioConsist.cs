@@ -1,6 +1,7 @@
 using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
@@ -28,7 +29,7 @@ public record ScenarioConsist : Consist
 
     public float? Mass { get; init; }
 
-    public static ScenarioConsist ParseConsist(IDocument document, ConsistEntry consistEntry)
+    public static ScenarioConsist ParseConsist(IDocument document, Blueprint blueprint)
     {
         var el = document.DocumentElement;
 
@@ -57,9 +58,9 @@ public record ScenarioConsist : Consist
             LocoClass = consist.LocoClass,
             ServiceName = consist.ServiceName,
             PlayerDriver = consist.PlayerDriver,
-            BlueprintId = consistEntry.Blueprint.BlueprintId,
-            BlueprintSetIdProduct = consistEntry.Blueprint.BlueprintSetIdProduct,
-            BlueprintSetIdProvider = consistEntry.Blueprint.BlueprintSetIdProvider,
+            BlueprintId = blueprint.BlueprintId,
+            BlueprintSetIdProduct = blueprint.BlueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprint.BlueprintSetIdProvider,
             BlueprintType = vehicleType,
             ServiceId = consist.ServiceId,
             EntityCount = entityCount,

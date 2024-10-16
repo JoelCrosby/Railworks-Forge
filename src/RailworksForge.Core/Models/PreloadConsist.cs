@@ -59,7 +59,7 @@ public class PreloadConsist
 
         if (string.IsNullOrEmpty(locomotiveName))
         {
-            var locoDocument = blueprint.GetBlueprintXml().GetAwaiter().GetResult();
+            var locoDocument = blueprint.GetXmlDocument().GetAwaiter().GetResult();
 
             locomotiveName = locoDocument.SelectLocalisedStringContent("LocoName");
             displayName = locoDocument.SelectLocalisedStringContent("DisplayName");

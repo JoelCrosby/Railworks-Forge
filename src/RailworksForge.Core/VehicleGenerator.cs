@@ -2,6 +2,7 @@ using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
+using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core;
 
@@ -9,9 +10,9 @@ public record GeneratedVehicle(IElement Element, string Number);
 
 public class VehicleGenerator
 {
-    public static async Task<GeneratedVehicle> GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, ConsistEntry consistVehicle)
+    public static async Task<GeneratedVehicle> GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, Blueprint blueprint, bool flipped)
     {
-        var vehicleType = await GetConsistEntryVehicleType(consistVehicle);
+        var vehicleType = await GetConsistEntryVehicleType(blueprint);
         var xml = VehicleTemplates.GetXml(vehicleType);
         var doc = await XmlParser.ParseDocumentAsync(xml);
         var cOwnedEntity = doc.DocumentElement;
@@ -42,7 +43,7 @@ public class VehicleGenerator
         UpdateEntityId(document, cOwnedEntity);
         UpdateOwnedEntityIds(cOwnedEntity);
         UpdateBlueprintIds(vehicle, cOwnedEntity);
-        UpdateFlipped(cOwnedEntity, consistVehicle);
+        UpdateFlipped(cOwnedEntity, flipped);
         UpdateMass(cOwnedEntity, vehicle);
 
         if (vehicle.IsReskin)
@@ -53,7 +54,7 @@ public class VehicleGenerator
         cOwnedEntity.UpdateTextElement("Name", vehicle.Name!);
 
         var originalNumber = cOwnedEntity.SelectTextContent("UniqueNumber");
-        var number = vehicle.Number ?? GetAvailableNumber(vehicle, consistVehicle);
+        var number = vehicle.Number ?? GetAvailableNumber(vehicle, blueprint);
 
         cOwnedEntity.UpdateTextElement("UniqueNumber", number);
 
@@ -62,9 +63,9 @@ public class VehicleGenerator
         return new GeneratedVehicle(cOwnedEntity, number);
     }
 
-    private static async Task<BlueprintType> GetConsistEntryVehicleType(ConsistEntry consistVehicle)
+    private static async Task<BlueprintType> GetConsistEntryVehicleType(Blueprint blueprint)
     {
-        var document = await consistVehicle.GetXmlDocument();
+        var document = await blueprint.GetXmlDocument();
         var elementName = document.QuerySelector("Blueprint")?.FirstElementChild?.NodeName;
 
         return Utilities.ParseBlueprintType(elementName);
@@ -94,7 +95,7 @@ public class VehicleGenerator
         }
     }
 
-    private static string GetAvailableNumber(ScenarioConsist vehicle, ConsistEntry consistEntry)
+    private static string GetAvailableNumber(ScenarioConsist vehicle, Blueprint blueprint)
     {
         var path = vehicle.NumberingListPath;
 
@@ -117,13 +118,13 @@ public class VehicleGenerator
 
         string? GetCompressedText()
         {
-            return GetCompressedNumberingList(consistEntry, normalisedPath);
+            return GetCompressedNumberingList(blueprint, normalisedPath);
         }
     }
 
-    private static string? GetCompressedNumberingList(ConsistEntry consistEntry, string path)
+    private static string? GetCompressedNumberingList(Blueprint blueprint, string path)
     {
-        var productPath = Path.Join(consistEntry.Blueprint.BlueprintSetIdProvider, consistEntry.Blueprint.BlueprintSetIdProduct);
+        var productPath = Path.Join(blueprint.BlueprintSetIdProvider, blueprint.BlueprintSetIdProduct);
         var fullProductPath = Path.Join(Paths.GetAssetsDirectory(), productPath);
         var productArchives = Directory.EnumerateFiles(fullProductPath, "*.ap", SearchOption.TopDirectoryOnly);
         var normalisedPath = path.Replace(productPath, string.Empty);
@@ -235,11 +236,11 @@ public class VehicleGenerator
         cAbsoluteBlueprintId.QuerySelector("BlueprintID")?.SetTextContent(vehicle.BlueprintId);
     }
 
-    private static void UpdateFlipped(IElement cOwnedEntity, ConsistEntry consistEntry)
+    private static void UpdateFlipped(IElement cOwnedEntity, bool flipped)
     {
-        var flipped = consistEntry.Flipped ? "1" : "0";
+        var value = flipped ? "1" : "0";
 
-        cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(flipped);
+        cOwnedEntity.QuerySelector("Flipped")?.SetTextContent(value);
     }
 
     private static void UpdateEntityId(IDocument document, IElement cOwnedEntity)

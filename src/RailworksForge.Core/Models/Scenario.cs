@@ -266,10 +266,12 @@ public record Scenario
         var flipped = el.SelectTextContent("Flipped") == "1";
         var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
+        var entityID = el.SelectTextContent("EntityID cGUID DevString");
 
         return new ConsistRailVehicle
         {
             Id = consistId,
+            EntityID = entityID,
             LocomotiveName = locomotiveName,
             UniqueNumber = uniqueNumber,
             Flipped = flipped,

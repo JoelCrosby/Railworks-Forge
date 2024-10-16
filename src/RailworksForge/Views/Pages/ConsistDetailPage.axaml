@@ -25,17 +25,19 @@
             <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
             <DataGrid
+                      Name="ConsistVehiclesDataGrid"
                       IsVisible="{Binding !IsLoading}"
                       ItemsSource="{Binding RailVehicles}"
                       IsReadOnly="True"
                       GridLinesVisibility="All"
                       SelectionMode="Single"
+                      SelectionChanged="DataGrid_OnSelectionChanged"
                       SelectedItem="{Binding SelectedConsistVehicle}"
                       BorderThickness="0,1,0,0"
                       BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
             >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Id, Converter={StaticResource IdValueConverter}}" FontFamily="monospace" />
+                    <DataGridTextColumn Header="Id" Binding="{Binding DisplayId}" FontFamily="monospace" />
                     <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
                     <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
                     <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />

@@ -34,7 +34,7 @@ public record Blueprint
 
     private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
 
-    public async Task<IDocument> GetBlueprintXml(bool force = false)
+    public async Task<IDocument> GetXmlDocument(bool force = false)
     {
         if (File.Exists(BlueprintPath))
         {
@@ -160,5 +160,31 @@ public record Blueprint
         BlueprintCache.Add(blueprintId, result);
 
         return result;
+    }
+
+    public static Blueprint FromPath(string path)
+    {
+        var relative = path
+            .Replace(Paths.GetAssetsDirectory(), string.Empty)
+            .Replace(Paths.CacheOutputPath, string.Empty);
+
+        var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length < 3)
+        {
+            throw new Exception($"unable to parse blueprint from path {path}");
+        }
+
+        var provider = parts[1];
+        var product = parts[2];
+
+        var assetPath = string.Join("\\", parts.Skip(3)).Replace(".bin.xml", ".xml");
+
+        return new Blueprint
+        {
+            BlueprintSetIdProduct = product,
+            BlueprintSetIdProvider = provider,
+            BlueprintId = assetPath,
+        };
     }
 }

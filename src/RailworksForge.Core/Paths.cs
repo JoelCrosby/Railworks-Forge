@@ -213,7 +213,7 @@ public static class Paths
         return Path.Join(GetConfigurationFolder(), "logs");
     }
 
-    private static readonly string CacheOutputPath = Path.Join(GetConfigurationFolder(), "xml-cache");
+    public static readonly string CacheOutputPath = Path.Join(GetConfigurationFolder(), "xml-cache");
 
     public static string GetAssetCachePath(string path, bool isBin)
     {
