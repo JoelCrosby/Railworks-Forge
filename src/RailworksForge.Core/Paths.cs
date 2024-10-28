@@ -215,6 +215,8 @@ public static class Paths
 
     public static readonly string CacheOutputPath = Path.Join(GetConfigurationFolder(), "xml-cache");
 
+    public static readonly string PackageCachePath = Path.Join(GetConfigurationFolder(), "package-cache");
+
     public static string GetAssetCachePath(string path, bool isBin)
     {
         var renamedOutput = isBin ? path.Replace(".bin", ".bin.xml") : path.Replace(".bin.xml", ".bin");

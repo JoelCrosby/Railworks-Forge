@@ -101,6 +101,7 @@ public static class Utilities
             "cEditorShapeBlueprint" => BlueprintType.EditorShape,
             "cAnalogClockBlueprint" => BlueprintType.AnalogClock,
             "cDigitalClockBlueprint" => BlueprintType.DigitalClock,
+            "cScriptableSceneryBlueprint" => BlueprintType.ScriptableSceneryBlueprint,
             _ => throw new Exception($"unknown blueprint type for tag with the following name '{tagName}'"),
         };
     }

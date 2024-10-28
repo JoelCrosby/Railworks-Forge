@@ -29,4 +29,5 @@ public enum BlueprintType
     EditorShape,
     AnalogClock,
     DigitalClock,
+    ScriptableSceneryBlueprint,
 }
