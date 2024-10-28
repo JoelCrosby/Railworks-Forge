@@ -58,7 +58,8 @@ public record Scenario
     {
         var doc = GetPropertiesDocument(path);
 
-        if (doc.DocumentElement.FirstElementChild is null) return null;
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        if (doc.DocumentElement?.FirstElementChild is null) return null;
 
         var id = doc.SelectTextContent("ID cGUID DevString").Trim();
         var name = doc.SelectLocalisedStringContent("DisplayName");
