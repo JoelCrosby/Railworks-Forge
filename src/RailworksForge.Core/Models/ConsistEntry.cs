@@ -49,7 +49,7 @@ public class ConsistEntry
 
     private async Task<string> ConvertBinToXml()
     {
-        if (File.Exists(BinaryXmlPath))
+        if (Paths.Exists(BinaryXmlPath))
         {
             return BinaryXmlPath;
         }
@@ -74,5 +74,5 @@ public class ConsistEntry
         return destination;
     }
 
-    private bool HasBinary => File.Exists(BinaryPath);
+    private bool HasBinary => Paths.Exists(BinaryPath);
 }

@@ -36,7 +36,7 @@ public record Blueprint
 
     public async Task<IDocument> GetXmlDocument(bool force = false)
     {
-        if (File.Exists(BlueprintPath))
+        if (Paths.Exists(BlueprintPath))
         {
             var converted = await Serz.Convert(BlueprintPath, force: force);
             var text = await File.ReadAllTextAsync(converted.OutputPath);
@@ -64,7 +64,7 @@ public record Blueprint
 
     public IDocument GetBlueprintXmlInternal()
     {
-        if (File.Exists(BlueprintPath))
+        if (Paths.Exists(BlueprintPath))
         {
             var data = File.ReadAllBytes(BlueprintPath);
             return new SerzInternal(ref data).ToXml();

@@ -56,13 +56,25 @@ public partial class PreloadConsistViewModel : ViewModelBase
         var blueprintPath = Path.GetDirectoryName(consist.BinaryPath);
         var idealPath = Path.Join(blueprintPath, "LocoInformation", "Image.png");
         var imagePath = Paths.GetActualPathFromInsensitive(idealPath);
-        var image = File.Exists(imagePath) ? File.OpenRead(imagePath) : null;
+        var image = GetImageStream(imagePath);
 
         var result = image.ReadBitmap();
 
         BitmapCache.TryAdd(consist.BinaryPath, result);
 
         return result;
+    }
+
+    private static FileStream? GetImageStream(string? imagePath)
+    {
+        if (imagePath is null) return null;
+
+        if (Paths.GetActualPathFromInsensitive(imagePath) is { } path)
+        {
+            return File.OpenRead(path);
+        }
+
+        return null;
     }
 
     private async Task<Bitmap?> GetCompressedImageStream()

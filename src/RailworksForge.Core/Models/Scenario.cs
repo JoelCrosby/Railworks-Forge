@@ -47,7 +47,7 @@ public record Scenario
 
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
 
-    private bool HasBinary => File.Exists(BinaryPath);
+    private bool HasBinary => Paths.Exists(BinaryPath);
     private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
