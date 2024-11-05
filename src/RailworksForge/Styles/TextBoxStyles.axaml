@@ -21,4 +21,21 @@
     <Style Selector="TextBox.search:pointerover">
         <Setter Property="BorderThickness" Value="0,0,0,0" />
     </Style>
+
+    <Style Selector="TextBox.search-table">
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemChromeDisabledHighColor}" />
+        <Setter Property="Padding" Value="16,16" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style Selector="TextBox.search-table:focus">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="TextBox.search-table:pointerover">
+        <Setter Property="BorderThickness" Value="0,0,0,0" />
+    </Style>
 </Styles>

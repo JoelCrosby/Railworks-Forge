@@ -34,6 +34,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
 
+    [ObservableProperty]
+    private string? _searchTerm;
+
+    private List<Consist> _cachedServices = [];
+
     public ObservableCollection<Consist> Services { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -193,6 +198,17 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         Services = [];
 
         Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
+
+        this.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not nameof(SearchTerm)) return;
+
+            var invariant = _searchTerm?.ToLowerInvariant();
+            var indexed = invariant is null ? _cachedServices : _cachedServices.Where(service => service.SearchIndex.Contains(invariant));
+
+            Services.Clear();
+            Services.AddRange(indexed);
+        };
     }
 
     private async Task<string> GetSavedConsistRailVehicleElement()
@@ -234,12 +250,15 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         var results = consists
             .Select(Consist.ParseScenarioConsist)
             .Where(r => r is not null)
-            .Cast<Consist>();
+            .Cast<Consist>()
+            .ToList();
 
         Dispatcher.UIThread.Post(() =>
         {
             Services.Clear();
             Services.AddRange(results);
+
+            _cachedServices = results;
 
             IsLoading = false;
         });

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -6,6 +8,8 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
@@ -22,6 +26,8 @@ public partial class RouteDetailViewModel : ViewModelBase
 
     public ObservableCollection<Scenario> Scenarios { get; init; }
 
+    private List<Scenario>? _cachedScenarios;
+
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -30,6 +36,9 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckAssetsCommand { get; }
 
     public Scenario? SelectedItem { get; set; }
+
+    [ObservableProperty]
+    private string? _searchTerm;
 
     public RouteDetailViewModel(RouteViewModel route)
     {
@@ -75,20 +84,34 @@ public partial class RouteDetailViewModel : ViewModelBase
             await Utils.GetApplicationViewModel().ShowCheckAssetsDialog.Handle(new CheckAssetsViewModel(Route.Model));
         });
 
-        Scenarios = GetScenarios();
+        Scenarios = new (GetScenarios());
+
+        this.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not nameof(SearchTerm)) return;
+
+            var invariant = _searchTerm?.ToLowerInvariant();
+            var scenarios = _cachedScenarios ?? GetScenarios();
+            var indexed = invariant is null ? scenarios : scenarios.Where(scenario => scenario.SearchIndex.Contains(invariant));
+
+            Scenarios.Clear();
+            Scenarios.AddRange(indexed);
+        };
     }
 
     protected RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }
 
-    private ObservableCollection<Scenario> GetScenarios()
+    private List<Scenario> GetScenarios()
     {
         if (Design.IsDesignMode)
         {
-            return new (DesignData.DesignData.Scenarios);
+            return [..DesignData.DesignData.Scenarios];
         }
 
         var items = ScenarioService.GetScenarios(Route.Model);
 
-        return new (items);
+        _cachedScenarios = items;
+
+        return items;
     }
 }

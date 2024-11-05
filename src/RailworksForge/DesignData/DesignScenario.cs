@@ -36,6 +36,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = "WCML-South",
                 BlueprintSetIdProvider = "DTG",
+                SearchIndex = string.Empty,
             },
             new()
             {

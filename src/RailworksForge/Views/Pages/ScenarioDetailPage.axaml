@@ -75,43 +75,56 @@
             <Button Command="{Binding ExtractScenariosCommand}">Extract Scenarios</Button>
         </StackPanel>
 
-        <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+       <StackPanel Orientation="Vertical">
+            <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
-        <DataGrid DockPanel.Dock="Bottom"
-                  ItemsSource="{Binding Services}"
-                  IsReadOnly="True"
-                  IsVisible="{Binding !IsLoading}"
-                  GridLinesVisibility="All"
-                  SelectionMode="Extended"
-                  SelectionChanged="DataGrid_OnSelectionChanged"
-                  DoubleTapped="DataGrid_OnDoubleTapped"
-                  BorderThickness="0,1,0,0"
-                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                  Name="ServicesDataGrid"
-                  Sorting="DataGrid_OnSorting"
-        >
+            <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+                <TextBox Text="{Binding SearchTerm}"
+                         VerticalContentAlignment="Center"
+                         Classes="search-table"
+                         Watermark="Search"
+                         HorizontalAlignment="Stretch"
+                         Background="Transparent"
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
-                <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
-                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                <DataGridTextColumn Header="Consist Length" Binding="{Binding Length}" />
-                <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
-                <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
-            </DataGrid.Columns>
+                />
+            </Border>
 
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
-                    <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
-                    <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
-                    <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
-                </ContextMenu>
-            </DataGrid.ContextMenu>
+            <DataGrid DockPanel.Dock="Bottom"
+                      ItemsSource="{Binding Services}"
+                      IsReadOnly="True"
+                      IsVisible="{Binding !IsLoading}"
+                      GridLinesVisibility="All"
+                      SelectionMode="Extended"
+                      SelectionChanged="DataGrid_OnSelectionChanged"
+                      DoubleTapped="DataGrid_OnDoubleTapped"
+                      BorderThickness="0,1,0,0"
+                      BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                      Name="ServicesDataGrid"
+                      Sorting="DataGrid_OnSorting"
+            >
 
-        </DataGrid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
+                    <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
+                    <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
+                    <DataGridTextColumn Header="Consist Length" Binding="{Binding Length}" />
+                    <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
+                    <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
+                    <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
+                    <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
+                </DataGrid.Columns>
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
+                        <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
+                        <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
+                        <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
+            </DataGrid>
+       </StackPanel>
 
     </DockPanel>
 

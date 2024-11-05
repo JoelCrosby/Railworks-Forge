@@ -19,6 +19,8 @@ public record Scenario
 
     public required string Name { get; init; }
 
+    public string SearchIndex { get; init; } = string.Empty;
+
     public string? Description { get; init; }
 
     public string? Briefing { get; init; }
@@ -93,6 +95,7 @@ public record Scenario
             Route = route,
             Rating = rating,
             Season = season,
+            SearchIndex = name.ToLowerInvariant(),
         };
     }
 

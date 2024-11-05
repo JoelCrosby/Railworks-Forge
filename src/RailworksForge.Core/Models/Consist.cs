@@ -16,6 +16,8 @@ public record Consist : Blueprint
 
     public required string LocomotiveName { get; init; }
 
+    public string SearchIndex { get; init; } = string.Empty;
+
     public string? LocoAuthor { get; init; }
 
     public LocoClass? LocoClass { get; init; }
@@ -60,6 +62,7 @@ public record Consist : Blueprint
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
             ConsistAcquisitionState = cachedState,
+            SearchIndex = $"{locomotiveName} {locoAuthor} {locoClass} {serviceName}".ToLowerInvariant(),
         };
     }
 
@@ -109,6 +112,7 @@ public record Consist : Blueprint
             ServiceId = serviceId,
             ConsistAcquisitionState = consistAcquisitionState,
             Length = vehicles.Count,
+            SearchIndex = $"{locomotiveName} {blueprintSetIdProvider} {locoClass} {serviceName}".ToLowerInvariant(),
         };
     }
 

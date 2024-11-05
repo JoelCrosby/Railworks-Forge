@@ -55,6 +55,18 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+
+            <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+                <TextBox Text="{Binding SearchTerm}"
+                         VerticalContentAlignment="Center"
+                         Classes="search-table"
+                         Watermark="Search"
+                         HorizontalAlignment="Stretch"
+                         Background="Transparent"
+
+                />
+            </Border>
+
             <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,1">
                 <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
                     Scenarios
@@ -63,52 +75,55 @@
         </StackPanel>
 
 
-        <DataGrid ItemsSource="{Binding Scenarios}"
-                  IsReadOnly="True"
-                  DoubleTapped="DataGrid_OnDoubleTapped"
-                  GridLinesVisibility="All"
-                  SelectionMode="Single"
-                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                  Name="ScenariosDataGrid"
-                  Sorting="DataGrid_OnSorting"
-        >
+        <StackPanel Orientation="Vertical">
 
-            <DataGrid.Columns>
+            <DataGrid ItemsSource="{Binding Scenarios}"
+                      IsReadOnly="True"
+                      DoubleTapped="DataGrid_OnDoubleTapped"
+                      GridLinesVisibility="All"
+                      SelectionMode="Single"
+                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                      Name="ScenariosDataGrid"
+                      Sorting="DataGrid_OnSorting"
+            >
 
-                <DataGridTemplateColumn Header="Id" SortMemberPath="Id">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border BorderThickness="2"
-                                    Margin="12, 4"
-                                    VerticalAlignment="Center">
-                                <TextBlock Margin="3" VerticalAlignment="Center"
-                                           Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
-                                           FontFamily="monospace"
-                                           FontSize="13"/>
-                            </Border>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Locomotive" Binding="{Binding Locomotive}" />
-                <DataGridTextColumn Header="Type" Binding="{Binding ScenarioClass}" />
-                <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
-                <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" />
-                <DataGridTextColumn Header="Season" Binding="{Binding Season}" />
-            </DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Id" SortMemberPath="Id">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="2"
+                                        Margin="12, 4"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Margin="3" VerticalAlignment="Center"
+                                               Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
+                                               FontFamily="monospace"
+                                               FontSize="13"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
-                    <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
-                    <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />
-                </ContextMenu>
-            </DataGrid.ContextMenu>
+                    <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Locomotive" Binding="{Binding Locomotive}" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding ScenarioClass}" />
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
+                    <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" />
+                    <DataGridTextColumn Header="Season" Binding="{Binding Season}" />
+                </DataGrid.Columns>
 
-        </DataGrid>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
+                        <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
+                        <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
+            </DataGrid>
+        </StackPanel>
+
     </DockPanel>
-
 
 </UserControl>

@@ -67,6 +67,7 @@ public record ScenarioConsist : Consist
             CargoComponents = cargoComponents,
             NumberingListPath = numberList,
             Mass = mass,
+            SearchIndex = $"{consist.LocomotiveName} {consist.LocoAuthor} {consist.LocoClass} {consist.ServiceName}".ToLowerInvariant(),
         };
     }
 
