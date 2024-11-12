@@ -48,7 +48,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
     }
 
-    private async Task ShowDialog<TInput, TOutput, TDialog>(InteractionContext<TInput, TOutput?> interaction)
+    private async Task ShowDialog<TInput, TOutput, TDialog>(IInteractionContext<TInput, TOutput?> interaction)
         where TInput : ViewModelBase
         where TDialog : ReactiveWindow<TInput>, new ()
     {
