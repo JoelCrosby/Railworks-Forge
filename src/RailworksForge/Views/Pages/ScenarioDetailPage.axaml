@@ -75,9 +75,9 @@
             <Button Command="{Binding ExtractScenariosCommand}">Extract Scenarios</Button>
         </StackPanel>
 
-       <StackPanel Orientation="Vertical">
-            <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+        <li:LoadingIndicator DockPanel.Dock="Bottom" VerticalAlignment="Stretch" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical"  IsVisible="{Binding !IsLoading}">
             <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
                 <TextBox Text="{Binding SearchTerm}"
                          VerticalContentAlignment="Center"
@@ -85,14 +85,14 @@
                          Watermark="Search"
                          HorizontalAlignment="Stretch"
                          Background="Transparent"
+                         IsVisible="{Binding !IsLoading}"
 
                 />
             </Border>
 
-            <DataGrid DockPanel.Dock="Bottom"
-                      ItemsSource="{Binding Services}"
+            <DataGrid ItemsSource="{Binding Services}"
                       IsReadOnly="True"
-                      IsVisible="{Binding !IsLoading}"
+
                       GridLinesVisibility="All"
                       SelectionMode="Extended"
                       SelectionChanged="DataGrid_OnSelectionChanged"
@@ -102,7 +102,6 @@
                       Name="ServicesDataGrid"
                       Sorting="DataGrid_OnSorting"
             >
-
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
                     <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
@@ -122,10 +121,9 @@
                         <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>
-
             </DataGrid>
+
        </StackPanel>
 
     </DockPanel>
-
 </UserControl>
