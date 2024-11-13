@@ -37,6 +37,7 @@ public static partial class DesignData
                 BlueprintSetIdProduct = "WCML-South",
                 BlueprintSetIdProvider = "DTG",
                 SearchIndex = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -49,6 +50,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = "Class150Pack01",
                 BlueprintSetIdProvider = "AP",
+                Vehicles = [],
             },
             new()
             {
@@ -61,6 +63,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = "WCML-South",
                 BlueprintSetIdProvider = "DTG",
+                Vehicles = [],
             },
             new()
             {
@@ -73,6 +76,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = "Class66Pack03",
                 BlueprintSetIdProvider = "RSC",
+                Vehicles = [],
             },
             new()
             {
@@ -85,6 +89,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = "Voyager",
                 BlueprintSetIdProvider = "JustTrains",
+                Vehicles = [],
             },
             new()
             {
@@ -97,6 +102,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = "PortsmouthDirect",
                 BlueprintSetIdProvider = "DTG",
+                Vehicles = [],
             },
             new()
             {
@@ -109,6 +115,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = "Class325Pack01",
                 BlueprintSetIdProvider = "RSC",
+                Vehicles = [],
             },
             new()
             {
@@ -121,6 +128,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -133,6 +141,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -145,6 +154,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -157,6 +167,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -169,6 +180,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -181,6 +193,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -193,6 +206,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -205,6 +219,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -217,6 +232,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Electric,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
             new()
             {
@@ -229,6 +245,7 @@ public static partial class DesignData
                 LocoClass = LocoClass.Diesel,
                 BlueprintSetIdProduct = string.Empty,
                 BlueprintSetIdProvider = string.Empty,
+                Vehicles = [],
             },
         ],
     };

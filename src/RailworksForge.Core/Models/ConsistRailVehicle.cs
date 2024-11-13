@@ -2,7 +2,7 @@ using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
-public record ConsistRailVehicle : Blueprint
+public class ConsistRailVehicle : Blueprint
 {
     public required string Id { get; init; }
 

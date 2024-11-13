@@ -5,7 +5,7 @@ using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
 
-public record ScenarioConsist : Consist
+public class ScenarioConsist : Consist
 {
     public string? Name { get; init; }
 
@@ -68,6 +68,7 @@ public record ScenarioConsist : Consist
             NumberingListPath = numberList,
             Mass = mass,
             SearchIndex = $"{consist.LocomotiveName} {consist.LocoAuthor} {consist.LocoClass} {consist.ServiceName}".ToLowerInvariant(),
+            Vehicles = consist.Vehicles,
         };
     }
 

@@ -8,7 +8,7 @@ using RailworksForge.Core.External;
 namespace RailworksForge.Core.Models.Common;
 
 [DebuggerDisplay("{BlueprintSetIdProvider}/{BlueprintSetIdProduct}/{BlueprintId}")]
-public record Blueprint
+public class Blueprint
 {
     public required string BlueprintId { get; init; }
 

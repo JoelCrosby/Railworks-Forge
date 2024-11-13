@@ -10,7 +10,7 @@ using Serilog;
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{ServiceName}")]
-public record Consist : Blueprint
+public class Consist : Blueprint
 {
     public required string Id { get; init; }
 
@@ -34,7 +34,7 @@ public record Consist : Blueprint
 
     public int Length { get; init; }
 
-    public List<Blueprint> Vehicles { get; init; }
+    public required List<Blueprint> Vehicles { get; init; }
 
     public static Consist ParseConsist(IElement el)
     {
