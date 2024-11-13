@@ -34,6 +34,8 @@ public record Consist : Blueprint
 
     public int Length { get; init; }
 
+    public List<Blueprint> Vehicles { get; init; }
+
     public static Consist ParseConsist(IElement el)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
@@ -63,6 +65,7 @@ public record Consist : Blueprint
             ServiceId = serviceId,
             ConsistAcquisitionState = cachedState,
             SearchIndex = $"{locomotiveName} {locoAuthor} {locoClass} {serviceName}".ToLowerInvariant(),
+            Vehicles = [],
         };
     }
 
@@ -113,6 +116,7 @@ public record Consist : Blueprint
             ConsistAcquisitionState = consistAcquisitionState,
             Length = vehicles.Count,
             SearchIndex = $"{locomotiveName} {blueprintSetIdProvider} {locoClass} {serviceName}".ToLowerInvariant(),
+            Vehicles = vehicles,
         };
     }
 

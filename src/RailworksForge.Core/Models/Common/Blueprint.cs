@@ -48,7 +48,7 @@ public record Blueprint
 
         foreach (var archive in archives)
         {
-            var extracted = Archives.ExtractFileContentFromPath(archive, BinaryPath, BlueprintPath);
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintPath);
 
             if (extracted)
             {
@@ -74,7 +74,7 @@ public record Blueprint
 
         foreach (var archive in archives)
         {
-            var extracted = Archives.ExtractFileContentFromPath(archive, BinaryPath, BlueprintPath);
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintPath);
 
             if (extracted)
             {
@@ -95,8 +95,16 @@ public record Blueprint
     );
 
     private string AgnosticBlueprintIdPath => BlueprintId.Replace('\\', Path.DirectorySeparatorChar);
-    private string BinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
-    private string BlueprintPath => Path.Join(ProductDirectory, BinaryPath);
+
+    public string RelativeBinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
+
+    public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
+
+    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintSetIdProvider, BlueprintSetIdProduct);
+
+    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
+
+    private string BlueprintPath => Path.Join(ProductDirectory, RelativeBinaryPath);
     private string XmlDocumentPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
     private AcquisitionState GetAcquisitionState()
@@ -130,7 +138,7 @@ public record Blueprint
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
 
-        if (archives.Select(archive => Archives.EntryExists(archive, BinaryPath)).Any(found => found))
+        if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
         {
             return AcquisitionState.Found;
         }

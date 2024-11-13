@@ -10,14 +10,14 @@ using RailworksForge.Util;
 
 namespace RailworksForge.ViewModels;
 
-public partial class PreloadConsistViewModel : ViewModelBase
+public partial class ConsistViewModel : ViewModelBase
 {
-    public PreloadConsist Consist { get; }
+    public Consist Consist { get; }
 
     [ObservableProperty]
     private Bitmap? _imageBitmap;
 
-    public PreloadConsistViewModel(PreloadConsist consist)
+    public ConsistViewModel(Consist consist)
     {
         Consist = consist;
     }
@@ -29,7 +29,7 @@ public partial class PreloadConsistViewModel : ViewModelBase
 
     private Task<Bitmap?> GetImageBitmap()
     {
-        var consist = Consist.ConsistEntries.FirstOrDefault();
-        return BitmapUtils.GetImageBitmap(consist?.Blueprint);
+        var consist = Consist.Vehicles.FirstOrDefault();
+        return BitmapUtils.GetImageBitmap(consist);
     }
 }

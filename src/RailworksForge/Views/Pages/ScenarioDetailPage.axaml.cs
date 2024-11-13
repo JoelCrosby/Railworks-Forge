@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 
 using RailworksForge.Controls;
-using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
@@ -45,7 +44,7 @@ public partial class ScenarioDetailPage : DataGridUserControl
 
         if (dataGrid.SelectedItems is null) return;
 
-        context.SelectedConsists = dataGrid.SelectedItems.Cast<Consist>();
+        context.SelectedConsistViewModels = dataGrid.SelectedItems.Cast<ConsistViewModel>();
     }
 
     // ReSharper disable once UnusedParameter.Local

@@ -101,14 +101,23 @@
                   Sorting="DataGrid_OnSorting"
         >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Consist State" Binding="{Binding ConsistAcquisitionState}" />
-                <DataGridTextColumn Header="Is Player Driver" Binding="{Binding PlayerDriver}" />
-                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                <DataGridTextColumn Header="Consist Length" Binding="{Binding Length}" />
-                <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" />
-                <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
+
+                <DataGridTemplateColumn Header="" Width="64">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Height="32" Source="{Binding ImageBitmap}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Consist State" Binding="{Binding Consist.ConsistAcquisitionState}" />
+                <DataGridTextColumn Header="Is Player Driver" Binding="{Binding Consist.PlayerDriver}" />
+                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
+                <DataGridTextColumn Header="Consist Length" Binding="{Binding Consist.Length}" />
+                <DataGridTextColumn Header="Service Name" Binding="{Binding Consist.ServiceName}" />
+                <DataGridTextColumn Header="Provider" Binding="{Binding Consist.BlueprintSetIdProvider}" />
+                <DataGridTextColumn Header="Product" Binding="{Binding Consist.BlueprintSetIdProduct}" />
+                <DataGridTextColumn Header="Blueprint ID" Binding="{Binding Consist.BlueprintId}" />
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>

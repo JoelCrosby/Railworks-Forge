@@ -37,9 +37,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [ObservableProperty]
     private string? _searchTerm;
 
-    private List<Consist> _cachedServices = [];
+    private List<ConsistViewModel> _cachedServices = [];
 
-    public ObservableCollection<Consist> Services { get; }
+    public ObservableCollection<ConsistViewModel> Services { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
@@ -52,14 +52,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
-    public IEnumerable<Consist> SelectedConsists { get; set; }
+    public IEnumerable<ConsistViewModel> SelectedConsistViewModels { get; set; }
 
-    private Consist? SelectedConsist => SelectedConsists.Count() is 1 ? SelectedConsists.First() : null;
+    private ConsistViewModel? SelectedConsistViewModel => SelectedConsistViewModels.Count() is 1 ? SelectedConsistViewModels.First() : null;
 
     public ScenarioDetailViewModel(Scenario scenario)
     {
         Scenario = scenario;
-        SelectedConsists = [];
+        SelectedConsistViewModels = [];
         IsLoading = true;
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
@@ -91,14 +91,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         ClickedConsistCommand = ReactiveCommand.Create(() =>
         {
-            if (SelectedConsist is null) return;
+            if (SelectedConsistViewModel is null) return;
 
-            Utils.GetApplicationViewModel().SelectScenarioConsist(Scenario, SelectedConsist);
+            Utils.GetApplicationViewModel().SelectScenarioConsist(Scenario, SelectedConsistViewModel.Consist);
         });
 
         SaveConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            if (SelectedConsist is null)
+            if (SelectedConsistViewModel is null)
             {
                 return;
             }
@@ -108,8 +108,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             var result = await Utils.GetApplicationViewModel().ShowSaveConsistDialog.Handle(new SaveConsistViewModel
             {
                 ConsistElement = consistElement,
-                Name = SelectedConsist.LocomotiveName,
-                LocomotiveName = SelectedConsist.LocomotiveName,
+                Name = SelectedConsistViewModel.Consist.LocomotiveName,
+                LocomotiveName = SelectedConsistViewModel.Consist.LocomotiveName,
             });
 
             if (result?.Name is null) return;
@@ -122,7 +122,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            if (SelectedConsists.Any() is false)
+            if (SelectedConsistViewModels.Any() is false)
             {
                 return;
             }
@@ -137,7 +137,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = true;
 
-            var target = new TargetConsist(SelectedConsists);
+            var target = new TargetConsist(SelectedConsistViewModels.Select(x => x.Consist));
 
             var request = new ReplaceConsistRequest
             {
@@ -158,14 +158,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         DeleteConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            if (SelectedConsists.Any() is false)
+            if (SelectedConsistViewModels.Any() is false)
             {
                 return;
             }
 
-            var isBulkSelection = SelectedConsists.Count() > 1;
+            var isBulkSelection = SelectedConsistViewModels.Count() > 1;
             var consistMessage = isBulkSelection ? "consists" : "consist";
-            var summary = isBulkSelection ? $"{SelectedConsists.Count()} consists selected." : $"Consist: {SelectedConsist!.ServiceName} - {SelectedConsist.LocomotiveName}";
+            var summary = isBulkSelection ? $"{SelectedConsistViewModels.Count()} consists selected." : $"Consist: {SelectedConsistViewModel!.Consist.ServiceName} - {SelectedConsistViewModel.Consist.LocomotiveName}";
 
             var result = await Utils.GetApplicationViewModel().ShowConfirmationDialog.Handle(new ConfirmationDialogViewModel
             {
@@ -182,7 +182,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = true;
 
-            var target = new TargetConsist(SelectedConsists);
+            var target = new TargetConsist(SelectedConsistViewModels.Select(x => x.Consist));
 
             var runner = new ConsistCommandRunner
             {
@@ -204,7 +204,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             if (e.PropertyName is not nameof(SearchTerm)) return;
 
             var invariant = _searchTerm?.ToLowerInvariant();
-            var indexed = invariant is null ? _cachedServices : _cachedServices.Where(service => service.SearchIndex.Contains(invariant));
+            var indexed = invariant is null ? _cachedServices : _cachedServices.Where(service => service.Consist.SearchIndex.Contains(invariant));
 
             Services.Clear();
             Services.AddRange(indexed);
@@ -213,13 +213,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private async Task<string> GetSavedConsistRailVehicleElement()
     {
-        ArgumentNullException.ThrowIfNull(SelectedConsist);
+        ArgumentNullException.ThrowIfNull(SelectedConsistViewModel);
 
         using var doc = await Scenario.GetXmlDocument();
 
         var vehicles = doc
             .QuerySelectorAll("cConsist")
-            .QueryByTextContent("ServiceName Key", SelectedConsist.ServiceId)?
+            .QueryByTextContent("ServiceName Key", SelectedConsistViewModel.Consist.ServiceId)?
             .QuerySelector("RailVehicles");
 
         if (vehicles is null)
@@ -251,7 +251,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             .Select(Consist.ParseScenarioConsist)
             .Where(r => r is not null)
             .Cast<Consist>()
-            .ToList();
+            .ToList()
+            .ConvertAll(e => new ConsistViewModel(e));
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -261,6 +262,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             _cachedServices = results;
 
             IsLoading = false;
+
+            Task.Run(() => Parallel.ForEachAsync(results, async (r, _) => await r.LoadImage()));
         });
     }
 }
