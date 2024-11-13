@@ -14,7 +14,8 @@
     <Grid ColumnDefinitions="2*, 4, *">
 
         <DockPanel Grid.Column="0">
-            <li:LoadingIndicator IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+            <li:LoadingIndicator DockPanel.Dock="Top" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+
             <StackPanel IsVisible="{Binding !IsLoading}" DockPanel.Dock="Top" Orientation="Vertical">
                 <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
                     <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
