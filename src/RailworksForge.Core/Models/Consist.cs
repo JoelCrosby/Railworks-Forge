@@ -72,18 +72,10 @@ public class Consist : Blueprint
     public static Consist? ParseScenarioConsist(IElement el)
     {
         var railVehicles = el.QuerySelector("RailVehicles");
-
-        if (railVehicles is null)
-        {
-            Log.Information("could not RailVehicles element");
-            return null;
-        }
-
-        var lead = railVehicles.QuerySelector("cOwnedEntity");
+        var lead = railVehicles?.QuerySelector("cOwnedEntity");
 
         if (lead is null)
         {
-            Log.Information("could not find leadVehicle element");
             return null;
         }
 
@@ -124,7 +116,10 @@ public class Consist : Blueprint
     {
         var byId = document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
 
-        if (byId is not null) return byId;
+        if (byId is not null)
+        {
+            return byId;
+        }
 
         return document.QuerySelectorAll("cConsist").QueryByTextContent("ServiceName Key", consist.ServiceId);
     }
