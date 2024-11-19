@@ -98,15 +98,6 @@
                                                 </i:Interaction.Behaviors>
                                             </AutoCompleteBox>
 
-                                            <!-- <ComboBox -->
-                                            <!--     Grid.Column="2" -->
-                                            <!--     HorizontalAlignment="Stretch" -->
-                                            <!--     ItemsSource="{Binding Products}" -->
-                                            <!--     SelectedItem="{Binding SelectedProduct}" -->
-                                            <!--     DisplayMemberBinding="{Binding Name}" -->
-                                            <!--     PlaceholderText="Product" -->
-                                            <!-- /> -->
-
                                             <AutoCompleteBox
                                                 Grid.Column="4"
                                                 Height="32"
@@ -121,14 +112,6 @@
                                                 </i:Interaction.Behaviors>
                                             </AutoCompleteBox>
 
-                                            <!-- <ComboBox -->
-                                            <!--     Grid.Column="4" -->
-                                            <!--     HorizontalAlignment="Stretch" -->
-                                            <!--     ItemsSource="{Binding Tracks}" -->
-                                            <!--     SelectedItem="{Binding SelectedTrack}" -->
-                                            <!--     DisplayMemberBinding="{Binding DisplayName}" -->
-                                            <!--     PlaceholderText="Track Blueprint" -->
-                                            <!-- /> -->
                                         </Grid>
                                     </Grid>
                                 </Border>

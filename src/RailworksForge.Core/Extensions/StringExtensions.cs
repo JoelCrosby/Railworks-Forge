@@ -11,7 +11,7 @@ public static partial class StringExtensions
     [GeneratedRegex(@"[^a-z0-9\s-_]", RegexOptions.Compiled)]
     private static partial Regex AlphaNumericRegex();
 
-    [GeneratedRegex(@"([-_]){2,}", RegexOptions.Compiled)]
+    [GeneratedRegex("([-_]){2,}", RegexOptions.Compiled)]
     private static partial Regex DoubleDashesRegex();
 
     public static string ToUrlSlug(this string value)

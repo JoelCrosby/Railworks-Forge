@@ -20,7 +20,7 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
             AssociatedObject.GotFocus += OnGotFocus;
             AssociatedObject.PointerReleased += PointerReleased;
 
-            Task.Delay(500).ContinueWith(_ => Avalonia.Threading.Dispatcher.UIThread.Invoke(() => { CreateDropdownButton(); }));
+            Task.Delay(500).ContinueWith(_ => Avalonia.Threading.Dispatcher.UIThread.Invoke(CreateDropdownButton));
         }
 
         base.OnAttached();
@@ -74,13 +74,15 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
     {
         if (AssociatedObject is null || AssociatedObject.IsDropDownOpen) return;
 
-        typeof(AutoCompleteBox).GetMethod("PopulateDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(AssociatedObject, new object[] { AssociatedObject, EventArgs.Empty });
-        typeof(AutoCompleteBox).GetMethod("OpeningDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(AssociatedObject, new object[] { false });
+        var autoCompleteBoxType = typeof(AutoCompleteBox);
+
+        autoCompleteBoxType.GetMethod("PopulateDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(AssociatedObject, [AssociatedObject, EventArgs.Empty]);
+        autoCompleteBoxType.GetMethod("OpeningDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(AssociatedObject, [false]);
 
         if (AssociatedObject.IsDropDownOpen) return;
 
         // We *must* set the field and not the property as we need to avoid the changed event being raised (which prevents the dropdown opening).
-        var ipc = typeof(AutoCompleteBox).GetField("_ignorePropertyChange", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var ipc = autoCompleteBoxType.GetField("_ignorePropertyChange", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         if ((bool?) ipc?.GetValue(AssociatedObject) == false)
         {

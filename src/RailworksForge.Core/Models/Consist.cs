@@ -5,8 +5,6 @@ using AngleSharp.Dom;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models.Common;
 
-using Serilog;
-
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{ServiceName}")]
