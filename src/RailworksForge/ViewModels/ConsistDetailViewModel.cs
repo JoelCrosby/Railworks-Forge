@@ -16,6 +16,7 @@ using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
+using RailworksForge.Core.Commands.Common;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
@@ -70,7 +71,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock = [];
         SelectedConsistVehicles = [];
 
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelRailVehicleDirectories());
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.RailVehicleBrowser());
 
         IsLoading = true;
 
@@ -79,7 +80,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         {
             if (SelectedDirectory is null) return;
 
-            Launcher.Open(SelectedDirectory.FullPath);
+            Launcher.Open(SelectedDirectory.AssetDirectory.Path);
         });
 
         RailVehicles = [];
@@ -98,12 +99,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private async Task LoadAvailableStock()
     {
-        if (SelectedDirectory?.Level is not AssetBrowserLevel.Product)
+        if (SelectedDirectory?.AssetDirectory is null or not ProductDirectory)
         {
             return;
         }
 
-        var railVehiclesDirectory = Path.Join(SelectedDirectory.FullPath, "RailVehicles");
+        var railVehiclesDirectory = Path.Join(SelectedDirectory.AssetDirectory.Path, "RailVehicles");
 
         if (!Paths.Exists(railVehiclesDirectory))
         {
@@ -125,6 +126,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         Dispatcher.UIThread.Post(() => AvailableStock.Clear());
 
+        await ProcessBinaries(binFiles);
+    }
+
+    private async Task ProcessBinaries(List<string> binFiles)
+    {
         LoadAvailableStockProgress = 0;
 
         var processedCount = 0;

@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
+using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
@@ -40,7 +41,7 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
     {
         if (ViewModel is not {} model) return;
 
-        if (model.SelectedDirectory?.Level is AssetBrowserLevel.Provider)
+        if (model.SelectedDirectory?.AssetDirectory is ProviderDirectory)
         {
             e.Cancel = true;
         }

@@ -95,45 +95,6 @@ public static class Paths
         return path.Replace("/", @"\").ReplaceFirst(@"\", @"z:\");
     }
 
-    public static List<BrowserDirectory> GetTopLevelPreloadDirectories()
-    {
-        var assetsPath = GetAssetsDirectory();
-        var assetDirectories = Directory.GetDirectories(assetsPath);
-
-        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 1, "PreLoad").Any());
-
-        var sorted = directories
-            .Select(dir => new BrowserDirectory(dir, "PreLoad"))
-            .OrderBy(dir => dir.Name);
-
-        return [..sorted];
-    }
-
-    public static List<BrowserDirectory> GetTopLevelRailVehicleDirectories()
-    {
-        var assetsPath = GetAssetsDirectory();
-        var assetDirectories = Directory.GetDirectories(assetsPath);
-
-        var directories = assetDirectories.Where(dir => EnumerateRailVehicles(dir, 1, "RailVehicles").Any());
-
-        var sorted = directories
-            .Select(dir => new BrowserDirectory(dir, "RailVehicles"))
-            .OrderBy(dir => dir.Name);
-
-        return [..sorted];
-    }
-
-    public static IEnumerable<string> EnumerateRailVehicles(string dir, int depth, string target)
-    {
-        return Directory.EnumerateFileSystemEntries(dir, target, new EnumerationOptions
-        {
-            MaxRecursionDepth = depth,
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            MatchCasing = MatchCasing.CaseInsensitive,
-        });
-    }
-
     public static bool Exists(string path, string? rootPath = null)
     {
         return GetActualPathFromInsensitive(path, rootPath) is not null;

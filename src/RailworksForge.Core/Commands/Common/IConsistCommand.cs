@@ -1,4 +1,4 @@
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.Commands.Common;
 
 public interface IConsistCommand
 {

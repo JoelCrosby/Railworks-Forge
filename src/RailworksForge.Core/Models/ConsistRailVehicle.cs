@@ -6,6 +6,8 @@ public class ConsistRailVehicle : Blueprint
 {
     public required string Id { get; init; }
 
+    public int Index { get; init; }
+
     public string DisplayId => string.IsNullOrWhiteSpace(Id) ? Id :  Id[..6];
 
     public required string LocomotiveName { get; init; }

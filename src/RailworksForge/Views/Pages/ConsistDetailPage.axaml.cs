@@ -2,13 +2,16 @@ using System.Linq;
 
 using Avalonia.Controls;
 
+using RailworksForge.Controls;
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
-public partial class ConsistDetailPage : UserControl
+public partial class ConsistDetailPage : DataGridUserControl
 {
+    protected override DataGrid DataGrid => ConsistVehiclesDataGrid;
+
     public ConsistDetailPage()
     {
         InitializeComponent();

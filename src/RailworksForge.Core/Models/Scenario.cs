@@ -261,7 +261,7 @@ public record Scenario
             .ToList() ?? [];
     }
 
-    private static ConsistRailVehicle ParseConsist(IElement el)
+    private static ConsistRailVehicle ParseConsist(IElement el, int index)
     {
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
         var locomotiveName = el.SelectTextContent("Name");
@@ -275,6 +275,7 @@ public record Scenario
         return new ConsistRailVehicle
         {
             Id = consistId,
+            Index = index,
             EntityID = entityID,
             LocomotiveName = locomotiveName,
             UniqueNumber = uniqueNumber,

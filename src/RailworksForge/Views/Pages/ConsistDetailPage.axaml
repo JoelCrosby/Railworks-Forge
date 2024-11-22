@@ -24,6 +24,7 @@
                 </Border>
 
                 <DataGrid Name="ConsistVehiclesDataGrid"
+                          Sorting="DataGrid_OnSorting"
                           IsVisible="{Binding !IsLoading}"
                           ItemsSource="{Binding RailVehicles}"
                           IsReadOnly="True"
@@ -36,6 +37,7 @@
                 >
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Id" Binding="{Binding DisplayId}" FontFamily="monospace" />
+                        <DataGridTextColumn Header="Index" Binding="{Binding Index}" FontFamily="monospace" />
                         <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
                         <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
                         <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />

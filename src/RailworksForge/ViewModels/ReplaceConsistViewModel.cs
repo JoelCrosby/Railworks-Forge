@@ -46,7 +46,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public ReplaceConsistViewModel()
     {
         AvailableStock = [];
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(Paths.GetTopLevelPreloadDirectories());
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.PreloadBrowser());
 
         ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist?.Consist);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
@@ -54,7 +54,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         {
             if (SelectedDirectory is null) return;
 
-            Launcher.Open(SelectedDirectory.FullPath);
+            Launcher.Open(SelectedDirectory.AssetDirectory.Path);
         });
     }
 
@@ -94,12 +94,12 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     private static string GetPreloadDirectory(BrowserDirectory directory)
     {
-        var assetDirectories = Directory.GetDirectories(directory.FullPath);
+        var assetDirectories = Directory.GetDirectories(directory.AssetDirectory.Path);
         var preloadDirectory = assetDirectories.FirstOrDefault(d => d.Contains("PreLoad", StringComparison.OrdinalIgnoreCase));
 
         if (preloadDirectory is null)
         {
-            throw new Exception($"Could not find preload directory {directory.FullPath}");
+            throw new Exception($"Could not find preload directory {directory.AssetDirectory.Path}");
         }
 
         if (Paths.Exists(preloadDirectory))
@@ -107,7 +107,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             return preloadDirectory;
         }
 
-        foreach (var package in Directory.EnumerateFiles(directory.FullPath, "*.ap"))
+        foreach (var package in Directory.EnumerateFiles(directory.AssetDirectory.Path, "*.ap"))
         {
             Archives.ExtractDirectory(package, "PreLoad");
         }

@@ -5,46 +5,43 @@ public class BrowserDirectory
     public List<BrowserDirectory> Subfolders => GetVehicleDirectories();
 
     public string Name { get; }
-    public string FullPath { get; }
-    public AssetBrowserLevel Level { get; }
+    public AssetDirectory AssetDirectory { get; }
 
-    private string SubFolderPath { get; }
+    private Func<ProductDirectory, bool> ChildPredicate { get; }
 
-    private static readonly string AssetsDir = Paths.GetAssetsDirectory();
-
-    public BrowserDirectory(string fullPath, string subFolderPath)
+    public BrowserDirectory(AssetDirectory baseDirectory, Func<ProductDirectory, bool> childPredicate)
     {
-        FullPath = fullPath;
-        Name = Path.GetFileName(fullPath);
-        Level = GetAssetLevel();
-        SubFolderPath = subFolderPath;
-    }
-
-    private AssetBrowserLevel GetAssetLevel()
-    {
-        var relativeGamePath = FullPath.AsSpan().Slice(AssetsDir.Length, FullPath.Length - AssetsDir.Length);
-        var parts = relativeGamePath.Count('/');
-
-        return parts switch
-        {
-            1 => AssetBrowserLevel.Provider,
-            2 => AssetBrowserLevel.Product,
-            _ => AssetBrowserLevel.ProductAsset,
-        };
+        AssetDirectory = baseDirectory;
+        Name = baseDirectory.Name;
+        ChildPredicate = childPredicate;
     }
 
     private List<BrowserDirectory> GetVehicleDirectories()
     {
-        if (Level > AssetBrowserLevel.Provider) return [];
+        if (AssetDirectory is ProviderDirectory providerDirectory)
+        {
+            return providerDirectory.Products
+                .Where(ChildPredicate)
+                .Select(e => new BrowserDirectory(e, ChildPredicate))
+                .ToList();
+        }
 
-        var directories = Directory.GetDirectories(FullPath);
-        var vehicleDirectories = directories.Where(dir => Paths.EnumerateRailVehicles(dir, 1, SubFolderPath).Any());
+        return [];
+    }
 
-        var sorted = vehicleDirectories
-            .Select(dir => new BrowserDirectory(dir, SubFolderPath))
-            .OrderBy(dir => Directory.EnumerateFileSystemEntries(dir.FullPath).Any())
-            .ThenBy(dir => dir.Name);
+    public static List<BrowserDirectory> RailVehicleBrowser()
+    {
+        return AssetDatabase.Open.ProviderDirectories
+            .Where(e => e.Products.Any(pd => pd.ContainsRailVehicles))
+            .Select(e => new BrowserDirectory(e, p => p.ContainsRailVehicles))
+            .ToList();
+    }
 
-        return [..sorted];
+    public static List<BrowserDirectory> PreloadBrowser()
+    {
+        return AssetDatabase.Open.ProviderDirectories
+            .Where(e => e.Products.Any(pd => pd.ContainsPreloadData))
+            .Select(e => new BrowserDirectory(e, p => p.ContainsPreloadData))
+            .ToList();
     }
 }

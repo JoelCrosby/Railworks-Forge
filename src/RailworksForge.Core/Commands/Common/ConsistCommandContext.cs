@@ -2,7 +2,7 @@ using AngleSharp.Dom;
 
 using RailworksForge.Core.Models;
 
-namespace RailworksForge.Core;
+namespace RailworksForge.Core.Commands.Common;
 
 public record ConsistCommandContext
 {

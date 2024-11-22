@@ -120,6 +120,13 @@ public static class Archives
         }
     }
 
+    public static bool TopLevelDirectoryExists(string archivePath, string directoryName)
+    {
+        using var archive = ZipFile.OpenRead(archivePath);
+
+        return archive.Entries.Any(e => e.FullName.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
+    }
+
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
         var normalisedArchivePath = archivePath.NormalisePath();
