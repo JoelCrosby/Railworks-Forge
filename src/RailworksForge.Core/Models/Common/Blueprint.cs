@@ -141,6 +141,16 @@ public class Blueprint
 
     private AcquisitionState LoadAcquisitionState()
     {
+        if (string.IsNullOrEmpty(BlueprintSetIdProvider))
+        {
+            return AcquisitionState.Missing;
+        }
+
+        if (string.IsNullOrEmpty(BlueprintSetIdProduct))
+        {
+            return AcquisitionState.Missing;
+        }
+
         if (Paths.Exists(BlueprintPath, Paths.GetAssetsDirectory()))
         {
             return AcquisitionState.Found;
