@@ -127,6 +127,8 @@ public static class Archives
         return archive.Entries.Any(e => e.FullName.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
     }
 
+    private static readonly HashSet<string> CorruptArchivePaths = [];
+
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
         var normalisedArchivePath = archivePath.NormalisePath();
@@ -136,6 +138,11 @@ public static class Archives
         if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
         {
             return true;
+        }
+
+        if (CorruptArchivePaths.Contains(normalisedArchivePath))
+        {
+            return false;
         }
 
         try
@@ -174,6 +181,8 @@ public static class Archives
         catch (Exception e)
         {
             Log.Error(e, "Failed to read entry {Entry} inside archive at path {Path}", agnosticBlueprintIdPath, archivePath);
+
+            CorruptArchivePaths.Add(normalisedArchivePath);
 
             return false;
         }

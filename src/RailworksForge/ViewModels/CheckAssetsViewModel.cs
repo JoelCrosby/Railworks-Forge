@@ -42,6 +42,9 @@ public partial class CheckAssetsViewModel : ViewModelBase
     private string _loadingMessage;
 
     [ObservableProperty]
+    private string _loadingStatusMessage;
+
+    [ObservableProperty]
     private ObservableCollection<Blueprint> _blueprints;
 
     private readonly CancellationTokenSource _cts = new ();
@@ -52,6 +55,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         IsLoading = true;
         Blueprints = [];
         LoadingMessage = string.Empty;
+        LoadingStatusMessage = string.Empty;
 
         if (Design.IsDesignMode)
         {
@@ -68,7 +72,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         var results = new ConcurrentDictionary<Blueprint, byte>();
 
         var processedCount = 0;
-        var processed = binFiles.Count;
+        var amountToProcess = binFiles.Count;
 
         await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, token) =>
         {
@@ -104,8 +108,9 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
                 Dispatcher.UIThread.Post(() =>
                 {
-                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / processed);
-                    LoadingMessage = $"Processed {count} of {processed} files ( %{LoadingProgress} )";
+                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToProcess);
+                    LoadingMessage = $"Processed {count} of {amountToProcess} files ( %{LoadingProgress} )";
+                    LoadingStatusMessage = $"Processing path: {path}";
                 });
             }
             catch (Exception e)
@@ -114,7 +119,35 @@ public partial class CheckAssetsViewModel : ViewModelBase
             }
         });
 
-        var missing = await Task.Run(() => results.Keys.Where(r => r.AcquisitionState is not AcquisitionState.Found).ToList());
+        var amountCheckedCount = 0;
+        var amountToCheck = results.Count;
+
+        var missing = await Observable.Start(() =>
+        {
+            var notFound = new List<Blueprint>();
+
+            foreach (var blueprint in results.Keys)
+            {
+                amountCheckedCount++;
+
+                var count = amountCheckedCount;
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToCheck);
+                    LoadingMessage = $"Checked {count} of {amountToCheck} blueprints ( %{LoadingProgress} )";
+                    LoadingStatusMessage = $"Processing blueprint at path: {blueprint.BinaryPath}";
+                });
+
+                if (blueprint.AcquisitionState is not AcquisitionState.Found)
+                {
+                    notFound.Add(blueprint);
+                }
+            }
+
+            return notFound.OrderBy(n => n.BlueprintSetIdProvider);
+
+        }, RxApp.TaskpoolScheduler);
 
         Dispatcher.UIThread.Post(() =>
         {

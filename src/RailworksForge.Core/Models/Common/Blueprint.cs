@@ -16,18 +16,33 @@ public class Blueprint
 
     public required string BlueprintSetIdProduct { get; init; }
 
-    public virtual bool Equals(Blueprint? other)
-    {
-        if (other is null) return false;
+    public override bool Equals(object? other) => this.Equals(other as Blueprint);
 
-        return other.BlueprintId == BlueprintId
-               && other.BlueprintSetIdProvider == BlueprintSetIdProvider
-               && other.BlueprintSetIdProduct == BlueprintSetIdProduct;
+    private bool Equals(Blueprint? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (this.GetType() != other.GetType())
+        {
+            return false;
+        }
+
+        return BlueprintId == other.BlueprintId &&
+               BlueprintSetIdProvider == other.BlueprintSetIdProvider &&
+               BlueprintSetIdProduct == other.BlueprintSetIdProduct;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(BlueprintId, BlueprintSetIdProvider, BlueprintSetIdProduct);
+        return (BlueprintId, BlueprintSetIdProvider, BlueprintSetIdProduct).GetHashCode();
     }
 
     public AcquisitionState AcquisitionState => GetAcquisitionState();
@@ -86,7 +101,10 @@ public class Blueprint
         throw new Exception($"unable to get blueprint xml for path {BlueprintPath}");
     }
 
-    private AcquisitionState _cachedAcquisitionState;
+    private string ProviderDirectory => Path.Join(
+        Paths.GetAssetsDirectory(),
+        BlueprintSetIdProvider
+    );
 
     private string ProductDirectory => Path.Join(
         Paths.GetAssetsDirectory(),
@@ -107,16 +125,18 @@ public class Blueprint
     private string BlueprintPath => Path.Join(ProductDirectory, RelativeBinaryPath);
     private string XmlDocumentPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
+    public AcquisitionState CachedAcquisitionState { get; private set; }
+
     private AcquisitionState GetAcquisitionState()
     {
-        if (_cachedAcquisitionState is AcquisitionState.Found)
+        if (CachedAcquisitionState is AcquisitionState.Found)
         {
             return AcquisitionState.Found;
         }
 
-        _cachedAcquisitionState = LoadAcquisitionState();
+        CachedAcquisitionState = LoadAcquisitionState();
 
-        return _cachedAcquisitionState;
+        return CachedAcquisitionState;
     }
 
     private AcquisitionState LoadAcquisitionState()
@@ -131,22 +151,30 @@ public class Blueprint
             return AcquisitionState.Found;
         }
 
-        if (!Directory.Exists(ProductDirectory))
+        if (Directory.Exists(ProductDirectory))
         {
-            return AcquisitionState.Missing;
+            var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
+
+            if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
+            {
+                return AcquisitionState.Found;
+            }
         }
 
-        var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
-
-        if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
+        if (Directory.Exists(ProviderDirectory))
         {
-            return AcquisitionState.Found;
+            var archives = Directory.EnumerateFiles(ProviderDirectory, "*.ap", SearchOption.AllDirectories);
+
+            if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
+            {
+                return AcquisitionState.Found;
+            }
         }
 
         return AcquisitionState.Missing;
     }
 
-    public static Blueprint Parse(IElement el)
+    protected static Blueprint Parse(IElement el)
     {
         var blueprintId = el.SelectTextContent("BlueprintID");
 
