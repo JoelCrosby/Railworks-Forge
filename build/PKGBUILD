@@ -27,7 +27,7 @@ package() {
 	mkdir -pv "$pkgdir/opt/$_pkgbasename"
 	mkdir -pv "$pkgdir/usr/share/applications/"
 
-	cp -R "src/RailworksForge/bin/Release/net8.0/linux-x64/publish/." "$pkgdir/opt/$_pkgbasename/"
+	cp -R "src/RailworksForge/bin/Release/net9.0/linux-x64/publish/." "$pkgdir/opt/$_pkgbasename/"
 
 	cp railworks-forge.desktop "$pkgdir/usr/share/applications/"
 	cp railworks-forge-icon.png "$pkgdir/opt/$_pkgbasename/"
