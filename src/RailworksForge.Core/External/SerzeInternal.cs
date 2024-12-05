@@ -108,7 +108,7 @@ public class SerzInternal
                     ++_parentCount;
                     var num2 = ReadInt32();
                     _childCount = ReadInt32();
-                    var element2 = xmlDoc.CreateXmlElement(_chunkName.Replace("::", "-"));
+                    var element2 = xmlDoc.CreateXmlElement(_chunkName!.Replace("::", "-"));
 
                     if (num2 != 0)
                     {
