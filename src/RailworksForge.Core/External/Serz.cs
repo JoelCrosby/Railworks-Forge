@@ -27,7 +27,7 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
-        await Cli.Wrap("wine64").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
+        await Cli.Wrap("wine").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
 
         var isSuccess = Paths.Exists(outputPath);
 

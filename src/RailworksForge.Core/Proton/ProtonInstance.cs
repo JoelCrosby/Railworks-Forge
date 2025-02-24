@@ -26,7 +26,7 @@ public class ProtonInstance
         ProtonDirectory = protonDirectory;
 
         PrefixPath = Path.Join(SteamCompatDataPath, "pfx");
-        WineBinPath = Path.Join(ProtonDirectory, "files", "bin", "wine64");
+        WineBinPath = Path.Join(ProtonDirectory, "files", "bin", "wine");
         WineServerPath = Path.Join(ProtonDirectory, "files", "bin", "wineserver");
 
         SteamAppsPath = Directory.GetParent(SteamCompatDataPath)!.Parent!.FullName;
