@@ -71,7 +71,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock = [];
         SelectedConsistVehicles = [];
 
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.RailVehicleBrowser());
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser());
 
         IsLoading = true;
 
@@ -104,15 +104,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
-        var railVehiclesDirectory = Path.Join(SelectedDirectory.AssetDirectory.Path, "RailVehicles");
-
-        if (!Paths.Exists(railVehiclesDirectory))
-        {
-            return;
-        }
-
         var binFiles = Directory
-            .EnumerateFiles(railVehiclesDirectory, "*.bin", SearchOption.AllDirectories)
+            .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.bin", SearchOption.AllDirectories)
             .Where(path =>
             {
                 if (Utilities.RollingStockFolders.Any(path.Contains))

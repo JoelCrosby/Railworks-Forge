@@ -29,6 +29,13 @@ public class BrowserDirectory
         return [];
     }
 
+    public static List<BrowserDirectory> ViewAllBrowser()
+    {
+        return AssetDatabase.Open.ProviderDirectories
+            .Select(e => new BrowserDirectory(e, _ => true))
+            .ToList();
+    }
+
     public static List<BrowserDirectory> RailVehicleBrowser()
     {
         return AssetDatabase.Open.ProviderDirectories

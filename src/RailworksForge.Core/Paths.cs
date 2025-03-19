@@ -6,7 +6,6 @@ using AngleSharp.Text;
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
-using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
 
@@ -80,14 +79,28 @@ public static class Paths
         return Configuration.Get().GameDirectoryPath;
     }
 
+    private static string? _assetsDirectory;
+
     public static string GetAssetsDirectory()
     {
-        return Path.Join(GetGameDirectory(), "Assets");
+        if (string.IsNullOrEmpty(_assetsDirectory))
+        {
+            _assetsDirectory = Path.Join(GetGameDirectory(), "Assets");
+        }
+
+        return _assetsDirectory;
     }
+
+    private static string? _routesDirectory;
 
     public static string GetRoutesDirectory()
     {
-        return Path.Join(GetGameDirectory(), "Content", "Routes");
+        if (string.IsNullOrEmpty(_routesDirectory))
+        {
+            _routesDirectory = Path.Join(GetGameDirectory(), "Content", "Routes");
+        }
+
+        return _routesDirectory;
     }
 
     public static string ToWindowsPath(this string path)

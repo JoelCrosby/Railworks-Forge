@@ -10,6 +10,7 @@
 
         <ResourceDictionary>
             <converters:IdValueConverter x:Key="IdValueConverter" />
+            <converters:AcquisitionStateConverter x:Key="AcquisitionStateConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://LoadingIndicators.Avalonia/LoadingIndicators.axaml" />
@@ -35,6 +36,7 @@
         <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
 
         <StyleInclude Source="avares://RailworksForge/Styles/TextBoxStyles.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Styles/DataGridRowHighlight.axaml"/>
 
         <Style Selector="DataGrid:focus DataGridCell /template/ Grid#FocusVisual">
             <Setter Property="IsVisible" Value="False" />
