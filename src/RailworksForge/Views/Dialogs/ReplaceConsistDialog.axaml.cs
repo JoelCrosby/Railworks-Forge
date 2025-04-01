@@ -6,7 +6,6 @@ using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
 using RailworksForge.Core;
-using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;
 
 using ReactiveUI;
