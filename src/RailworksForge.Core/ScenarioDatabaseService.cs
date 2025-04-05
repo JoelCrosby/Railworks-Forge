@@ -35,8 +35,6 @@ public static class ScenarioDatabaseService
         IsLoaded.OnNext(true);
     }
 
-    private static readonly ScenarioPlayerInfo Empty = new ();
-
     private static async Task<ConcurrentDictionary<string, ScenarioPlayerInfo>> GetScenarioDictionary(CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
@@ -112,6 +110,6 @@ public static class ScenarioDatabaseService
 
     public static ScenarioPlayerInfo GetScenario(string id)
     {
-        return _scenarioDictionary?.GetOrDefault(id, null) ?? Empty;
+        return _scenarioDictionary?.GetOrDefault(id, null) ?? ScenarioPlayerInfo.Empty;
     }
 }

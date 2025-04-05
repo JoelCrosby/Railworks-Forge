@@ -47,7 +47,7 @@ public record Scenario
 
     public ScenarioClass ScenarioClass { get; init; }
 
-    public ScenarioPlayerInfo PlayerInfo { get; private init; } = new();
+    public ScenarioPlayerInfo PlayerInfo { get; private init; } = ScenarioPlayerInfo.Empty;
 
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
 

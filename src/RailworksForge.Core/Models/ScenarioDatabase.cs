@@ -2,11 +2,19 @@ namespace RailworksForge.Core.Models;
 
 public class ScenarioPlayerInfo
 {
-    public string ScenarioId { get; set; }
+    public required string ScenarioId { get; init; }
 
-    public int Score { get; set; }
+    public required int Score { get; init; }
 
-    public string Completion { get; set; }
+    public required string Completion { get; init; }
 
-    public int MedalsAwarded { get; set; }
+    public required int MedalsAwarded { get; init; }
+
+    public static readonly ScenarioPlayerInfo Empty = new ()
+    {
+        ScenarioId = string.Empty,
+        Score = 0,
+        Completion = string.Empty,
+        MedalsAwarded = 0,
+    };
 }

@@ -68,7 +68,6 @@ public class ReplaceConsistVehicles : IConsistCommand
         if (serviceElement is null)
         {
             Log.Warning("Could not find service {Service} in scenario properties file", consist.ServiceName);
-            return;
         }
     }
 }
