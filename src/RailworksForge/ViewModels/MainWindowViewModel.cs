@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive;
-
-using AsyncAwaitBestPractices;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -135,8 +135,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void OnLoaded()
     {
-        ScenarioDatabaseService.LoadScenarioDatabase().SafeFireAndForget();
-
-        _assetDirectoryTreeService.LoadDirectoryTree().SafeFireAndForget();
+        Task.Run(() =>
+        {
+            Observable.Start(ScenarioDatabaseService.LoadScenarioDatabase, RxApp.MainThreadScheduler);
+            Observable.Start(_assetDirectoryTreeService.LoadDirectoryTree, RxApp.MainThreadScheduler);
+        });
     }
 }

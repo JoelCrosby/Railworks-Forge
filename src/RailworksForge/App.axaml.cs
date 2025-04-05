@@ -1,5 +1,3 @@
-using System;
-
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -17,8 +15,6 @@ namespace RailworksForge;
 
 public class App : Application
 {
-    public static IServiceProvider Services { get; private set; } = null!;
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -42,8 +38,6 @@ public class App : Application
             };
         }
 
-        Services = provider;
-
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -63,7 +57,6 @@ public class App : Application
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
         ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();
-        ViewLocator.Register<ProgressIndicatorViewModel, ProgressIndicator>();
     }
 
     private static void RegisterServices(IServiceCollection services)

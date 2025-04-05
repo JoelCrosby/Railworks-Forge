@@ -46,7 +46,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             action(ViewModel.ShowCheckAssetsDialog.RegisterHandler(ShowDialog
                 <CheckAssetsViewModel, Unit?, CheckAssetsDialog>));
+
+            ViewModel?.OnLoaded();
         });
+
+
     }
 
     private async Task ShowDialog<TInput, TOutput, TDialog>(IInteractionContext<TInput, TOutput?> interaction)
@@ -61,10 +65,5 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var result = await dialog.ShowDialog<TOutput?>(this);
 
         interaction.SetOutput(result);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        ViewModel?.OnLoaded();
     }
 }
