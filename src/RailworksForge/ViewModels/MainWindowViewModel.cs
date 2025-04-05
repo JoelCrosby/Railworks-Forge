@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
-using System.Reactive.Linq;
+
+using AsyncAwaitBestPractices;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -49,6 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowCheckAssetsDialog = new Interaction<CheckAssetsViewModel, Unit?>();
 
         _contentViewModel = Routes;
+
         _assetDirectoryTreeService = provider.GetRequiredService<AssetDirectoryTreeService>();
     }
 
@@ -133,6 +135,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void OnLoaded()
     {
-        Observable.StartAsync(_assetDirectoryTreeService.LoadDirectoryTree, RxApp.TaskpoolScheduler);
+        ScenarioDatabaseService.LoadScenarioDatabase().SafeFireAndForget();
+
+        _assetDirectoryTreeService.LoadDirectoryTree().SafeFireAndForget();
     }
 }

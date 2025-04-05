@@ -186,7 +186,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private static async Task<List<RollingStockEntry>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
     {
-        var text = await File.ReadAllTextAsync(path, cancellationToken);
+        var text = File.OpenRead(path);
         var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
         var blueprint = Blueprint.FromPath(path);
 

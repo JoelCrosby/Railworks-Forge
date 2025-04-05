@@ -16,7 +16,19 @@ public class XmlParser
         return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocument(source);
     }
 
+    public static IDocument ParseDocument(Stream source)
+    {
+        return new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocument(source);
+    }
+
     public static async Task<IDocument> ParseDocumentAsync(string source, CancellationToken cancellationToken = default)
+    {
+        var document = await new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, cancellationToken);
+
+        return document;
+    }
+
+    public static async Task<IDocument> ParseDocumentAsync(Stream source, CancellationToken cancellationToken = default)
     {
         var document = await new AngleSharp.Xml.Parser.XmlParser(Options).ParseDocumentAsync(source, cancellationToken);
 

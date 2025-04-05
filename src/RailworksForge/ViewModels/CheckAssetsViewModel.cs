@@ -79,8 +79,9 @@ public partial class CheckAssetsViewModel : ViewModelBase
             try
             {
                 var serialised = await Serz.Convert(path, token);
-                var xml  = File.ReadAllText(serialised.OutputPath);
+                var xml = File.OpenRead(serialised.OutputPath);
 
+                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                 using var document = XmlParser.ParseDocument(xml);
 
                 var entities = document.QuerySelectorAll("cDynamicEntity BlueprintID");

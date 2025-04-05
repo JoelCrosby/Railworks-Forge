@@ -22,6 +22,20 @@ public static class AngleSharpExtensions
         return document.DocumentElement.SelectTextContent(selector);
     }
 
+    public static int SelectInteger(this IDocument document, string selector)
+    {
+        _ = int.TryParse(document.SelectTextContent(selector), out var value);
+
+        return value;
+    }
+
+    public static int SelectInteger(this IElement document, string selector)
+    {
+        _ = int.TryParse(document.SelectTextContent(selector), out var value);
+
+        return value;
+    }
+
     public static string SelectLocalisedStringContent(this IElement node, string selector)
     {
         var localisedSelector = $"{selector} Localisation-cUserLocalisedString";

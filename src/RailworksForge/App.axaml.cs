@@ -1,3 +1,5 @@
+using System;
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -15,6 +17,8 @@ namespace RailworksForge;
 
 public class App : Application
 {
+    public static IServiceProvider Services { get; private set; } = null!;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -37,6 +41,8 @@ public class App : Application
                 DataContext = dataContext,
             };
         }
+
+        Services = provider;
 
         base.OnFrameworkInitializationCompleted();
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -36,6 +37,8 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckAssetsCommand { get; }
 
     public Scenario? SelectedItem { get; set; }
+
+    public IObservable<bool> ShowPlayerInfoColumns => ScenarioDatabaseService.IsLoaded;
 
     [ObservableProperty]
     private string? _searchTerm;

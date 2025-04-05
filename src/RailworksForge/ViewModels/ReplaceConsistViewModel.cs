@@ -22,6 +22,8 @@ using RailworksForge.Util;
 
 using ReactiveUI;
 
+using Serilog;
+
 namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel : ViewModelBase
@@ -86,9 +88,16 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     private static async void LoadImages(IEnumerable<PreloadConsistViewModel> items)
     {
-        foreach (var item in items)
+        try
         {
-            await item.LoadImage();
+            foreach (var item in items)
+            {
+                await item.LoadImage();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "an error occured while trying to load stock images");
         }
     }
 
@@ -117,8 +126,8 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path, CancellationToken cancellationToken = default)
     {
-        var text = await File.ReadAllTextAsync(path, cancellationToken);
-        var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
+        var file = File.OpenRead(path);
+        var doc = await XmlParser.ParseDocumentAsync(file, cancellationToken);
 
         var blueprints = doc.QuerySelectorAll("Blueprint cConsistBlueprint").ToList();
 

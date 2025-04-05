@@ -47,6 +47,8 @@ public record Scenario
 
     public ScenarioClass ScenarioClass { get; init; }
 
+    public ScenarioPlayerInfo PlayerInfo { get; private init; } = new();
+
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
 
     private bool HasBinary => Paths.Exists(BinaryPath);
@@ -73,9 +75,8 @@ public record Scenario
         var season = ParseSeason(doc.SelectTextContent("Season"));
         var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.ParseConsist).ToList();
         var locomotive = consists.FirstOrDefault(c => c.PlayerDriver)?.LocomotiveName ?? string.Empty;
-
-        _ = int.TryParse(doc.SelectTextContent("DurationMins"), out var duration);
-        _ = int.TryParse(doc.SelectTextContent("Rating"), out var rating);
+        var duration = doc.SelectInteger("DurationMins");
+        var rating = doc.SelectInteger("Rating");
 
         return new Scenario
         {
@@ -96,6 +97,7 @@ public record Scenario
             Rating = rating,
             Season = season,
             SearchIndex = name.ToLowerInvariant(),
+            PlayerInfo = ScenarioDatabaseService.GetScenario(id),
         };
     }
 
@@ -117,8 +119,8 @@ public record Scenario
     {
         if (Paths.Exists(path.Path) && path.Path.EndsWith(".xml"))
         {
-            var content = File.ReadAllText(path.Path);
-            return XmlParser.ParseDocument(content);
+            var file = File.OpenRead(path.Path);
+            return XmlParser.ParseDocument(file);
         }
 
         if (path.IsArchivePath)
@@ -150,8 +152,8 @@ public record Scenario
     public async Task<IDocument> GetXmlDocument(bool useCache = true)
     {
         var path = await ConvertBinToXml(useCache);
-        var text = await File.ReadAllTextAsync(path);
-        var document = await XmlParser.ParseDocumentAsync(text);
+        var file = File.OpenRead(path);
+        var document = await XmlParser.ParseDocumentAsync(file);
 
         XmlException.ThrowIfNotExists(document, path);
 

@@ -37,8 +37,8 @@ public class ConsistEntry
             throw new Exception($"failed to find part of path {path}");
         }
 
-        var text = await File.ReadAllTextAsync(sensitivePath);
-        var document = await XmlParser.ParseDocumentAsync(text);
+        var file = File.OpenRead(sensitivePath);
+        var document = await XmlParser.ParseDocumentAsync(file);
 
         XmlException.ThrowIfNotExists(document, path);
 

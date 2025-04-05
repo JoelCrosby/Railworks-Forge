@@ -107,6 +107,8 @@
                 <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
                 <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" />
                 <DataGridTextColumn Header="Season" Binding="{Binding Season}" />
+                <DataGridTextColumn Header="Completion" Binding="{Binding PlayerInfo.Completion}" IsVisible="{Binding  ShowPlayerInfoColumns^}" />
+                <DataGridTextColumn Header="Score" Binding="{Binding PlayerInfo.Score}" IsVisible="{Binding ShowPlayerInfoColumns^}" />
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>

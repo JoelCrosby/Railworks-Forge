@@ -1,4 +1,6 @@
-﻿using RailworksForge.Core.Extensions;
+﻿using AngleSharp.Dom;
+
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
@@ -71,21 +73,22 @@ public class RouteService
     private static Route ReadRouteFile(string path)
     {
         var file = File.ReadAllText(path);
+        var doc = XmlParser.ParseDocument(file);
 
-        return ReadRouteProperties(path, file);
+        return ReadRouteProperties(path, doc);
     }
 
     private static Route ReadCompressedRouteFile(string path)
     {
-        var file = Archives.GetTextFileContentFromPath(path, "/RouteProperties.xml");
+        var fileContent = Archives.GetTextFileContentFromPath(path, "/RouteProperties.xml");
+        var doc = XmlParser.ParseDocument(fileContent);
 
-        return ReadRouteProperties(path, file);
+        return ReadRouteProperties(path, doc);
     }
 
-    private static Route ReadRouteProperties(string path, string fileContent)
+    private static Route ReadRouteProperties(string path, IDocument doc)
     {
         var id = Directory.GetParent(path)?.Name ?? string.Empty;
-        var doc = XmlParser.ParseDocument(fileContent);
         var name = doc.SelectLocalisedStringContent("DisplayName");
         var directoryPath = Directory.GetParent(path)?.FullName ?? string.Empty;
 

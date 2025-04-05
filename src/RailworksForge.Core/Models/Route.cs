@@ -94,9 +94,9 @@ public record Route
         if (Paths.Exists(path))
         {
             var output = await Serz.Convert(path, force: true);
-            var xml = await File.ReadAllTextAsync(output.OutputPath);
+            var file = File.OpenRead(output.OutputPath);
 
-            return await XmlParser.ParseDocumentAsync(xml);
+            return await XmlParser.ParseDocumentAsync(file);
         }
 
         var archivePath = MainContentArchivePath;
@@ -108,8 +108,8 @@ public record Route
 
         if (Paths.Exists(compressedOutput.OutputPath))
         {
-            var xml = await File.ReadAllTextAsync(compressedOutput.OutputPath);
-            return await XmlParser.ParseDocumentAsync(xml);
+            var file = File.OpenRead(compressedOutput.OutputPath);
+            return await XmlParser.ParseDocumentAsync(file);
         }
 
         return null;
@@ -122,8 +122,8 @@ public record Route
             return await GetArchivedPropertiesDocument();
         }
 
-        var text = await File.ReadAllTextAsync(RoutePropertiesPath);
-        return await XmlParser.ParseDocumentAsync(text);
+        var file = File.OpenRead(RoutePropertiesPath);
+        return await XmlParser.ParseDocumentAsync(file);
     }
 
     private Task<IDocument> GetArchivedPropertiesDocument()

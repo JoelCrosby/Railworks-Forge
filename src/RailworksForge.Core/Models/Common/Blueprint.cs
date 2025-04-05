@@ -54,9 +54,9 @@ public class Blueprint
         if (Paths.Exists(BlueprintPath))
         {
             var converted = await Serz.Convert(BlueprintPath, force: force);
-            var text = await File.ReadAllTextAsync(converted.OutputPath);
+            var file = File.OpenRead(converted.OutputPath);
 
-            return await XmlParser.ParseDocumentAsync(text);
+            return await XmlParser.ParseDocumentAsync(file);
         }
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
@@ -68,9 +68,9 @@ public class Blueprint
             if (extracted)
             {
                 var result = await Serz.Convert(BlueprintPath);
-                var text = await File.ReadAllTextAsync(result.OutputPath);
+                var file = File.OpenRead(result.OutputPath);
 
-                return await XmlParser.ParseDocumentAsync(text);
+                return await XmlParser.ParseDocumentAsync(file);
             }
         }
 
