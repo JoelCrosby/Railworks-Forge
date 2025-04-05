@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Linq;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Packaging;
 
@@ -29,14 +31,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private ViewModelBase _contentViewModel;
 
+    private readonly AssetDirectoryTreeService _assetDirectoryTreeService;
+
     public MainWindowViewModel(IServiceProvider provider)
     {
         Routes = provider.GetRequiredService<RoutesViewModel>();
 
-        MainMenu = new MainMenuViewModel();
-        NavigationBar = new NavigationBarViewModel();
-        StatusBar = new StatusBarViewModel();
-        ProgressIndicator = new ProgressIndicatorViewModel();
+        MainMenu = provider.GetRequiredService<MainMenuViewModel>();
+        NavigationBar = provider.GetRequiredService<NavigationBarViewModel>();
+        StatusBar = provider.GetRequiredService<StatusBarViewModel>();
+        ProgressIndicator = provider.GetRequiredService<ProgressIndicatorViewModel>();
 
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
@@ -45,6 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowCheckAssetsDialog = new Interaction<CheckAssetsViewModel, Unit?>();
 
         _contentViewModel = Routes;
+        _assetDirectoryTreeService = provider.GetRequiredService<AssetDirectoryTreeService>();
     }
 
     public void SelectRoute(RouteViewModel route)
@@ -103,7 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         NavigationBar.Consist = consist;
 
-        ContentViewModel = new ConsistDetailViewModel(scenario, consist);
+        ContentViewModel = new ConsistDetailViewModel(scenario, consist, _assetDirectoryTreeService);
     }
 
     public void SelectCurrentConsist()
@@ -113,7 +118,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario.Scenario, NavigationBar.Consist);
+        ContentViewModel = new ConsistDetailViewModel(NavigationBar.Scenario.Scenario, NavigationBar.Consist, _assetDirectoryTreeService);
     }
 
     public void UpdateProgressIndicator(InstallProgress model)
@@ -124,5 +129,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public void ClearProgressIndicator()
     {
         ProgressIndicator.ClearProgress();
+    }
+
+    public void OnLoaded()
+    {
+        Observable.StartAsync(_assetDirectoryTreeService.LoadDirectoryTree, RxApp.TaskpoolScheduler);
     }
 }

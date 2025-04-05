@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using RailworksForge.Core;
+
 namespace RailworksForge.ViewModels;
 
 public partial class StatusBarViewModel : ViewModelBase
@@ -15,4 +17,9 @@ public partial class StatusBarViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _showProgress;
+
+    public StatusBarViewModel()
+    {
+        StatusText = Paths.GetGameDirectory();
+    }
 }

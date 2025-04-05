@@ -64,7 +64,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
 
-    public ConsistDetailViewModel(Scenario scenario, Consist consist)
+    public ConsistDetailViewModel(Scenario scenario, Consist consist, AssetDirectoryTreeService directoryTreeService)
     {
         _scenario = scenario;
         _consist = consist;
@@ -72,7 +72,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock = [];
         SelectedConsistVehicles = [];
 
-        DirectoryTree = [];
+        DirectoryTree = directoryTreeService.GetDirectoryTree();
 
         IsLoading = true;
 
@@ -96,14 +96,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private void Refresh()
     {
         Observable.StartAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
-        Observable.StartAsync(LoadDirectoryTree, RxApp.TaskpoolScheduler);
-    }
-
-    private async Task LoadDirectoryTree()
-    {
-        var tree = await Task.Run(() => new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser()));
-
-        Dispatcher.UIThread.Post(() => DirectoryTree = tree);
     }
 
     private async Task LoadAvailableStock()

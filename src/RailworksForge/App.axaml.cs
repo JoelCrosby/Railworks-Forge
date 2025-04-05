@@ -1,3 +1,5 @@
+using System.Reactive.Linq;
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -10,6 +12,8 @@ using RailworksForge.Views;
 using RailworksForge.Views.Controls;
 using RailworksForge.Views.Dialogs;
 using RailworksForge.Views.Pages;
+
+using ReactiveUI;
 
 namespace RailworksForge;
 
@@ -57,16 +61,29 @@ public class App : Application
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
         ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();
+        ViewLocator.Register<ProgressIndicatorViewModel, ProgressIndicator>();
     }
 
     private static void RegisterServices(IServiceCollection services)
     {
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<MainMenuViewModel>();
-
+        services.AddTransient<ConsistDetailViewModel>();
+        services.AddTransient<NavigationBarViewModel>();
+        services.AddTransient<ReplaceConsistViewModel>();
+        services.AddTransient<ReplaceTrackViewModel>();
+        services.AddTransient<CheckAssetsViewModel>();
+        services.AddTransient<RouteDetailViewModel>();
         services.AddTransient<RoutesViewModel>();
         services.AddTransient<RoutesBaseViewModel>();
+        services.AddTransient<ConfirmationDialogViewModel>();
+        services.AddTransient<SaveConsistViewModel>();
+        services.AddTransient<ScenarioDetailViewModel>();
+        services.AddTransient<StatusBarViewModel>();
+        services.AddTransient<ProgressIndicatorViewModel>();
 
         services.AddTransient<RouteService>();
+
+        services.AddSingleton<AssetDirectoryTreeService>();
     }
 }

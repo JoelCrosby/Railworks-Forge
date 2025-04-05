@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
 using RailworksForge.Core.Models;
@@ -60,5 +61,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var result = await dialog.ShowDialog<TOutput?>(this);
 
         interaction.SetOutput(result);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        ViewModel?.OnLoaded();
     }
 }
