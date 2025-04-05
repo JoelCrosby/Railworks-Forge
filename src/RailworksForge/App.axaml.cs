@@ -1,5 +1,3 @@
-using System.Reactive.Linq;
-
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -12,8 +10,6 @@ using RailworksForge.Views;
 using RailworksForge.Views.Controls;
 using RailworksForge.Views.Dialogs;
 using RailworksForge.Views.Pages;
-
-using ReactiveUI;
 
 namespace RailworksForge;
 
