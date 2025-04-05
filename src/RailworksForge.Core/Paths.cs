@@ -205,6 +205,20 @@ public static class Paths
         return outputPath;
     }
 
+    public static string GetArchiveCachePath(string path)
+    {
+        var renamedOutput = path.Replace(".ap", string.Empty);
+        var flattened = renamedOutput.Replace(GetGameDirectory(), string.Empty);
+
+        var outputPath = Path.Join(CacheOutputPath, flattened);
+        var parentDir = Directory.GetParent(outputPath)?.FullName;
+
+        DirectoryException.ThrowIfNotExists(parentDir);
+        Directory.CreateDirectory(parentDir);
+
+        return outputPath;
+    }
+
     public static List<DirectoryInfo> GetAssetProviders()
     {
         return Directory

@@ -113,6 +113,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
+
         var binFiles = Directory
             .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.bin", SearchOption.AllDirectories)
             .Where(path =>
@@ -127,6 +128,28 @@ public partial class ConsistDetailViewModel : ViewModelBase
             .ToList();
 
         Dispatcher.UIThread.Post(() => AvailableStock.Clear());
+
+        await ProcessBinaries(binFiles);
+        await ProcessArchives();
+    }
+
+    private async Task ProcessArchives()
+    {
+        if (SelectedDirectory?.AssetDirectory is null or not ProductDirectory)
+        {
+            return;
+        }
+
+        var packages = Directory
+            .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.ap", SearchOption.AllDirectories);
+
+        var binFiles = new List<string>();
+
+        foreach (var package in packages)
+        {
+            var archiveBinaries = Archives.ExtractFilesOfType(package, ".bin");
+            binFiles.AddRange(archiveBinaries);
+        }
 
         await ProcessBinaries(binFiles);
     }
@@ -177,7 +200,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         return doc
             .QuerySelectorAll("Blueprint")
-            .Select((el) => RollingStockEntry.Parse(el, blueprint))
+            .Select(el => RollingStockEntry.Parse(el, blueprint))
             .Where(e => e.BlueprintType is BlueprintType.Engine or BlueprintType.Tender or BlueprintType.Wagon)
             .ToList();
     }

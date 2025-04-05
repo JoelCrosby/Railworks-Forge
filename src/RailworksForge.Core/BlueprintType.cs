@@ -30,4 +30,10 @@ public enum BlueprintType
     AnalogClock,
     DigitalClock,
     ScriptableSceneryBlueprint,
+    ConsistBlueprint,
+    MetadataBlueprint,
+    ConsistFragmentBlueprint,
+    TerrainTextureBluePrint,
+    SignalBlueprint,
+    Unknown
 }

@@ -2,6 +2,8 @@ using AngleSharp.Dom;
 
 using RailworksForge.Core.Extensions;
 
+using Serilog;
+
 namespace RailworksForge.Core;
 
 public static class Utilities
@@ -69,7 +71,7 @@ public static class Utilities
 
     public static BlueprintType ParseBlueprintType(string? tagName)
     {
-        return tagName switch
+        var result = tagName switch
         {
             "cEngine" => BlueprintType.Engine,
             "cEngineBlueprint" => BlueprintType.Engine,
@@ -102,8 +104,20 @@ public static class Utilities
             "cAnalogClockBlueprint" => BlueprintType.AnalogClock,
             "cDigitalClockBlueprint" => BlueprintType.DigitalClock,
             "cScriptableSceneryBlueprint" => BlueprintType.ScriptableSceneryBlueprint,
-            _ => throw new Exception($"unknown blueprint type for tag with the following name '{tagName}'"),
+            "cConsistBlueprint" => BlueprintType.ConsistBlueprint,
+            "cMetadataBlueprint" => BlueprintType.MetadataBlueprint,
+            "cConsistFragmentBlueprint" => BlueprintType.ConsistFragmentBlueprint,
+            "cTerrainTextureBluePrint" => BlueprintType.TerrainTextureBluePrint,
+            "cSignalBlueprint" => BlueprintType.SignalBlueprint,
+            _ => BlueprintType.Unknown,
         };
+
+        if (result == BlueprintType.Unknown)
+        {
+            Log.Warning("unknown blueprint type for tag with the following name '{TagName}'", tagName);
+        }
+
+        return result;
     }
 
     private static readonly char Sp = Path.DirectorySeparatorChar;

@@ -96,6 +96,34 @@ public static class Archives
         return true;
     }
 
+    public static List<string> ExtractFilesOfType(string archivePath, string extension)
+    {
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+
+        var entries = archive.Entries.Where(entry => entry.Name.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+        var destinationDir = Paths.GetArchiveCachePath(archivePath);
+
+        Directory.CreateDirectory(destinationDir);
+        DirectoryException.ThrowIfNotExists(destinationDir);
+
+        var output = new List<string>();
+
+        foreach (var entry in entries)
+        {
+            var destinationFile = Path.Combine(destinationDir, entry.FullName);
+            var destinationFileDir = Path.GetDirectoryName(destinationFile);
+
+            DirectoryException.ThrowIfNotExists(destinationFileDir);
+            Directory.CreateDirectory(destinationFileDir);
+
+            entry.ExtractToFile(destinationFile, true);
+
+            output.Add(destinationFile);
+        }
+
+        return output;
+    }
+
     public static void ExtractDirectory(string archivePath, string directoryPath)
     {
         using var archive = ZipFile.OpenRead(archivePath);
