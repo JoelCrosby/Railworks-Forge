@@ -5,6 +5,7 @@
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:li="using:LoadingIndicators.Avalonia"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
              x:Class="RailworksForge.Views.Pages.ConsistDetailPage"
@@ -17,44 +18,23 @@
             <li:LoadingIndicator DockPanel.Dock="Top" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
             <StackPanel IsVisible="{Binding !IsLoading}" DockPanel.Dock="Top" Orientation="Vertical">
-                <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
-                    <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
-                        Consist Vehicles
-                    </TextBlock>
-                </Border>
+                <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
+                <controls:TableHeader Text="Consist Vehicles" />
 
-                <DataGrid Name="ConsistVehiclesDataGrid"
-                          Sorting="DataGrid_OnSorting"
-                          IsVisible="{Binding !IsLoading}"
-                          ItemsSource="{Binding RailVehicles}"
-                          IsReadOnly="True"
-                          GridLinesVisibility="All"
-                          SelectionMode="Single"
-                          SelectionChanged="DataGrid_OnSelectionChanged"
-                          SelectedItem="{Binding SelectedConsistVehicle}"
-                          BorderThickness="0,1,0,0"
-                          BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                <TreeDataGrid
+                    Source="{Binding RailVehiclesSource}"
+                    CanUserSortColumns="True"
+                    Name="ConsistVehiclesDataGrid"
+                    DoubleTapped="ConsistVehiclesDataGrid_OnDoubleTapped"
                 >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Id" Binding="{Binding DisplayId}" FontFamily="monospace" />
-                        <DataGridTextColumn Header="Index" Binding="{Binding Index}" FontFamily="monospace" />
-                        <DataGridTextColumn Header="State" Binding="{Binding AcquisitionState}" />
-                        <DataGridTextColumn Header="Locomotive Name" Binding="{Binding LocomotiveName}" />
-                        <DataGridTextColumn Header="UniqueNumber" Binding="{Binding UniqueNumber}" />
-                        <DataGridTextColumn Header="Is Flipped" Binding="{Binding Flipped}" />
-                        <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                        <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                        <DataGridTextColumn Header="BlueprintId" Binding="{Binding BlueprintId}" />
-                    </DataGrid.Columns>
-
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
+                    <TreeDataGrid.ContextMenu>
+                        <ContextMenu Opened="MenuBase_OnOpened">
                             <MenuItem Header="Replace Vehicle With Selected" Command="{Binding ReplaceVehicleCommand}"  />
                             <MenuItem Header="Delete Vehicle" Command="{Binding DeleteVehicleCommand}"  />
                         </ContextMenu>
-                    </DataGrid.ContextMenu>
+                    </TreeDataGrid.ContextMenu>
+                </TreeDataGrid>
 
-                </DataGrid>
             </StackPanel>
         </DockPanel>
 
@@ -64,11 +44,7 @@
            <Grid RowDefinitions="*,4,*">
                <DockPanel>
                    <StackPanel DockPanel.Dock="Top">
-                       <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,0,0,1">
-                           <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
-                               Available Stock
-                           </TextBlock>
-                       </Border>
+                        <controls:TableHeader Text="Available Stock" />
                    </StackPanel>
 
                    <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
@@ -99,33 +75,20 @@
                    </StackPanel>
 
                    <StackPanel DockPanel.Dock="Top">
-                       <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}">
-                           <TextBlock Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" FontSize="12">Consist</TextBlock>
-                       </Border>
+                       <controls:TableHeader Text="Consist" />
                    </StackPanel>
 
-                   <DataGrid  BorderThickness="0,1,0,0"
-                              BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                              ItemsSource="{Binding AvailableStock}"
-                              GridLinesVisibility="All"
-                              SelectionMode="Single"
-                              IsReadOnly="True"
-                              CanUserResizeColumns="True"
-                              CanUserReorderColumns="True"
-                              CanUserSortColumns="True"
-                              SelectedItem="{Binding SelectedVehicle}">
-                       <DataGrid.Columns>
-                           <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
-                           <DataGridTextColumn Header="Type" Binding="{Binding BlueprintType}" />
-                           <DataGridTextColumn Header="Blueprint Id" Binding="{Binding Blueprint.BlueprintId}" />
-                       </DataGrid.Columns>
-
-                       <DataGrid.ContextMenu>
-                           <ContextMenu>
+                   <TreeDataGrid
+                       Source="{Binding AvailableStockSource}"
+                       CanUserSortColumns="True"
+                       Name="AvailableStockDataGrid"
+                   >
+                       <TreeDataGrid.ContextMenu>
+                           <ContextMenu Opened="MenuBase_OnOpened">
                                <MenuItem Header="Add to Consist" Command="{Binding AddVehicleCommand}"  />
                            </ContextMenu>
-                       </DataGrid.ContextMenu>
-                   </DataGrid>
+                       </TreeDataGrid.ContextMenu>
+                   </TreeDataGrid>
 
                </DockPanel>
            </Grid>

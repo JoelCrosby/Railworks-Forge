@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
@@ -30,39 +31,17 @@
 
             <Border Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
-                    <StackPanel IsVisible="{Binding Scenario.Locomotive, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Locomotive" />
-                        <TextBlock Text="{Binding Scenario.Locomotive}" />
-                    </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Start Location" />
-                        <TextBlock Text="{Binding Scenario.StartLocation}" />
-                    </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Scenario Type" />
-                        <TextBlock Text="{Binding Scenario.ScenarioClass}" />
-                    </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.StartLocation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Packaging Type" />
-                        <TextBlock Text="{Binding Scenario.PackagingType}" />
-                    </StackPanel>
+                    <controls:NameValueDisplay Heading="Locomotive" Value="{Binding Scenario.Locomotive}" />
+                    <controls:NameValueDisplay Heading="Start Location" Value="{Binding Scenario.StartLocation}" />
+                    <controls:NameValueDisplay Heading="Scenario Type" Value="{Binding Scenario.ScenarioClass}" />
+                    <controls:NameValueDisplay Heading="Packaging Type" Value="{Binding Scenario.PackagingType}" />
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
-                    <StackPanel>
-                        <TextBlock FontWeight="SemiBold" Text="Description" />
-                        <TextBlock Text="{Binding Scenario.Description}" />
-                    </StackPanel>
-
-                    <StackPanel IsVisible="{Binding Scenario.Briefing, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock FontWeight="SemiBold" Text="Briefing" />
-                        <TextBlock Text="{Binding Scenario.Briefing}" />
-                    </StackPanel>
+                    <controls:NameValueDisplay Heading="Description" Value="{Binding Scenario.Description}" />
+                    <controls:NameValueDisplay Heading="Briefing" Value="{Binding Scenario.Briefing}" />
                 </StackPanel>
             </Border>
         </Grid>
@@ -77,58 +56,39 @@
 
         <li:LoadingIndicator DockPanel.Dock="Top"  VerticalAlignment="Stretch" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
-        <Border DockPanel.Dock="Top" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-            <TextBox Text="{Binding SearchTerm}"
-                     VerticalContentAlignment="Center"
-                     Classes="search-table"
-                     Watermark="Search"
-                     HorizontalAlignment="Stretch"
-                     Background="Transparent"
-                     IsVisible="{Binding !IsLoading}"
+        <StackPanel DockPanel.Dock="Top">
+            <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
+            <controls:TableHeader Text="Services" />
+        </StackPanel>
 
-            />
-        </Border>
-
-        <DataGrid ItemsSource="{Binding Services}"
-                  IsReadOnly="True"
-                  GridLinesVisibility="All"
-                  SelectionMode="Extended"
-                  SelectionChanged="DataGrid_OnSelectionChanged"
-                  DoubleTapped="DataGrid_OnDoubleTapped"
-                  BorderThickness="0,1,0,0"
-                  BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                  Name="ServicesDataGrid"
-                  Sorting="DataGrid_OnSorting"
+        <TreeDataGrid
+            Source="{Binding ServicesSource}"
+            CanUserSortColumns="True"
+            Name="ServicesDataGrid"
+            DoubleTapped="ServicesDataGrid_OnDoubleTapped"
         >
-            <DataGrid.Columns>
-
-                <DataGridTemplateColumn Header="" Width="64">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Height="32" Source="{Binding ImageBitmap}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTextColumn Header="Consist State" Binding="{Binding Consist.ConsistAcquisitionState}" />
-                <DataGridTextColumn Header="Is Player Driver" Binding="{Binding Consist.PlayerDriver}" />
-                <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
-                <DataGridTextColumn Header="Consist Length" Binding="{Binding Consist.Length}" />
-                <DataGridTextColumn Header="Service Name" Binding="{Binding Consist.ServiceName}" />
-                <DataGridTextColumn Header="Provider" Binding="{Binding Consist.BlueprintSetIdProvider}" />
-                <DataGridTextColumn Header="Product" Binding="{Binding Consist.BlueprintSetIdProduct}" />
-                <DataGridTextColumn Header="Blueprint ID" Binding="{Binding Consist.BlueprintId}" />
-            </DataGrid.Columns>
-
-            <DataGrid.ContextMenu>
-                <ContextMenu>
+            <TreeDataGrid.ContextMenu>
+                <ContextMenu Opened="MenuBase_OnOpened">
                     <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
                     <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
                     <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
                     <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
                 </ContextMenu>
-            </DataGrid.ContextMenu>
-        </DataGrid>
+            </TreeDataGrid.ContextMenu>
+
+            <TreeDataGrid.Resources>
+                <DataTemplate x:Key="ImageCell" DataType="vm:ConsistViewModel">
+                    <Image Height="64" Source="{Binding ImageBitmap}"/>
+                </DataTemplate>
+            </TreeDataGrid.Resources>
+
+            <TreeDataGrid.Styles>
+                <Style Selector="TreeDataGridRow">
+                    <Setter Property="MinHeight" Value="64" />
+                </Style>
+            </TreeDataGrid.Styles>
+
+        </TreeDataGrid>
 
     </DockPanel>
 </UserControl>

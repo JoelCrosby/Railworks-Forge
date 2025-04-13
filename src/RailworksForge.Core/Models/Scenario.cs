@@ -285,6 +285,7 @@ public record Scenario
             BlueprintId = blueprintId,
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
+            SearchIndex = $"{locomotiveName} {uniqueNumber} {blueprintSetIdProduct} {blueprintSetIdProvider} {blueprintId}".ToLowerInvariant(),
         };
     }
 

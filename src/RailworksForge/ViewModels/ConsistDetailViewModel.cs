@@ -8,6 +8,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,9 +41,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceVehicleCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<RollingStockEntry> _availableStock;
-
-    [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
     [ObservableProperty]
@@ -51,7 +50,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private ConsistRailVehicle? _selectedConsistVehicle;
 
     [ObservableProperty]
-    private List<ConsistRailVehicle> _selectedConsistVehicles;
+    private IReadOnlyList<ConsistRailVehicle> _selectedConsistVehicles;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -60,9 +59,18 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private int _loadAvailableStockProgress;
 
     [ObservableProperty]
+    private string? _searchTerm;
+
+    private List<ConsistRailVehicle> _cachedRailVehicles = [];
+
+    [ObservableProperty]
     private ObservableCollection<BrowserDirectory> _directoryTree;
 
-    public ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
+    private ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
+    public FlatTreeDataGridSource<ConsistRailVehicle> RailVehiclesSource { get; }
+
+    private ObservableCollection<RollingStockEntry> AvailableStock { get; }
+    public FlatTreeDataGridSource<RollingStockEntry> AvailableStockSource { get; }
 
     public ConsistDetailViewModel(Scenario scenario, Consist consist, AssetDirectoryTreeService directoryTreeService)
     {
@@ -70,6 +78,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _consist = consist;
 
         AvailableStock = [];
+        RailVehicles = [];
         SelectedConsistVehicles = [];
 
         DirectoryTree = directoryTreeService.GetDirectoryTree();
@@ -77,6 +86,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         IsLoading = true;
 
         LoadAvailableStockCommand = ReactiveCommand.CreateFromObservable(() => Observable.StartAsync(LoadAvailableStock));
+
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
             if (SelectedDirectory is null) return;
@@ -84,11 +94,45 @@ public partial class ConsistDetailViewModel : ViewModelBase
             Launcher.Open(SelectedDirectory.AssetDirectory.Path);
         });
 
-        RailVehicles = [];
-
         AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehicle);
         DeleteVehicleCommand = ReactiveCommand.CreateFromTask(DeleteVehicle);
         ReplaceVehicleCommand = ReactiveCommand.CreateFromTask(ReplaceVehicle);
+
+        RailVehiclesSource = new FlatTreeDataGridSource<ConsistRailVehicle>(RailVehicles)
+        {
+            Columns =
+            {
+                new TextColumn<ConsistRailVehicle, int>("Index", x => x.Index),
+                new TextColumn<ConsistRailVehicle, AcquisitionState>("State", x => x.AcquisitionState),
+                new TextColumn<ConsistRailVehicle, string>("Locomotive Name", x => x.LocomotiveName),
+                new TextColumn<ConsistRailVehicle, string>("UniqueNumber", x => x.UniqueNumber),
+                new TextColumn<ConsistRailVehicle, bool>("Is Flipped", x => x.Flipped),
+                new TextColumn<ConsistRailVehicle, string>("Product", x => x.BlueprintSetIdProduct),
+                new TextColumn<ConsistRailVehicle, string>("Provider", x => x.BlueprintSetIdProvider),
+                new TextColumn<ConsistRailVehicle, string>("BlueprintId", x => x.BlueprintId),
+            },
+        };
+
+        AvailableStockSource = new FlatTreeDataGridSource<RollingStockEntry>(AvailableStock)
+        {
+            Columns =
+            {
+                new TextColumn<RollingStockEntry, string>("Name", x => x.DisplayName),
+                new TextColumn<RollingStockEntry, BlueprintType>("Type", x => x.BlueprintType),
+                new TextColumn<RollingStockEntry, string>("Blueprint ID", x => x.Blueprint.BlueprintId),
+            },
+        };
+
+        this.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not nameof(SearchTerm)) return;
+
+            var invariant = _searchTerm?.ToLowerInvariant();
+            var indexed = invariant is null ? _cachedRailVehicles : _cachedRailVehicles.Where(x => x.SearchIndex.Contains(invariant));
+
+            RailVehicles.Clear();
+            RailVehicles.AddRange(indexed);
+        };
 
         Refresh();
     }
@@ -179,6 +223,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         Dispatcher.UIThread.Post(() =>
         {
+            _cachedRailVehicles = consists;
+
             RailVehicles.Clear();
             RailVehicles.AddRange(consists);
         });
@@ -224,11 +270,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
-        var replacements = SelectedConsistVehicles.ConvertAll(target => new VehicleReplacement
-        {
-            Replacement = SelectedVehicle,
-            Target = target,
-        });
+        var replacements = SelectedConsistVehicles
+            .Select(target => new VehicleReplacement
+            {
+                Replacement = SelectedVehicle,
+                Target = target,
+            })
+            .ToList();
 
         var request = new ReplaceVehiclesRequest
         {

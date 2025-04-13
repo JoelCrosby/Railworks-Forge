@@ -8,8 +8,6 @@ public class ConsistRailVehicle : Blueprint
 
     public int Index { get; init; }
 
-    public string DisplayId => string.IsNullOrWhiteSpace(Id) ? Id :  Id[..6];
-
     public required string LocomotiveName { get; init; }
 
     public string? UniqueNumber { get; init; }
@@ -17,4 +15,6 @@ public class ConsistRailVehicle : Blueprint
     public bool Flipped { get; init; }
 
     public required string EntityID { get; init; }
+
+    public required string SearchIndex { get; init; }
 }

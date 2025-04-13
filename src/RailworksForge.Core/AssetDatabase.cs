@@ -32,16 +32,19 @@ public class AssetDatabase
         var assetsDirectory = Paths.GetAssetsDirectory();
         var providerDirectories = Directory.EnumerateDirectories(assetsDirectory, "*", SearchOption.TopDirectoryOnly).ToList();
 
-        var providers = providerDirectories.Select(e => new ProviderDirectory
-        {
-            Name = Path.GetFileName(e),
-            Path = e,
-            Products = GetProductDirectories(e),
-        });
+        var providers = providerDirectories
+            .Order()
+            .Select(e => new ProviderDirectory
+            {
+                Name = Path.GetFileName(e),
+                Path = e,
+                Products = GetProductDirectories(e),
+            })
+            .ToList();
 
         return new AssetDatabase
         {
-            ProviderDirectories = providers.OrderBy(p => p.Name).ToList(),
+            ProviderDirectories = providers,
         };
     }
 
@@ -80,7 +83,7 @@ public class AssetDatabase
                 }
                 catch (Exception exception)
                 {
-                    Log.Error(exception, "Failed to open archive @ '{Archive}' for {ProductDirectory}", archive, productDirectory);
+                    Log.Error(exception, "failed to open archive @ '{Archive}' for {ProductDirectory}", archive, productDirectory);
                 }
             }
 

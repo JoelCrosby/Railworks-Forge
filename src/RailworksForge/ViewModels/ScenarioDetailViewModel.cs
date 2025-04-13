@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 using AngleSharp.Xml;
 
+using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -42,6 +44,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public ObservableCollection<ConsistViewModel> Services { get; }
 
+    public FlatTreeDataGridSource<ConsistViewModel> ServicesSource { get; }
+
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
     public ReactiveCommand<Unit, Unit> ExportBinXmlCommand { get; }
@@ -53,14 +57,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
-    public IEnumerable<ConsistViewModel> SelectedConsistViewModels { get; set; }
+    public IEnumerable<ConsistViewModel> SelectedItems { get; set; }
 
-    private ConsistViewModel? SelectedConsistViewModel => SelectedConsistViewModels.Count() is 1 ? SelectedConsistViewModels.First() : null;
+    private ConsistViewModel? SelectedConsistViewModel => SelectedItems.Count() is 1 ? SelectedItems.First() : null;
 
     public ScenarioDetailViewModel(Scenario scenario)
     {
         Scenario = scenario;
-        SelectedConsistViewModels = [];
+        SelectedItems = [];
         IsLoading = true;
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
@@ -123,7 +127,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         ReplaceConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            if (SelectedConsistViewModels.Any() is false)
+            if (SelectedItems.Any() is false)
             {
                 return;
             }
@@ -138,7 +142,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = true;
 
-            var target = new TargetConsist(SelectedConsistViewModels.Select(x => x.Consist));
+            var target = new TargetConsist(SelectedItems.Select(x => x.Consist));
 
             var request = new ReplaceConsistRequest
             {
@@ -159,14 +163,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         DeleteConsistCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            if (SelectedConsistViewModels.Any() is false)
+            if (SelectedItems.Any() is false)
             {
                 return;
             }
 
-            var isBulkSelection = SelectedConsistViewModels.Count() > 1;
+            var isBulkSelection = SelectedItems.Count() > 1;
             var consistMessage = isBulkSelection ? "consists" : "consist";
-            var summary = isBulkSelection ? $"{SelectedConsistViewModels.Count()} consists selected." : $"Consist: {SelectedConsistViewModel!.Consist.ServiceName} - {SelectedConsistViewModel.Consist.LocomotiveName}";
+            var summary = isBulkSelection ? $"{SelectedItems.Count()} consists selected." : $"Consist: {SelectedConsistViewModel!.Consist.ServiceName} - {SelectedConsistViewModel.Consist.LocomotiveName}";
 
             var result = await Utils.GetApplicationViewModel().ShowConfirmationDialog.Handle(new ConfirmationDialogViewModel
             {
@@ -183,7 +187,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = true;
 
-            var target = new TargetConsist(SelectedConsistViewModels.Select(x => x.Consist));
+            var target = new TargetConsist(SelectedItems.Select(x => x.Consist));
 
             var runner = new ConsistCommandRunner
             {
@@ -197,6 +201,22 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         });
 
         Services = [];
+
+        ServicesSource = new FlatTreeDataGridSource<ConsistViewModel>(Services)
+        {
+            Columns =
+            {
+                new TemplateColumn<ConsistViewModel>("Image", "ImageCell") { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.AcquisitionState) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, bool>("Is Player Driver", x => x.Consist.PlayerDriver) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, int>("Consist Length", x => x.Consist.Length) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, string>("Service Name", x => x.Consist.ServiceName) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, string>("Provider", x => x.Consist.BlueprintSetIdProvider) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, string>("Product", x => x.Consist.BlueprintSetIdProduct) { Options = { CanUserSortColumn = true }},
+                new TextColumn<ConsistViewModel, string>("Blueprint ID", x => x.Consist.BlueprintId) { Options = { CanUserSortColumn = true }},
+            },
+        };
 
         Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
 

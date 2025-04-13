@@ -20,6 +20,6 @@ public partial class StatusBarViewModel : ViewModelBase
 
     public StatusBarViewModel()
     {
-        StatusText = Paths.GetGameDirectory();
+        StatusText = $"Railworks Directory - {Paths.GetGameDirectory()}";
     }
 }

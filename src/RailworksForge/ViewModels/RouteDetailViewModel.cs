@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -25,7 +26,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     [ObservableProperty]
     private RouteViewModel _route;
 
-    public ObservableCollection<Scenario> Scenarios { get; init; }
+    private ObservableCollection<Scenario> Scenarios { get; init; }
 
     private List<Scenario>? _cachedScenarios;
 
@@ -42,6 +43,8 @@ public partial class RouteDetailViewModel : ViewModelBase
 
     [ObservableProperty]
     private string? _searchTerm;
+
+    public FlatTreeDataGridSource<Scenario> ScenariosSource { get; }
 
     public RouteDetailViewModel(RouteViewModel route)
     {
@@ -88,6 +91,22 @@ public partial class RouteDetailViewModel : ViewModelBase
         });
 
         Scenarios = new (GetScenarios());
+
+        ScenariosSource = new FlatTreeDataGridSource<Scenario>(Scenarios)
+        {
+            Columns =
+            {
+                new TextColumn<Scenario, PackagingType>("Packaging Type", x => x.PackagingType) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, string>("Name", x => x.Name) { Options = { CanUserSortColumn = true,  }},
+                new TextColumn<Scenario, string>("Locomotive", x => x.Locomotive) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, ScenarioClass>("Type", x => x.ScenarioClass) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, int>("Duration", x => x.Duration) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, int>("Rating", x => x.Rating) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, string>("Season", x => x.Season) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, int>("Score", x => x.PlayerInfo.Score) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, string>("Completion", x => x.PlayerInfo.Completion) { Options = { CanUserSortColumn = true }},
+            },
+        };
 
         this.PropertyChanged += (_, e) =>
         {

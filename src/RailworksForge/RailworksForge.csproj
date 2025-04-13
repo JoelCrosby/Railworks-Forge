@@ -3,13 +3,25 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+<!--    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>-->
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+    <!-- Recommended Avalonia trimming settings for Native AOT -->
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <TrimMode>link</TrimMode>
+  </PropertyGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Preserve Avalonia types for reflection -->
+    <TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,6 +87,10 @@
     </Compile>
     <Compile Update="Views\Dialogs\CheckAssetsDialog.axaml.cs">
       <DependentUpon>CheckAssetsDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\TemplatedControls\TableHeader.axaml.cs">
+      <DependentUpon>TableHeader.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

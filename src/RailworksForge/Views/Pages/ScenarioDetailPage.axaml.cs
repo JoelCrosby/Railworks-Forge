@@ -1,60 +1,49 @@
-using System;
-using System.ComponentModel;
-using System.Linq;
+using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Subjects;
 
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 using RailworksForge.Controls;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
-public partial class ScenarioDetailPage : DataGridUserControl
+public partial class ScenarioDetailPage : TreeDataGridUserControl
 {
-    protected override DataGrid DataGrid => ServicesDataGrid;
+    protected override TreeDataGrid DataGrid => ServicesDataGrid;
 
     public ScenarioDetailPage()
     {
         InitializeComponent();
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
         SortColumns();
-
-        if (DataContext is ScenarioDetailViewModel context)
-        {
-            context.PropertyChanged += ViewModel_PropertyChanged;
-        }
     }
 
     // ReSharper disable once UnusedParameter.Local
-    private void DataGrid_OnDoubleTapped(object? _, TappedEventArgs args)
+    private void ServicesDataGrid_OnDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (args.Source is not Border) return;
+        if (DataContext is not ScenarioDetailViewModel context) return;
+        if (ServicesDataGrid.RowSelection?.SelectedItems is not IReadOnlyList<ConsistViewModel> items) return;
 
-        if (DataContext is ScenarioDetailViewModel context)
-        {
-            context.ClickedConsistCommand.Execute().Subscribe();
-        }
+        context.SelectedItems = items;
+        context.ClickedConsistCommand.Execute().Subscribe(new Subject<Unit>());
     }
 
-    // ReSharper disable once UnusedParameter.Local
-    private void DataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void MenuBase_OnOpened(object? sender, RoutedEventArgs e)
     {
-        if (sender is not DataGrid dataGrid) return;
         if (DataContext is not ScenarioDetailViewModel context) return;
 
-        if (dataGrid.SelectedItems is null) return;
-
-        context.SelectedConsistViewModels = dataGrid.SelectedItems.Cast<ConsistViewModel>();
-    }
-
-    // ReSharper disable once UnusedParameter.Local
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs? e)
-    {
-        if (e?.PropertyName != "Services")
+        if (DataGrid.RowSelection?.SelectedItem is ConsistViewModel consist)
         {
-            return;
+            context.SelectedItems = [consist];
         }
-
-        ServicesDataGrid.UpdateLayout();
     }
 }

@@ -1,0 +1,19 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls">
+    <Design.PreviewWith>
+        <controls:TableHeader />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|TableHeader">
+        <Setter Property="Template">
+            <ControlTemplate>
+
+                <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
+                    <TextBlock Text="{TemplateBinding Text}" FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" />
+                </Border>
+
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

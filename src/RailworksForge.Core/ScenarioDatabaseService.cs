@@ -5,6 +5,7 @@ using System.Text.Json;
 
 using AngleSharp.Common;
 
+using RailworksForge.Core.Config;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
@@ -94,8 +95,9 @@ public static class ScenarioDatabaseService
 
         Log.Information("found cached scenario database @ {Path}", cachePath);
 
-        var jsonText = File.ReadAllText(cachePath);
-        return JsonSerializer.Deserialize<ConcurrentDictionary<string, ScenarioPlayerInfo>>(jsonText);
+        using var json = File.OpenRead(cachePath);
+
+        return JsonSerializer.Deserialize<ConcurrentDictionary<string, ScenarioPlayerInfo>>(json, Configuration.JsonSerializerOptions);
     }
 
     private static string GetCachePath()

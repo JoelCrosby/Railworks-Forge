@@ -113,17 +113,17 @@ public partial class SelectTrackViewModel : ViewModelBase
         Products = new ObservableCollection<DirectoryItem>(items);
     }
 
-    partial void OnSelectedProductChanged(DirectoryItem? item)
+    partial void OnSelectedProductChanged(DirectoryItem? value)
     {
-        if (item is null || SelectedProvider is null || SelectedProduct is null)
+        if (value is null || SelectedProvider is null || SelectedProduct is null)
         {
             return;
         }
 
-        var value = item.Directory;
+        var directory = value.Directory;
 
-        var networkTracksPath = Path.Join(value.FullName, "RailNetwork");
-        var tracksPath = Path.Join(value.FullName, "Track");
+        var networkTracksPath = Path.Join(directory.FullName, "RailNetwork");
+        var tracksPath = Path.Join(directory.FullName, "Track");
 
         var networkBinaries = GetTrackBinaryPaths(networkTracksPath);
         var trackBinaries = GetTrackBinaryPaths(tracksPath);
@@ -135,7 +135,7 @@ public partial class SelectTrackViewModel : ViewModelBase
             .Select(path =>
             {
                 var blueprintId = path
-                    .Replace(value.FullName, string.Empty)
+                    .Replace(directory.FullName, string.Empty)
                     .TrimStart('/')
                     .Replace('/', '\\')
                     .Replace(".bin", ".xml");
@@ -151,7 +151,7 @@ public partial class SelectTrackViewModel : ViewModelBase
 
         blueprints.AddRange(set);
 
-        var archives = Directory.EnumerateFiles(value.FullName, "*.ap", SearchOption.TopDirectoryOnly);
+        var archives = Directory.EnumerateFiles(directory.FullName, "*.ap", SearchOption.TopDirectoryOnly);
 
         foreach (var archive in archives)
         {

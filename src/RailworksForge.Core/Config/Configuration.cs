@@ -3,10 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace RailworksForge.Core.Config;
 
-
 public class Configuration
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
+    public static readonly JsonSerializerOptions JsonSerializerOptions = new ()
     {
         AllowTrailingCommas = true,
         WriteIndented = true,
