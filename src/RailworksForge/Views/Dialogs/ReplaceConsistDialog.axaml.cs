@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
 using RailworksForge.Core;
+using RailworksForge.Util;
 using RailworksForge.ViewModels;
 
 using ReactiveUI;
@@ -14,9 +15,13 @@ namespace RailworksForge.Views.Dialogs;
 
 public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewModel>
 {
+    private readonly TreeDataGridSortHandler _preloadConsistsDataGridSortHandler;
+
     public ReplaceConsistDialog()
     {
         InitializeComponent();
+
+        _preloadConsistsDataGridSortHandler  = new (PreloadConsistsDataGrid);
 
         if (Design.IsDesignMode) return;
 
@@ -28,6 +33,13 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
 
             action(disposable);
         });
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        _preloadConsistsDataGridSortHandler.SortColumns();
     }
 
     // ReSharper disable UnusedParameter.Local

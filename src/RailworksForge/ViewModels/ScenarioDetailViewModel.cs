@@ -42,8 +42,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private List<ConsistViewModel> _cachedServices = [];
 
-    public ObservableCollection<ConsistViewModel> Services { get; }
-
+    private ObservableCollection<ConsistViewModel> Services { get; }
     public FlatTreeDataGridSource<ConsistViewModel> ServicesSource { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -57,14 +56,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
-    public IEnumerable<ConsistViewModel> SelectedItems { get; set; }
+    private IReadOnlyList<ConsistViewModel> SelectedItems => ServicesSource.RowSelection?.SelectedItems as IReadOnlyList<ConsistViewModel> ?? [];
 
-    private ConsistViewModel? SelectedConsistViewModel => SelectedItems.Count() is 1 ? SelectedItems.First() : null;
+    private ConsistViewModel? SelectedConsistViewModel => SelectedItems.Count is 1 ? SelectedItems[0] : null;
 
     public ScenarioDetailViewModel(Scenario scenario)
     {
         Scenario = scenario;
-        SelectedItems = [];
         IsLoading = true;
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
@@ -134,7 +132,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             var result = await Utils.GetApplicationViewModel().ShowReplaceConsistDialog.Handle(new ReplaceConsistViewModel
             {
-                AvailableStock = [],
                 Scenario = Scenario,
             });
 
@@ -168,9 +165,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
                 return;
             }
 
-            var isBulkSelection = SelectedItems.Count() > 1;
+            var isBulkSelection = SelectedItems.Count > 1;
             var consistMessage = isBulkSelection ? "consists" : "consist";
-            var summary = isBulkSelection ? $"{SelectedItems.Count()} consists selected." : $"Consist: {SelectedConsistViewModel!.Consist.ServiceName} - {SelectedConsistViewModel.Consist.LocomotiveName}";
+            var summary = isBulkSelection ? $"{SelectedItems.Count} consists selected." : $"Consist: {SelectedConsistViewModel!.Consist.ServiceName} - {SelectedConsistViewModel.Consist.LocomotiveName}";
 
             var result = await Utils.GetApplicationViewModel().ShowConfirmationDialog.Handle(new ConfirmationDialogViewModel
             {
@@ -206,15 +203,15 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         {
             Columns =
             {
-                new TemplateColumn<ConsistViewModel>("Image", "ImageCell") { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.AcquisitionState) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, bool>("Is Player Driver", x => x.Consist.PlayerDriver) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, int>("Consist Length", x => x.Consist.Length) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, string>("Service Name", x => x.Consist.ServiceName) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, string>("Provider", x => x.Consist.BlueprintSetIdProvider) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, string>("Product", x => x.Consist.BlueprintSetIdProduct) { Options = { CanUserSortColumn = true }},
-                new TextColumn<ConsistViewModel, string>("Blueprint ID", x => x.Consist.BlueprintId) { Options = { CanUserSortColumn = true }},
+                new TemplateColumn<ConsistViewModel>("Image", "ImageCell"),
+                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.AcquisitionState),
+                new TextColumn<ConsistViewModel, bool>("Is Player Driver", x => x.Consist.PlayerDriver),
+                new TextColumn<ConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName),
+                new TextColumn<ConsistViewModel, int>("Consist Length", x => x.Consist.Length),
+                new TextColumn<ConsistViewModel, string>("Service Name", x => x.Consist.ServiceName),
+                new TextColumn<ConsistViewModel, string>("Provider", x => x.Consist.BlueprintSetIdProvider),
+                new TextColumn<ConsistViewModel, string>("Product", x => x.Consist.BlueprintSetIdProduct),
+                new TextColumn<ConsistViewModel, string>("Blueprint ID", x => x.Consist.BlueprintId),
             },
         };
 

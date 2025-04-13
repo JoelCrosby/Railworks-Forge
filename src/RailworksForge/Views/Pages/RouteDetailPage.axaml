@@ -62,13 +62,12 @@
 
 
         <TreeDataGrid
-            Source="{Binding ScenariosSource}"
-            CanUserSortColumns="True"
             Name="ScenariosDataGrid"
+            Source="{Binding ScenariosSource}"
             DoubleTapped="ScenariosDataGrid_OnDoubleTapped"
         >
             <TreeDataGrid.ContextMenu>
-                <ContextMenu Opened="MenuBase_OnOpened">
+                <ContextMenu>
                     <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
                     <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
                     <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />

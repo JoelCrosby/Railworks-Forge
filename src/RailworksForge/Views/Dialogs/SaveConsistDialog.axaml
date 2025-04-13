@@ -9,7 +9,7 @@
         CanResize="False"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
-        Title="Save Consist">
+        Title="RailworksForge - Save Consist">
 
         <Design.DataContext>
                 <vm:DesignSaveConsistViewModel />

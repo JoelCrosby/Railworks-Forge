@@ -22,13 +22,12 @@
                 <controls:TableHeader Text="Consist Vehicles" />
 
                 <TreeDataGrid
-                    Source="{Binding RailVehiclesSource}"
-                    CanUserSortColumns="True"
                     Name="ConsistVehiclesDataGrid"
+                    Source="{Binding RailVehiclesSource}"
                     DoubleTapped="ConsistVehiclesDataGrid_OnDoubleTapped"
                 >
                     <TreeDataGrid.ContextMenu>
-                        <ContextMenu Opened="MenuBase_OnOpened">
+                        <ContextMenu>
                             <MenuItem Header="Replace Vehicle With Selected" Command="{Binding ReplaceVehicleCommand}"  />
                             <MenuItem Header="Delete Vehicle" Command="{Binding DeleteVehicleCommand}"  />
                         </ContextMenu>
@@ -84,7 +83,7 @@
                        Name="AvailableStockDataGrid"
                    >
                        <TreeDataGrid.ContextMenu>
-                           <ContextMenu Opened="MenuBase_OnOpened">
+                           <ContextMenu>
                                <MenuItem Header="Add to Consist" Command="{Binding AddVehicleCommand}"  />
                            </ContextMenu>
                        </TreeDataGrid.ContextMenu>

@@ -4,13 +4,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
         Width="1280"
         Height="720"
         WindowStartupLocation="CenterOwner"
-        Title="Replace Consist">
+        Title="RailworksForge - Replace Consist">
 
     <Design.DataContext>
         <vm:DesignReplaceConsistViewModel />
@@ -26,11 +27,7 @@
         <Grid Grid.Row="1" ColumnDefinitions="*,4,3*">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,0,0,1">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}">
-                            Available Stock
-                        </TextBlock>
-                    </Border>
+                    <controls:TableHeader Text="Available Stock" />
                 </StackPanel>
 
                 <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
@@ -61,37 +58,17 @@
             <Border Grid.Column="2">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
-                        <Border Padding="12, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}">
-                            <TextBlock Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}"
-                                       FontSize="12">
-                                Consist
-                            </TextBlock>
-                        </Border>
+                        <controls:TableHeader Text="Consist" />
                     </StackPanel>
 
-                    <DataGrid BorderThickness="0,1,0,0"
-                              BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                              ItemsSource="{Binding AvailableStock}"
-                              SelectedItem="{Binding SelectedConsist}"
-                              GridLinesVisibility="All"
-                              SelectionMode="Single"
-                              IsReadOnly="True">
-                        <DataGrid.Columns>
+                    <TreeDataGrid Source="{Binding PreloadConsistsSource}" Name="PreloadConsistsDataGrid">
+                        <TreeDataGrid.Resources>
+                            <DataTemplate x:Key="ImageCell" DataType="vm:PreloadConsistViewModel">
+                                <Image Height="64" Source="{Binding ImageBitmap}"/>
+                            </DataTemplate>
+                        </TreeDataGrid.Resources>
+                    </TreeDataGrid>
 
-                            <DataGridTemplateColumn Header="Image" Width="64">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Image Height="32" Source="{Binding ImageBitmap}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTextColumn Header="Locomotive Name" Binding="{Binding Consist.LocomotiveName}" />
-                            <DataGridTextColumn Header="Display Name" Binding="{Binding Consist.DisplayName}" />
-                            <DataGridTextColumn Header="Engine Type" Binding="{Binding Consist.EngineType}" />
-                            <DataGridTextColumn Header="Length" Binding="{Binding Consist.ConsistEntries.Count}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
                 </DockPanel>
             </Border>
         </Grid>

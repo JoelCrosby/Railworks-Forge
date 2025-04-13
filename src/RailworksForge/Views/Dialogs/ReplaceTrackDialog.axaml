@@ -12,7 +12,7 @@
         Width="1280"
         Height="720"
         WindowStartupLocation="CenterOwner"
-        Title="Replace Track">
+        Title="RailworksForge - Replace Track">
 
     <Design.DataContext>
         <vm:DesignReplaceTrackViewModel />

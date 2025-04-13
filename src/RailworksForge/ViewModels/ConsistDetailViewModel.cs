@@ -43,14 +43,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
-    [ObservableProperty]
-    private RollingStockEntry? _selectedVehicle;
-
-    [ObservableProperty]
-    private ConsistRailVehicle? _selectedConsistVehicle;
-
-    [ObservableProperty]
-    private IReadOnlyList<ConsistRailVehicle> _selectedConsistVehicles;
+    private RollingStockEntry? SelectedVehicle => AvailableStockSource.RowSelection?.SelectedItem;
+    private ConsistRailVehicle? SelectedConsistVehicle  => RailVehiclesSource.RowSelection?.SelectedItem;
+    private IReadOnlyList<ConsistRailVehicle> SelectedConsistVehicles => RailVehiclesSource.RowSelection?.SelectedItems as IReadOnlyList<ConsistRailVehicle> ?? [];
 
     [ObservableProperty]
     private bool _isLoading;
@@ -79,7 +74,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         AvailableStock = [];
         RailVehicles = [];
-        SelectedConsistVehicles = [];
 
         DirectoryTree = directoryTreeService.GetDirectoryTree();
 

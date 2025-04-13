@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -26,7 +25,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     [ObservableProperty]
     private RouteViewModel _route;
 
-    private ObservableCollection<Scenario> Scenarios { get; init; }
+    private ObservableCollection<Scenario> Scenarios { get; }
 
     private List<Scenario>? _cachedScenarios;
 
@@ -37,9 +36,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceTrackCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckAssetsCommand { get; }
 
-    public Scenario? SelectedItem { get; set; }
-
-    public IObservable<bool> ShowPlayerInfoColumns => ScenarioDatabaseService.IsLoaded;
+    private Scenario? SelectedItem => ScenariosSource.RowSelection?.SelectedItem;
 
     [ObservableProperty]
     private string? _searchTerm;
@@ -96,15 +93,15 @@ public partial class RouteDetailViewModel : ViewModelBase
         {
             Columns =
             {
-                new TextColumn<Scenario, PackagingType>("Packaging Type", x => x.PackagingType) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, PackagingType>("Packaging Type", x => x.PackagingType),
                 new TextColumn<Scenario, string>("Name", x => x.Name) { Options = { CanUserSortColumn = true,  }},
-                new TextColumn<Scenario, string>("Locomotive", x => x.Locomotive) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, ScenarioClass>("Type", x => x.ScenarioClass) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, int>("Duration", x => x.Duration) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, int>("Rating", x => x.Rating) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, string>("Season", x => x.Season) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, int>("Score", x => x.PlayerInfo.Score) { Options = { CanUserSortColumn = true }},
-                new TextColumn<Scenario, string>("Completion", x => x.PlayerInfo.Completion) { Options = { CanUserSortColumn = true }},
+                new TextColumn<Scenario, string>("Locomotive", x => x.Locomotive),
+                new TextColumn<Scenario, ScenarioClass>("Type", x => x.ScenarioClass),
+                new TextColumn<Scenario, int>("Duration", x => x.Duration),
+                new TextColumn<Scenario, int>("Rating", x => x.Rating),
+                new TextColumn<Scenario, string>("Season", x => x.Season),
+                new TextColumn<Scenario, int>("Score", x => x.PlayerInfo.Score),
+                new TextColumn<Scenario, string>("Completion", x => x.PlayerInfo.Completion),
             },
         };
 

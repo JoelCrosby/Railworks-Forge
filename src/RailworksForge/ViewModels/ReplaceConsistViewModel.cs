@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 using AngleSharp.Dom;
 
+using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -35,20 +37,20 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public required Scenario Scenario { get; init; }
 
     [ObservableProperty]
-    private ObservableCollection<PreloadConsistViewModel> _availableStock;
-
-    [ObservableProperty]
-    private PreloadConsistViewModel? _selectedConsist;
-
-    [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
-    public ObservableCollection<BrowserDirectory> DirectoryTree { get; }
+    [ObservableProperty]
+    private ObservableCollection<BrowserDirectory> _directoryTree;
+
+    private ObservableCollection<PreloadConsistViewModel> PreloadConsists { get; }
+    public FlatTreeDataGridSource<PreloadConsistViewModel> PreloadConsistsSource { get; }
+
+    public PreloadConsistViewModel? SelectedConsist => PreloadConsistsSource.RowSelection?.SelectedItem;
 
     public ReplaceConsistViewModel()
     {
-        AvailableStock = [];
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.PreloadBrowser());
+        PreloadConsists = [];
+        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser());
 
         ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist?.Consist);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
@@ -58,17 +60,29 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
             Launcher.Open(SelectedDirectory.AssetDirectory.Path);
         });
+
+        PreloadConsistsSource = new FlatTreeDataGridSource<PreloadConsistViewModel>(PreloadConsists)
+        {
+            Columns =
+            {
+                new TemplateColumn<PreloadConsistViewModel>("Image", "ImageCell"),
+                new TextColumn<PreloadConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName),
+                new TextColumn<PreloadConsistViewModel, string>("Display Name", x => x.Consist.DisplayName),
+                new TextColumn<PreloadConsistViewModel, LocoClass>("Engine Type", x => x.Consist.EngineType),
+                new TextColumn<PreloadConsistViewModel, int>("Length", x => x.Consist.ConsistEntries.Count),
+            },
+        };
     }
 
     private async Task LoadAvailableStock()
     {
-        Dispatcher.UIThread.Post(AvailableStock.Clear);
+        Dispatcher.UIThread.Post(PreloadConsists.Clear);
 
         if (SelectedDirectory is null) return;
 
         var preloadDirectory = GetPreloadDirectory(SelectedDirectory);
 
-        if (!Paths.Exists(preloadDirectory)) return;
+        if (preloadDirectory is null || !Paths.Exists(preloadDirectory)) return;
 
         var binFiles = Directory
             .EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories)
@@ -82,7 +96,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
             LoadImages(models);
 
-            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
+            Dispatcher.UIThread.Post(() => PreloadConsists.AddRange(models));
         });
     }
 
@@ -101,17 +115,12 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         }
     }
 
-    private static string GetPreloadDirectory(BrowserDirectory directory)
+    private static string? GetPreloadDirectory(BrowserDirectory directory)
     {
         var assetDirectories = Directory.GetDirectories(directory.AssetDirectory.Path);
         var preloadDirectory = assetDirectories.FirstOrDefault(d => d.Contains("PreLoad", StringComparison.OrdinalIgnoreCase));
 
-        if (preloadDirectory is null)
-        {
-            throw new Exception($"Could not find preload directory {directory.AssetDirectory.Path}");
-        }
-
-        if (Paths.Exists(preloadDirectory))
+        if (preloadDirectory is not null && Paths.Exists(preloadDirectory))
         {
             return preloadDirectory;
         }

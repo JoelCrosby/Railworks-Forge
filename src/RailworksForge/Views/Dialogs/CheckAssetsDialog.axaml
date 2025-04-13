@@ -10,7 +10,7 @@
         Width="1280"
         Height="720"
         WindowStartupLocation="CenterOwner"
-        Title="Check Route Assets">
+        Title="RailworksForge - Check Route Assets">
 
     <Design.DataContext>
         <vm:DesignCheckAssetsViewModel />

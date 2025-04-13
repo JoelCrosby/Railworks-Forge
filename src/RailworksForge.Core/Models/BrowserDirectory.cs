@@ -35,20 +35,4 @@ public class BrowserDirectory
             .Select(e => new BrowserDirectory(e, _ => true))
             .ToList();
     }
-
-    public static List<BrowserDirectory> RailVehicleBrowser()
-    {
-        return AssetDatabase.Open.ProviderDirectories
-            .Where(e => e.Products.Any(pd => pd.ContainsRailVehicles))
-            .Select(e => new BrowserDirectory(e, p => p.ContainsRailVehicles))
-            .ToList();
-    }
-
-    public static List<BrowserDirectory> PreloadBrowser()
-    {
-        return AssetDatabase.Open.ProviderDirectories
-            .Where(e => e.Products.Any(pd => pd.ContainsPreloadData))
-            .Select(e => new BrowserDirectory(e, p => p.ContainsPreloadData))
-            .ToList();
-    }
 }

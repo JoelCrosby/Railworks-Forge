@@ -62,17 +62,15 @@
         </StackPanel>
 
         <TreeDataGrid
-            Source="{Binding ServicesSource}"
-            CanUserSortColumns="True"
             Name="ServicesDataGrid"
+            Source="{Binding ServicesSource}"
             DoubleTapped="ServicesDataGrid_OnDoubleTapped"
         >
             <TreeDataGrid.ContextMenu>
-                <ContextMenu Opened="MenuBase_OnOpened">
-                    <MenuItem Header="Details" Command="{Binding ClickedConsistCommand}" />
-                    <MenuItem Header="Save" Command="{Binding SaveConsistCommand}" />
-                    <MenuItem Header="Replace" Command="{Binding ReplaceConsistCommand}"  />
-                    <MenuItem Header="Delete" Command="{Binding DeleteConsistCommand}" />
+                <ContextMenu>
+                    <MenuItem Header="Open Details" Command="{Binding ClickedConsistCommand}" />
+                    <MenuItem Header="Replace with quick drive Consist" Command="{Binding ReplaceConsistCommand}"  />
+                    <MenuItem Header="Delete Service" Command="{Binding DeleteConsistCommand}" />
                 </ContextMenu>
             </TreeDataGrid.ContextMenu>
 
