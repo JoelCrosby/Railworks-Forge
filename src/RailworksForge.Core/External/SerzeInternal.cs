@@ -8,6 +8,8 @@ using RailworksForge.Core.Extensions;
 
 // ReSharper disable NotAccessedField.Local
 // ReSharper disable UnusedMember.Local
+// ReSharper disable NotAccessedVariable
+// ReSharper disable RedundantAssignment
 
 namespace RailworksForge.Core.External;
 
