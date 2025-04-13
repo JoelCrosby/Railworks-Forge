@@ -35,6 +35,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenConsistVehicleInExplorerCommand { get; }
 
     public ReactiveCommand<Unit, Unit> AddVehicleCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteVehicleCommand { get; }
@@ -86,6 +87,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
             if (SelectedDirectory is null) return;
 
             Launcher.Open(SelectedDirectory.AssetDirectory.Path);
+        });
+
+        OpenConsistVehicleInExplorerCommand = ReactiveCommand.Create(() =>
+        {
+            if (SelectedConsistVehicle?.BinaryDirectoryPath is null) return;
+
+            Launcher.Open(SelectedConsistVehicle.BinaryDirectoryPath);
         });
 
         AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehicle);

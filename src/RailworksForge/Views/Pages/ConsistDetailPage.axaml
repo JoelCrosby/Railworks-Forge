@@ -28,6 +28,7 @@
                 >
                     <TreeDataGrid.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Open Containing Folder in Explorer" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
                             <MenuItem Header="Replace Vehicle With Selected" Command="{Binding ReplaceVehicleCommand}"  />
                             <MenuItem Header="Delete Vehicle" Command="{Binding DeleteVehicleCommand}"  />
                         </ContextMenu>

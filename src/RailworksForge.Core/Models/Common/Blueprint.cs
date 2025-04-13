@@ -118,6 +118,8 @@ public class Blueprint
 
     public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
 
+    public string? BinaryDirectoryPath => Path.GetDirectoryName(BinaryPath);
+
     public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintSetIdProvider, BlueprintSetIdProduct);
 
     public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
