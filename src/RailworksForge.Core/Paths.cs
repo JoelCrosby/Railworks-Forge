@@ -17,9 +17,8 @@ public static class Paths
     public enum Platform
     {
         Linux = 0,
-        FreeBsd = 1,
-        Osx = 2,
-        Windows = 3,
+        Osx = 1,
+        Windows = 2,
     }
 
     private const string PrimaryDirName = nameof(RailworksForge);
@@ -39,11 +38,6 @@ public static class Paths
             return Platform.Osx;
         }
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-        {
-            return Platform.FreeBsd;
-        }
-
         return Platform.Linux;
     }
 
@@ -51,7 +45,6 @@ public static class Paths
     {
         Platform.Linux => Environment.GetEnvironmentVariable("HOME"),
         Platform.Osx => Environment.GetEnvironmentVariable("HOME"),
-        Platform.FreeBsd => Environment.GetEnvironmentVariable("HOME"),
         Platform.Windows => GetHomeDirectoryWindows(),
         _ => throw new PlatformNotSupportedException(),
     };
@@ -129,7 +122,7 @@ public static class Paths
 
     public static string ToWindowsPath(this string path)
     {
-        if (Paths.GetPlatform() is Platform.Windows) return path;
+        if (GetPlatform() is Platform.Windows) return path;
 
         return path.Replace("/", @"\").ReplaceFirst(@"\", @"z:\");
     }
@@ -141,9 +134,9 @@ public static class Paths
 
     public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
-        if (GetPlatform() is Platform.Windows && Path.Exists(path))
+        if (GetPlatform() is Platform.Windows)
         {
-            return path;
+            return Path.Exists(path) ? path : null;
         }
 
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);

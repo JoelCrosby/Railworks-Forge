@@ -1,5 +1,4 @@
 using CliWrap;
-using static RailworksForge.Core.Paths;
 
 namespace RailworksForge.Core.External;
 
@@ -42,11 +41,11 @@ public class Serz
 
     private static async Task RunSerz(string inputArg, string outputArg, CancellationToken token)
     {
-        if (Paths.GetPlatform() == Platform.Windows)
+        if (Paths.GetPlatform() == Paths.Platform.Windows)
         {
             await Cli.Wrap(ExePath).WithArguments([inputArg, outputArg]).ExecuteAsync(token);
         }
-        else 
+        else
         {
             await Cli.Wrap("wine").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
         }

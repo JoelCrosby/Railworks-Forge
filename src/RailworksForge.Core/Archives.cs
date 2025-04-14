@@ -180,19 +180,10 @@ public static class Archives
 
     public static bool TopLevelDirectoryExists(string archivePath, string directoryName)
     {
-        var normalizedArchivePath = archivePath.NormalisePath();
-        if (Cache.ArchiveCache.GetValueOrDefault(normalizedArchivePath) is {} cachedArchive)
-        {
-            var normalisedDirectoryName = directoryName.NormalisePath();
-
-            if (cachedArchive.Contains(normalisedDirectoryName))
-            {
-                return true;
-            }
-        }
-
         var entries = GetEntries(archivePath);
-        return entries.Any(e => e.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
+        var normalisedDirectoryName = directoryName.NormalisePath();
+
+        return entries.Any(e => e.StartsWith(normalisedDirectoryName));
     }
 
     private static readonly HashSet<string> CorruptArchivePaths = ["Assets/DTG/Academy/AcademyAssetsTest.ap"];
@@ -205,9 +196,18 @@ public static class Archives
             var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
             var cachedArchiveFiles = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath);
 
-            if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
+            if (cachedArchiveFiles is not null)
             {
-                return true;
+                Log.Information("cache archive found {ArchivePath}", archivePath.ToRelativeGamePath());
+
+                if (cachedArchiveFiles.Contains(normalisedBlueprintPath))
+                {
+                    return true;
+                }
+
+                Log.Information("cache entry not found {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
+
+                return false;
             }
 
             if (CorruptArchivePaths.Any(a => normalisedArchivePath.Contains(a)))
@@ -218,7 +218,7 @@ public static class Archives
             Log.Information("checking entry exists {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
 
             var entries = GetEntries(archivePath);
-            return entries.Any(e => string.Equals(e, normalisedBlueprintPath, StringComparison.OrdinalIgnoreCase));
+            return entries.Contains(normalisedBlueprintPath);
         }
     }
 

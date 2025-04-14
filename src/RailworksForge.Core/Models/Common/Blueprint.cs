@@ -141,6 +141,8 @@ public class Blueprint
         return CachedAcquisitionState;
     }
 
+    private static readonly Lock ArchiveLock = new ();
+
     private AcquisitionState LoadAcquisitionState()
     {
         if (string.IsNullOrEmpty(BlueprintSetIdProvider))
@@ -163,23 +165,16 @@ public class Blueprint
             return AcquisitionState.Found;
         }
 
-        if (Directory.Exists(ProductDirectory))
+        lock (ArchiveLock)
         {
-            var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
-
-            if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
+            if (Directory.Exists(ProductDirectory))
             {
-                return AcquisitionState.Found;
-            }
-        }
+                var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
 
-        if (Directory.Exists(ProviderDirectory))
-        {
-            var archives = Directory.EnumerateFiles(ProviderDirectory, "*.ap", SearchOption.AllDirectories);
-
-            if (archives.Select(archive => Archives.EntryExists(archive, RelativeBinaryPath)).Any(found => found))
-            {
-                return AcquisitionState.Found;
+                if (archives.Any(archive => Archives.EntryExists(archive, RelativeBinaryPath)))
+                {
+                    return AcquisitionState.Found;
+                }
             }
         }
 
