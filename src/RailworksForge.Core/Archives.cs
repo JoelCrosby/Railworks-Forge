@@ -36,7 +36,7 @@ public static class Archives
 
     public static string? TryGetTextFileContentFromPath(string archivePath, string filePath)
     {
-        using var archive = ZipFile.Open(filePath, ZipArchiveMode.Read);
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
 
         var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
         var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
@@ -184,9 +184,21 @@ public static class Archives
 
     public static bool TopLevelDirectoryExists(string archivePath, string directoryName)
     {
+        if (Cache.ArchiveCache.GetValueOrDefault(archivePath) is { } cachedArchive)
+        {
+            if (cachedArchive.Any(e => string.Equals(e, directoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+
         using var archive = ZipFile.OpenRead(archivePath);
 
-        return archive.Entries.Any(e => e.FullName.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
+        var entries = archive.Entries.Select(e => e.FullName).ToHashSet();
+
+        Cache.ArchiveCache.TryAdd(archivePath, entries);
+
+        return entries.Any(e => e.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static readonly HashSet<string> CorruptArchivePaths = [];
