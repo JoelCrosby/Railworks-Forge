@@ -281,7 +281,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = false;
 
-            Task.Run(() => Parallel.ForEach(results, (r, _) => r.LoadImage()));
+            Task.Run(() =>
+            {
+                foreach (var result in results)
+                {
+                    result.LoadImage();
+                }
+            });
         });
     }
 }

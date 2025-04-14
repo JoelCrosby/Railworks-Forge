@@ -73,7 +73,7 @@ public static class Archives
 
             if (Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath) is {} cachedArchive)
             {
-                if (!cachedArchive.Any(e => string.Equals(e, normalisedEntryFilepath, StringComparison.OrdinalIgnoreCase)))
+                if (!cachedArchive.Contains(normalisedEntryFilepath))
                 {
                     Log.Information("skipped indexing archive {Archive} as cache hit", archivePath.ToRelativeGamePath());
 
@@ -88,6 +88,8 @@ public static class Archives
             {
                 return null;
             }
+
+            Log.Information("loaded image from archive {Archive}", archivePath.ToRelativeGamePath());
 
             var stream = entry.Open();
 
@@ -183,7 +185,7 @@ public static class Archives
         {
             var normalisedDirectoryName = directoryName.NormalisePath();
 
-            if (cachedArchive.Any(e => string.Equals(e, normalisedDirectoryName, StringComparison.OrdinalIgnoreCase)))
+            if (cachedArchive.Contains(normalisedDirectoryName))
             {
                 return true;
             }
@@ -197,23 +199,22 @@ public static class Archives
 
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
-        var normalisedArchivePath = archivePath.NormalisePath();
-        var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
-        var cachedArchiveFiles = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath);
-
-        if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
-        {
-            return true;
-        }
-
-        if (CorruptArchivePaths.Any(a => normalisedArchivePath.Contains(a)))
-        {
-            return false;
-        }
-
-
         lock (EntryExistsSyncObj)
         {
+            var normalisedArchivePath = archivePath.NormalisePath();
+            var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
+            var cachedArchiveFiles = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath);
+
+            if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
+            {
+                return true;
+            }
+
+            if (CorruptArchivePaths.Any(a => normalisedArchivePath.Contains(a)))
+            {
+                return false;
+            }
+
             Log.Information("checking entry exists {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
 
             var entries = GetEntries(archivePath);
@@ -233,6 +234,11 @@ public static class Archives
 
     private static HashSet<string> GetEntries(string archivePath)
     {
+        if (Cache.ArchiveCache.GetValueOrDefault(archivePath.NormalisePath()) is {} cachedArchive)
+        {
+            return cachedArchive;
+        }
+
         Log.Information("indexing archive {Archive}", archivePath.ToRelativeGamePath());
 
         using var archive = ZipFile.OpenRead(archivePath);
