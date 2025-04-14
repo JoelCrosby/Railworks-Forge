@@ -22,9 +22,9 @@ public partial class PreloadConsistViewModel : ViewModelBase
         Consist = consist;
     }
 
-    public async Task LoadImage()
+    public void LoadImage()
     {
-        ImageBitmap = await Task.Run(GetImageBitmap);
+        ImageBitmap = GetImageBitmap();
     }
 
     private Bitmap? GetImageBitmap()

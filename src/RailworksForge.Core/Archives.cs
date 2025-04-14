@@ -11,6 +11,10 @@ namespace RailworksForge.Core;
 
 public static class Archives
 {
+
+
+    private static readonly Lock SyncObj = new ();
+
     public static string GetTextFileContentFromPath(string archivePath, string filePath)
     {
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
@@ -32,7 +36,7 @@ public static class Archives
 
     public static string? TryGetTextFileContentFromPath(string archivePath, string filePath)
     {
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+        using var archive = ZipFile.Open(filePath, ZipArchiveMode.Read);
 
         var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
         var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
@@ -51,29 +55,58 @@ public static class Archives
 
     public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
     {
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
-
-        var unixFilePath = filePath.Replace('\\', '/');
-        var normalisedFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
-        var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
-
-        if (entry is null)
+        lock (SyncObj)
         {
-            if (strict)
+            if (Cache.ImageCache.GetValueOrDefault((archivePath, filePath)) is {} cachedBitmap)
             {
-                ArchiveException.ThrowFileNotFound(archivePath, filePath);
+                Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath, filePath);
+
+                return cachedBitmap;
             }
 
-            return null;
+            var unixFilePath = filePath.Replace('\\', '/');
+            var normalisedFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
+
+            if (Cache.ArchiveCache.GetValueOrDefault(archivePath) is {} cachedArchive)
+            {
+                if (!cachedArchive.Any(e => string.Equals(e, normalisedFilepath, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Log.Information("skipped indexing archive {Archive} as cache hit", archivePath);
+
+                    return null;
+                }
+            }
+
+            Log.Information("indexing archive {Archive}", archivePath);
+
+            using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+
+            Cache.ArchiveCache.TryAdd(archivePath, archive.Entries.Select(e => e.FullName).ToHashSet());
+
+            var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
+
+            if (entry is null)
+            {
+                if (strict)
+                {
+                    ArchiveException.ThrowFileNotFound(archivePath, filePath);
+                }
+
+                return null;
+            }
+
+            var stream = entry.Open();
+
+            var image = new MemoryStream();
+            stream.CopyTo(image);
+            image.Position = 0;
+
+            var result = image.ReadBitmap();
+
+            Cache.ImageCache.TryAdd((archivePath, filePath), result);
+
+            return result;
         }
-
-        var stream = entry.Open();
-
-        var image = new MemoryStream();
-        stream.CopyTo(image);
-        image.Position = 0;
-
-        return image.ReadBitmap();
     }
 
     public static bool ExtractFileContentFromPath(string archivePath, string filePath, string destination)

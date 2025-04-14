@@ -100,13 +100,13 @@ public partial class ReplaceConsistViewModel : ViewModelBase
         });
     }
 
-    private static async void LoadImages(IEnumerable<PreloadConsistViewModel> items)
+    private static void LoadImages(IEnumerable<PreloadConsistViewModel> items)
     {
         try
         {
             foreach (var item in items)
             {
-                await item.LoadImage();
+                item.LoadImage();
             }
         }
         catch (Exception ex)
