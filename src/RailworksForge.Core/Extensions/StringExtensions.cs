@@ -31,4 +31,10 @@ public static partial class StringExtensions
     {
         return value.Normalize().ToLowerInvariant();
     }
+
+    public static string ToRelativeGamePath(this string value)
+    {
+        var length = Paths.GetGameDirectory().Length;
+        return value[length..];
+    }
 }

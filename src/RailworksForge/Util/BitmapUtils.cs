@@ -72,7 +72,7 @@ public static class BitmapUtils
         {
             var directory = Path.GetDirectoryName(blueprint.BlueprintIdPath);
             var idealPath = Path.Join(directory, "LocoInformation", "Image.png");
-            var result = Archives.GetBitmapStreamFromPath(archive, idealPath, false);
+            var result = Archives.GetBitmapStreamFromPath(archive, idealPath);
 
             if (result is not null) return result;
         }

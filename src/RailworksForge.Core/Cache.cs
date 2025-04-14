@@ -13,8 +13,6 @@ public class Cache
 {
     public static ConcurrentDictionary<string, AcquisitionState> AcquisitionStates = new ();
 
-    public static ConcurrentDictionary<string, HashSet<string>> ArchiveFileCache = new ();
-
     public static readonly ConcurrentDictionary<string, HashSet<string>> ArchiveCache = new();
 
     public static readonly ConcurrentDictionary<(string, string), Bitmap?> ImageCache = new();

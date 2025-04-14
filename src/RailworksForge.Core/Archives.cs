@@ -18,7 +18,7 @@ public static class Archives
 
     public static string GetTextFileContentFromPath(string archivePath, string filePath)
     {
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+        using var archive = ZipFile.OpenRead(archivePath);
 
         var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
         var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
@@ -37,7 +37,7 @@ public static class Archives
 
     public static string? TryGetTextFileContentFromPath(string archivePath, string filePath)
     {
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+        using var archive = ZipFile.OpenRead(archivePath);
 
         var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
         var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
@@ -54,45 +54,38 @@ public static class Archives
         return reader.ReadToEnd();
     }
 
-    public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
+    public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath)
     {
+        var normalisedArchivePath = archivePath.NormalisePath();
+
         lock (GetBitmapSyncObj)
         {
             if (Cache.ImageCache.GetValueOrDefault((archivePath, filePath)) is {} cachedBitmap)
             {
-                Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath, filePath);
+                Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
 
                 return cachedBitmap;
             }
 
             var unixFilePath = filePath.Replace('\\', '/');
-            var normalisedFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
+            var archiveEntryFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
+            var normalisedEntryFilepath = archiveEntryFilepath.NormalisePath();
 
-            if (Cache.ArchiveCache.GetValueOrDefault(archivePath) is {} cachedArchive)
+            if (Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath) is {} cachedArchive)
             {
-                if (!cachedArchive.Any(e => string.Equals(e, normalisedFilepath, StringComparison.OrdinalIgnoreCase)))
+                if (!cachedArchive.Any(e => string.Equals(e, normalisedEntryFilepath, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Log.Information("skipped indexing archive {Archive} as cache hit", archivePath);
+                    Log.Information("skipped indexing archive {Archive} as cache hit", archivePath.ToRelativeGamePath());
 
                     return null;
                 }
             }
 
-            Log.Information("indexing archive {Archive}", archivePath);
-
             using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
-
-            Cache.ArchiveCache.TryAdd(archivePath, archive.Entries.Select(e => e.FullName).ToHashSet());
-
-            var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
+            var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, archiveEntryFilepath, StringComparison.OrdinalIgnoreCase));
 
             if (entry is null)
             {
-                if (strict)
-                {
-                    ArchiveException.ThrowFileNotFound(archivePath, filePath);
-                }
-
                 return null;
             }
 
@@ -185,49 +178,45 @@ public static class Archives
 
     public static bool TopLevelDirectoryExists(string archivePath, string directoryName)
     {
-        if (Cache.ArchiveCache.GetValueOrDefault(archivePath) is { } cachedArchive)
+        var normalizedArchivePath = archivePath.NormalisePath();
+        if (Cache.ArchiveCache.GetValueOrDefault(normalizedArchivePath) is {} cachedArchive)
         {
-            if (cachedArchive.Any(e => string.Equals(e, directoryName, StringComparison.OrdinalIgnoreCase)))
+            var normalisedDirectoryName = directoryName.NormalisePath();
+
+            if (cachedArchive.Any(e => string.Equals(e, normalisedDirectoryName, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }
         }
 
-        using var archive = ZipFile.OpenRead(archivePath);
-
-        var entries = archive.Entries.Select(e => e.FullName).ToHashSet();
-
-        Cache.ArchiveCache.TryAdd(archivePath, entries);
-
+        var entries = GetEntries(archivePath);
         return entries.Any(e => e.StartsWith(directoryName, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static readonly HashSet<string> CorruptArchivePaths = [];
+    private static readonly HashSet<string> CorruptArchivePaths = ["Assets/DTG/Academy/AcademyAssetsTest.ap"];
 
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
+        var normalisedArchivePath = archivePath.NormalisePath();
+        var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
+        var cachedArchiveFiles = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath);
+
+        if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
+        {
+            return true;
+        }
+
+        if (CorruptArchivePaths.Any(a => normalisedArchivePath.Contains(a)))
+        {
+            return false;
+        }
+
+
         lock (EntryExistsSyncObj)
         {
-            var normalisedArchivePath = archivePath.NormalisePath();
-            var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
-            var cachedArchiveFiles = Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath);
+            Log.Information("checking entry exists {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
 
-            if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
-            {
-                return true;
-            }
-
-            if (CorruptArchivePaths.Contains(normalisedArchivePath))
-            {
-                return false;
-            }
-
-            using var archive = ZipFile.OpenRead(archivePath);
-
-            var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
-
-            Cache.ArchiveCache.TryAdd(archivePath, entries);
-
+            var entries = GetEntries(archivePath);
             return entries.Any(e => string.Equals(e, normalisedBlueprintPath, StringComparison.OrdinalIgnoreCase));
         }
     }
@@ -240,5 +229,17 @@ public static class Archives
             .Where(entry => entry.FullName.StartsWith(directoryPath) && entry.FullName.EndsWith(extension))
             .Select(entry => entry.FullName)
             .ToList();
+    }
+
+    private static HashSet<string> GetEntries(string archivePath)
+    {
+        Log.Information("indexing archive {Archive}", archivePath.ToRelativeGamePath());
+
+        using var archive = ZipFile.OpenRead(archivePath);
+        var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
+
+        Cache.ArchiveCache.TryAdd(archivePath.NormalisePath(), entries);
+
+        return entries;
     }
 }

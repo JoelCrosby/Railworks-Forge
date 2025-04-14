@@ -74,6 +74,6 @@ public partial class RouteViewModel : ViewModelBase
 
         if (path is null) return null;
 
-        return Archives.GetBitmapStreamFromPath(path, "RouteInformation/Image.png", false);
+        return Archives.GetBitmapStreamFromPath(path, "RouteInformation/Image.png");
     }
 }
