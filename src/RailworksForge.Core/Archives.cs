@@ -56,51 +56,58 @@ public static class Archives
 
     public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath)
     {
-        var normalisedArchivePath = archivePath.NormalisePath();
-        var cacheKey = normalisedArchivePath + filePath.NormalisePath();
-
-        lock (GetBitmapSyncObj)
+        try
         {
-            if (Cache.ImageCache.GetValueOrDefault(cacheKey) is {} cachedBitmap)
+            var normalisedArchivePath = archivePath.NormalisePath();
+            var cacheKey = normalisedArchivePath + filePath.NormalisePath();
+
+            lock (GetBitmapSyncObj)
             {
-                Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
+                if (Cache.ImageCache.GetValueOrDefault(cacheKey) is {} cachedBitmap)
+                {
+                    Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
 
-                return cachedBitmap;
-            }
+                    return cachedBitmap;
+                }
 
-            var unixFilePath = filePath.Replace('\\', '/');
-            var archiveEntryFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
-            var normalisedEntryFilepath = archiveEntryFilepath.NormalisePath();
+                var unixFilePath = filePath.Replace('\\', '/');
+                var archiveEntryFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
+                var normalisedEntryFilepath = archiveEntryFilepath.NormalisePath();
 
-            if (Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath) is {} cachedArchive)
-            {
-                if (!cachedArchive.Contains(normalisedEntryFilepath))
+                if (Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath) is {} cachedArchive)
+                {
+                    if (!cachedArchive.Contains(normalisedEntryFilepath))
+                    {
+                        return null;
+                    }
+                }
+
+                using var archive = ZipFile.OpenRead(archivePath);
+                var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, archiveEntryFilepath, StringComparison.OrdinalIgnoreCase));
+
+                if (entry is null)
                 {
                     return null;
                 }
+
+                Log.Information("loaded image from archive {Archive}", archivePath.ToRelativeGamePath());
+
+                var stream = entry.Open();
+
+                var image = new MemoryStream();
+                stream.CopyTo(image);
+                image.Position = 0;
+
+                var result = image.ReadBitmap();
+
+                Cache.ImageCache.TryAdd(cacheKey, result);
+
+                return result;
             }
-
-            using var archive = ZipFile.OpenRead(archivePath);
-            var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, archiveEntryFilepath, StringComparison.OrdinalIgnoreCase));
-
-            if (entry is null)
-            {
-                return null;
-            }
-
-            Log.Information("loaded image from archive {Archive}", archivePath.ToRelativeGamePath());
-
-            var stream = entry.Open();
-
-            var image = new MemoryStream();
-            stream.CopyTo(image);
-            image.Position = 0;
-
-            var result = image.ReadBitmap();
-
-            Cache.ImageCache.TryAdd(cacheKey, result);
-
-            return result;
+        }
+        catch
+        {
+            return null;
         }
     }
 

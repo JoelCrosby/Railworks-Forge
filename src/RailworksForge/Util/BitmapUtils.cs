@@ -52,7 +52,14 @@ public static class BitmapUtils
 
         if (Paths.GetActualPathFromInsensitive(imagePath) is { } path)
         {
-            return File.OpenRead(path);
+            try
+            {
+                return File.OpenRead(path);
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
         }
 
         return null;
@@ -71,7 +78,7 @@ public static class BitmapUtils
         foreach (var archive in archives)
         {
             var directory = Path.GetDirectoryName(blueprint.BlueprintIdPath);
-            var idealPath = Path.Join(directory, "LocoInformation", "Image.png");
+            var idealPath = Path.Join(directory, "LocoInformation", "image.png");
             var result = Archives.GetBitmapStreamFromPath(archive, idealPath);
 
             if (result is not null) return result;

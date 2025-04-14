@@ -22,6 +22,8 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        Paths.SetGameDirectory();
+
         var services = new ServiceCollection();
 
         RegisterServices(services);

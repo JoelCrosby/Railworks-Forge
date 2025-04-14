@@ -73,17 +73,31 @@ public static class Paths
         return Path.Join(home, configFolder, PrimaryDirName);
     }
 
+    private static string _gameDirectory = string.Empty;
+    private static readonly Lock RegLock = new();
+
     public static string GetGameDirectory()
+    {
+        return _gameDirectory;
+    }
+
+    public static void SetGameDirectory()
     {
         if (OperatingSystem.IsWindows())
         {
-            if (GetGameDirectoryWindows() is {} windowsPath)
+            lock (RegLock)
             {
-                return windowsPath;
+
+                if (GetGameDirectoryWindows() is {} windowsPath)
+                {
+                    _gameDirectory = windowsPath;
+
+                    return;
+                }
             }
         }
 
-        return Configuration.Get().GameDirectoryPath;
+        _gameDirectory = Configuration.Get().GameDirectoryPath;
     }
 
     [SupportedOSPlatform("windows")]
@@ -129,16 +143,12 @@ public static class Paths
 
     public static bool Exists(string path, string? rootPath = null)
     {
+        rootPath ??= GetGameDirectory();
         return GetActualPathFromInsensitive(path, rootPath) is not null;
     }
 
     public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
-        if (GetPlatform() is Platform.Windows)
-        {
-            return Path.Exists(path) ? path : null;
-        }
-
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);
 
         if (Path.Exists(normalisedPath))
@@ -148,7 +158,7 @@ public static class Paths
 
         if (normalisedPath is null)
         {
-            throw new Exception("unable to get relative path.");
+            return null;
         }
 
         var relative = rootPath is not null ? normalisedPath.Replace(rootPath, string.Empty) : normalisedPath;

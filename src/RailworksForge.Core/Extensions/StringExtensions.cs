@@ -29,7 +29,7 @@ public static partial class StringExtensions
 
     public static string NormalisePath(this string value)
     {
-        return value.Normalize().ToLowerInvariant();
+        return value.Normalize().ToLowerInvariant().Replace('\\', '/');
     }
 
     public static string ToRelativeGamePath(this string value)
