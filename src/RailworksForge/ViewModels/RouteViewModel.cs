@@ -48,14 +48,14 @@ public partial class RouteViewModel : ViewModelBase
         ImageBitmap = await Task.Run(GetImageBitmap);
     }
 
-    private async Task<Bitmap?> GetImageBitmap()
+    private Bitmap? GetImageBitmap()
     {
         if (GetUnCompressedImageStream() is {} result)
         {
             return result;
         }
 
-        return await GetCompressedImageStream();
+        return GetCompressedImageStream();
     }
 
     private Bitmap? GetUnCompressedImageStream()
@@ -67,13 +67,13 @@ public partial class RouteViewModel : ViewModelBase
         return image.ReadBitmap();
     }
 
-    private async Task<Bitmap?> GetCompressedImageStream()
+    private Bitmap? GetCompressedImageStream()
     {
         var idealPath = Path.Join(DirectoryPath, "MainContent.ap");
         var path = Paths.GetActualPathFromInsensitive(idealPath, Paths.GetRoutesDirectory());
 
         if (path is null) return null;
 
-        return await Archives.GetBitmapStreamFromPath(path, "RouteInformation/Image.png", false);
+        return Archives.GetBitmapStreamFromPath(path, "RouteInformation/Image.png", false);
     }
 }

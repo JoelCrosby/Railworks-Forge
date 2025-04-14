@@ -27,7 +27,7 @@ public partial class PreloadConsistViewModel : ViewModelBase
         ImageBitmap = await Task.Run(GetImageBitmap);
     }
 
-    private Task<Bitmap?> GetImageBitmap()
+    private Bitmap? GetImageBitmap()
     {
         var consist = Consist.ConsistEntries.FirstOrDefault();
         return BitmapUtils.GetImageBitmap(consist?.Blueprint);

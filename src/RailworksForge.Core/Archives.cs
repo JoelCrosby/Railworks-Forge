@@ -49,11 +49,12 @@ public static class Archives
         return reader.ReadToEnd();
     }
 
-    public static async Task<Bitmap?> GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
+    public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
     {
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
 
-        var normalisedFilepath = filePath.StartsWith('/') ? filePath.TrimStart('/') : filePath;
+        var unixFilePath = filePath.Replace('\\', '/');
+        var normalisedFilepath = unixFilePath.StartsWith('/') ? unixFilePath.TrimStart('/') : unixFilePath;
         var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, normalisedFilepath, StringComparison.OrdinalIgnoreCase));
 
         if (entry is null)
@@ -69,7 +70,7 @@ public static class Archives
         var stream = entry.Open();
 
         var image = new MemoryStream();
-        await stream.CopyToAsync(image);
+        stream.CopyTo(image);
         image.Position = 0;
 
         return image.ReadBitmap();

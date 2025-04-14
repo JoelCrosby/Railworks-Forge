@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 
@@ -22,12 +21,12 @@ public partial class ConsistViewModel : ViewModelBase
         Consist = consist;
     }
 
-    public async Task LoadImage()
+    public void LoadImage()
     {
-        ImageBitmap = await Task.Run(GetImageBitmap);
+        ImageBitmap = GetImageBitmap();
     }
 
-    private Task<Bitmap?> GetImageBitmap()
+    private Bitmap? GetImageBitmap()
     {
         var consist = Consist.Vehicles.FirstOrDefault();
         return BitmapUtils.GetImageBitmap(consist);

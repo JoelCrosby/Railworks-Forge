@@ -281,7 +281,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             IsLoading = false;
 
-            Task.Run(() => Parallel.ForEachAsync(results, async (r, _) => await r.LoadImage()));
+            Task.Run(() => Parallel.ForEach(results, (r, _) => r.LoadImage()));
         });
     }
 }

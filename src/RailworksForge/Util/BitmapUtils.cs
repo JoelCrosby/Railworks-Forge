@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.IO;
-using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 
@@ -12,14 +11,14 @@ namespace RailworksForge.Util;
 
 public static class BitmapUtils
 {
-    public static async Task<Bitmap?> GetImageBitmap(Blueprint? blueprint)
+    public static Bitmap? GetImageBitmap(Blueprint? blueprint)
     {
         if (GetUnCompressedImageStream(blueprint) is {} result)
         {
             return result;
         }
 
-        return await GetCompressedImageStream(blueprint);
+        return GetCompressedImageStream(blueprint);
     }
 
     private static readonly ConcurrentDictionary<string, Bitmap?> BitmapCache = new();
@@ -59,7 +58,7 @@ public static class BitmapUtils
         return null;
     }
 
-    private static async Task<Bitmap?> GetCompressedImageStream(Blueprint? blueprint)
+    private static Bitmap? GetCompressedImageStream(Blueprint? blueprint)
     {
         if (blueprint is null) return null;
 
@@ -73,7 +72,7 @@ public static class BitmapUtils
         {
             var directory = Path.GetDirectoryName(blueprint.BlueprintIdPath);
             var idealPath = Path.Join(directory, "LocoInformation", "Image.png");
-            var result = await Archives.GetBitmapStreamFromPath(archive, idealPath, false);
+            var result = Archives.GetBitmapStreamFromPath(archive, idealPath, false);
 
             if (result is not null) return result;
         }

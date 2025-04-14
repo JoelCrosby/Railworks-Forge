@@ -102,6 +102,7 @@ public static class ScenarioDatabaseService
 
     private static string GetCachePath()
     {
+        Directory.CreateDirectory(Paths.GetCacheFolder());
         return Path.Join(Paths.GetCacheFolder(), "SDBCache.json");
     }
 

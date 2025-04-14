@@ -1,4 +1,5 @@
 using CliWrap;
+using static RailworksForge.Core.Paths;
 
 namespace RailworksForge.Core.External;
 
@@ -27,7 +28,7 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
-        await Cli.Wrap("wine").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
+        await RunSerz(inputArg, outputArg, token);
 
         var isSuccess = Paths.Exists(outputPath);
 
@@ -37,5 +38,17 @@ public class Serz
         }
 
         return new ConvertedSerzFile(outputPath);
+    }
+
+    private static async Task RunSerz(string inputArg, string outputArg, CancellationToken token)
+    {
+        if (Paths.GetPlatform() == Platform.Windows)
+        {
+            await Cli.Wrap(ExePath).WithArguments([inputArg, outputArg]).ExecuteAsync(token);
+        }
+        else 
+        {
+            await Cli.Wrap("wine").WithArguments([ExePath, inputArg, outputArg]).ExecuteAsync(token);
+        }
     }
 }

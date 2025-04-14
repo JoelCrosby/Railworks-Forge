@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Avalonia.Platform;
+using RailworksForge.Core;
 
 namespace RailworksForge.Util;
 
@@ -8,7 +10,7 @@ public static class Launcher
     {
         var processInfo = new ProcessStartInfo
         {
-            FileName = "xdg-open",
+            FileName = Paths.GetPlatform() is Paths.Platform.Windows ? "explorer" : "xdg-open",
             Arguments = $"\"{path}\"",
         };
 

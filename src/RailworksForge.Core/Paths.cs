@@ -13,7 +13,7 @@ namespace RailworksForge.Core;
 
 public static class Paths
 {
-    private enum Platform
+    public enum Platform
     {
         Linux = 0,
         FreeBsd = 1,
@@ -23,10 +23,10 @@ public static class Paths
 
     private const string PrimaryDirName = nameof(RailworksForge);
 
-    private const string InstallPathRegKey = @"KEY_LOCAL_MACHINE\Software\Wow6432Node\Railsimulator.com\RailWorks";
+    private const string InstallPathRegKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Railsimulator.com\RailWorks";
     private const string InstallPathRegKeyValueName = "Install_Path";
 
-    private static Platform GetPlatform()
+    public static Platform GetPlatform()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -120,6 +120,8 @@ public static class Paths
 
     public static string ToWindowsPath(this string path)
     {
+        if (Paths.GetPlatform() is Platform.Windows) return path;
+
         return path.Replace("/", @"\").ReplaceFirst(@"\", @"z:\");
     }
 

@@ -53,7 +53,7 @@ internal sealed class Program
 
         args.Exception.Handle(ex =>
         {
-            Log.Error("Unobserved task exception type: {ExceptionType}", ex.GetType());
+            Log.Error(ex, "Unobserved task exception type: {ExceptionType} {Message}", ex.GetType());
             return true;
         });
     }
