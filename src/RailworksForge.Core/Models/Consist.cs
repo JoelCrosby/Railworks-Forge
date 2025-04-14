@@ -47,7 +47,7 @@ public class Consist : Blueprint
         var blueprintSetIdProduct = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("LocoBP iBlueprintLibrary-cBlueprintSetID Provider");
 
-        Cache.AcquisitionStates.TryGetValue(consistId, out var cachedState);
+        Cache.ConsistAcquisitionStates.TryGetValue(consistId, out var cachedState);
 
         return new Consist
         {
@@ -61,7 +61,7 @@ public class Consist : Blueprint
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
             ServiceId = serviceId,
-            ConsistAcquisitionState = cachedState,
+            ConsistAcquisitionState = cachedState ?? AcquisitionState.Missing,
             SearchIndex = $"{locomotiveName} {locoAuthor} {locoClass} {serviceName}".ToLowerInvariant(),
             Vehicles = [],
         };

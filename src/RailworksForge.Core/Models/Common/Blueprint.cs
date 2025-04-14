@@ -5,6 +5,8 @@ using AngleSharp.Dom;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 
+using Serilog;
+
 namespace RailworksForge.Core.Models.Common;
 
 [DebuggerDisplay("{BlueprintSetIdProvider}/{BlueprintSetIdProduct}/{BlueprintId}")]
@@ -127,18 +129,18 @@ public class Blueprint
     private string BlueprintPath => Path.Join(ProductDirectory, RelativeBinaryPath);
     private string XmlDocumentPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
-    public AcquisitionState CachedAcquisitionState { get; private set; }
-
     private AcquisitionState GetAcquisitionState()
     {
-        if (CachedAcquisitionState is AcquisitionState.Found)
+        if (Cache.BlueprintAcquisitionStates.GetValueOrDefault(RelativeBinaryPath) is {} cached)
         {
-            return AcquisitionState.Found;
+            return cached;
         }
 
-        CachedAcquisitionState = LoadAcquisitionState();
+        var state = LoadAcquisitionState();
 
-        return CachedAcquisitionState;
+        Cache.BlueprintAcquisitionStates.TryAdd(RelativeBinaryPath, state);
+
+        return state;
     }
 
     private static readonly Lock ArchiveLock = new ();
@@ -160,16 +162,13 @@ public class Blueprint
             return AcquisitionState.Found;
         }
 
-        if (Paths.Exists(XmlDocumentPath, Paths.GetAssetsDirectory()))
-        {
-            return AcquisitionState.Found;
-        }
-
         lock (ArchiveLock)
         {
             if (Directory.Exists(ProductDirectory))
             {
-                var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
+                var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories).ToList();
+
+                Log.Information("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
 
                 if (archives.Any(archive => Archives.EntryExists(archive, RelativeBinaryPath)))
                 {

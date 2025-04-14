@@ -57,10 +57,11 @@ public static class Archives
     public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath)
     {
         var normalisedArchivePath = archivePath.NormalisePath();
+        var cacheKey = normalisedArchivePath + filePath.NormalisePath();
 
         lock (GetBitmapSyncObj)
         {
-            if (Cache.ImageCache.GetValueOrDefault((archivePath, filePath)) is {} cachedBitmap)
+            if (Cache.ImageCache.GetValueOrDefault(cacheKey) is {} cachedBitmap)
             {
                 Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
 
@@ -75,13 +76,11 @@ public static class Archives
             {
                 if (!cachedArchive.Contains(normalisedEntryFilepath))
                 {
-                    Log.Information("skipped indexing archive {Archive} as cache hit", archivePath.ToRelativeGamePath());
-
                     return null;
                 }
             }
 
-            using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+            using var archive = ZipFile.OpenRead(archivePath);
             var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, archiveEntryFilepath, StringComparison.OrdinalIgnoreCase));
 
             if (entry is null)
@@ -99,7 +98,7 @@ public static class Archives
 
             var result = image.ReadBitmap();
 
-            Cache.ImageCache.TryAdd((archivePath, filePath), result);
+            Cache.ImageCache.TryAdd(cacheKey, result);
 
             return result;
         }
