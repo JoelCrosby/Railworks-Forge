@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 
 using AngleSharp.Text;
 
+using Microsoft.Win32;
+
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
@@ -20,6 +22,9 @@ public static class Paths
     }
 
     private const string PrimaryDirName = nameof(RailworksForge);
+
+    private const string InstallPathRegKey = @"KEY_LOCAL_MACHINE\Software\Wow6432Node\Railsimulator.com\RailWorks";
+    private const string InstallPathRegKeyValueName = "Install_Path";
 
     private static Platform GetPlatform()
     {
@@ -76,6 +81,16 @@ public static class Paths
 
     public static string GetGameDirectory()
     {
+        if (GetPlatform() == Platform.Windows)
+        {
+            var entry = Registry.GetValue(InstallPathRegKey, InstallPathRegKeyValueName, null);
+
+            if (entry is string path)
+            {
+                if (Paths.Exists(path)) return path;
+            }
+        }
+
         return Configuration.Get().GameDirectoryPath;
     }
 
