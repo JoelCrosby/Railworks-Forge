@@ -204,7 +204,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Columns =
             {
                 new TemplateColumn<ConsistViewModel>("Image", "ImageCell"),
-                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.AcquisitionState),
+                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.ConsistAcquisitionState),
                 new TextColumn<ConsistViewModel, bool>("Is Player Driver", x => x.Consist.PlayerDriver),
                 new TextColumn<ConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName),
                 new TextColumn<ConsistViewModel, int>("Consist Length", x => x.Consist.Length),

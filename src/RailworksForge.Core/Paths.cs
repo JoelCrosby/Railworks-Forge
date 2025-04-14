@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 
 using AngleSharp.Text;
@@ -28,12 +29,12 @@ public static class Paths
 
     public static Platform GetPlatform()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (OperatingSystem.IsWindows())
         {
             return Platform.Windows;
         }
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (OperatingSystem.IsMacOS())
         {
             return Platform.Osx;
         }
@@ -81,17 +82,25 @@ public static class Paths
 
     public static string GetGameDirectory()
     {
-        if (GetPlatform() == Platform.Windows)
+        if (OperatingSystem.IsWindows())
         {
-            var entry = Registry.GetValue(InstallPathRegKey, InstallPathRegKeyValueName, null);
-
-            if (entry is string path)
+            if (GetGameDirectoryWindows() is {} windowsPath)
             {
-                if (Paths.Exists(path)) return path;
+                return windowsPath;
             }
         }
 
         return Configuration.Get().GameDirectoryPath;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static string? GetGameDirectoryWindows()
+    {
+         var entry = Registry.GetValue(InstallPathRegKey, InstallPathRegKeyValueName, null);
+
+         if (entry is not string path) return null;
+
+         return Exists(path) ? path : null;
     }
 
     private static string? _assetsDirectory;
