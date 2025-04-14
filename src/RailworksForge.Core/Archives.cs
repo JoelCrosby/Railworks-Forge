@@ -13,7 +13,8 @@ public static class Archives
 {
 
 
-    private static readonly Lock SyncObj = new ();
+    private static readonly Lock GetBitmapSyncObj = new ();
+    private static readonly Lock EntryExistsSyncObj = new ();
 
     public static string GetTextFileContentFromPath(string archivePath, string filePath)
     {
@@ -55,7 +56,7 @@ public static class Archives
 
     public static Bitmap? GetBitmapStreamFromPath(string archivePath, string filePath, bool strict = true)
     {
-        lock (SyncObj)
+        lock (GetBitmapSyncObj)
         {
             if (Cache.ImageCache.GetValueOrDefault((archivePath, filePath)) is {} cachedBitmap)
             {
@@ -205,60 +206,29 @@ public static class Archives
 
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
-        var normalisedArchivePath = archivePath.NormalisePath();
-        var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
-        var cachedArchiveFiles = Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath);
-
-        if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
+        lock (EntryExistsSyncObj)
         {
-            return true;
-        }
+            var normalisedArchivePath = archivePath.NormalisePath();
+            var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
+            var cachedArchiveFiles = Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath);
 
-        if (CorruptArchivePaths.Contains(normalisedArchivePath))
-        {
-            return false;
-        }
-
-        try
-        {
-            using var archive = ZipFile.OpenRead(archivePath);
-
-            foreach (var entry in archive.Entries)
+            if (cachedArchiveFiles?.Contains(normalisedBlueprintPath) ?? false)
             {
-                if (entry.FullName.Contains('.', StringComparison.Ordinal) is false)
-                {
-                    continue;
-                }
-
-                var normalisedEntry = entry.FullName.NormalisePath();
-
-                if (Cache.ArchiveFileCache.GetValueOrDefault(normalisedArchivePath) is {} files)
-                {
-                    files.Add(normalisedEntry);
-                }
-                else
-                {
-                    HashSet<string> UpdateEntry(string _, HashSet<string> value)
-                    {
-                        value.Add(normalisedEntry);
-                        return value;
-                    }
-
-                    HashSet<string> CreateEntry(string _) => [normalisedEntry];
-
-                    Cache.ArchiveFileCache.AddOrUpdate(normalisedArchivePath, CreateEntry,  UpdateEntry);
-                }
+                return true;
             }
 
-            return Cache.ArchiveFileCache[normalisedArchivePath].Contains(normalisedBlueprintPath);
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to read entry {Entry} inside archive at path {Path}", agnosticBlueprintIdPath, archivePath);
+            if (CorruptArchivePaths.Contains(normalisedArchivePath))
+            {
+                return false;
+            }
 
-            CorruptArchivePaths.Add(normalisedArchivePath);
+            using var archive = ZipFile.OpenRead(archivePath);
 
-            return false;
+            var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
+
+            Cache.ArchiveCache.TryAdd(archivePath, entries);
+
+            return entries.Any(e => string.Equals(e, normalisedBlueprintPath, StringComparison.OrdinalIgnoreCase));
         }
     }
 
