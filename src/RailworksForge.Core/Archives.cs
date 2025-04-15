@@ -240,18 +240,26 @@ public static class Archives
 
     private static HashSet<string> GetEntries(string archivePath)
     {
-        if (Cache.ArchiveCache.GetValueOrDefault(archivePath.NormalisePath()) is {} cachedArchive)
+        lock (EntryExistsSyncObj)
         {
-            return cachedArchive;
+            if (CorruptArchivePaths.Any(archivePath.Contains))
+            {
+                return [];
+            }
+
+            if (Cache.ArchiveCache.GetValueOrDefault(archivePath.NormalisePath()) is {} cachedArchive)
+            {
+                return cachedArchive;
+            }
+
+            Log.Information("indexing archive {Archive}", archivePath.ToRelativeGamePath());
+
+            using var archive = ZipFile.OpenRead(archivePath);
+            var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
+
+            Cache.ArchiveCache.TryAdd(archivePath.NormalisePath(), entries);
+
+            return entries;
         }
-
-        Log.Information("indexing archive {Archive}", archivePath.ToRelativeGamePath());
-
-        using var archive = ZipFile.OpenRead(archivePath);
-        var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
-
-        Cache.ArchiveCache.TryAdd(archivePath.NormalisePath(), entries);
-
-        return entries;
     }
 }
