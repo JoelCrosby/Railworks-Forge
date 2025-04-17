@@ -4,6 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+             xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:converters="clr-namespace:RailworksForge.Converters"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.RouteDetailPage"
@@ -73,6 +76,12 @@
                     <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />
                 </ContextMenu>
             </TreeDataGrid.ContextMenu>
+
+            <TreeDataGrid.Resources>
+                <DataTemplate x:Key="CompletionCell" DataType="models:Scenario">
+                    <lucideAvalonia:Lucide Icon="CircleCheckBig" IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}" StrokeBrush="{DynamicResource SuccessBrush}" StrokeThickness="3" Width="20" Height="20" />
+                </DataTemplate>
+            </TreeDataGrid.Resources>
         </TreeDataGrid>
 
     </DockPanel>

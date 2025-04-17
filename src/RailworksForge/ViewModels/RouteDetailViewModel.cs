@@ -101,7 +101,7 @@ public partial class RouteDetailViewModel : ViewModelBase
                 new TextColumn<Scenario, int>("Rating", x => x.Rating),
                 new TextColumn<Scenario, string>("Season", x => x.Season),
                 new TextColumn<Scenario, int>("Score", x => x.PlayerInfo.Score),
-                new TextColumn<Scenario, string>("Completion", x => x.PlayerInfo.Completion),
+                new TemplateColumn<Scenario>("Completion", "CompletionCell"),
             },
         };
 

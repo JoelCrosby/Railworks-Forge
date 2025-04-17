@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 
+using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -11,23 +12,36 @@ namespace RailworksForge.Converters;
 
 public class RowHighlightStateConverter : IValueConverter
 {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        var app = Application.Current!;
+        var theme = app.ActualThemeVariant;
+        var resources = app.Resources;
+
         if (value is ConsistViewModel { Consist: {} consist })
         {
             if (consist.ConsistAcquisitionState is AcquisitionState.Missing)
             {
-                return Brushes.DarkRed;
+                if (resources.TryGetResource("ErrorBrush", theme, out var res))
+                {
+                    return res;
+                }
             }
 
             if (consist.ConsistAcquisitionState is AcquisitionState.Partial)
             {
-                return Brushes.DarkGoldenrod;
+                if (resources.TryGetResource("PartialBrush", theme, out var res))
+                {
+                    return res;
+                }
             }
 
             if (consist.PlayerDriver)
             {
-                return Brushes.DarkBlue;
+                if (resources.TryGetResource("IsPlayerBrush", theme, out var res))
+                {
+                    return res;
+                }
             }
         }
 

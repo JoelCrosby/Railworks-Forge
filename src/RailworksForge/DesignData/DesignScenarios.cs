@@ -26,6 +26,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -44,6 +51,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -61,6 +75,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -79,6 +100,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -97,6 +125,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -115,6 +150,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "NotCompleted",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -133,6 +175,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "CompletedSuccessfully",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
         new()
         {
@@ -151,6 +200,13 @@ public static partial class DesignData
             AssetPath = AssetPath.Empty,
             Duration = 60,
             Rating = 2,
+            PlayerInfo = new ()
+            {
+                Completion = "NotCompleted",
+                Score = 200,
+                MedalsAwarded = 2,
+                ScenarioId = string.Empty,
+            },
         },
     ];
 }
