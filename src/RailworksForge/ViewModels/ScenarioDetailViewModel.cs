@@ -252,6 +252,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         IsLoading = true;
 
+        Cache.BlueprintAcquisitionStates.Clear();
+        Cache.ArchiveCache.Clear();
+
         var updatedScenario = Scenario.Refresh();
 
         if (updatedScenario is null) return;

@@ -141,6 +141,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private void Refresh()
     {
+        Cache.BlueprintAcquisitionStates.Clear();
+        Cache.ArchiveCache.Clear();
+
         Observable.StartAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
     }
 
