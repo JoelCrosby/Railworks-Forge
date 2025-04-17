@@ -104,7 +104,8 @@ public class VehicleGenerator
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar) + ".dcsv";
         var filepath = Path.Join(Paths.GetAssetsDirectory(), normalisedPath);
 
-        var text = Paths.Exists(filepath) ? File.ReadAllText(filepath) : GetCompressedText();
+        var existingPath = Paths.GetActualPathFromInsensitive(filepath);
+        var text = existingPath != null ? File.ReadAllText(existingPath) : GetCompressedText();
 
         if (text is null)
         {

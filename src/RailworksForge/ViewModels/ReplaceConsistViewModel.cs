@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 

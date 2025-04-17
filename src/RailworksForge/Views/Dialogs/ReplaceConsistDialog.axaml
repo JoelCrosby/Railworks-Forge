@@ -76,7 +76,7 @@
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Click="CancelButtonOnClick">Cancel</Button>
-                <Button IsEnabled="{Binding SelectedConsist, Converter={x:Static ObjectConverters.IsNotNull}}"
+                <Button IsEnabled="{Binding PreloadConsistsSource.RowSelection.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}"
                         Command="{Binding ReplaceConsistCommand}">
                     Replace Consist
                 </Button>

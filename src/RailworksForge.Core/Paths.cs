@@ -156,11 +156,6 @@ public static class Paths
             return normalisedPath;
         }
 
-        if (normalisedPath is null)
-        {
-            return null;
-        }
-
         var relative = rootPath is not null ? normalisedPath.Replace(rootPath, string.Empty) : normalisedPath;
         var parts = relative.Split(Path.DirectorySeparatorChar).Where(r => !string.IsNullOrEmpty(r));
         var partsQueue = new Queue<string>(parts);
