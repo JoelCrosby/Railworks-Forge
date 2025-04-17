@@ -12,6 +12,11 @@ namespace RailworksForge.Core.Extensions;
 
 public static class AngleSharpExtensions
 {
+    public static string SelectTextContent(this IElement? node)
+    {
+        return node?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;
+    }
+
     public static string SelectTextContent(this IElement node, string selector)
     {
         return node.QuerySelector(selector)?.Text().Trim().ReplaceLineEndings(string.Empty) ?? string.Empty;

@@ -4,5 +4,6 @@ public enum AcquisitionState
 {
     Unknown = 0,
     Found = 1,
-    Missing = 2,
+    Partial = 2,
+    Missing = 3,
 }

@@ -74,7 +74,7 @@
     </Style>
 
     <Style Selector="TreeDataGrid TreeDataGridRow TreeDataGridCellsPresenter">
-        <Setter Property="Background" Value="{Binding DataType=models:Consist, Converter={StaticResource AcquisitionStateConverter}}" />
+        <Setter Property="Background" Value="{Binding DataType=models:Consist, Converter={StaticResource RowHighlightStateConverter}}" />
     </Style>
 
     <Style Selector="TreeDataGridTextCell TextBlock, TreeDataGridColumnHeader TextBlock">

@@ -88,8 +88,7 @@ public class Consist : Blueprint
         var blueprintSetIdProvider = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Provider");
 
         var vehicles = el.QuerySelectorAll("RailVehicles BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID").Select(Parse).ToList();
-        var consistAcquisitionState = vehicles.All(v => v.AcquisitionState is AcquisitionState.Found)
-            ? AcquisitionState.Found : AcquisitionState.Missing;
+        var consistAcquisitionState = GetConsistAcquisitionState(vehicles);
 
         return new Consist
         {
@@ -108,6 +107,19 @@ public class Consist : Blueprint
             SearchIndex = $"{locomotiveName} {blueprintSetIdProvider} {locoClass} {serviceName}".ToLowerInvariant(),
             Vehicles = vehicles,
         };
+    }
+
+    private static AcquisitionState GetConsistAcquisitionState(List<Blueprint> vehicles)
+    {
+        var found = vehicles.Count(v => v.AcquisitionState is AcquisitionState.Found);
+
+        var partial = found > 0 && found < vehicles.Count;
+        var all = found == vehicles.Count;
+
+        if (all) return AcquisitionState.Found;
+        if (partial) return AcquisitionState.Partial;
+
+        return AcquisitionState.Missing;
     }
 
     public static IElement? GetServiceConsist(IDocument document, Consist consist)

@@ -10,7 +10,7 @@
 
         <ResourceDictionary>
             <converters:IdValueConverter x:Key="IdValueConverter" />
-            <converters:AcquisitionStateConverter x:Key="AcquisitionStateConverter" />
+            <converters:RowHighlightStateConverter x:Key="RowHighlightStateConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://LoadingIndicators.Avalonia/LoadingIndicators.axaml" />

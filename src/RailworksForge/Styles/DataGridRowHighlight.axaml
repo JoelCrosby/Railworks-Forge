@@ -3,6 +3,6 @@
         xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core">
 
         <Style Selector="DataGrid DataGridRow">
-                <Setter Property="Background" Value="{Binding DataType=models:Consist, Converter={StaticResource AcquisitionStateConverter}}" />
+                <Setter Property="Background" Value="{Binding DataType=models:Consist, Converter={StaticResource RowHighlightStateConverter}}" />
         </Style>
 </Styles>
