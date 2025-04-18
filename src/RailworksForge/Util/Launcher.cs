@@ -1,6 +1,7 @@
-using System.Diagnostics;
-using Avalonia.Platform;
-using RailworksForge.Core;
+using System.IO;
+
+using Avalonia.Platform.Storage;
+
 
 namespace RailworksForge.Util;
 
@@ -8,12 +9,9 @@ public static class Launcher
 {
     public static void Open(string path)
     {
-        var processInfo = new ProcessStartInfo
-        {
-            FileName = Paths.GetPlatform() is Paths.Platform.Windows ? "explorer" : "xdg-open",
-            Arguments = $"\"{path}\"",
-        };
+        var launcher = Utils.GetApplicationWindow().Launcher;
+        var info = new DirectoryInfo(path);
 
-        Process.Start(processInfo);
+        launcher.LaunchDirectoryInfoAsync(info);
     }
 }

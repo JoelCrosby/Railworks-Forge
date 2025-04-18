@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Reactive;
 
+using Avalonia;
+using Avalonia.Styling;
 
 using RailworksForge.Core;
 using RailworksForge.Core.External;
@@ -20,6 +22,8 @@ public class MainMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConvertXmlToBinCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenSettingsDirectoryCommand { get; }
     public ReactiveCommand<Unit, Unit> InstallPackageCommand { get; }
+    public ReactiveCommand<Unit, Unit> DarkThemeCommand { get; }
+    public ReactiveCommand<Unit, Unit> LightThemeCommand { get; }
 
     public MainMenuViewModel()
     {
@@ -78,6 +82,16 @@ public class MainMenuViewModel : ViewModelBase
             }
 
             mainWindow.ClearProgressIndicator();
+        });
+
+        DarkThemeCommand = ReactiveCommand.Create(() =>
+        {
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+        });
+
+        LightThemeCommand = ReactiveCommand.Create(() =>
+        {
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         });
     }
 }

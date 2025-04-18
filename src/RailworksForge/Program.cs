@@ -53,13 +53,20 @@ internal sealed class Program
 
         args.Exception.Handle(ex =>
         {
-            Log.Error(ex, "Unobserved task exception type: {ExceptionType} {Message}", ex.GetType());
+            Log.Error(ex, "Unobserved task exception");
             return true;
         });
     }
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Log.Error("Unobserved task exception type: {ExceptionType}", e.ExceptionObject.GetType());
+        if (e.ExceptionObject is Exception ex)
+        {
+            Log.Error(ex, "Unobserved task exception");
+        }
+        else
+        {
+            Log.Error("Unobserved task exception type: {ExceptionType}", e.ExceptionObject.GetType());
+        }
     }
 }

@@ -103,11 +103,6 @@ public class Blueprint
         throw new Exception($"unable to get blueprint xml for path {BlueprintPath}");
     }
 
-    private string ProviderDirectory => Path.Join(
-        Paths.GetAssetsDirectory(),
-        BlueprintSetIdProvider
-    );
-
     private string ProductDirectory => Path.Join(
         Paths.GetAssetsDirectory(),
         BlueprintSetIdProvider,
@@ -127,7 +122,6 @@ public class Blueprint
     public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
     private string BlueprintPath => Path.Join(ProductDirectory, RelativeBinaryPath);
-    private string XmlDocumentPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
     private AcquisitionState GetAcquisitionState()
     {
