@@ -153,7 +153,13 @@ public class SerzInternal
 
         if (index == ushort.MaxValue)
         {
-            var count = ReadInt32();
+            var count = Math.Abs(ReadInt32());
+
+            if (count > _mData.Length - _dataIx)
+            {
+                count = _mData.Length - _dataIx;
+            }
+
             str = Encoding.UTF8.GetString(_mData, _dataIx, count);
             _dataIx += count;
 
