@@ -49,14 +49,13 @@ public record Scenario
 
     public ScenarioPlayerInfo PlayerInfo { get; init; } = ScenarioPlayerInfo.Empty;
 
-    private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
-
-    private bool HasBinary => Paths.Exists(BinaryPath);
-    private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
-
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 
     public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
+
+    private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
+    private bool HasBinary => Paths.Exists(BinaryPath);
+    private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
 
     public static Scenario? New(Route route, AssetPath path)
     {
@@ -142,11 +141,7 @@ public record Scenario
         }
 
         var content = entry.Open();
-
-        using var reader = new StreamReader(content);
-
-        var file = reader.ReadToEnd();
-        return XmlParser.ParseDocument(file);
+        return XmlParser.ParseDocument(content);
     }
 
     public async Task<IDocument> GetXmlDocument(bool useCache = true)
@@ -253,7 +248,7 @@ public record Scenario
 
     public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(string consistId)
     {
-        var doc = await GetXmlDocument(false);
+        var doc = await GetXmlDocument();
 
         return doc
             .QuerySelectorAll("cConsist")

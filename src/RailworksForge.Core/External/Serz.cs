@@ -1,4 +1,10 @@
+using System.Diagnostics;
+
 using CliWrap;
+
+using RailworksForge.Core.Extensions;
+
+using Serilog;
 
 namespace RailworksForge.Core.External;
 
@@ -27,7 +33,13 @@ public class Serz
         var outputType = isBin ? "xml" : "bin";
         var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
+        var sw = Stopwatch.StartNew();
+
         await RunSerz(inputArg, outputArg, token);
+
+        Log.Information("converted file {Input} to {Format} in {Ms}ms", inputArg.ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
+
+        sw.Stop();
 
         var isSuccess = Paths.Exists(outputPath);
 
