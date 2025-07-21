@@ -41,7 +41,7 @@ public class DesignReplaceTrackViewModel : ReplaceTrackViewModel
 
     public DesignReplaceTrackViewModel() : base(DesignData.DesignData.Route)
     {
-        var models =_tracks.Select(track => new SelectTrackViewModel { RouteBlueprint = track});
+        var models = _tracks.Select(track => new SelectTrackViewModel { RouteBlueprint = track, TrackCount = 512 });
 
         RouteTracks = models.ToList();
         IsLoading = false;

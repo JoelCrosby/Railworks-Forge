@@ -59,7 +59,7 @@ public record Route
         ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
 
-    public async Task<List<Blueprint>> GetTrackBlueprints()
+    public async Task<List<TrackBlueprint>> GetTrackBlueprints()
     {
         var document = await GetTrackDocument();
 
@@ -70,18 +70,35 @@ public record Route
 
         var blueprints = document
                 .QuerySelectorAll("Network-cSectionGenericProperties BlueprintID")
-                .Select(element =>
+                .Aggregate(new List<TrackBlueprint>(), (results, element) =>
                 {
-                    var provider = element.SelectTextContent("Provider");
-                    var product = element.SelectTextContent("Product");
                     var blueprintId = element.SelectTextContent("BlueprintID");
 
-                    return new Blueprint
+                    if (string.IsNullOrEmpty(blueprintId))
                     {
-                        BlueprintId = blueprintId,
-                        BlueprintSetIdProduct = product,
-                        BlueprintSetIdProvider = provider,
-                    };
+                        return results;
+                    }
+
+                    if (results.FirstOrDefault(r => r.Blueprint.BlueprintId == blueprintId) is {} result)
+                    {
+                        result.Add();
+                    }
+                    else
+                    {
+                        var provider = element.SelectTextContent("Provider");
+                        var product = element.SelectTextContent("Product");
+
+                        var blueprint = new Blueprint
+                        {
+                            BlueprintId = blueprintId,
+                            BlueprintSetIdProduct = product,
+                            BlueprintSetIdProvider = provider,
+                        };
+
+                        results.Add(new TrackBlueprint(blueprint));
+                    }
+
+                    return results;
                 });
 
         return blueprints.ToList();

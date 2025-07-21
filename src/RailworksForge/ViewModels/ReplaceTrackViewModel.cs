@@ -66,9 +66,11 @@ public partial class ReplaceTrackViewModel : ViewModelBase
         var blueprints = await Route.GetTrackBlueprints();
 
         var  models = blueprints
-            .ToHashSet()
-            .Where(blueprint => string.IsNullOrEmpty(blueprint.BlueprintId) is false)
-            .Select(track => new SelectTrackViewModel { RouteBlueprint = track })
+            .Select(blueprint => new SelectTrackViewModel
+            {
+                RouteBlueprint = blueprint.Blueprint,
+                TrackCount = blueprint.Count,
+            })
             .ToList();
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
@@ -100,6 +102,8 @@ public partial class SelectTrackViewModel : ViewModelBase
 
     [ObservableProperty]
     private Track? _selectedTrack;
+
+    public required int TrackCount { get; init; }
 
     public required Blueprint RouteBlueprint { get; init; }
 

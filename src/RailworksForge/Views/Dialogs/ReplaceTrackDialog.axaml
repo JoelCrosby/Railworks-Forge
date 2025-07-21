@@ -53,11 +53,16 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                                    <Grid ColumnDefinitions="460,12,*">
+                                    <Grid ColumnDefinitions="*,12,*">
                                         <StackPanel Grid.Column="0" Spacing="8" Orientation="Horizontal">
                                             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProvider}" />
                                             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProduct}" />
                                             <TextBlock VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintId}" />
+                                            <TextBlock VerticalAlignment="Center">
+                                                <Run Text="(" />
+                                                <Run FontWeight="Bold" Text="{Binding TrackCount}" />
+                                                <Run Text=")" />
+                                            </TextBlock>
                                         </StackPanel>
 
                                         <Grid ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
@@ -92,6 +97,7 @@
                                                 Watermark="Select Product"
                                                 ItemsSource="{Binding Products}"
                                                 SelectedItem="{Binding SelectedProduct}"
+                                                IsEnabled="{Binding SelectedProvider, Converter={x:Static ObjectConverters.IsNotNull}}"
                                             >
                                                 <i:Interaction.Behaviors>
                                                     <bh:AutoCompleteBehaviour/>
@@ -106,6 +112,7 @@
                                                 Watermark="Select Track Blueprint"
                                                 ItemsSource="{Binding Tracks}"
                                                 SelectedItem="{Binding SelectedTrack}"
+                                                IsEnabled="{Binding SelectedProduct, Converter={x:Static ObjectConverters.IsNotNull}}"
                                             >
                                                 <i:Interaction.Behaviors>
                                                     <bh:AutoCompleteBehaviour/>

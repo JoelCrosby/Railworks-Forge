@@ -34,12 +34,13 @@ public class MainMenuViewModel : ViewModelBase
             if (storageFile is null) return;
 
             var path = storageFile.Path.LocalPath;
+            var extension = Path.GetExtension(path);
 
-            if (Path.GetExtension(path) != ".bin") return;
+            if (extension is not ".bin") return;
 
             var result = await Serz.Convert(path, token, true);
 
-            File.Copy(result.OutputPath, path.Replace(".bin", ".bin.xml"));
+            File.Copy(result.OutputPath, path.Replace(extension, $"{extension}.xml"));
         });
 
         ConvertXmlToBinCommand = ReactiveCommand.CreateFromTask(async (token) =>
@@ -49,12 +50,13 @@ public class MainMenuViewModel : ViewModelBase
             if (storageFile is null) return;
 
             var path = storageFile.Path.LocalPath;
+            var extension = Path.GetExtension(path);
 
-            if (Path.GetExtension(path) != ".xml") return;
+            if (extension is not ".xml") return;
 
             var result = await Serz.Convert(path, token, true);
 
-            File.Copy(result.OutputPath, path.Replace(".bin.xml", ".bin"));
+            File.Copy(result.OutputPath, path.Replace($"{extension}.xml", extension));
         });
 
         OpenSettingsDirectoryCommand = ReactiveCommand.Create(() =>
