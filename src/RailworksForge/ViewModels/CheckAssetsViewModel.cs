@@ -107,12 +107,9 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
                 var count = processedCount;
 
-                Dispatcher.UIThread.Post(() =>
-                {
-                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToProcess);
-                    LoadingMessage = $"Processed {count} of {amountToProcess} files ( %{LoadingProgress} )";
-                    LoadingStatusMessage = $"Processing path: {path}";
-                });
+                LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToProcess);
+                LoadingMessage = $"Processed {count} of {amountToProcess} files ( %{LoadingProgress} )";
+                LoadingStatusMessage = $"Processing path: {path}";
             }
             catch (Exception e)
             {

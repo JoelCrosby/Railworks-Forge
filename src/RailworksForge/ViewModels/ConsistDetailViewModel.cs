@@ -57,6 +57,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private string? _searchTerm;
 
+    [ObservableProperty]
+    private string? _directoryTreeSearchTerm;
+
     private List<ConsistRailVehicle> _cachedRailVehicles = [];
 
     [ObservableProperty]
@@ -76,7 +79,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock = [];
         RailVehicles = [];
 
-        DirectoryTree = directoryTreeService.GetDirectoryTree();
+        DirectoryTree = [..directoryTreeService.GetDirectoryTree()];
 
         IsLoading = true;
 
@@ -127,13 +130,26 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         this.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is not nameof(SearchTerm)) return;
+            if (e.PropertyName is nameof(SearchTerm))
+            {
+                var invariant = _searchTerm?.ToLowerInvariant();
+                var indexed = invariant is null ? _cachedRailVehicles : _cachedRailVehicles.Where(x => x.SearchIndex.Contains(invariant));
 
-            var invariant = _searchTerm?.ToLowerInvariant();
-            var indexed = invariant is null ? _cachedRailVehicles : _cachedRailVehicles.Where(x => x.SearchIndex.Contains(invariant));
+                RailVehicles.Clear();
+                RailVehicles.AddRange(indexed);
+            }
 
-            RailVehicles.Clear();
-            RailVehicles.AddRange(indexed);
+            if (e.PropertyName is nameof(DirectoryTreeSearchTerm))
+            {
+                var invariant = _directoryTreeSearchTerm?.ToLowerInvariant();
+
+                var indexed = string.IsNullOrWhiteSpace(invariant)
+                    ? directoryTreeService.GetDirectoryTree()
+                    : directoryTreeService.GetDirectoryTree()
+                        .Where(x => x.SearchIndex.Contains(invariant) || x.Subfolders.Any(y => y.SearchIndex.Contains(invariant)));
+
+                DirectoryTree = [..indexed];
+            }
         };
 
         Refresh();

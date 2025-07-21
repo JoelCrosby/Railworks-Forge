@@ -6,7 +6,7 @@ namespace RailworksForge.Core;
 
 public class AssetDirectoryTreeService
 {
-    private readonly ObservableCollection<BrowserDirectory> _directoryTree = [];
+    private ObservableCollection<BrowserDirectory> _directoryTree = [];
 
     public ObservableCollection<BrowserDirectory> GetDirectoryTree()
     {
@@ -19,9 +19,6 @@ public class AssetDirectoryTreeService
 
         var directories = await Task.Run(() => new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser()));
 
-        foreach (var directory in directories)
-        {
-            _directoryTree.Add(directory);
-        }
+        _directoryTree = [..directories];
     }
 }

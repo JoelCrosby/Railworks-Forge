@@ -5,6 +5,7 @@ public class BrowserDirectory
     public List<BrowserDirectory> Subfolders => GetVehicleDirectories();
 
     public string Name { get; }
+    public string SearchIndex { get; }
     public AssetDirectory AssetDirectory { get; }
 
     private Func<ProductDirectory, bool> ChildPredicate { get; }
@@ -14,6 +15,7 @@ public class BrowserDirectory
         AssetDirectory = baseDirectory;
         Name = baseDirectory.Name;
         ChildPredicate = childPredicate;
+        SearchIndex = baseDirectory.Name.ToLowerInvariant();
     }
 
     private List<BrowserDirectory> GetVehicleDirectories()

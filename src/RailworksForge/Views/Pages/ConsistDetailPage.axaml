@@ -44,7 +44,8 @@
            <Grid RowDefinitions="*,4,*">
                <DockPanel>
                    <StackPanel DockPanel.Dock="Top">
-                        <controls:TableHeader Text="Available Stock" />
+                       <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}"  />
+                       <controls:TableHeader Text="Available Stock" />
                    </StackPanel>
 
                    <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
