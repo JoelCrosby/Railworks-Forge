@@ -6,6 +6,8 @@
              xmlns:li="using:LoadingIndicators.Avalonia"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
              x:Class="RailworksForge.Views.Pages.ConsistDetailPage"
@@ -19,7 +21,7 @@
 
             <StackPanel IsVisible="{Binding !IsLoading}" DockPanel.Dock="Top" Orientation="Vertical">
                 <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
-                <controls:TableHeader Text="Consist Vehicles" />
+                <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}" />
 
                 <TreeDataGrid
                     Name="ConsistVehiclesDataGrid"
@@ -28,9 +30,9 @@
                 >
                     <TreeDataGrid.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Open Containing Folder in Explorer" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
-                            <MenuItem Header="Replace Vehicle With Selected" Command="{Binding ReplaceVehicleCommand}"  />
-                            <MenuItem Header="Delete Vehicle" Command="{Binding DeleteVehicleCommand}"  />
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_vehicle_with_selected}}" Command="{Binding ReplaceVehicleCommand}"  />
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_vehicle}}" Command="{Binding DeleteVehicleCommand}"  />
                         </ContextMenu>
                     </TreeDataGrid.ContextMenu>
                 </TreeDataGrid>
@@ -45,7 +47,7 @@
                <DockPanel>
                    <StackPanel DockPanel.Dock="Top">
                        <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}"  />
-                       <controls:TableHeader Text="Available Stock" />
+                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}" />
                    </StackPanel>
 
                    <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
@@ -60,8 +62,8 @@
 
                        <TreeView.ContextMenu>
                            <ContextMenu>
-                               <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
-                               <MenuItem Header="Load Consists" Command="{Binding LoadAvailableStockCommand}"  />
+                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}"  />
+                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.load_consists}}" Command="{Binding LoadAvailableStockCommand}"  />
                            </ContextMenu>
                        </TreeView.ContextMenu>
 
@@ -76,7 +78,7 @@
                    </StackPanel>
 
                    <StackPanel DockPanel.Dock="Top">
-                       <controls:TableHeader Text="Consist" />
+                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
                    </StackPanel>
 
                    <TreeDataGrid
@@ -86,7 +88,7 @@
                    >
                        <TreeDataGrid.ContextMenu>
                            <ContextMenu>
-                               <MenuItem Header="Add to Consist" Command="{Binding AddVehicleCommand}"  />
+                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}"  />
                            </ContextMenu>
                        </TreeDataGrid.ContextMenu>
                    </TreeDataGrid>

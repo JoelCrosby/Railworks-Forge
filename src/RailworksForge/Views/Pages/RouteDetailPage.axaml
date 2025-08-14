@@ -7,6 +7,8 @@
              xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:converters="clr-namespace:RailworksForge.Converters"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.RouteDetailPage"
@@ -40,12 +42,12 @@
             <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
                     <StackPanel>
-                        <TextBlock FontWeight="SemiBold" Text="Name" />
+                        <TextBlock FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.name}}" />
                         <TextBlock Text="{Binding Route.Name}" />
                     </StackPanel>
 
                     <StackPanel>
-                        <TextBlock FontWeight="SemiBold" Text="Packaging Type" />
+                        <TextBlock FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.packaging_type}}" />
                         <TextBlock Text="{Binding Route.PackagingType}" />
                     </StackPanel>
                 </StackPanel>
@@ -53,14 +55,14 @@
         </Grid>
 
         <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
-            <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>
-            <Button Command="{Binding CheckAssetsCommand}">Check Asset Availability</Button>
-            <Button Command="{Binding ReplaceTrackCommand}">Replace Track</Button>
+            <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
+            <Button Command="{Binding CheckAssetsCommand}" Content="{echoes:Translate {x:Static translations:Strings.check_asset_availability}}" />
+            <Button Command="{Binding ReplaceTrackCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_track}}"/>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
-            <controls:TableHeader Text="Scenarios" />
+            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.scenarios}}" />
         </StackPanel>
 
 
@@ -71,9 +73,9 @@
         >
             <TreeDataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
-                    <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
-                    <MenuItem Header="Open in Explorer" Command="{Binding OpenScenarioInExplorerCommand}"  />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding DetailsClickedCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyClickedCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
                 </ContextMenu>
             </TreeDataGrid.ContextMenu>
 

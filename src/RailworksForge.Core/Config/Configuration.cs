@@ -13,15 +13,9 @@ public class Configuration
         TypeInfoResolver = SourceGenerationContext.Default,
     };
 
-    private static readonly ConfigurationOptions DefaultConfigurationOptions = new ()
-    {
-        GameDirectoryPath = string.Empty,
-        DataGrids = new (),
-    };
-
     public static ConfigurationOptions Get()
     {
-        if (GetConfigFromPath("settings", DefaultConfigurationOptions) is not {} options)
+        if (GetConfigFromPath("settings", new ConfigurationOptions()) is not {} options)
         {
             throw new Exception("Failed to read configuration settings.");
         }

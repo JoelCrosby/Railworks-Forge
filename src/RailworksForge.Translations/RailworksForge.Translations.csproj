@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Echoes" Version="0.2.0" />
+      <PackageReference Include="Echoes.Generator" Version="0.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Include all .toml files as embedded resources (so we can dynamically load them at runtime) -->
+        <AdditionalFiles Include="Translations\Strings_de.toml" />
+        <EmbeddedResource Include="**\*.toml" />
+
+        <!-- Specify invariant files that are fed into the generator (Echoes.Generator) -->
+        <AdditionalFiles Include="Translations\Strings.toml" />
+    </ItemGroup>
+
+</Project>

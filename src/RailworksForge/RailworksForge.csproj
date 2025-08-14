@@ -3,14 +3,12 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
-<!--    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>-->
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishAot>true</PublishAot>
-    <!-- Recommended Avalonia trimming settings for Native AOT -->
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
     <TrimMode>link</TrimMode>
   </PropertyGroup>
@@ -20,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Preserve Avalonia types for reflection -->
+    <ProjectCapability Include="Avalonia" />
     <TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
   </ItemGroup>
 
@@ -32,7 +30,6 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.3.2" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.2" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.2" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.2" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.3.0.6" />
@@ -54,44 +51,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RailworksForge.Core\RailworksForge.Core.csproj" />
+    <ProjectReference Include="..\RailworksForge.Translations\RailworksForge.Translations.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Views\Controls\RoutesGrid.axaml.cs">
-      <DependentUpon>RoutesGridaxaml.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Pages\RoutesPage.axaml.cs">
-      <DependentUpon>Routes.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Pages\RouteDetailPage.axaml.cs">
-      <DependentUpon>RouteDetail.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Pages\ScenarioDetailPage.axaml.cs">
-      <DependentUpon>ScenarioDetail.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Pages\ConsistDetailPage.axaml.cs">
-      <DependentUpon>ConsistDetail.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Dialogs\SaveConsistDialog.axaml.cs">
-      <DependentUpon>SaveConsistDialog.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Dialogs\ReplaceConsistDialog.axaml.cs">
-      <DependentUpon>ReplaceConsistDialog.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Dialogs\CheckAssetsDialog.axaml.cs">
-      <DependentUpon>CheckAssetsDialog.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\TemplatedControls\TableHeader.axaml.cs">
-      <DependentUpon>TableHeader.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+  
 </Project>

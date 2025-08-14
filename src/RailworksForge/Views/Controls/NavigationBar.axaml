@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.NavigationBar"
@@ -32,7 +34,7 @@
         <Button Command="{Binding RoutesClickedCommand}">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <lucideAvalonia:Lucide Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                <TextBlock>Routes</TextBlock>
+                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
             </StackPanel>
         </Button>
 

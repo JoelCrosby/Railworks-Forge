@@ -1,10 +1,16 @@
+using System.Globalization;
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
+
+using Echoes;
 
 using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Config;
 using RailworksForge.ViewModels;
 using RailworksForge.Views;
 using RailworksForge.Views.Controls;
@@ -18,6 +24,17 @@ public class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        var config = Configuration.Get();
+
+        TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(config.Language));
+
+        RequestedThemeVariant = config.Theme switch
+        {
+            "Light" => ThemeVariant.Light,
+            "Dark" => ThemeVariant.Dark,
+            _ => ThemeVariant.Default,
+        };
     }
 
     public override void OnFrameworkInitializationCompleted()

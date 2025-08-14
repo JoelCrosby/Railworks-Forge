@@ -5,6 +5,8 @@
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
@@ -31,34 +33,34 @@
 
             <Border Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
-                    <controls:NameValueDisplay Heading="Locomotive" Value="{Binding Scenario.Locomotive}" />
-                    <controls:NameValueDisplay Heading="Start Location" Value="{Binding Scenario.StartLocation}" />
-                    <controls:NameValueDisplay Heading="Scenario Type" Value="{Binding Scenario.ScenarioClass}" />
-                    <controls:NameValueDisplay Heading="Packaging Type" Value="{Binding Scenario.PackagingType}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.locomotive}}" Value="{Binding Scenario.Locomotive}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.start_location}}" Value="{Binding Scenario.StartLocation}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.scenario_type}}" Value="{Binding Scenario.ScenarioClass}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.packaging_type}}" Value="{Binding Scenario.PackagingType}" />
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
                 <StackPanel>
-                    <controls:NameValueDisplay Heading="Description" Value="{Binding Scenario.Description}" />
-                    <controls:NameValueDisplay Heading="Briefing" Value="{Binding Scenario.Briefing}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.description}}" Value="{Binding Scenario.Description}" />
+                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.briefing}}" Value="{Binding Scenario.Briefing}" />
                 </StackPanel>
             </Border>
         </Grid>
 
         <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
-            <Button Command="{Binding OpenInExplorerCommand}">Open In Explorer</Button>
-            <Button Command="{Binding OpenBackupsFolder}">Open Backups Folder</Button>
-            <Button Command="{Binding ExportBinXmlCommand}">Export Bin to XML</Button>
-            <Button Command="{Binding ExportXmlBinCommand}">Convert XML to Bin</Button>
-            <Button Command="{Binding ExtractScenariosCommand}">Extract Scenarios</Button>
+            <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
+            <Button Command="{Binding OpenBackupsFolder}" Content="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" />
+            <Button Command="{Binding ExportBinXmlCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" />
+            <Button Command="{Binding ExportXmlBinCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}" />
+            <Button Command="{Binding ExtractScenariosCommand}" Content="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" />
         </StackPanel>
 
         <li:LoadingIndicator DockPanel.Dock="Top"  VerticalAlignment="Stretch" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
 
         <StackPanel DockPanel.Dock="Top">
             <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
-            <controls:TableHeader Text="Services" />
+            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.services}}" />
         </StackPanel>
 
         <TreeDataGrid
@@ -68,9 +70,9 @@
         >
             <TreeDataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Open Details" Command="{Binding ClickedConsistCommand}" />
-                    <MenuItem Header="Replace with quick drive Consist" Command="{Binding ReplaceConsistCommand}"  />
-                    <MenuItem Header="Delete Service" Command="{Binding DeleteConsistCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding ClickedConsistCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_with_quick_drive_consist}}" Command="{Binding ReplaceConsistCommand}"  />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_service}}" Command="{Binding DeleteConsistCommand}" />
                 </ContextMenu>
             </TreeDataGrid.ContextMenu>
 

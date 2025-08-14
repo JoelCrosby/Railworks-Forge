@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
+using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
@@ -93,15 +94,15 @@ public partial class RouteDetailViewModel : ViewModelBase
         {
             Columns =
             {
-                new TextColumn<Scenario, PackagingType>("Packaging Type", x => x.PackagingType),
-                new TextColumn<Scenario, string>("Name", x => x.Name) { Options = { CanUserSortColumn = true,  }},
-                new TextColumn<Scenario, string>("Locomotive", x => x.Locomotive),
-                new TextColumn<Scenario, ScenarioClass>("Type", x => x.ScenarioClass),
-                new TextColumn<Scenario, int>("Duration", x => x.Duration),
-                new TextColumn<Scenario, int>("Rating", x => x.Rating),
-                new TextColumn<Scenario, string>("Season", x => x.Season),
-                new TextColumn<Scenario, int>("Score", x => x.PlayerInfo.Score),
-                new TemplateColumn<Scenario>("Completion", "CompletionCell"),
+                new TranslatedColumn<Scenario, PackagingType>("packaging_type", x => x.PackagingType),
+                new TranslatedColumn<Scenario, string>("name", x => x.Name) { Options = { CanUserSortColumn = true,  }},
+                new TranslatedColumn<Scenario, string>("locomotive", x => x.Locomotive),
+                new TranslatedColumn<Scenario, ScenarioClass>("type", x => x.ScenarioClass),
+                new TranslatedColumn<Scenario, int>("duration", x => x.Duration),
+                new TranslatedColumn<Scenario, int>("rating", x => x.Rating),
+                new TranslatedColumn<Scenario, string>("season", x => x.Season),
+                new TranslatedColumn<Scenario, int>("score", x => x.PlayerInfo.Score),
+                new TemplateColumn<Scenario>("completion", "CompletionCell"),
             },
         };
 

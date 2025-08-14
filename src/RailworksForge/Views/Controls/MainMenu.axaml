@@ -3,28 +3,43 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="RailworksForge.Views.Controls.MainMenu"
              x:DataType="vm:MainMenuViewModel">
 
     <Menu BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" VerticalAlignment="Top">
-        <MenuItem Header="_Railworks Forge">
-            <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
+        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.railworks_forge}}">
+            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.exit}}" Command="{Binding ExitCommand}" />
         </MenuItem>
-        <MenuItem Header="_View">
-            <MenuItem Header="_Theme" Command="{Binding ExitCommand}">
-                <MenuItem Command="{Binding DarkThemeCommand}" Header="Dark"/>
-                <MenuItem Command="{Binding LightThemeCommand}" Header="Light"/>
+
+        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.settings}}">
+
+            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.language}}" ItemsSource="{Binding Languages}">
+                <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton Command="{Binding SetCultureCommand}" Content="{Binding Header}" VerticalAlignment="Center" IsChecked="{Binding IsSelected}" />
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
+            </MenuItem>
+
+            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.theme}}">
+                <MenuItem Command="{Binding SystemThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.system}}"/>
+                <MenuItem Command="{Binding DarkThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.dark}}"/>
+                <MenuItem Command="{Binding LightThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.light}}"/>
             </MenuItem>
         </MenuItem>
-        <MenuItem Header="_Tools">
-            <MenuItem Command="{Binding OpenSettingsDirectoryCommand}" Header="Open Settings Folder"/>
-            <MenuItem Command="{Binding ConvertBinToXmlCommand}" Header="Convert .bin to .xml"/>
-            <MenuItem Command="{Binding ConvertXmlToBinCommand}" Header="Convert .xml to .bin"/>
+
+        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.tools}}">
+            <MenuItem Command="{Binding OpenSettingsDirectoryCommand}" Header="{echoes:Translate {x:Static translations:Strings.open_settings_folder}}"/>
+            <MenuItem Command="{Binding ConvertBinToXmlCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}"/>
+            <MenuItem Command="{Binding ConvertXmlToBinCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}"/>
         </MenuItem>
-        <MenuItem Header="_Packages">
-            <MenuItem Command="{Binding InstallPackageCommand}" Header="Install Package"/>
+
+        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.packages}}">
+            <MenuItem Command="{Binding InstallPackageCommand}" Header="{echoes:Translate {x:Static translations:Strings.install_package}}"/>
         </MenuItem>
     </Menu>
 

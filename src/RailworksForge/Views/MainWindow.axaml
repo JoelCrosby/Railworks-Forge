@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="using:RailworksForge.Views.Controls"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:CompileBindings="True"
         x:Class="RailworksForge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/railworks-forge-icon.png"
-        Title="Railworks Forge">
+        Title="{echoes:Translate {x:Static translations:Strings.railworks_forge}}">
 
     <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
         <controls:MainMenu Grid.Row="0" DataContext="{Binding MainMenu}" />

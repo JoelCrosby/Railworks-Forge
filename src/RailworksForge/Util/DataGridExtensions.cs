@@ -13,7 +13,7 @@ public static class DataGridExtensions
     {
         var bindingPath = column.GetSortBindingPath();
         var sortDescriptions = dataGrid.CollectionView.SortDescriptions;
-        var description =  sortDescriptions?.FirstOrDefault(d => d.PropertyPath == bindingPath);
+        var description =  sortDescriptions.FirstOrDefault(d => d.PropertyPath == bindingPath);
 
         return description;
     }
