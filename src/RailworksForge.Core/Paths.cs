@@ -228,9 +228,11 @@ public static class Paths
         return outputPath;
     }
 
+    public const string ArchivePathPreserveSuffix = "__RFAP__";
+
     public static string GetArchiveCachePath(string path)
     {
-        var renamedOutput = path.Replace(".ap", string.Empty);
+        var renamedOutput = path.Replace(".ap", ArchivePathPreserveSuffix);
         var flattened = renamedOutput.Replace(GetGameDirectory(), string.Empty);
 
         var outputPath = Path.Join(CacheOutputPath, flattened);

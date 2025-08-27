@@ -65,11 +65,12 @@ public class Blueprint
 
         foreach (var archive in archives)
         {
-            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintPath);
+            var destination = Path.Join(Paths.CacheOutputPath, RelativeBinaryPath);
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, destination);
 
             if (extracted)
             {
-                var result = await Serz.Convert(BlueprintPath);
+                var result = await Serz.Convert(destination);
                 var file = File.OpenRead(result.OutputPath);
 
                 return await XmlParser.ParseDocumentAsync(file);
@@ -204,7 +205,10 @@ public class Blueprint
             .Replace(Paths.GetAssetsDirectory(), string.Empty)
             .Replace(Paths.CacheOutputPath, string.Empty);
 
-        var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var parts = relative
+            .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Where(p => !p.Contains(Paths.ArchivePathPreserveSuffix))
+            .ToArray();
 
         if (parts.Length < 3)
         {
