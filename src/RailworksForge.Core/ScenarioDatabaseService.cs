@@ -20,9 +20,9 @@ public static class ScenarioDatabaseService
 
     public static readonly BehaviorSubject<bool> IsLoaded = new (false);
 
-    private static async Task ParseDatabase(CancellationToken cancellationToken)
+    private static async Task ParseDatabase(bool useCache, CancellationToken cancellationToken)
     {
-        if (GetJsonCache() is {} jsonCache)
+        if (useCache && GetJsonCache() is {} jsonCache)
         {
             Log.Information("using cached scenario database");
 
@@ -47,12 +47,12 @@ public static class ScenarioDatabaseService
             throw new Exception($"failed to get find scenario database in expected path: {path}");
         }
 
-        var serialised = await Serz.Convert(path, cancellationToken);
+        var serialised = await Serz.Convert(path, cancellationToken, true);
         var file = File.OpenRead(serialised.OutputPath);
 
         var document = await XmlParser.ParseDocumentAsync(file, cancellationToken);
 
-        Log.Information("parsed scenario database document in {Elapsed}ms", sw.ElapsedMilliseconds);
+        Log.Information("parsed scenario database in {Elapsed}ms", sw.ElapsedMilliseconds);
 
         sw.Restart();
 
@@ -108,7 +108,7 @@ public static class ScenarioDatabaseService
 
     public static async Task LoadScenarioDatabase()
     {
-        await ParseDatabase(CancellationToken.None);
+        await ParseDatabase(false, CancellationToken.None);
     }
 
     public static ScenarioPlayerInfo GetScenario(string id)
