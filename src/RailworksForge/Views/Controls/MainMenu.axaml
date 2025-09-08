@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
-             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="RailworksForge.Views.Controls.MainMenu"

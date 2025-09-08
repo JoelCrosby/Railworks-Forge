@@ -7,7 +7,7 @@
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
-             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
              x:Class="RailworksForge.Views.Pages.ConsistDetailPage"

@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
-        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         xmlns:controls="using:RailworksForge.Views.TemplatedControls">
     <Design.PreviewWith>
         <controls:TableSearchBox />
