@@ -17,6 +17,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
+using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
@@ -66,10 +67,10 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             Columns =
             {
                 new TemplateColumn<PreloadConsistViewModel>("Image", "ImageCell"),
-                new TextColumn<PreloadConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName),
-                new TextColumn<PreloadConsistViewModel, string>("Display Name", x => x.Consist.DisplayName),
-                new TextColumn<PreloadConsistViewModel, LocoClass>("Engine Type", x => x.Consist.EngineType),
-                new TextColumn<PreloadConsistViewModel, int>("Length", x => x.Consist.ConsistEntries.Count),
+                new TranslatedColumn<PreloadConsistViewModel, string>("locomotive_name", x => x.Consist.LocomotiveName),
+                new TranslatedColumn<PreloadConsistViewModel, string>("display_name", x => x.Consist.DisplayName),
+                new TranslatedColumn<PreloadConsistViewModel, LocoClass>("engine_type", x => x.Consist.EngineType),
+                new TranslatedColumn<PreloadConsistViewModel, int>("length", x => x.Consist.ConsistEntries.Count),
             },
         };
     }

@@ -9,13 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
+using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -107,14 +107,14 @@ public partial class ConsistDetailViewModel : ViewModelBase
         {
             Columns =
             {
-                new TextColumn<ConsistRailVehicle, int>("Index", x => x.Index),
-                new TextColumn<ConsistRailVehicle, AcquisitionState>("State", x => x.AcquisitionState),
-                new TextColumn<ConsistRailVehicle, string>("Locomotive Name", x => x.LocomotiveName),
-                new TextColumn<ConsistRailVehicle, string>("UniqueNumber", x => x.UniqueNumber),
-                new TextColumn<ConsistRailVehicle, bool>("Is Flipped", x => x.Flipped),
-                new TextColumn<ConsistRailVehicle, string>("Product", x => x.BlueprintSetIdProduct),
-                new TextColumn<ConsistRailVehicle, string>("Provider", x => x.BlueprintSetIdProvider),
-                new TextColumn<ConsistRailVehicle, string>("BlueprintId", x => x.BlueprintId),
+                new TranslatedColumn<ConsistRailVehicle, int>("index", x => x.Index),
+                new TranslatedColumn<ConsistRailVehicle, AcquisitionState>("state", x => x.AcquisitionState),
+                new TranslatedColumn<ConsistRailVehicle, string>("locomotive_name", x => x.LocomotiveName),
+                new TranslatedColumn<ConsistRailVehicle, string>("unique_number", x => x.UniqueNumber),
+                new TranslatedColumn<ConsistRailVehicle, bool>("is_flipped", x => x.Flipped),
+                new TranslatedColumn<ConsistRailVehicle, string>("product", x => x.BlueprintSetIdProduct),
+                new TranslatedColumn<ConsistRailVehicle, string>("provider", x => x.BlueprintSetIdProvider),
+                new TranslatedColumn<ConsistRailVehicle, string>("blueprint_id", x => x.BlueprintId),
             },
         };
 
@@ -122,9 +122,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
         {
             Columns =
             {
-                new TextColumn<RollingStockEntry, string>("Name", x => x.DisplayName),
-                new TextColumn<RollingStockEntry, BlueprintType>("Type", x => x.BlueprintType),
-                new TextColumn<RollingStockEntry, string>("Blueprint ID", x => x.Blueprint.BlueprintId),
+                new TranslatedColumn<RollingStockEntry, string>("name", x => x.DisplayName),
+                new TranslatedColumn<RollingStockEntry, BlueprintType>("type", x => x.BlueprintType),
+                new TranslatedColumn<RollingStockEntry, string>("blueprint_id", x => x.Blueprint.BlueprintId),
             },
         };
 

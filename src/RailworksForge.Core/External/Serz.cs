@@ -37,7 +37,7 @@ public class Serz
 
         await RunSerz(inputArg, outputArg, token);
 
-        Log.Information("converted file {Input} to {Format} in {Ms}ms", inputArg.ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
+        Log.Debug("converted file {Input} to {Format} in {Ms}ms", inputArg.ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
 
         sw.Stop();
 

@@ -163,7 +163,7 @@ public class Blueprint
             {
                 var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories).ToList();
 
-                Log.Information("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
+                Log.Debug("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
 
                 if (archives.Any(archive => Archives.EntryExists(archive, RelativeBinaryPath)))
                 {

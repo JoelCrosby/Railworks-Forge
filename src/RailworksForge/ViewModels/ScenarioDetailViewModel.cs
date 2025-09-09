@@ -17,6 +17,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
+using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -204,14 +205,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             Columns =
             {
                 new TemplateColumn<ConsistViewModel>("Image", "ImageCell"),
-                new TextColumn<ConsistViewModel, AcquisitionState>("Consist State", x => x.Consist.ConsistAcquisitionState),
-                new TextColumn<ConsistViewModel, bool>("Is Player Driver", x => x.Consist.PlayerDriver),
-                new TextColumn<ConsistViewModel, string>("Locomotive Name", x => x.Consist.LocomotiveName),
-                new TextColumn<ConsistViewModel, int>("Consist Length", x => x.Consist.Length),
-                new TextColumn<ConsistViewModel, string>("Service Name", x => x.Consist.ServiceName),
-                new TextColumn<ConsistViewModel, string>("Provider", x => x.Consist.BlueprintSetIdProvider),
-                new TextColumn<ConsistViewModel, string>("Product", x => x.Consist.BlueprintSetIdProduct),
-                new TextColumn<ConsistViewModel, string>("Blueprint ID", x => x.Consist.BlueprintId),
+                new TranslatedColumn<ConsistViewModel, AcquisitionState>("consist_state", x => x.Consist.ConsistAcquisitionState),
+                new TranslatedColumn<ConsistViewModel, bool>("is_player_driver", x => x.Consist.PlayerDriver),
+                new TranslatedColumn<ConsistViewModel, string>("locomotive_name", x => x.Consist.LocomotiveName),
+                new TranslatedColumn<ConsistViewModel, int>("consist_length", x => x.Consist.Length),
+                new TranslatedColumn<ConsistViewModel, string>("service_name", x => x.Consist.ServiceName),
+                new TranslatedColumn<ConsistViewModel, string>("provider", x => x.Consist.BlueprintSetIdProvider),
+                new TranslatedColumn<ConsistViewModel, string>("product", x => x.Consist.BlueprintSetIdProduct),
+                new TranslatedColumn<ConsistViewModel, string>("blueprint_id", x => x.Consist.BlueprintId),
             },
         };
 
