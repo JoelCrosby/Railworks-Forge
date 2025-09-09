@@ -65,7 +65,7 @@ public static class Archives
             {
                 if (Cache.ImageCache.GetValueOrDefault(cacheKey) is {} cachedBitmap)
                 {
-                    Log.Information("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
+                    Log.Debug("loaded image from cache {Archive} {Path} as cache hit", archivePath.ToRelativeGamePath(), filePath);
 
                     return cachedBitmap;
                 }
@@ -90,7 +90,7 @@ public static class Archives
                     return null;
                 }
 
-                Log.Information("loaded image from archive {Archive}", archivePath.ToRelativeGamePath());
+                Log.Debug("loaded image from archive {Archive}", archivePath.ToRelativeGamePath());
 
                 var stream = entry.Open();
 
@@ -204,14 +204,14 @@ public static class Archives
 
             if (cachedArchiveFiles is not null)
             {
-                Log.Information("cache archive found {ArchivePath}", archivePath.ToRelativeGamePath());
+                Log.Debug("cache archive found {ArchivePath}", archivePath.ToRelativeGamePath());
 
                 if (cachedArchiveFiles.Contains(normalisedBlueprintPath))
                 {
                     return true;
                 }
 
-                Log.Information("cache entry not found {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
+                Log.Debug("cache entry not found {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
 
                 return false;
             }
@@ -221,7 +221,7 @@ public static class Archives
                 return false;
             }
 
-            Log.Information("checking entry exists {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
+            Log.Debug("checking entry exists {ArchivePath} {Entry}", archivePath.ToRelativeGamePath(), agnosticBlueprintIdPath);
 
             var entries = GetEntries(archivePath);
             return entries.Contains(normalisedBlueprintPath);
@@ -252,7 +252,7 @@ public static class Archives
                 return cachedArchive;
             }
 
-            Log.Information("indexing archive {Archive}", archivePath.ToRelativeGamePath());
+            Log.Debug("indexing archive {Archive}", archivePath.ToRelativeGamePath());
 
             using var archive = ZipFile.OpenRead(archivePath);
             var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
