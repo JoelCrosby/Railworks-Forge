@@ -70,8 +70,8 @@ public class Utils
 
     public static string GetTranslation(string key)
     {
-        var assembly = typeof(RailworksForge.Translations.Strings).Assembly;
-        const string sourceFile = $"{nameof(RailworksForge.Translations)}/{nameof(RailworksForge.Translations.Strings)}.toml";
+        var assembly = typeof(Translations.Strings).Assembly;
+        const string sourceFile = $"{nameof(Translations)}/{nameof(Translations.Strings)}.toml";
 
         return TranslationProvider.ReadTranslation(assembly, sourceFile, key, TranslationProvider.Culture);
     }

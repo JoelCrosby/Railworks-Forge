@@ -172,11 +172,6 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
         Archives.ExtractDirectory(archivePath, "Scenery");
 
-        if (Paths.Exists(sceneryPath))
-        {
-            return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
-        }
-
         return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
     }
 

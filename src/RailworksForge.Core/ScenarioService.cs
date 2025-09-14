@@ -93,11 +93,4 @@ public class ScenarioService
             ArchivePath = e.FullName,
         });
     }
-
-    private ScenarioPlayerInfo GetScenarioIdFromPath(string path)
-    {
-        var id = Path.GetDirectoryName(path);
-
-        return id is null ? throw new Exception("scenarioPath is null") : _scenarioDatabaseService.GetScenario(id);
-    }
 }
