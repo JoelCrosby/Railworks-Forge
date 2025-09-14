@@ -14,7 +14,8 @@
         Title="{echoes:Translate {x:Static translations:Strings.railworks_forge}}">
 
     <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
-        <controls:MainMenu Grid.Row="0" DataContext="{Binding MainMenu}" />
+        <!-- <controls:MainMenu Grid.Row="0" DataContext="{Binding MainMenu}" /> -->
+        <controls:Toolbar Grid.Row="0" DataContext="{Binding Toolbar}" />
         <controls:NavigationBar Grid.Row="1" DataContext="{Binding NavigationBar}"/>
 
         <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">

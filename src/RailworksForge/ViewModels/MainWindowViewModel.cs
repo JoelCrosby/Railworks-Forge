@@ -18,6 +18,7 @@ namespace RailworksForge.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     public MainMenuViewModel MainMenu { get; }
+    public ToolbarViewModel Toolbar { get; }
     public NavigationBarViewModel NavigationBar { get; }
     public StatusBarViewModel StatusBar { get; }
     public ProgressIndicatorViewModel ProgressIndicator { get; }
@@ -33,15 +34,17 @@ public partial class MainWindowViewModel : ViewModelBase
     private ViewModelBase _contentViewModel;
 
     private readonly AssetDirectoryTreeService _assetDirectoryTreeService;
+    private readonly ScenarioDatabaseService _scenarioDatabaseService;
+    private readonly ScenarioService _scenarioService;
 
     public MainWindowViewModel(IServiceProvider provider)
     {
         Routes = provider.GetRequiredService<RoutesViewModel>();
-
         MainMenu = provider.GetRequiredService<MainMenuViewModel>();
         NavigationBar = provider.GetRequiredService<NavigationBarViewModel>();
         StatusBar = provider.GetRequiredService<StatusBarViewModel>();
         ProgressIndicator = provider.GetRequiredService<ProgressIndicatorViewModel>();
+        Toolbar = provider.GetRequiredService<ToolbarViewModel>();
 
         ShowSaveConsistDialog = new Interaction<SaveConsistViewModel, SavedConsist?>();
         ShowReplaceConsistDialog = new Interaction<ReplaceConsistViewModel, PreloadConsist?>();
@@ -52,11 +55,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _contentViewModel = Routes;
 
         _assetDirectoryTreeService = provider.GetRequiredService<AssetDirectoryTreeService>();
+        _scenarioDatabaseService = provider.GetRequiredService<ScenarioDatabaseService>();
+        _scenarioService = provider.GetRequiredService<ScenarioService>();
     }
 
     public void SelectRoute(RouteViewModel route)
     {
-        NavigationBar.Route = new RouteDetailViewModel(route);
+        NavigationBar.Route = new RouteDetailViewModel(route, _scenarioService);
         NavigationBar.Scenario = null;
 
         ContentViewModel = NavigationBar.Route;
@@ -137,7 +142,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Task.Run(() =>
         {
-            Observable.Start(ScenarioDatabaseService.LoadScenarioDatabase, RxApp.MainThreadScheduler);
+            Observable.Start(_scenarioDatabaseService.LoadScenarioDatabase, RxApp.MainThreadScheduler);
             Observable.Start(_assetDirectoryTreeService.LoadDirectoryTree, RxApp.MainThreadScheduler);
         });
     }

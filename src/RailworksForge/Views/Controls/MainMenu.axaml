@@ -17,14 +17,6 @@
 
         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.settings}}">
 
-            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.language}}" ItemsSource="{Binding Languages}">
-                <MenuItem.ItemTemplate>
-                    <DataTemplate>
-                        <RadioButton Command="{Binding SetCultureCommand}" Content="{Binding Header}" VerticalAlignment="Center" IsChecked="{Binding IsSelected}" />
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
-            </MenuItem>
-
             <MenuItem Header="{echoes:Translate {x:Static translations:Strings.theme}}">
                 <MenuItem Command="{Binding SystemThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.system}}"/>
                 <MenuItem Command="{Binding DarkThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.dark}}"/>

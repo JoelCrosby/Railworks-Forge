@@ -5,9 +5,16 @@ using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core;
 
-public static class ScenarioService
+public class ScenarioService
 {
-    public static List<Scenario> GetScenarios(Route route)
+    private readonly ScenarioDatabaseService _scenarioDatabaseService;
+
+    public ScenarioService(ScenarioDatabaseService  scenarioDatabaseService)
+    {
+        _scenarioDatabaseService = scenarioDatabaseService;
+    }
+
+    public List<Scenario> GetScenarios(Route route)
     {
         var scenarios = new HashSet<Scenario>();
 
@@ -17,7 +24,7 @@ public static class ScenarioService
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
     }
 
-    private static void AddPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios)
     {
         foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
         {
@@ -27,12 +34,13 @@ public static class ScenarioService
 
                 if (scenario is null) continue;
 
+                scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
                 scenarios.Add(scenario);
             }
         }
     }
 
-    private static void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    private void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios)
     {
         if (GetScenarioDirectory(route) is not {} dir) return;
 
@@ -42,7 +50,7 @@ public static class ScenarioService
         }
     }
 
-    private static List<Scenario> ReadScenarioFiles(Route route, string directory)
+    private List<Scenario> ReadScenarioFiles(Route route, string directory)
     {
         var scenarios = new List<Scenario>();
 
@@ -56,6 +64,7 @@ public static class ScenarioService
 
             if (scenario is null) continue;
 
+            scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
             scenarios.Add(scenario);
         }
 
@@ -83,5 +92,12 @@ public static class ScenarioService
             IsArchivePath = true,
             ArchivePath = e.FullName,
         });
+    }
+
+    private ScenarioPlayerInfo GetScenarioIdFromPath(string path)
+    {
+        var id = Path.GetDirectoryName(path);
+
+        return id is null ? throw new Exception("scenarioPath is null") : _scenarioDatabaseService.GetScenario(id);
     }
 }

@@ -23,6 +23,8 @@ namespace RailworksForge.ViewModels;
 
 public partial class RouteDetailViewModel : ViewModelBase
 {
+    private readonly ScenarioService _scenarioService;
+
     [ObservableProperty]
     private RouteViewModel _route;
 
@@ -44,8 +46,10 @@ public partial class RouteDetailViewModel : ViewModelBase
 
     public FlatTreeDataGridSource<Scenario> ScenariosSource { get; }
 
-    public RouteDetailViewModel(RouteViewModel route)
+    public RouteDetailViewModel(RouteViewModel route, ScenarioService scenarioService)
     {
+        _scenarioService = scenarioService;
+
         Route = route;
 
         DetailsClickedCommand = ReactiveCommand.Create(() =>
@@ -119,8 +123,6 @@ public partial class RouteDetailViewModel : ViewModelBase
         };
     }
 
-    protected RouteDetailViewModel(Route route) : this(new RouteViewModel(route)) { }
-
     private List<Scenario> GetScenarios()
     {
         if (Design.IsDesignMode)
@@ -128,7 +130,7 @@ public partial class RouteDetailViewModel : ViewModelBase
             return [..DesignData.DesignData.Scenarios];
         }
 
-        var items = ScenarioService.GetScenarios(Route.Model);
+        var items = _scenarioService.GetScenarios(Route.Model);
 
         _cachedScenarios = items;
 

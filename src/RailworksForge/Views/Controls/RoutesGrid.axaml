@@ -37,7 +37,7 @@
                                     BorderBrush="{DynamicResource DataGridGridLinesBrush}"
                                     BorderThickness="1">
                                 <StackPanel Orientation="Vertical">
-                                    <Image Height="128" Source="{Binding ImageBitmap}" />
+                                    <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill" />
                                     <Border Padding="12,8">
                                         <TextBlock Text="{Binding Name}" />
                                     </Border>

@@ -1,20 +1,15 @@
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Reactive;
 
 using Avalonia;
 using Avalonia.Styling;
 
-
-using Echoes;
-
 using RailworksForge.Core;
 using RailworksForge.Core.Config;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Packaging;
 using RailworksForge.Util;
-using RailworksForge.ViewModels.MenuItems;
 
 using ReactiveUI;
 
@@ -31,8 +26,6 @@ public class MainMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SystemThemeCommand { get; }
     public ReactiveCommand<Unit, Unit> DarkThemeCommand { get; }
     public ReactiveCommand<Unit, Unit> LightThemeCommand { get; }
-
-    public ObservableCollection<LanguageMenuItem> Languages { get; }
 
     public MainMenuViewModel()
     {
@@ -112,15 +105,6 @@ public class MainMenuViewModel : ViewModelBase
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
             Configuration.Set(Configuration.Get() with { Theme = "Light" });
         });
-
-        Languages = [
-            new LanguageMenuItem(Utils.GetTranslation("english"), "en-GB", IsSelected("en-GB")),
-            new LanguageMenuItem(Utils.GetTranslation("german"), "de-DE", IsSelected("de-DE")),
-        ];
-
-        return;
-
-        bool IsSelected(string culture) => Configuration.Get().Language == culture;
     }
 
 

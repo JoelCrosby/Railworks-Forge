@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Subjects;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using AngleSharp.Common;
 
@@ -14,13 +15,21 @@ using Serilog;
 
 namespace RailworksForge.Core;
 
-public static class ScenarioDatabaseService
+public class ScenarioDatabaseService
 {
-    private static ConcurrentDictionary<string, ScenarioPlayerInfo>? _scenarioDictionary;
+    private ConcurrentDictionary<string, ScenarioPlayerInfo>? _scenarioDictionary;
 
-    public static readonly BehaviorSubject<bool> IsLoaded = new (false);
+    private readonly BehaviorSubject<bool> IsLoaded = new (false);
 
-    private static async Task ParseDatabase(bool useCache, CancellationToken cancellationToken)
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
+    {
+        AllowTrailingCommas = true,
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        TypeInfoResolver = SourceGenerationContext.Default,
+    };
+
+    private async Task ParseDatabase(bool useCache, CancellationToken cancellationToken)
     {
         if (useCache && GetJsonCache() is {} jsonCache)
         {
@@ -80,7 +89,7 @@ public static class ScenarioDatabaseService
         Log.Information("built scenario cache in {Elapsed}ms", sw.ElapsedMilliseconds);
 
         var cachePath = GetCachePath();
-        var jsonCache = JsonSerializer.Serialize(scenarioDictionary);
+        var jsonCache = JsonSerializer.Serialize(scenarioDictionary, JsonSerializerOptions);
 
         await File.WriteAllTextAsync(cachePath, jsonCache, cancellationToken);
 
@@ -106,12 +115,12 @@ public static class ScenarioDatabaseService
         return Path.Join(Paths.GetCacheFolder(), "SDBCache.json");
     }
 
-    public static async Task LoadScenarioDatabase()
+    public async Task LoadScenarioDatabase()
     {
         await ParseDatabase(false, CancellationToken.None);
     }
 
-    public static ScenarioPlayerInfo GetScenario(string id)
+    public ScenarioPlayerInfo GetScenario(string id)
     {
         return _scenarioDictionary?.GetOrDefault(id, null) ?? ScenarioPlayerInfo.Empty;
     }

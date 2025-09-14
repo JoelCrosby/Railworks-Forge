@@ -66,6 +66,7 @@ public class App : Application
         ViewLocator.Register<MainMenuViewModel, MainMenu>();
         ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
+        ViewLocator.Register<ToolbarViewModel, Toolbar>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
         ViewLocator.Register<CheckAssetsViewModel, CheckAssetsDialog>();
@@ -83,6 +84,7 @@ public class App : Application
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<MainMenuViewModel>();
         services.AddTransient<ConsistDetailViewModel>();
+        services.AddTransient<ToolbarViewModel>();
         services.AddTransient<NavigationBarViewModel>();
         services.AddTransient<ReplaceConsistViewModel>();
         services.AddTransient<ReplaceTrackViewModel>();
@@ -97,7 +99,9 @@ public class App : Application
         services.AddTransient<ProgressIndicatorViewModel>();
 
         services.AddTransient<RouteService>();
+        services.AddTransient<ScenarioService>();
 
         services.AddSingleton<AssetDirectoryTreeService>();
+        services.AddSingleton<ScenarioDatabaseService>();
     }
 }

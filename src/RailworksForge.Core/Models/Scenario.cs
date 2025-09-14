@@ -47,7 +47,7 @@ public record Scenario
 
     public ScenarioClass ScenarioClass { get; init; }
 
-    public ScenarioPlayerInfo PlayerInfo { get; init; } = ScenarioPlayerInfo.Empty;
+    public ScenarioPlayerInfo PlayerInfo { get; set; } = ScenarioPlayerInfo.Empty;
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 
@@ -96,7 +96,6 @@ public record Scenario
             Rating = rating,
             Season = season,
             SearchIndex = name.ToLowerInvariant(),
-            PlayerInfo = ScenarioDatabaseService.GetScenario(id),
         };
     }
 
@@ -311,5 +310,10 @@ public record Scenario
     public override int GetHashCode()
     {
         return Id.GetHashCode();
+    }
+
+    public void SetPlayerInfo(ScenarioPlayerInfo playerInfo)
+    {
+        PlayerInfo = playerInfo;
     }
 }
