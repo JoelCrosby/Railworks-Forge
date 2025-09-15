@@ -252,13 +252,23 @@ public record Scenario
         return BinaryPath;
     }
 
-    public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(string consistId)
+    public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(Consist consist)
     {
         var doc = await GetXmlDocument();
 
+        if (!string.IsNullOrEmpty(consist.Id))
+        {
+            return doc
+                .QuerySelectorAll("cConsist")
+                .FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id)?
+                .QuerySelectorAll("RailVehicles cOwnedEntity")
+                .Select(ParseConsist)
+                .ToList() ?? [];
+        }
+
         return doc
             .QuerySelectorAll("cConsist")
-            .FirstOrDefault(el => el.GetAttribute("d:id") == consistId)?
+            .ElementAtOrDefault(consist.Index ?? 0)?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
             .Select(ParseConsist)
             .ToList() ?? [];

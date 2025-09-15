@@ -170,7 +170,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
-
         var binFiles = Directory
             .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.bin", SearchOption.AllDirectories)
             .Where(path =>
@@ -238,7 +237,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
             return;
         }
 
-        var consists = await _scenario.GetServiceConsistVehicles(_consist.Id);
+        var consists = await _scenario.GetServiceConsistVehicles(_consist);
 
         Dispatcher.UIThread.Post(() => IsLoading = false);
 

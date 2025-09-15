@@ -32,7 +32,11 @@ public class Consist : Blueprint
 
     public int Length { get; init; }
 
-    public required List<Blueprint> Vehicles { get; init; }
+    public required List<VehicleBlueprint> Vehicles { get; init; }
+
+    public VehicleBlueprint? LeadVehicle {  get; init; }
+
+    public int? Index { get; set; }
 
     public static Consist ParseConsist(IElement el)
     {
@@ -67,32 +71,29 @@ public class Consist : Blueprint
         };
     }
 
-    public static Consist? ParseScenarioConsist(IElement el)
+    public static Consist? ParseScenarioConsist(IElement el, int index)
     {
-        var railVehicles = el.QuerySelector("RailVehicles");
-        var lead = railVehicles?.QuerySelector("cOwnedEntity");
+        var vehicles = el.QuerySelectorAll("RailVehicles cOwnedEntity").Select(VehicleBlueprint.Parse).ToList();
+        var lead = GetLeadVehicle(vehicles);
 
-        if (lead is null)
-        {
-            return null;
-        }
+        if (lead is null) return null;
 
         var consistId = el.GetAttribute("d:id") ?? string.Empty;
-        var locomotiveName = lead.SelectTextContent("Name");
+        var locomotiveName = lead.Element.SelectTextContent("Name");
         var playerDriver = el.SelectTextContent("Driver PlayerDriver") == "1";
-        var blueprintId = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID");
+        var blueprintId = lead.Element.SelectTextContent("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID");
         var serviceName = el.SelectLocalisedStringContent("Driver ServiceName");
         var serviceId = el.SelectTextContent("Driver ServiceName Key");
-        var locoClass = LocoClassUtils.Parse(lead.SelectTextContent("LocoClass"));
-        var blueprintSetIdProduct = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Product");
-        var blueprintSetIdProvider = lead.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Provider");
+        var locoClass = LocoClassUtils.Parse(lead.Element.SelectTextContent("LocoClass"));
+        var blueprintSetIdProduct = lead.Element.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = lead.Element.SelectTextContent("BlueprintID iBlueprintLibrary-cBlueprintSetID Provider");
 
-        var vehicles = el.QuerySelectorAll("RailVehicles BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID").Select(Parse).ToList();
         var consistAcquisitionState = GetConsistAcquisitionState(vehicles);
 
         return new Consist
         {
             Id = consistId,
+            LeadVehicle = lead,
             LocomotiveName = locomotiveName,
             LocoAuthor = blueprintSetIdProvider,
             LocoClass = locoClass,
@@ -106,12 +107,28 @@ public class Consist : Blueprint
             Length = vehicles.Count,
             SearchIndex = $"{locomotiveName} {blueprintSetIdProvider} {locoClass} {serviceName}".ToLowerInvariant(),
             Vehicles = vehicles,
+            Index = index,
         };
     }
 
-    private static AcquisitionState GetConsistAcquisitionState(List<Blueprint> vehicles)
+    private static VehicleBlueprint? GetLeadVehicle(List<VehicleBlueprint> vehicles)
     {
-        var found = vehicles.Count(v => v.AcquisitionState is AcquisitionState.Found);
+        if (vehicles.FirstOrDefault()?.BlueprintType == BlueprintType.Engine)
+        {
+            return vehicles.First();
+        }
+
+        if (vehicles.LastOrDefault()?.BlueprintType == BlueprintType.Engine)
+        {
+            return vehicles.Last();
+        }
+
+        return vehicles.FirstOrDefault();
+    }
+
+    private static AcquisitionState GetConsistAcquisitionState(List<VehicleBlueprint> vehicles)
+    {
+        var found = vehicles.Count(v => v.Blueprint.AcquisitionState is AcquisitionState.Found);
 
         var partial = found > 0 && found < vehicles.Count;
         var all = found == vehicles.Count;

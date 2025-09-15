@@ -175,7 +175,7 @@ public class Blueprint
         return AcquisitionState.Missing;
     }
 
-    protected static Blueprint Parse(IElement el)
+    public static Blueprint Parse(IElement el)
     {
         var blueprintId = el.SelectTextContent("BlueprintID");
 
