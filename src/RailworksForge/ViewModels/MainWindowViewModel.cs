@@ -113,9 +113,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void SelectScenarioConsist(Scenario scenario, Consist consist)
     {
+        var view = new ConsistDetailViewModel(scenario, consist, _assetDirectoryTreeService);
+
         NavigationBar.Consist = consist;
 
-        ContentViewModel = new ConsistDetailViewModel(scenario, consist, _assetDirectoryTreeService);
+        ContentViewModel = view;
     }
 
     public void SelectCurrentConsist()

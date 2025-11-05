@@ -76,12 +76,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _scenario = scenario;
         _consist = consist;
 
+        IsLoading = true;
         AvailableStock = [];
         RailVehicles = [];
 
         DirectoryTree = [..directoryTreeService.GetDirectoryTree()];
-
-        IsLoading = true;
 
         LoadAvailableStockCommand = ReactiveCommand.CreateFromObservable(() => Observable.StartAsync(LoadAvailableStock));
 
@@ -157,10 +156,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private void Refresh()
     {
+        IsLoading = true;
+
         Cache.BlueprintAcquisitionStates.Clear();
         Cache.ArchiveCache.Clear();
 
-        Observable.StartAsync(GetRailVehicles, RxApp.TaskpoolScheduler);
+        Observable.StartAsync(GetRailVehicles, RxApp.MainThreadScheduler);
     }
 
     private async Task LoadAvailableStock()
@@ -239,14 +240,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
         var consists = await _scenario.GetServiceConsistVehicles(_consist);
 
-        Dispatcher.UIThread.Post(() => IsLoading = false);
-
         Dispatcher.UIThread.Post(() =>
         {
             _cachedRailVehicles = consists;
 
             RailVehicles.Clear();
             RailVehicles.AddRange(consists);
+            IsLoading = false;
         });
     }
 
