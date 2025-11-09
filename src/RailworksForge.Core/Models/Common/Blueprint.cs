@@ -159,9 +159,9 @@ public class Blueprint
 
         lock (ArchiveLock)
         {
-            if (Directory.Exists(ProductDirectory))
+            if (Paths.GetActualPathFromInsensitive(ProductDirectory) is {} actualProductDirectory)
             {
-                var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories).ToList();
+                var archives = Directory.EnumerateFiles(actualProductDirectory, "*.ap", SearchOption.AllDirectories).ToList();
 
                 Log.Debug("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
 
