@@ -53,9 +53,9 @@ public class Blueprint
 
     public async Task<IDocument> GetXmlDocument(bool force = false)
     {
-        if (Paths.Exists(BlueprintPath))
+        if (Paths.Exists(BlueprintBinaryPath))
         {
-            var converted = await Serz.Convert(BlueprintPath, force: force);
+            var converted = await Serz.Convert(BlueprintBinaryPath, force: force);
             var file = File.OpenRead(converted.OutputPath);
 
             return await XmlParser.ParseDocumentAsync(file);
@@ -77,14 +77,14 @@ public class Blueprint
             }
         }
 
-        throw new Exception($"unable to get blueprint xml for path {BlueprintPath}");
+        throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
     }
 
     public IDocument GetBlueprintXmlInternal()
     {
-        if (Paths.Exists(BlueprintPath))
+        if (Paths.Exists(BlueprintBinaryPath))
         {
-            var data = File.ReadAllBytes(BlueprintPath);
+            var data = File.ReadAllBytes(BlueprintBinaryPath);
             return new SerzInternal(ref data).ToXml();
         }
 
@@ -92,16 +92,16 @@ public class Blueprint
 
         foreach (var archive in archives)
         {
-            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintPath);
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintBinaryPath);
 
             if (extracted)
             {
-                var data = File.ReadAllBytes(BlueprintPath);
+                var data = File.ReadAllBytes(BlueprintBinaryPath);
                 return new SerzInternal(ref data).ToXml();
             }
         }
 
-        throw new Exception($"unable to get blueprint xml for path {BlueprintPath}");
+        throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
     }
 
     private string ProductDirectory => Path.Join(
@@ -122,7 +122,9 @@ public class Blueprint
 
     public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
-    private string BlueprintPath => Path.Join(ProductDirectory, RelativeBinaryPath);
+    private string BlueprintBinaryPath => Path.Join(ProductDirectory, RelativeBinaryPath);
+
+    private string BlueprintXmlPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
     private AcquisitionState GetAcquisitionState()
     {
@@ -152,7 +154,12 @@ public class Blueprint
             return AcquisitionState.Missing;
         }
 
-        if (Paths.Exists(BlueprintPath, Paths.GetAssetsDirectory()))
+        if (Paths.Exists(BlueprintBinaryPath, Paths.GetAssetsDirectory()))
+        {
+            return AcquisitionState.Found;
+        }
+
+        if (Paths.Exists(BlueprintXmlPath, Paths.GetAssetsDirectory()))
         {
             return AcquisitionState.Found;
         }
