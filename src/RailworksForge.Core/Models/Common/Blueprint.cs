@@ -2,6 +2,8 @@ using System.Diagnostics;
 
 using AngleSharp.Dom;
 
+using Dameng.SepEx;
+
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 
@@ -9,13 +11,20 @@ using Serilog;
 
 namespace RailworksForge.Core.Models.Common;
 
+[GenSepParsable]
 [DebuggerDisplay("{BlueprintSetIdProvider}/{BlueprintSetIdProduct}/{BlueprintId}")]
-public class Blueprint
+public partial class Blueprint
 {
+    [SepColumnName("id")]
+    [SepColumnIndex(2)]
     public required string BlueprintId { get; init; }
 
+    [SepColumnName("provider")]
+    [SepColumnIndex(0)]
     public required string BlueprintSetIdProvider { get; init; }
 
+    [SepColumnName("product")]
+    [SepColumnIndex(1)]
     public required string BlueprintSetIdProduct { get; init; }
 
     public override bool Equals(object? other) => this.Equals(other as Blueprint);
@@ -47,7 +56,23 @@ public class Blueprint
         return (BlueprintId, BlueprintSetIdProvider, BlueprintSetIdProduct).GetHashCode();
     }
 
+    [SepColumnIgnore]
     public AcquisitionState AcquisitionState => GetAcquisitionState();
+
+    [SepColumnIgnore]
+    public string RelativeBinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
+
+    [SepColumnIgnore]
+    public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
+
+    [SepColumnIgnore]
+    public string? BinaryDirectoryPath => Path.GetDirectoryName(BinaryPath);
+
+    [SepColumnIgnore]
+    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintSetIdProvider, BlueprintSetIdProduct);
+
+    [SepColumnIgnore]
+    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
     private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
 
@@ -104,26 +129,20 @@ public class Blueprint
         throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
     }
 
+    [SepColumnIgnore]
     private string ProductDirectory => Path.Join(
         Paths.GetAssetsDirectory(),
         BlueprintSetIdProvider,
         BlueprintSetIdProduct
     );
 
+    [SepColumnIgnore]
     private string AgnosticBlueprintIdPath => BlueprintId.Replace('\\', Path.DirectorySeparatorChar);
 
-    public string RelativeBinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
-
-    public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
-
-    public string? BinaryDirectoryPath => Path.GetDirectoryName(BinaryPath);
-
-    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintSetIdProvider, BlueprintSetIdProduct);
-
-    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
-
+    [SepColumnIgnore]
     private string BlueprintBinaryPath => Path.Join(ProductDirectory, RelativeBinaryPath);
 
+    [SepColumnIgnore]
     private string BlueprintXmlPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
 
     private AcquisitionState GetAcquisitionState()

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -14,10 +13,11 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using CsvHelper;
-using CsvHelper.Configuration;
+using Dameng.SepEx;
 
 using DynamicData;
+
+using nietras.SeparatedValues;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
@@ -91,37 +91,17 @@ public partial class CheckAssetsViewModel : ViewModelBase
             Directory.CreateDirectory(directory);
         }
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = true,
-        };
+        await using var writer = Sep.Writer().ToFile(path);
 
-        await using var writer = new StreamWriter(path);
-        await using var csv = new CsvWriter(writer, config);
-
-        await csv.WriteRecordsAsync(blueprints);
+        writer.WriteRecords(blueprints);
     }
 
-    private async Task<List<Blueprint>> GetCachedBlueprintResults()
+    private List<Blueprint> GetCachedBlueprintResults()
     {
         var path = Paths.GetRouteAssetsCachePath(Route);
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = true,
-        };
-
-        using var reader = new StreamReader(path);
-        using var csv = new CsvReader(reader, config);
-
-        var results = new List<Blueprint>();
-
-        await foreach (var blueprint in csv.GetRecordsAsync<Blueprint>())
-        {
-            results.Add(blueprint);
-        }
-
-        return results;
+        using var reader = Sep.Reader().FromFile(path);
+        return reader.GetRecords<Blueprint>().ToList();
     }
 
     private bool HasCachedBlueprints()
@@ -134,7 +114,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
     {
         if (HasCachedBlueprints())
         {
-            return await GetCachedBlueprintResults();
+            return GetCachedBlueprintResults();
         }
 
         var sceneryBinFiles = GetBinFiles("Scenery", true);

@@ -217,7 +217,7 @@ public static class Paths
 
     public static string GetRouteAssetsCachePath(Route route)
     {
-        return Path.Join(GetConfigurationFolder(), "route-assets-cache", route.Id, "blueprints.csv");
+        return Path.Join(GetConfigurationFolder(), "route-assets-cache", $"{route.Id}.csv");
     }
 
     public static string GetAssetCachePath(string path, bool isBin)
