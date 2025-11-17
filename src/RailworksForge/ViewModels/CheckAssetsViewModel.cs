@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -12,6 +13,9 @@ using Avalonia.Controls;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using CsvHelper;
+using CsvHelper.Configuration;
 
 using DynamicData;
 
@@ -62,13 +66,92 @@ public partial class CheckAssetsViewModel : ViewModelBase
             return;
         }
 
-        Observable.Start(GetMissingAssets, RxApp.TaskpoolScheduler);
+        Observable.Start(RunAssetCheck, RxApp.TaskpoolScheduler);
     }
 
-    private async Task GetMissingAssets()
+    private async Task RunAssetCheck()
     {
-        var binFiles = GetBinFiles();
+        var blueprints = await GetBlueprints();
+        var missing = await GetMissingAssets(blueprints);
 
+        Dispatcher.UIThread.Post(() =>
+        {
+            Blueprints.AddRange(missing);
+            IsLoading = false;
+        });
+    }
+
+    private async Task CacheBlueprintResults(IEnumerable<Blueprint> blueprints)
+    {
+        var path = Paths.GetRouteAssetsCachePath(Route);
+        var directory = Directory.GetParent(path)?.FullName;
+
+        if (directory is not null)
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+
+        await using var writer = new StreamWriter(path);
+        await using var csv = new CsvWriter(writer, config);
+
+        await csv.WriteRecordsAsync(blueprints);
+    }
+
+    private async Task<List<Blueprint>> GetCachedBlueprintResults()
+    {
+        var path = Paths.GetRouteAssetsCachePath(Route);
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+
+        using var reader = new StreamReader(path);
+        using var csv = new CsvReader(reader, config);
+
+        var results = new List<Blueprint>();
+
+        await foreach (var blueprint in csv.GetRecordsAsync<Blueprint>())
+        {
+            results.Add(blueprint);
+        }
+
+        return results;
+    }
+
+    private bool HasCachedBlueprints()
+    {
+        var path = Paths.GetRouteAssetsCachePath(Route);
+        return Paths.Exists(path);
+    }
+
+    private async Task<List<Blueprint>> GetBlueprints()
+    {
+        if (HasCachedBlueprints())
+        {
+            return await GetCachedBlueprintResults();
+        }
+
+        var sceneryBinFiles = GetBinFiles("Scenery", true);
+        var networkBinFiles = GetBinFiles("Networks", false);
+
+        var binFiles = sceneryBinFiles.Concat(networkBinFiles).ToList();
+
+        var blueprintDictionary = await GetBlueprintsFromBinaries(binFiles);
+        var blueprints = blueprintDictionary.Keys.ToList();
+
+        await CacheBlueprintResults(blueprints);
+
+        return blueprints;
+    }
+
+    private async Task<ConcurrentDictionary<Blueprint, byte>> GetBlueprintsFromBinaries(List<string> binFiles)
+    {
         var results = new ConcurrentDictionary<Blueprint, byte>();
 
         var processedCount = 0;
@@ -117,14 +200,19 @@ public partial class CheckAssetsViewModel : ViewModelBase
             }
         });
 
+        return results;
+    }
+
+    private async Task<List<Blueprint>> GetMissingAssets(List<Blueprint> blueprints)
+    {
         var amountCheckedCount = 0;
-        var amountToCheck = results.Count;
+        var amountToCheck = blueprints.Count;
 
         var missing = await Observable.Start(() =>
         {
             var notFound = new List<Blueprint>();
 
-            foreach (var blueprint in results.Keys)
+            foreach (var blueprint in blueprints)
             {
                 amountCheckedCount++;
 
@@ -143,24 +231,21 @@ public partial class CheckAssetsViewModel : ViewModelBase
                 }
             }
 
-            return notFound.OrderBy(n => n.BlueprintSetIdProvider);
+            return notFound.OrderBy(n => n.BlueprintSetIdProvider).ToList();
 
         }, RxApp.TaskpoolScheduler);
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            Blueprints.AddRange(missing);
-            IsLoading = false;
-        });
+        return missing;
     }
 
-    private List<string> GetBinFiles()
+    private List<string> GetBinFiles(string directory, bool allDirectories)
     {
-        var sceneryPath = Path.Join(Route.DirectoryPath, "Scenery");
+        var absolutePath = Path.Join(Route.DirectoryPath, directory);
+        var searchOption =  allDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
-        if (Paths.Exists(sceneryPath))
+        if (Paths.Exists(absolutePath))
         {
-            return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+            return Directory.EnumerateFiles(absolutePath, "*.bin", searchOption).ToList();
         }
 
         var archivePath = Route.MainContentArchivePath;
@@ -170,9 +255,9 @@ public partial class CheckAssetsViewModel : ViewModelBase
             throw new Exception($"Could not find archive at {archivePath}");
         }
 
-        Archives.ExtractDirectory(archivePath, "Scenery");
+        Archives.ExtractDirectory(archivePath, directory);
 
-        return Directory.EnumerateFiles(sceneryPath, "*.bin").ToList();
+        return Directory.EnumerateFiles(absolutePath, "*.bin", searchOption).ToList();
     }
 
     public void OnClose()

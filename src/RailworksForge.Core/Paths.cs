@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Models;
 
 namespace RailworksForge.Core;
 
@@ -213,6 +214,11 @@ public static class Paths
     public static readonly string CacheOutputPath = Path.Join(GetConfigurationFolder(), "xml-cache");
 
     public static readonly string PackageCachePath = Path.Join(GetConfigurationFolder(), "package-cache");
+
+    public static string GetRouteAssetsCachePath(Route route)
+    {
+        return Path.Join(GetConfigurationFolder(), "route-assets-cache", route.Id, "blueprints.csv");
+    }
 
     public static string GetAssetCachePath(string path, bool isBin)
     {
