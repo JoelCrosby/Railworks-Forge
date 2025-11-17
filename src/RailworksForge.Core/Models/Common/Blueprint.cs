@@ -15,17 +15,14 @@ namespace RailworksForge.Core.Models.Common;
 [DebuggerDisplay("{BlueprintSetIdProvider}/{BlueprintSetIdProduct}/{BlueprintId}")]
 public partial class Blueprint
 {
-    [SepColumnName("id")]
-    [SepColumnIndex(2)]
-    public required string BlueprintId { get; init; }
-
     [SepColumnName("provider")]
-    [SepColumnIndex(0)]
     public required string BlueprintSetIdProvider { get; init; }
 
     [SepColumnName("product")]
-    [SepColumnIndex(1)]
     public required string BlueprintSetIdProduct { get; init; }
+
+    [SepColumnName("id")]
+    public required string BlueprintId { get; init; }
 
     public override bool Equals(object? other) => this.Equals(other as Blueprint);
 
