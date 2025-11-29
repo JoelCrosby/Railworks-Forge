@@ -22,6 +22,15 @@ public class SerzInternalTests
         Assert.NotNull(document.DocumentElement);
     }
 
+    [Fact]
+    public void SerzInternal_CreatesExpected_Document()
+    {
+        var data = GetResourceStream("+000000+000000.bin");
+        var document = new SerzInternal(ref data).ToXml();
+
+        Assert.NotNull(document.DocumentElement);
+    }
+
     private static byte[] GetResourceStream(string name)
     {
         var assembly = typeof(SerzInternalTests).Assembly;

@@ -22,7 +22,6 @@ public class SerzInternal
     private string? _chunkName;
     private readonly byte[] _mData;
     private int _dataIx = 8;
-    private int _lastChunkCacheIx;
     private int _lastStringCacheIx;
     private int _parentCount;
     private readonly List<string> _stringCache = new(1000);
@@ -31,6 +30,12 @@ public class SerzInternal
     public SerzInternal(ref byte[] data)
     {
         _mData = data;
+    }
+
+    public static IDocument Convert(string inputPath)
+    {
+        var input = File.ReadAllBytes(inputPath);
+        return new SerzInternal(ref input).ToXml();
     }
 
     public IDocument ToXml()
@@ -71,8 +76,6 @@ public class SerzInternal
 
                 sChunk.MTypeNameIx = _lastStringCacheIx;
                 _chunkCache.Add(sChunk);
-
-                _lastChunkCacheIx = _chunkCache.Count;
             }
             else
             {
