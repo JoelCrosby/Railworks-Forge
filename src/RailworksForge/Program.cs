@@ -42,10 +42,11 @@ internal sealed class Program
 
     private static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
             .WithInterFont()
+            .With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan] })
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUI()
+            .UsePlatformDetect();
 
     private static void HandleUnobservedTaskExceptions(object? _, UnobservedTaskExceptionEventArgs args)
     {
