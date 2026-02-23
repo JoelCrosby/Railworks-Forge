@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Echoes" Version="0.3.0" />
-      <PackageReference Include="Echoes.Generator" Version="0.3.0" />
+      <PackageReference Include="Echoes" Version="0.4.1" />
+      <PackageReference Include="Echoes.Generator" Version="0.4.1" />
     </ItemGroup>
 
     <ItemGroup>
