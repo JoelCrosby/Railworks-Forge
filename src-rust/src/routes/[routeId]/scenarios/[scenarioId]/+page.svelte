@@ -100,6 +100,14 @@
 		goto(`/routes/${encodeURIComponent(routeId)}`, { state: { route } });
 	}
 
+	function openConsistDetail(consist: Consist) {
+		if (!detail) return;
+		goto(
+			`/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}/consists/${encodeURIComponent(consist.id)}`,
+			{ state: { route, scenario: detail, consist } }
+		);
+	}
+
 	function acquisitionIcon(state: string): string {
 		return state === 'found' ? '✓' : state === 'partial' ? '~' : '✗';
 	}
@@ -190,6 +198,7 @@
 									{/if}
 									<span class="loco-class badge-{consist.locoClass}">{consist.locoClass}</span>
 									<span class="vehicle-count">{consist.vehicles.length} vehicles</span>
+									<button class="edit-btn" onclick={() => openConsistDetail(consist)}>Edit</button>
 								</div>
 							</div>
 
@@ -521,4 +530,17 @@
 	.veh-acq.found   { color: #68d391; }
 	.veh-acq.partial { color: #f6ad55; }
 	.veh-acq.missing { color: #fc8181; }
+
+	.edit-btn {
+		margin-left: auto;
+		background: none;
+		border: 1px solid #4a5568;
+		border-radius: 4px;
+		color: #718096;
+		padding: 0.15rem 0.5rem;
+		font-size: 0.7rem;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+	.edit-btn:hover { background: #2d3748; color: #e2e8f0; }
 </style>

@@ -176,14 +176,16 @@ Five cache layers mirroring the existing C# app:
 - [x] Routes list page (`routes/+page.svelte`) — replaces placeholder, calls `get_routes` with Channel progress
 - [x] SPA mode enabled via `routes/+layout.ts` (`ssr = false`)
 
-### Phase 3 — Consist Editing
+### Phase 3 — Consist Editing ✅ Complete
 
-- [ ] Command pattern: `ReplaceConsist`, `ReplaceConsistVehicles`, `AddConsistVehicle`, `DeleteConsist`, `DeleteConsistVehicle`
-- [ ] `ConsistCommandRunner` — batched command execution + XML write-back
-- [ ] `PersistenceService` — scenario backup creation, write-back via Serz
-- [ ] `VehicleTemplates` + `VehicleGenerator` — preload consist templates
-- [ ] Consist detail page in Svelte (vehicle list, add/delete/replace)
-- [ ] Replace consist dialog
+- [x] Command pattern: `DeleteVehicle`, `DeleteConsist`, `ReplaceVehicles` (`services/consist_commands.rs`)
+- [x] `ScenarioEditor` — single-pass streaming XML editor applying consist commands (`services/scenario_editor.rs`)
+- [x] `PersistenceService` — scenario backup creation, XML write-back via Serz, saved consist templates (`services/persistence.rs`)
+- [x] `VehicleTemplates` + `VehicleGenerator` — embedded Engine/Wagon/Tender templates; generates vehicle XML with blueprint IDs + flipped flag (`services/vehicle_templates.rs`, `services/vehicle_generator.rs`)
+- [x] `commands/consists.rs` — `replace_consist`, `add_vehicle`, `delete_vehicle`, `delete_consist`, `save_consist`, `get_saved_consists`, `delete_saved_consist`
+- [x] Consist detail page (`routes/[routeId]/scenarios/[scenarioId]/consists/[consistId]/+page.svelte`) — vehicle table with per-vehicle delete, consist delete, replace consist dialog
+- [x] Replace consist dialog — inline vehicle list editor, add vehicle form, save/load named templates
+- [x] Scenario detail page updated with "Edit" link per consist card
 
 ### Phase 4 — Asset Management
 

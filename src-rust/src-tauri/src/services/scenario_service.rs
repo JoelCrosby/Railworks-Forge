@@ -4,7 +4,7 @@ use crate::{
     xml::{parser::read_xml_file, selectors},
 };
 use anyhow::Result;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 
 /// Loads all scenarios for a given route, merging packed and unpacked variants.
@@ -186,4 +186,49 @@ fn build_scenario(
         player_info,
         consists: Vec::new(),
     })
+}
+
+/// Returns the path to `Scenario.bin`, extracting it from the route archive first
+/// when the scenario is packed.
+pub async fn resolve_scenario_bin(scenario: &Scenario) -> anyhow::Result<PathBuf> {
+    let bin_path = scenario.binary_path();
+    if bin_path.exists() {
+        return Ok(bin_path);
+    }
+
+    // Packed: the .bin lives inside the route's MainContent.ap.
+    // scenario.directory_path = {route_dir}/Scenarios/{scenario_id}
+    let route_dir = scenario
+        .directory_path
+        .parent()
+        .and_then(|p| p.parent())
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "cannot determine route directory from: {}",
+                scenario.directory_path.display()
+            )
+        })?;
+
+    let archive_path = route_dir.join("MainContent.ap");
+    anyhow::ensure!(
+        archive_path.exists(),
+        "no Scenario.bin or MainContent.ap found for scenario {}",
+        scenario.id
+    );
+
+    let entry_name = format!("Scenarios/{}/Scenario.bin", scenario.id);
+    let destination = bin_path.clone();
+
+    if let Some(parent) = destination.parent() {
+        tokio::fs::create_dir_all(parent).await?;
+    }
+
+    tokio::task::spawn_blocking(move || {
+        let bytes = archive::read_entry(&archive_path, &entry_name)?;
+        std::fs::write(&destination, bytes)?;
+        Ok::<(), anyhow::Error>(())
+    })
+    .await??;
+
+    Ok(bin_path)
 }

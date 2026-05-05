@@ -1,13 +1,14 @@
 use super::blueprint::Blueprint;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum BlueprintType {
     Engine,
     Tender,
     Coach,
     Wagon,
+    #[default]
     Unknown,
 }
 

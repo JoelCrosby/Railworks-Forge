@@ -1,5 +1,10 @@
 pub mod asset_service;
+pub mod consist_commands;
+pub mod persistence;
 pub mod route_service;
 pub mod scenario_db;
+pub mod scenario_editor;
 pub mod scenario_parser;
 pub mod scenario_service;
+pub mod vehicle_generator;
+pub mod vehicle_templates;

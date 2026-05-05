@@ -1,12 +1,21 @@
-use crate::models::{Consist, Scenario};
+use crate::{
+    models::{Consist, Scenario},
+    services::{
+        consist_commands::{ConsistCommand, SavedConsist, VehicleEntry},
+        persistence,
+        scenario_service,
+    },
+};
 use serde::{Deserialize, Serialize};
+
+// ── Request types ────────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReplaceConsistRequest {
     pub scenario: Scenario,
     pub target_consist_id: String,
-    pub preload_consist_service_name: String,
+    pub entries: Vec<VehicleEntry>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,10 +23,7 @@ pub struct ReplaceConsistRequest {
 pub struct AddVehicleRequest {
     pub scenario: Scenario,
     pub consist_id: String,
-    pub provider: String,
-    pub product: String,
-    pub blueprint_id: String,
-    pub flipped: bool,
+    pub entry: VehicleEntry,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -28,55 +34,129 @@ pub struct DeleteVehicleRequest {
     pub vehicle_index: usize,
 }
 
-/// Returns the full consist detail including all vehicles.
-/// Triggers Serz conversion of Scenario.bin if not already cached.
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteConsistRequest {
+    pub scenario: Scenario,
+    pub consist_id: String,
+}
+
+// ── Read commands ────────────────────────────────────────────────────────────
+
+/// Returns the full consist (already populated by `get_scenario_detail`).
 #[tauri::command]
 pub async fn get_consist_detail(consist: Consist) -> Result<Consist, String> {
-    // Phase 2: streaming XML parser for Scenario.bin.xml
     Ok(consist)
 }
 
-/// Persists a consist after an in-frontend edit, writing back to Scenario.bin via Serz.
-#[tauri::command]
-pub async fn save_consist(scenario: Scenario) -> Result<(), String> {
-    // Phase 3: implement write-back
-    tracing::info!("save_consist called for scenario {}", scenario.id);
-    Ok(())
-}
+// ── Write commands ───────────────────────────────────────────────────────────
 
-/// Replaces an entire service consist with a preload consist template.
+/// Replaces all vehicles in a consist with the provided entries.
 #[tauri::command]
 pub async fn replace_consist(request: ReplaceConsistRequest) -> Result<Scenario, String> {
-    tracing::info!(
-        "replace_consist: {} -> {}",
-        request.target_consist_id,
-        request.preload_consist_service_name
-    );
-    // Phase 3: implement command execution
-    Ok(request.scenario)
+    let bin_path = scenario_service::resolve_scenario_bin(&request.scenario)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let command = ConsistCommand::ReplaceVehicles {
+        consist_id: request.target_consist_id,
+        entries: request.entries,
+    };
+
+    persistence::apply_edits(request.scenario, bin_path, vec![command])
+        .await
+        .map_err(|e| e.to_string())
 }
 
-/// Adds a vehicle to an existing consist.
+/// Appends a single vehicle to an existing consist.
 #[tauri::command]
 pub async fn add_vehicle(request: AddVehicleRequest) -> Result<Scenario, String> {
-    tracing::info!(
-        "add_vehicle to consist {} in scenario {}",
-        request.consist_id,
-        request.scenario.id
-    );
-    // Phase 3: implement command execution
-    Ok(request.scenario)
+    let bin_path = scenario_service::resolve_scenario_bin(&request.scenario)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Collect existing vehicles plus the new one, then replace the consist.
+    let existing = request
+        .scenario
+        .consists
+        .iter()
+        .find(|c| c.id == request.consist_id)
+        .map(|c| {
+            c.vehicles
+                .iter()
+                .map(|v| VehicleEntry {
+                    provider: v.blueprint.provider.clone(),
+                    product: v.blueprint.product.clone(),
+                    blueprint_id: v.blueprint.blueprint_id.clone(),
+                    flipped: v.flipped,
+                    blueprint_type: v.blueprint_type.clone(),
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    let mut entries = existing;
+    entries.push(request.entry);
+
+    let command = ConsistCommand::ReplaceVehicles {
+        consist_id: request.consist_id,
+        entries,
+    };
+
+    persistence::apply_edits(request.scenario, bin_path, vec![command])
+        .await
+        .map_err(|e| e.to_string())
 }
 
-/// Removes a vehicle from a consist by index.
+/// Removes a vehicle from a consist by its 0-based index.
 #[tauri::command]
 pub async fn delete_vehicle(request: DeleteVehicleRequest) -> Result<Scenario, String> {
-    tracing::info!(
-        "delete_vehicle [{}] from consist {} in scenario {}",
-        request.vehicle_index,
-        request.consist_id,
-        request.scenario.id
-    );
-    // Phase 3: implement command execution
-    Ok(request.scenario)
+    let bin_path = scenario_service::resolve_scenario_bin(&request.scenario)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let command = ConsistCommand::DeleteVehicle {
+        consist_id: request.consist_id,
+        vehicle_index: request.vehicle_index,
+    };
+
+    persistence::apply_edits(request.scenario, bin_path, vec![command])
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Removes an entire consist from a scenario.
+#[tauri::command]
+pub async fn delete_consist(request: DeleteConsistRequest) -> Result<Scenario, String> {
+    let bin_path = scenario_service::resolve_scenario_bin(&request.scenario)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let command = ConsistCommand::DeleteConsist {
+        consist_id: request.consist_id,
+    };
+
+    persistence::apply_edits(request.scenario, bin_path, vec![command])
+        .await
+        .map_err(|e| e.to_string())
+}
+
+// ── Saved consist templates ──────────────────────────────────────────────────
+
+/// Persists a consist entry list under a user-defined name.
+#[tauri::command]
+pub async fn save_consist(consist: SavedConsist) -> Result<(), String> {
+    persistence::save_consist_template(consist).map_err(|e| e.to_string())
+}
+
+/// Returns all saved consist templates.
+#[tauri::command]
+pub async fn get_saved_consists() -> Result<Vec<SavedConsist>, String> {
+    persistence::load_consist_templates().map_err(|e| e.to_string())
+}
+
+/// Removes a saved consist template by name.
+#[tauri::command]
+pub async fn delete_saved_consist(name: String) -> Result<(), String> {
+    persistence::delete_consist_template(&name).map_err(|e| e.to_string())
 }
