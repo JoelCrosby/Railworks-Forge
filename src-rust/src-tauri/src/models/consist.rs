@@ -10,6 +10,21 @@ pub enum LocoClass {
     Unknown,
 }
 
+impl LocoClass {
+    pub fn from_str(s: &str) -> Self {
+        let lower = s.to_lowercase();
+        if lower.contains("steam") {
+            Self::Steam
+        } else if lower.contains("diesel") {
+            Self::Diesel
+        } else if lower.contains("electric") {
+            Self::Electric
+        } else {
+            Self::Unknown
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum ConsistAcquisitionState {

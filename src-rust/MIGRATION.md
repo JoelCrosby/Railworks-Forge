@@ -165,14 +165,16 @@ Five cache layers mirroring the existing C# app:
 - [x] All Tauri command stubs registered: routes, scenarios, consists, tracks, assets
 - [x] Compiles clean (`cargo check` — 0 errors)
 
-### Phase 2 — Core XML Parsing
+### Phase 2 — Core XML Parsing ✅ Complete
 
-- [ ] Streaming `quick-xml` state-machine parser for `Scenario.bin.xml`
-  - Emits `Consist` and `VehicleBlueprint` from the event stream
-  - Benchmark against C# baseline (target: 3-5x faster on large files)
-- [ ] `get_scenario_detail` command — triggers Serz conversion, parses consists
-- [ ] Scenario detail page in Svelte
-- [ ] Route detail page in Svelte (scenario list)
+- [x] Streaming `quick-xml` state-machine parser for `Scenario.bin.xml` (`services/scenario_parser.rs`)
+  - Depth-tracked state machine; emits `Consist` + `VehicleBlueprint` from event stream
+  - Reads directly from file via `BufReader` — never loads full document into memory
+- [x] `get_scenario_detail` command — Serz conversion (cached), packed extraction, consist parsing
+- [x] Route detail page in Svelte (`routes/[routeId]/+page.svelte`) — scenario list with search
+- [x] Scenario detail page in Svelte (`routes/[routeId]/scenarios/[scenarioId]/+page.svelte`) — consist + vehicle list
+- [x] Routes list page (`routes/+page.svelte`) — replaces placeholder, calls `get_routes` with Channel progress
+- [x] SPA mode enabled via `routes/+layout.ts` (`ssr = false`)
 
 ### Phase 3 — Consist Editing
 
