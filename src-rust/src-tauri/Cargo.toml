@@ -1,0 +1,67 @@
+[package]
+name = "railworks-forge"
+version = "0.1.0"
+description = "Railworks Forge — Train Simulator asset manager"
+authors = ["Joel Crosby"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "railworks_forge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.0" }
+
+[dependencies]
+# Tauri
+tauri = { version = "2.11.0" }
+tauri-plugin-log = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# XML parsing (pull-based, zero-copy)
+quick-xml = { version = "0.37", features = ["async-tokio", "serde"] }
+
+# ZIP / .ap archive access
+zip = "2"
+
+# Concurrency
+dashmap = "6"
+rayon = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# CSV (route asset cache)
+csv = "1"
+
+# Path helpers
+dirs = "5"
+
+# MD5 for cache key generation
+md5 = "0.7"
+
+# LRU cache for image cache
+lru = "0.12"
+
+# Retry policies
+tokio-retry = "0.3"
+
+# Windows registry (conditional)
+[target.'cfg(windows)'.dependencies]
+winreg = "0.52"
