@@ -2,6 +2,7 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 
 	interface Route {
 		id: string;
@@ -133,17 +134,11 @@
 </script>
 
 <div class="mx-auto max-w-300 p-6">
-	<nav class="mb-4">
-		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
-			onclick={() =>
-				goto(`/routes/${encodeURIComponent(routeId)}`, {
-					state: { route: route ? $state.snapshot(route) : null }
-				})}
-		>
-			← {route?.name ?? 'Route'}
-		</button>
-	</nav>
+	<Breadcrumb items={[
+		{ label: 'Routes', onclick: () => goto('/') },
+		{ label: route?.name ?? routeId, onclick: () => goto(`/routes/${encodeURIComponent(routeId)}`, { state: { route: route ? $state.snapshot(route) : null } }) },
+		{ label: 'Tracks' }
+	]} />
 
 	<header class="mb-6 flex items-start justify-between gap-4">
 		<div>

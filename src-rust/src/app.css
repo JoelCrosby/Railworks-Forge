@@ -30,15 +30,15 @@
 :root {
 	font-family: system-ui, sans-serif;
 	color-scheme: dark;
-	--bg: #0f1117;
-	--surface: #1a202c;
-	--surface-hover: #222b3a;
-	--surface-raised: #2d3748;
-	--border: #2d3748;
-	--border-strong: #4a5568;
+	--bg: #000000;
+	--surface: #131313;
+	--surface-hover: #383838;
+	--surface-raised: #4a4a4a;
+	--border: #4a4a4a;
+	--border-strong: #686868;
 	--text: #e2e8f0;
-	--muted: #718096;
-	--muted-strong: #a0aec0;
+	--muted: #979797;
+	--muted-strong: #c0c0c0;
 	--accent: #4a90d9;
 	--accent-surface: #1a3a5c;
 	--accent-border: #2a5a8c;

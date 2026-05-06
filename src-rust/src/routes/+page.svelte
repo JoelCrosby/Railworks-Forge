@@ -85,7 +85,7 @@
 	});
 </script>
 
-<div class="mx-auto max-w-240 px-6 py-8">
+<div class="mx-auto px-6 py-8">
 	<header class="mb-8 flex items-center justify-between">
 		<h1 class="text-2xl font-bold">Railworks Forge</h1>
 		<div class="flex items-center gap-2">

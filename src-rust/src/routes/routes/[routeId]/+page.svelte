@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/settings';
+	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 
 	interface Route {
 		id: string;
@@ -124,12 +125,10 @@
 </script>
 
 <div class="mx-auto max-w-275 p-6">
-	<nav class="mb-4">
-		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
-			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
-		>
-	</nav>
+	<Breadcrumb items={[
+		{ label: t(locale, 'nav-routes'), onclick: () => goto('/') },
+		{ label: route?.name ?? routeId }
+	]} />
 
 	{#if route}
 		<header class="mb-6 flex items-start justify-between gap-4">

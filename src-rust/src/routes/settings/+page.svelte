@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	import { applyTheme, loadSettings, saveSettings, settings, type AppSettings, type Theme } from '$lib/settings';
+	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 
 	let form = $state<AppSettings>({ gamePath: null, theme: 'dark', locale: 'en-US' });
 	let loading = $state(true);
@@ -66,12 +67,10 @@
 </script>
 
 <div class="mx-auto max-w-190 p-6">
-	<nav class="mb-4">
-		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
-			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
-		>
-	</nav>
+	<Breadcrumb items={[
+		{ label: t(locale, 'nav-routes'), onclick: () => goto('/') },
+		{ label: t(locale, 'nav-settings') }
+	]} />
 
 	<header class="mb-6">
 		<h1 class="text-[1.35rem] font-bold">{t(locale, 'settings-title')}</h1>
