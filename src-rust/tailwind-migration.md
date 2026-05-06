@@ -1,11 +1,13 @@
 # Tailwind Migration Plan
 
 ## Summary
+
 Migrate the SvelteKit app in `src` from component-scoped CSS blocks to Tailwind CSS utilities. Use Tailwind v4's current SvelteKit/Vite setup: install `tailwindcss` and `@tailwindcss/vite`, add the Vite plugin, and import Tailwind from `src/app.css`.
 
 Reference: official Tailwind SvelteKit guide, `https://tailwindcss.com/docs/guides/sveltekit`.
 
 ## Key Changes
+
 - Add dev dependencies with `pnpm add -D tailwindcss @tailwindcss/vite`.
 - Update `vite.config.ts` to import `@tailwindcss/vite` and set plugins to `plugins: [tailwindcss(), sveltekit()]`.
 - Replace `src/app.css` with:
@@ -15,6 +17,7 @@ Reference: official Tailwind SvelteKit guide, `https://tailwindcss.com/docs/guid
 - Keep `src/routes/+layout.svelte` importing `../app.css`.
 
 ## Component Migration
+
 - Convert all component `<style>` blocks in these eight files to Tailwind utility classes:
   - `src/routes/+layout.svelte`
   - `src/routes/+page.svelte`
@@ -30,6 +33,7 @@ Reference: official Tailwind SvelteKit guide, `https://tailwindcss.com/docs/guid
 - Remove each component `<style>` block after its markup has equivalent Tailwind classes.
 
 ## Test Plan
+
 - Run `pnpm check`.
 - Run `pnpm build`.
 - Start `pnpm dev` and manually verify:
@@ -44,6 +48,7 @@ Reference: official Tailwind SvelteKit guide, `https://tailwindcss.com/docs/guid
 - Verify both dark and light themes still use the existing CSS variable values.
 
 ## Assumptions
+
 - The migration should be strict utility-first Tailwind, not a shared `@apply` component layer.
 - Existing app layout and visual design should be preserved rather than redesigned.
 - `tailwind-migration.md` should be created at the repo root with this plan content when file edits are allowed.

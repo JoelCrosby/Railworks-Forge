@@ -125,20 +125,20 @@
 	}
 
 	function acquisitionTextClass(state: string): string {
-		return state === 'found' ? 'text-[var(--ok)]' : state === 'partial' ? 'text-[var(--warn)]' : 'text-[var(--danger-text)]';
+		return state === 'found' ? 'text-ok' : state === 'partial' ? 'text-warn' : 'text-danger-text';
 	}
 
 	function locoBadgeClass(locoClass: Consist['locoClass']): string {
 		const base = 'rounded-[3px] px-1.5 py-0.5 text-[0.65rem] tracking-wide uppercase';
 		switch (locoClass) {
 			case 'steam':
-				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+				return `${base} bg-[#2d1f10] text-warn`;
 			case 'diesel':
-				return `${base} bg-[#1a2d1a] text-[var(--success-text)]`;
+				return `${base} bg-[#1a2d1a] text-success-text`;
 			case 'electric':
-				return `${base} bg-[#1a1a3d] text-[var(--accent-text)]`;
+				return `${base} bg-[#1a1a3d] text-accent-text`;
 			default:
-				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+				return `${base} bg-surface-raised text-muted`;
 		}
 	}
 
@@ -146,15 +146,15 @@
 		const base = 'inline-flex size-5 shrink-0 items-center justify-center rounded-[3px] text-[0.65rem] font-bold';
 		switch (type) {
 			case 'engine':
-				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+				return `${base} bg-[#2d1f10] text-warn`;
 			case 'tender':
 				return `${base} bg-[#2d2010] text-[#fbd38d]`;
 			case 'coach':
-				return `${base} bg-[#1a2d38] text-[var(--accent-text)]`;
+				return `${base} bg-[#1a2d38] text-accent-text`;
 			case 'wagon':
 				return `${base} bg-[#2d2a1a] text-[#f6e05e]`;
 			default:
-				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+				return `${base} bg-surface-raised text-muted`;
 		}
 	}
 
@@ -163,10 +163,10 @@
 	});
 </script>
 
-<div class="mx-auto max-w-[1100px] p-6">
+<div class="mx-auto max-w-275 p-6">
 	<nav class="mb-4">
 		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
 			onclick={backToRoute}>← {route?.name ?? 'Route'}</button
 		>
 	</nav>
@@ -175,25 +175,25 @@
 		<header class="mb-6 flex items-start justify-between gap-4">
 			<div class="flex-1">
 				<h1 class="mb-1.5 text-[1.3rem] font-bold">{scenarioBase.name}</h1>
-				<div class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
+				<div class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-muted">
 					<span>{scenarioBase.locomotive || '—'}</span>
-					<span class="text-[var(--border-strong)]">·</span>
+					<span class="text-border-strong">·</span>
 					<span>{scenarioBase.season || '—'}</span>
 					{#if scenarioBase.startLocation}
-						<span class="text-[var(--border-strong)]">·</span>
+						<span class="text-border-strong">·</span>
 						<span>{scenarioBase.startLocation}</span>
 					{/if}
 					{#if scenarioBase.playerInfo.completion}
-						<span class="text-[var(--border-strong)]">·</span>
-						<span class="text-[var(--ok)]">{scenarioBase.playerInfo.completion}</span>
+						<span class="text-border-strong">·</span>
+						<span class="text-ok">{scenarioBase.playerInfo.completion}</span>
 					{/if}
 				</div>
 				{#if scenarioBase.description}
-					<p class="mt-2 text-[0.82rem] leading-6 text-[var(--muted)]">{scenarioBase.description}</p>
+					<p class="mt-2 text-[0.82rem] leading-6 text-muted">{scenarioBase.description}</p>
 				{/if}
 			</div>
 			<button
-				class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+				class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
 				onclick={loadDetail}
 				disabled={loading}
 			>
@@ -205,18 +205,18 @@
 	{/if}
 
 	{#if error}
-		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>Error:</strong> {error}</div>
+		<div class="mb-6 rounded-md border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger-text"><strong>Error:</strong> {error}</div>
 	{/if}
 
 	{#if loading}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">Parsing Scenario.bin…</div>
+		<div class="mt-8 text-center text-sm text-muted">Parsing Scenario.bin…</div>
 	{:else if detail}
 		<div class="mt-2">
 			<div class="mb-3 flex items-center gap-4">
-				<h2 class="text-base font-semibold">Consists <span class="font-normal text-[var(--muted)]">({consists.length})</span></h2>
+				<h2 class="text-base font-semibold">Consists <span class="font-normal text-muted">({consists.length})</span></h2>
 				{#if consists.length > 4}
 					<input
-						class="max-w-[280px] flex-1 rounded-md border border-[var(--surface-raised)] bg-[var(--surface)] px-3 py-1.5 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+						class="max-w-70 flex-1 rounded-md border border-surface-raised bg-surface px-3 py-1.5 text-[0.8rem] text-text outline-none focus:border-accent"
 						type="search"
 						placeholder="Search consists…"
 						bind:value={search}
@@ -225,16 +225,16 @@
 			</div>
 
 			{#if consists.length === 0}
-				<div class="mt-8 text-center text-sm text-[var(--muted)]">No consists found in this scenario.</div>
+				<div class="mt-8 text-center text-sm text-muted">No consists found in this scenario.</div>
 			{:else}
 				<div class="flex flex-col gap-2">
 					{#each filtered as consist (consist.id || consist.serviceId)}
-						<div class="overflow-hidden rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)]">
-							<div class="border-b border-[var(--surface-raised)] px-4 py-3">
+						<div class="overflow-hidden rounded-lg border border-surface-raised bg-surface">
+							<div class="border-b border-surface-raised px-4 py-3">
 								<div class="mb-1 flex items-center gap-2">
 									<span class="text-sm font-medium">{consist.serviceName || '—'}</span>
 									{#if consist.playerDriver}
-										<span class="rounded bg-[var(--accent-surface)] px-1.5 py-0.5 text-[0.65rem] tracking-wider text-[var(--accent-text)] uppercase">Player</span>
+										<span class="rounded bg-accent-surface px-1.5 py-0.5 text-[0.65rem] tracking-wider text-accent-text uppercase">Player</span>
 									{/if}
 									<span
 										class={`w-4 text-center text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
@@ -243,15 +243,15 @@
 										{acquisitionIcon(consist.acquisitionState)}
 									</span>
 								</div>
-								<div class="flex items-center gap-2.5 text-[0.78rem] text-[var(--muted)]">
+								<div class="flex items-center gap-2.5 text-[0.78rem] text-muted">
 									<span class="italic">{consist.locomotiveName || '—'}</span>
 									{#if consist.locoAuthor}
-										<span class="text-[0.73rem] text-[var(--border-strong)]">{consist.locoAuthor}</span>
+										<span class="text-[0.73rem] text-border-strong">{consist.locoAuthor}</span>
 									{/if}
 									<span class={locoBadgeClass(consist.locoClass)}>{consist.locoClass}</span>
 									<span class="ml-auto">{consist.vehicles.length} vehicles</span>
 									<button
-										class="ml-auto shrink-0 cursor-pointer rounded border border-[var(--border-strong)] bg-transparent px-2 py-0.5 text-[0.7rem] text-[var(--muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]"
+										class="ml-auto shrink-0 cursor-pointer rounded border border-border-strong bg-transparent px-2 py-0.5 text-[0.7rem] text-muted hover:bg-surface-raised hover:text-text"
 										onclick={() => openConsistDetail(consist)}>Edit</button
 									>
 								</div>
@@ -260,15 +260,15 @@
 							{#if consist.vehicles.length > 0}
 								<div class="py-1">
 									{#each consist.vehicles as vehicle (vehicle.index)}
-										<div class="flex items-center gap-2 border-t border-[var(--border)] px-4 py-1.5 text-[0.78rem] hover:bg-[var(--border)]">
+										<div class="flex items-center gap-2 border-t border-border px-4 py-1.5 text-[0.78rem] hover:bg-border">
 											<span class={vehicleBadgeClass(vehicle.blueprintType)} title={vehicle.blueprintType}>
 												{vehicle.blueprintType[0].toUpperCase()}
 											</span>
-											<span class="flex-[2] truncate whitespace-nowrap font-medium">{vehicle.name || '—'}</span>
-											<span class="whitespace-nowrap text-[var(--border-strong)]">#{vehicle.uniqueNumber}</span>
-											<span class="flex-1 truncate whitespace-nowrap text-[0.72rem] text-[var(--border-strong)]">{vehicle.blueprint.provider}</span>
+											<span class="flex-2 truncate whitespace-nowrap font-medium">{vehicle.name || '—'}</span>
+											<span class="whitespace-nowrap text-border-strong">#{vehicle.uniqueNumber}</span>
+											<span class="flex-1 truncate whitespace-nowrap text-[0.72rem] text-border-strong">{vehicle.blueprint.provider}</span>
 											{#if vehicle.flipped}
-												<span class="text-[0.85rem] text-[var(--muted)]" title="Flipped">↩</span>
+												<span class="text-[0.85rem] text-muted" title="Flipped">↩</span>
 											{/if}
 											<span
 												class={`w-3.5 shrink-0 text-center text-[0.7rem] font-bold ${acquisitionTextClass(vehicle.blueprint.acquisitionState)}`}

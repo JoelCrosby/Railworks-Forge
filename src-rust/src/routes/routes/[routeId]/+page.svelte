@@ -102,15 +102,15 @@
 		const base = 'shrink-0 rounded px-2 py-0.5 text-[0.65rem] tracking-wider uppercase';
 		switch (scenarioClass) {
 			case 'passenger':
-				return `${base} bg-[var(--accent-surface)] text-[var(--accent-text)]`;
+				return `${base} bg-accent-surface text-accent-text`;
 			case 'freight':
-				return `${base} bg-[#3d2a14] text-[var(--warn)]`;
+				return `${base} bg-[#3d2a14] text-warn`;
 			case 'shunting':
-				return `${base} bg-[#2d3a1a] text-[var(--success-text)]`;
+				return `${base} bg-[#2d3a1a] text-success-text`;
 			case 'mixed':
 				return `${base} bg-[#3a2a4a] text-[#d6bcfa]`;
 			default:
-				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+				return `${base} bg-surface-raised text-muted`;
 		}
 	}
 
@@ -123,10 +123,10 @@
 	});
 </script>
 
-<div class="mx-auto max-w-[1100px] p-6">
+<div class="mx-auto max-w-275 p-6">
 	<nav class="mb-4">
 		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
 			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
 		>
 	</nav>
@@ -136,12 +136,12 @@
 			<div>
 				<h1 class="text-[1.3rem] font-bold">{route.name}</h1>
 				{#if route.description}
-					<p class="mt-1 text-[0.85rem] text-[var(--muted)]">{route.description}</p>
+					<p class="mt-1 text-[0.85rem] text-muted">{route.description}</p>
 				{/if}
 			</div>
 			<div class="flex shrink-0 gap-2">
 				<button
-					class="shrink-0 cursor-pointer rounded-md border border-[var(--accent-border)] bg-[var(--accent-surface)] px-4 py-1.5 text-sm text-[var(--accent-text)] disabled:cursor-not-allowed disabled:opacity-50"
+					class="shrink-0 cursor-pointer rounded-md border border-accent-border bg-accent-surface px-4 py-1.5 text-sm text-accent-text disabled:cursor-not-allowed disabled:opacity-50"
 					onclick={() =>
 						goto(`/routes/${encodeURIComponent(routeId)}/tracks`, {
 							state: { route: route ? $state.snapshot(route) : null }
@@ -150,7 +150,7 @@
 					{t(locale, 'route-tracks')}
 				</button>
 				<button
-					class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+					class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
 					onclick={loadScenarios}
 					disabled={loading}
 				>
@@ -163,44 +163,44 @@
 	{/if}
 
 	{#if error}
-		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
+		<div class="mb-6 rounded-md border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger-text"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 
 	{#if !loading && scenarios.length > 0}
 		<div class="mb-4 flex items-center gap-3">
 			<input
-				class="flex-1 rounded-md border border-[var(--surface-raised)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+				class="flex-1 rounded-md border border-surface-raised bg-surface px-3 py-2 text-sm text-text outline-none focus:border-accent"
 				type="search"
 				placeholder={t(locale, 'route-search-scenarios')}
 				bind:value={search}
 			/>
-			<span class="whitespace-nowrap text-[0.8rem] text-[var(--muted)]">{filtered.length} / {scenarios.length}</span>
+			<span class="whitespace-nowrap text-[0.8rem] text-muted">{filtered.length} / {scenarios.length}</span>
 		</div>
 	{/if}
 
 	{#if loadingRoute}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'route-opening')}</div>
+		<div class="mt-8 text-center text-sm text-muted">{t(locale, 'route-opening')}</div>
 	{:else if loading}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'route-loading-scenarios')}</div>
+		<div class="mt-8 text-center text-sm text-muted">{t(locale, 'route-loading-scenarios')}</div>
 	{:else if scenarios.length === 0 && !error}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'route-no-scenarios')}</div>
+		<div class="mt-8 text-center text-sm text-muted">{t(locale, 'route-no-scenarios')}</div>
 	{:else}
 		<ul class="flex list-none flex-col gap-1.5">
 			{#each filtered as scenario (scenario.id)}
 				<li>
 					<button
-						class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--text)] transition-colors hover:border-[var(--accent)]"
+						class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-surface-raised bg-surface px-4 py-3 text-left text-text transition-colors hover:border-accent"
 						onclick={() => openScenario(scenario)}
 					>
-						<span class="flex-[2] text-sm font-medium">{scenario.name}</span>
-						<span class="flex flex-[3] items-center gap-3 text-[0.8rem] text-[var(--muted)]">
+						<span class="flex-2 text-sm font-medium">{scenario.name}</span>
+						<span class="flex flex-3 items-center gap-3 text-[0.8rem] text-muted">
 							<span class="flex-1 truncate">{scenario.locomotive || '—'}</span>
 							<span class="whitespace-nowrap">{formatDuration(scenario.duration)}</span>
 							<span class="whitespace-nowrap">{scenario.season || '—'}</span>
 							<span class={scenarioBadgeClass(scenario.scenarioClass)}>{scenario.scenarioClass}</span>
 						</span>
 						{#if scenario.playerInfo.completion}
-							<span class="whitespace-nowrap text-xs text-[var(--ok)]">{scenario.playerInfo.completion}</span>
+							<span class="whitespace-nowrap text-xs text-ok">{scenario.playerInfo.completion}</span>
 						{/if}
 					</button>
 				</li>

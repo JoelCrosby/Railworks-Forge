@@ -65,10 +65,10 @@
 	});
 </script>
 
-<div class="mx-auto max-w-[1100px] p-6">
+<div class="mx-auto max-w-275 p-6">
 	<nav class="mb-4">
 		<button
-			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-accent hover:underline"
 			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
 		>
 	</nav>
@@ -77,11 +77,11 @@
 		<div>
 			<h1 class="text-[1.3rem] font-bold">{t(locale, 'assets-title')}</h1>
 			{#if !loading && nodes.length > 0}
-				<p class="mt-1 text-[0.8rem] text-[var(--muted)]">{filteredCount} / {totalProducts} products</p>
+				<p class="mt-1 text-[0.8rem] text-muted">{filteredCount} / {totalProducts} products</p>
 			{/if}
 		</div>
 		<button
-			class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+			class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
 			onclick={load}
 			disabled={loading}
 		>
@@ -90,18 +90,18 @@
 	</header>
 
 	{#if error}
-		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
+		<div class="mb-6 rounded-md border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger-text"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 
 	{#if !loading && nodes.length > 0}
 		<div class="mb-4 flex items-center gap-4">
 			<input
-				class="flex-1 rounded-md border border-[var(--surface-raised)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+				class="flex-1 rounded-md border border-surface-raised bg-surface px-3 py-2 text-sm text-text outline-none focus:border-accent"
 				type="search"
 				placeholder={t(locale, 'assets-search')}
 				bind:value={search}
 			/>
-			<label class="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[0.8rem] text-[var(--muted)]">
+			<label class="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[0.8rem] text-muted">
 				<input type="checkbox" bind:checked={filterRailVehicles} />
 				{t(locale, 'assets-railvehicles-only')}
 			</label>
@@ -109,35 +109,35 @@
 	{/if}
 
 	{#if loading}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'assets-scanning')}</div>
+		<div class="mt-8 text-center text-sm text-muted">{t(locale, 'assets-scanning')}</div>
 	{:else if groups.length === 0 && !error}
-		<div class="mt-8 text-center text-sm text-[var(--muted)]">{nodes.length === 0 ? t(locale, 'assets-no-assets') : t(locale, 'assets-no-matches')}</div>
+		<div class="mt-8 text-center text-sm text-muted">{nodes.length === 0 ? t(locale, 'assets-no-assets') : t(locale, 'assets-no-matches')}</div>
 	{:else}
 		<div class="flex flex-col gap-2">
 			{#each groups as group (group.name)}
 				<details
-					class="overflow-hidden rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)] [&[open]>summary]:border-b [&[open]>summary]:border-[var(--surface-raised)]"
+					class="overflow-hidden rounded-lg border border-surface-raised bg-surface [&[open]>summary]:border-b [&[open]>summary]:border-surface-raised"
 					open={groups.length <= 6}
 				>
 					<summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-sm font-semibold select-none [&::-webkit-details-marker]:hidden">
 						{group.name}
-						<span class="text-[0.8rem] font-normal text-[var(--muted)]">({group.products.length})</span>
+						<span class="text-[0.8rem] font-normal text-muted">({group.products.length})</span>
 					</summary>
 
 					<div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1.5 p-2">
 						{#each group.products as node (node.product)}
-							<div class="flex items-center justify-between gap-2 rounded-md border border-[var(--surface-raised)] bg-[var(--bg)] px-3 py-2">
+							<div class="flex items-center justify-between gap-2 rounded-md border border-surface-raised bg-bg px-3 py-2">
 								<span class="truncate text-[0.8rem]">{node.product}</span>
 								<div class="flex shrink-0 gap-1">
 									{#if node.hasRailVehicles}
 										<span
-											class="rounded-[3px] bg-[var(--accent-surface)] px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-[var(--accent-text)]"
+											class="rounded-[3px] bg-accent-surface px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-accent-text"
 											title="Contains RailVehicles">R</span
 										>
 									{/if}
 									{#if node.hasPreloadData}
 										<span
-											class="rounded-[3px] bg-[var(--success-border)] px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-[var(--success-text)]"
+											class="rounded-[3px] bg-success-border px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-success-text"
 											title="Contains PreloadData">P</span
 										>
 									{/if}

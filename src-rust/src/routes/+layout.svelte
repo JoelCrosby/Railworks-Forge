@@ -45,12 +45,12 @@
 
 {#if dbStatus !== null && dbStatus.status !== 'ready'}
 	<div
-		class={`fixed right-4 bottom-4 z-[100] flex max-w-md items-center gap-2 rounded-md border bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted-strong)] ${dbStatus.status === 'failed' ? 'border-[var(--danger-border)] text-[var(--danger-text)]' : 'border-[var(--border)]'}`}
+		class={`fixed right-4 bottom-4 z-100 flex max-w-md items-center gap-2 rounded-md border bg-surface px-3 py-1.5 text-xs text-muted-strong ${dbStatus.status === 'failed' ? 'border-danger-border text-danger-text' : 'border-border'}`}
 	>
 		{#if dbStatus.status === 'loading'}
-			<span class="size-1.5 shrink-0 animate-pulse rounded-full bg-[var(--accent)]"></span> {t(locale, 'status-loading-player-data')}
+			<span class="size-1.5 shrink-0 animate-pulse rounded-full bg-accent"></span> {t(locale, 'status-loading-player-data')}
 		{:else}
-			<span class="size-1.5 shrink-0 rounded-full bg-[var(--danger-text)]"></span> {t(locale, 'status-player-data-unavailable', { message: dbStatus.message })}
+			<span class="size-1.5 shrink-0 rounded-full bg-danger-text"></span> {t(locale, 'status-player-data-unavailable', { message: dbStatus.message })}
 			<button
 				class="ml-auto cursor-pointer border-0 bg-transparent px-0.5 text-base leading-none text-inherit opacity-60 hover:opacity-100"
 				aria-label="Dismiss"
