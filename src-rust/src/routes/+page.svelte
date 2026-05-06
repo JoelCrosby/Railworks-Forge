@@ -85,49 +85,65 @@
 	});
 </script>
 
-<div class="page">
-	<header>
-		<h1>Railworks Forge</h1>
-		<div class="header-actions">
-			<button class="btn-icon" onclick={() => goto('/settings')} title={t(locale, 'nav-settings')}>⚙</button>
-			<button class="btn-secondary" onclick={() => goto('/assets')}>{t(locale, 'nav-assets')}</button>
-			<button onclick={loadRoutes} disabled={loading}>
+<div class="mx-auto max-w-[960px] px-6 py-8">
+	<header class="mb-8 flex items-center justify-between">
+		<h1 class="text-2xl font-bold">Railworks Forge</h1>
+		<div class="flex items-center gap-2">
+			<button
+				class="cursor-pointer rounded-md border border-transparent bg-transparent px-2 py-1 text-base leading-none text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]"
+				onclick={() => goto('/settings')}
+				title={t(locale, 'nav-settings')}>⚙</button
+			>
+			<button
+				class="shrink-0 cursor-pointer rounded-md border border-[var(--accent-border)] bg-[var(--accent-surface)] px-4 py-1.5 text-sm text-[var(--accent-text)] disabled:cursor-not-allowed disabled:opacity-50"
+				onclick={() => goto('/assets')}>{t(locale, 'nav-assets')}</button
+			>
+			<button
+				class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+				onclick={loadRoutes}
+				disabled={loading}
+			>
 				{loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
 			</button>
 		</div>
 	</header>
 
 	{#if error}
-		<div class="error">
+		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]">
 			<strong>{t(locale, 'error-label')}:</strong> {error}
 		</div>
 	{/if}
 
 	{#if gamePathMissing}
-		<div class="error">
+		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]">
 			{t(locale, 'home-game-path-missing')}
-			<button class="inline-action" onclick={() => goto('/settings')}>{t(locale, 'nav-settings')}</button>
+			<button
+				class="ml-2 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3 py-1 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)]"
+				onclick={() => goto('/settings')}>{t(locale, 'nav-settings')}</button
+			>
 		</div>
 	{/if}
 
 	{#if loading}
-		<div class="status">{progress ?? t(locale, 'home-scanning-routes')}</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">{progress ?? t(locale, 'home-scanning-routes')}</div>
 	{:else if routes.length === 0 && !error && !gamePathMissing}
-		<div class="empty">{t(locale, 'home-no-routes')}</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'home-no-routes')}</div>
 	{:else}
-		<ul class="route-list">
+		<ul class="flex list-none flex-col gap-2">
 			{#each routes as route (route.id)}
 				<li>
 					<button
-						class="route-card"
+						class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)] px-4 py-3.5 text-left text-[var(--text)] transition-colors hover:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
 						onclick={() => openRoute(route)}
 						disabled={openingRouteId !== null}
 					>
-						<span class="route-name">{route.name}</span>
+						<span class="flex-1 text-[0.95rem] font-medium">{route.name}</span>
 						{#if route.description}
-							<span class="route-desc">{route.description}</span>
+							<span class="flex-[2] truncate text-[0.8rem] text-[var(--muted)]">{route.description}</span>
 						{/if}
-						<span class="badge {route.packagingType}">
+						<span
+							class={`shrink-0 rounded px-2 py-0.5 text-[0.7rem] tracking-wider uppercase ${route.packagingType === 'packed' ? 'bg-[var(--accent-surface)] text-[var(--accent-text)]' : 'bg-[var(--success-surface)] text-[var(--ok)]'}`}
+						>
 							{openingRouteId === route.id ? t(locale, 'home-opening') : route.packagingType}
 						</span>
 					</button>
@@ -136,175 +152,3 @@
 		</ul>
 	{/if}
 </div>
-
-<style>
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.page {
-		max-width: 960px;
-		margin: 0 auto;
-		padding: 2rem 1.5rem;
-	}
-
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 2rem;
-	}
-
-	.header-actions {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	h1 {
-		font-size: 1.5rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.4rem 1rem;
-		font-size: 0.875rem;
-		cursor: pointer;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--surface-hover);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.btn-primary {
-		background: var(--primary);
-		border-color: var(--primary-border);
-		color: #fff;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: var(--primary-hover);
-	}
-
-	.btn-secondary {
-		background: var(--accent-surface);
-		border-color: var(--accent-border);
-		color: var(--accent-text);
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background: var(--accent-surface);
-	}
-
-	.btn-icon {
-		background: none;
-		border: 1px solid transparent;
-		color: var(--muted);
-		padding: 0.3rem 0.5rem;
-		font-size: 1rem;
-		line-height: 1;
-	}
-
-	.btn-icon:hover {
-		color: var(--text);
-		background: var(--surface-raised);
-		border-color: var(--border-strong);
-	}
-
-	.status,
-	.empty {
-		color: var(--muted);
-		font-size: 0.9rem;
-		margin-top: 2rem;
-		text-align: center;
-	}
-
-	.error {
-		background: var(--danger-surface);
-		border: 1px solid var(--danger-border);
-		border-radius: 6px;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		color: var(--danger-text);
-		margin-bottom: 1.5rem;
-	}
-
-	.route-list {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.route-card {
-		width: 100%;
-		text-align: left;
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 8px;
-		padding: 0.875rem 1rem;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		transition: border-color 0.15s;
-	}
-
-	.route-card:hover {
-		background: var(--surface);
-		border-color: var(--accent);
-	}
-
-	.route-name {
-		flex: 1;
-		font-weight: 500;
-		font-size: 0.95rem;
-	}
-
-	.route-desc {
-		flex: 2;
-		font-size: 0.8rem;
-		color: var(--muted);
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.badge {
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		padding: 0.15rem 0.5rem;
-		border-radius: 4px;
-		flex-shrink: 0;
-	}
-
-	.badge.packed {
-		background: var(--accent-surface);
-		color: var(--accent-text);
-	}
-
-	.badge.unpacked {
-		background: var(--success-surface);
-		color: var(--ok);
-	}
-</style>

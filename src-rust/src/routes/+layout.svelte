@@ -44,76 +44,18 @@
 {@render children()}
 
 {#if dbStatus !== null && dbStatus.status !== 'ready'}
-	<div class="db-status {dbStatus.status}">
+	<div
+		class={`fixed right-4 bottom-4 z-[100] flex max-w-md items-center gap-2 rounded-md border bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted-strong)] ${dbStatus.status === 'failed' ? 'border-[var(--danger-border)] text-[var(--danger-text)]' : 'border-[var(--border)]'}`}
+	>
 		{#if dbStatus.status === 'loading'}
-			<span class="dot"></span> {t(locale, 'status-loading-player-data')}
+			<span class="size-1.5 shrink-0 animate-pulse rounded-full bg-[var(--accent)]"></span> {t(locale, 'status-loading-player-data')}
 		{:else}
-			<span class="dot"></span> {t(locale, 'status-player-data-unavailable', { message: dbStatus.message })}
-			<button aria-label="Dismiss" onclick={() => (dbStatus = null)}>x</button>
+			<span class="size-1.5 shrink-0 rounded-full bg-[var(--danger-text)]"></span> {t(locale, 'status-player-data-unavailable', { message: dbStatus.message })}
+			<button
+				class="ml-auto cursor-pointer border-0 bg-transparent px-0.5 text-base leading-none text-inherit opacity-60 hover:opacity-100"
+				aria-label="Dismiss"
+				onclick={() => (dbStatus = null)}>x</button
+			>
 		{/if}
 	</div>
 {/if}
-
-<style>
-	.db-status {
-		position: fixed;
-		bottom: 1rem;
-		right: 1rem;
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: 6px;
-		padding: 0.4rem 0.75rem;
-		font-size: 0.78rem;
-		color: var(--muted-strong);
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		z-index: 100;
-		max-width: 28rem;
-	}
-
-	.db-status.failed {
-		border-color: var(--danger-border);
-		color: var(--danger-text);
-	}
-
-	.dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--accent);
-		flex-shrink: 0;
-		animation: pulse 1.2s ease-in-out infinite;
-	}
-
-	.failed .dot {
-		background: var(--danger-text);
-		animation: none;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.3;
-		}
-	}
-
-	button {
-		background: none;
-		border: none;
-		color: inherit;
-		cursor: pointer;
-		padding: 0 0.1rem;
-		font-size: 1rem;
-		line-height: 1;
-		opacity: 0.6;
-		margin-left: auto;
-	}
-
-	button:hover {
-		opacity: 1;
-	}
-</style>

@@ -118,6 +118,40 @@
 		return s === 'found' ? 'found' : s === 'partial' ? 'partial' : 'missing';
 	}
 
+	function acquisitionTextClass(state: string): string {
+		return state === 'found' ? 'text-[var(--ok)]' : state === 'partial' ? 'text-[var(--warn)]' : 'text-[var(--danger-text)]';
+	}
+
+	function locoBadgeClass(locoClass: Consist['locoClass']): string {
+		const base = 'rounded-[3px] px-1.5 py-0.5 text-[0.65rem] tracking-wide uppercase';
+		switch (locoClass) {
+			case 'steam':
+				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+			case 'diesel':
+				return `${base} bg-[#1a2d1a] text-[var(--success-text)]`;
+			case 'electric':
+				return `${base} bg-[#1a1a3d] text-[var(--accent-text)]`;
+			default:
+				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+		}
+	}
+
+	function vehicleBadgeClass(type: VehicleEntry['blueprintType']): string {
+		const base = 'inline-flex size-5 items-center justify-center rounded-[3px] text-[0.65rem] font-bold';
+		switch (type) {
+			case 'engine':
+				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+			case 'tender':
+				return `${base} bg-[#2d2010] text-[#fbd38d]`;
+			case 'coach':
+				return `${base} bg-[#1a2d38] text-[var(--accent-text)]`;
+			case 'wagon':
+				return `${base} bg-[#2d2a1a] text-[#f6e05e]`;
+			default:
+				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+		}
+	}
+
 	function showSuccess(msg: string) {
 		successMsg = msg;
 		setTimeout(() => (successMsg = null), 3000);
@@ -262,95 +296,106 @@
 	}
 </script>
 
-<div class="page">
-	<nav>
-		<button class="back" onclick={backToScenario}>← {scenario?.name ?? 'Scenario'}</button>
+<div class="mx-auto max-w-[1200px] p-6">
+	<nav class="mb-4">
+		<button
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			onclick={backToScenario}>← {scenario?.name ?? 'Scenario'}</button
+		>
 	</nav>
 
 	{#if consist}
-		<header>
-			<div class="header-info">
-				<h1>{consist.serviceName || consist.locomotiveName || '—'}</h1>
-				<div class="meta-row">
-					<span class="loco-name">{consist.locomotiveName || '—'}</span>
+		<header class="mb-6 flex items-start justify-between gap-4">
+			<div class="flex-1">
+				<h1 class="mb-1.5 text-[1.3rem] font-bold">{consist.serviceName || consist.locomotiveName || '—'}</h1>
+				<div class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
+					<span class="italic">{consist.locomotiveName || '—'}</span>
 					{#if consist.locoAuthor}
-						<span class="sep">·</span>
+						<span class="text-[var(--border-strong)]">·</span>
 						<span>{consist.locoAuthor}</span>
 					{/if}
-					<span class="sep">·</span>
-					<span class="badge-{consist.locoClass} loco-badge">{consist.locoClass}</span>
+					<span class="text-[var(--border-strong)]">·</span>
+					<span class={locoBadgeClass(consist.locoClass)}>{consist.locoClass}</span>
 					{#if consist.playerDriver}
-						<span class="sep">·</span>
-						<span class="player-badge">Player</span>
+						<span class="text-[var(--border-strong)]">·</span>
+						<span class="rounded bg-[var(--accent-surface)] px-1.5 py-0.5 text-[0.65rem] tracking-wider text-[var(--accent-text)] uppercase">Player</span>
 					{/if}
-					<span class="sep">·</span>
-					<span class="acq {acquisitionClass(consist.acquisitionState)}">
+					<span class="text-[var(--border-strong)]">·</span>
+					<span class={`text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}>
 						{acquisitionIcon(consist.acquisitionState)}
 					</span>
 				</div>
 			</div>
-			<div class="header-actions">
-				<button onclick={openReplaceDialog} disabled={busy} class="btn-primary">Replace Consist</button>
-				<button onclick={deleteConsist} disabled={busy} class="btn-danger">Delete Consist</button>
+			<div class="flex shrink-0 gap-2">
+				<button
+					class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+					onclick={openReplaceDialog}
+					disabled={busy}>Replace Consist</button
+				>
+				<button
+					class="cursor-pointer rounded-md border border-[var(--danger-border)] bg-[var(--danger-border)] px-4 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+					onclick={deleteConsist}
+					disabled={busy}>Delete Consist</button
+				>
 			</div>
 		</header>
 	{:else}
-		<header><h1>Consist</h1></header>
+		<header class="mb-6"><h1 class="text-[1.3rem] font-bold">Consist</h1></header>
 	{/if}
 
 	{#if successMsg}
-		<div class="banner success">{successMsg}</div>
+		<div class="mb-4 rounded-md border border-[var(--success-border)] bg-[var(--success-surface)] px-4 py-3 text-sm text-[var(--success-text)]">{successMsg}</div>
 	{/if}
 	{#if error}
-		<div class="banner error"><strong>Error:</strong> {error}</div>
+		<div class="mb-4 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>Error:</strong> {error}</div>
 	{/if}
 
 	<!-- Vehicle list -->
 	{#if consist}
-		<section>
-			<div class="section-header">
-				<h2>Vehicles <span class="count">({consist.vehicles.length})</span></h2>
+		<section class="mt-2">
+			<div class="mb-3 flex items-center gap-4">
+				<h2 class="text-base font-semibold">Vehicles <span class="font-normal text-[var(--muted)]">({consist.vehicles.length})</span></h2>
 			</div>
 
 			{#if consist.vehicles.length === 0}
-				<div class="empty">No vehicles in this consist.</div>
+				<div class="mt-8 text-center text-sm text-[var(--muted)]">No vehicles in this consist.</div>
 			{:else}
-				<table class="vehicle-table">
+				<table class="w-full border-collapse text-[0.8rem]">
 					<thead>
 						<tr>
-							<th>#</th>
-							<th>Type</th>
-							<th>Name</th>
-							<th>Number</th>
-							<th>Provider</th>
-							<th>Blueprint</th>
-							<th>Flip</th>
-							<th>State</th>
-							<th></th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">#</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Type</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Name</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Number</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Provider</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Blueprint</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Flip</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">State</th>
+							<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]"></th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each consist.vehicles as v (v.index)}
-							<tr>
-								<td class="col-idx">{v.index + 1}</td>
-								<td>
-									<span class="veh-type badge-veh-{v.blueprintType}" title={v.blueprintType}>
+							<tr class="hover:bg-[var(--surface)]">
+								<td class="w-8 border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--border-strong)]">{v.index + 1}</td>
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 align-middle">
+									<span class={vehicleBadgeClass(v.blueprintType)} title={v.blueprintType}>
 										{v.blueprintType[0].toUpperCase()}
 									</span>
 								</td>
-								<td class="col-name">{v.name || '—'}</td>
-								<td class="col-num">#{v.uniqueNumber}</td>
-								<td class="col-provider">{v.blueprint.provider}</td>
-								<td class="col-bp">{v.blueprint.blueprintId}</td>
-								<td class="col-flip">{v.flipped ? '↩' : ''}</td>
-								<td>
-									<span class="acq {acquisitionClass(v.blueprint.acquisitionState)}">
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 align-middle font-medium">{v.name || '—'}</td>
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--border-strong)]">#{v.uniqueNumber}</td>
+								<td class="max-w-32 truncate whitespace-nowrap border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--muted)]">{v.blueprint.provider}</td>
+								<td class="max-w-80 truncate whitespace-nowrap border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--border-strong)]">{v.blueprint.blueprintId}</td>
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 text-center align-middle">{v.flipped ? '↩' : ''}</td>
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 align-middle">
+									<span class={`text-xs font-bold ${acquisitionTextClass(v.blueprint.acquisitionState)}`}>
 										{acquisitionIcon(v.blueprint.acquisitionState)}
 									</span>
 								</td>
-								<td>
+								<td class="border-t border-[var(--border)] px-2.5 py-1.5 align-middle">
 									<button
-										class="btn-small btn-danger"
+										class="cursor-pointer rounded-md border border-[var(--danger-border)] bg-[var(--danger-border)] px-2.5 py-1 text-[0.78rem] text-white disabled:cursor-not-allowed disabled:opacity-50"
 										onclick={() => deleteVehicle(v.index)}
 										disabled={busy}
 										title="Delete vehicle"
@@ -367,77 +412,101 @@
 
 <!-- Replace Consist Dialog -->
 {#if showReplaceDialog}
-	<div class="overlay" role="dialog" aria-modal="true">
-		<div class="dialog">
-			<div class="dialog-header">
-				<h2>Replace Consist</h2>
-				<button class="close-btn" onclick={() => (showReplaceDialog = false)}>✕</button>
+	<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70" role="dialog" aria-modal="true">
+		<div class="flex max-h-[85vh] w-[min(720px,95vw)] flex-col gap-4 overflow-y-auto rounded-[10px] border border-[var(--surface-raised)] bg-[var(--surface)] p-6">
+			<div class="flex items-center justify-between">
+				<h2 class="text-base font-semibold">Replace Consist</h2>
+				<button
+					class="cursor-pointer border-0 bg-transparent p-1 text-base text-[var(--muted)] hover:text-[var(--text)]"
+					onclick={() => (showReplaceDialog = false)}>✕</button
+				>
 			</div>
 
 			{#if replaceError}
-				<div class="banner error"><strong>Error:</strong> {replaceError}</div>
+				<div class="mb-4 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>Error:</strong> {replaceError}</div>
 			{/if}
 
 			<!-- Saved templates -->
 			{#if savedConsists.length > 0}
-				<div class="templates-row">
-					<span class="label">Load template:</span>
+				<div class="flex flex-wrap items-center gap-2">
+					<span class="text-[0.8rem] text-[var(--muted)]">Load template:</span>
 					{#each savedConsists as t}
-						<button class="btn-small" onclick={() => loadTemplate(t)}>{t.name}</button>
+						<button
+							class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-2.5 py-1 text-[0.78rem] text-[var(--text)] hover:bg-[var(--surface-hover)]"
+							onclick={() => loadTemplate(t)}>{t.name}</button
+						>
 					{/each}
 				</div>
 			{/if}
 
 			<!-- Current replacement vehicle list -->
-			<div class="replace-list">
+			<div class="flex max-h-[200px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--surface-raised)] p-2">
 				{#if replaceEntries.length === 0}
-					<div class="empty">Add vehicles below.</div>
+					<div class="mt-8 text-center text-sm text-[var(--muted)]">Add vehicles below.</div>
 				{:else}
 					{#each replaceEntries as entry, i}
-						<div class="replace-entry">
-							<span class="re-idx">{i + 1}</span>
-							<span class="re-type badge-veh-{entry.blueprintType}">{entry.blueprintType[0].toUpperCase()}</span>
-							<span class="re-provider">{entry.provider}</span>
-							<span class="re-product">{entry.product}</span>
-							<span class="re-bp">{entry.blueprintId}</span>
-							{#if entry.flipped}<span class="re-flip">↩</span>{/if}
-							<button class="btn-small btn-danger" onclick={() => removeReplaceEntry(i)}>✕</button>
+						<div class="flex items-center gap-2 rounded px-1.5 py-1 text-[0.78rem] hover:bg-[var(--bg)]">
+							<span class="w-5 shrink-0 text-right text-[var(--border-strong)]">{i + 1}</span>
+							<span class={`${vehicleBadgeClass(entry.blueprintType)} shrink-0`}>{entry.blueprintType[0].toUpperCase()}</span>
+							<span class="shrink-0 text-[var(--muted)]">{entry.provider}</span>
+							<span class="shrink-0 text-[var(--muted)]">{entry.product}</span>
+							<span class="flex-1 truncate whitespace-nowrap text-[var(--border-strong)]">{entry.blueprintId}</span>
+							{#if entry.flipped}<span class="shrink-0 text-[var(--muted)]">↩</span>{/if}
+							<button
+								class="cursor-pointer rounded-md border border-[var(--danger-border)] bg-[var(--danger-border)] px-2.5 py-1 text-[0.78rem] text-white"
+								onclick={() => removeReplaceEntry(i)}>✕</button
+							>
 						</div>
 					{/each}
 				{/if}
 			</div>
 
 			<!-- Add vehicle form -->
-			<details class="add-vehicle-form">
-				<summary>Add vehicle</summary>
-				<div class="form-grid">
-					<label>
+			<details class="rounded-md border border-[var(--surface-raised)] p-3">
+				<summary class="cursor-pointer text-sm text-[var(--muted)] select-none">Add vehicle</summary>
+				<div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+					<label class="flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 						Type
-						<select bind:value={newType}>
+						<select
+							class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+							bind:value={newType}
+						>
 							<option value="engine">Engine</option>
 							<option value="tender">Tender</option>
 							<option value="wagon">Wagon</option>
 							<option value="coach">Coach</option>
 						</select>
 					</label>
-					<label>
+					<label class="flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 						Provider
-						<input bind:value={newProvider} placeholder="e.g. DTG" />
+						<input
+							class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+							bind:value={newProvider}
+							placeholder="e.g. DTG"
+						/>
 					</label>
-					<label>
+					<label class="flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 						Product
-						<input bind:value={newProduct} placeholder="e.g. SomeProduct" />
+						<input
+							class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+							bind:value={newProduct}
+							placeholder="e.g. SomeProduct"
+						/>
 					</label>
-					<label class="col-span-2">
+					<label class="col-span-2 flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 						Blueprint ID
-						<input bind:value={newBlueprintId} placeholder="RailVehicles\Engines\Foo.xml" />
+						<input
+							class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+							bind:value={newBlueprintId}
+							placeholder="RailVehicles\Engines\Foo.xml"
+						/>
 					</label>
-					<label class="checkbox-label">
+					<label class="flex flex-row items-center gap-2 text-[0.78rem] text-[var(--text)]">
 						<input type="checkbox" bind:checked={newFlipped} />
 						Flipped
 					</label>
 					<button
-						class="btn-primary"
+						class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
 						onclick={addReplaceEntry}
 						disabled={!newProvider || !newProduct || !newBlueprintId}
 					>Add</button>
@@ -447,20 +516,37 @@
 			<!-- Save as template -->
 			{#if replaceEntries.length > 0}
 				{#if showSaveTemplate}
-					<div class="save-template-row">
-						<input bind:value={saveTemplateName} placeholder="Template name…" />
-						<button class="btn-primary" onclick={saveTemplate} disabled={!saveTemplateName.trim()}>Save</button>
-						<button onclick={() => (showSaveTemplate = false)}>Cancel</button>
+					<div class="flex items-center gap-2">
+						<input
+							class="flex-1 rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+							bind:value={saveTemplateName}
+							placeholder="Template name…"
+						/>
+						<button
+							class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+							onclick={saveTemplate}
+							disabled={!saveTemplateName.trim()}>Save</button
+						>
+						<button
+							class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)]"
+							onclick={() => (showSaveTemplate = false)}>Cancel</button
+						>
 					</div>
 				{:else}
-					<button class="btn-small" onclick={() => (showSaveTemplate = true)}>Save as template…</button>
+					<button
+						class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-2.5 py-1 text-[0.78rem] text-[var(--text)] hover:bg-[var(--surface-hover)]"
+						onclick={() => (showSaveTemplate = true)}>Save as template…</button
+					>
 				{/if}
 			{/if}
 
-			<div class="dialog-footer">
-				<button onclick={() => (showReplaceDialog = false)}>Cancel</button>
+			<div class="flex justify-end gap-2 border-t border-[var(--surface-raised)] pt-2">
 				<button
-					class="btn-primary"
+					class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)]"
+					onclick={() => (showReplaceDialog = false)}>Cancel</button
+				>
+				<button
+					class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
 					onclick={confirmReplace}
 					disabled={busy || replaceEntries.length === 0}
 				>
@@ -470,354 +556,3 @@
 		</div>
 	</div>
 {/if}
-
-<style>
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-
-	nav { margin-bottom: 1rem; }
-
-	.back {
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0;
-	}
-	.back:hover { text-decoration: underline; }
-
-	header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.header-info { flex: 1; }
-
-	h1 {
-		font-size: 1.3rem;
-		font-weight: 700;
-		margin-bottom: 0.35rem;
-	}
-
-	.meta-row {
-		font-size: 0.8rem;
-		color: var(--muted);
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		flex-wrap: wrap;
-	}
-
-	.sep { color: var(--border-strong); }
-	.loco-name { font-style: italic; }
-
-	.loco-badge {
-		font-size: 0.65rem;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		padding: 0.1rem 0.35rem;
-		border-radius: 3px;
-	}
-
-	.badge-steam    { background: #2d1f10; color: var(--warn); }
-	.badge-diesel   { background: #1a2d1a; color: var(--success-text); }
-	.badge-electric { background: #1a1a3d; color: var(--accent-text); }
-	.badge-unknown  { background: var(--surface-raised); color: var(--muted); }
-
-	.player-badge {
-		font-size: 0.65rem;
-		background: var(--accent-surface);
-		color: var(--accent-text);
-		padding: 0.1rem 0.4rem;
-		border-radius: 4px;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.acq { font-size: 0.75rem; font-weight: 700; }
-	.acq.found   { color: var(--ok); }
-	.acq.partial { color: var(--warn); }
-	.acq.missing { color: var(--danger-text); }
-
-	.header-actions {
-		display: flex;
-		gap: 0.5rem;
-		flex-shrink: 0;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.4rem 1rem;
-		font-size: 0.875rem;
-		cursor: pointer;
-	}
-	button:hover:not(:disabled) { background: var(--surface-hover); }
-	button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-	.btn-primary {
-		background: var(--primary);
-		border-color: var(--primary-border);
-		color: #fff;
-	}
-	.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-
-	.btn-danger {
-		background: var(--danger-border);
-		border-color: var(--danger-border);
-		color: #fff;
-	}
-	.btn-danger:hover:not(:disabled) { background: var(--danger-border); }
-
-	.btn-small {
-		padding: 0.25rem 0.6rem;
-		font-size: 0.78rem;
-	}
-
-	.banner {
-		padding: 0.75rem 1rem;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		margin-bottom: 1rem;
-	}
-	.banner.success { background: var(--success-surface); border: 1px solid var(--success-border); color: var(--success-text); }
-	.banner.error   { background: var(--danger-surface); border: 1px solid var(--danger-border); color: var(--danger-text); }
-
-	section { margin-top: 0.5rem; }
-
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 0.75rem;
-	}
-
-	h2 { font-size: 1rem; font-weight: 600; }
-	.count { color: var(--muted); font-weight: 400; }
-
-	.empty {
-		color: var(--muted);
-		font-size: 0.9rem;
-		text-align: center;
-		margin-top: 2rem;
-	}
-
-	/* Vehicle table */
-	.vehicle-table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.8rem;
-	}
-
-	.vehicle-table th {
-		text-align: left;
-		padding: 0.4rem 0.6rem;
-		color: var(--muted);
-		font-weight: 500;
-		border-bottom: 1px solid var(--surface-raised);
-	}
-
-	.vehicle-table td {
-		padding: 0.35rem 0.6rem;
-		border-top: 1px solid var(--border);
-		vertical-align: middle;
-	}
-
-	.vehicle-table tr:hover td { background: var(--surface); }
-
-	.col-idx  { width: 2rem; color: var(--border-strong); }
-	.col-name { font-weight: 500; }
-	.col-num  { color: var(--border-strong); }
-	.col-provider { color: var(--muted); max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.col-bp   { color: var(--border-strong); max-width: 20rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.col-flip { text-align: center; }
-
-	.veh-type {
-		font-weight: 700;
-		font-size: 0.65rem;
-		width: 1.2rem;
-		height: 1.2rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 3px;
-	}
-	.badge-veh-engine  { background: #2d1f10; color: var(--warn); }
-	.badge-veh-tender  { background: #2d2010; color: #fbd38d; }
-	.badge-veh-coach   { background: #1a2d38; color: var(--accent-text); }
-	.badge-veh-wagon   { background: #2d2a1a; color: #f6e05e; }
-	.badge-veh-unknown { background: var(--surface-raised); color: var(--muted); }
-
-	/* Replace dialog */
-	.overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(0,0,0,0.7);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 100;
-	}
-
-	.dialog {
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 10px;
-		width: min(720px, 95vw);
-		max-height: 85vh;
-		overflow-y: auto;
-		padding: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.dialog-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.close-btn {
-		background: none;
-		border: none;
-		color: var(--muted);
-		font-size: 1rem;
-		cursor: pointer;
-		padding: 0.25rem;
-	}
-	.close-btn:hover { color: var(--text); }
-
-	.templates-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-	.label { font-size: 0.8rem; color: var(--muted); }
-
-	.replace-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-		max-height: 200px;
-		overflow-y: auto;
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.5rem;
-	}
-
-	.replace-entry {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.78rem;
-		padding: 0.25rem 0.35rem;
-		border-radius: 4px;
-	}
-	.replace-entry:hover { background: var(--bg); }
-
-	.re-idx   { color: var(--border-strong); width: 1.2rem; text-align: right; flex-shrink: 0; }
-	.re-type  { flex-shrink: 0; }
-	.re-provider { color: var(--muted); flex-shrink: 0; }
-	.re-product  { color: var(--muted); flex-shrink: 0; }
-	.re-bp    { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--border-strong); }
-	.re-flip  { color: var(--muted); flex-shrink: 0; }
-
-	.add-vehicle-form {
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.75rem;
-	}
-
-	.add-vehicle-form summary {
-		cursor: pointer;
-		font-size: 0.875rem;
-		color: var(--muted);
-		user-select: none;
-	}
-
-	.form-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.5rem 1rem;
-		margin-top: 0.75rem;
-	}
-
-	.col-span-2 { grid-column: span 2; }
-
-	.form-grid label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		font-size: 0.78rem;
-		color: var(--muted);
-	}
-
-	.checkbox-label {
-		flex-direction: row !important;
-		align-items: center;
-		gap: 0.5rem !important;
-		color: var(--text) !important;
-	}
-
-	.form-grid input,
-	.form-grid select {
-		background: var(--bg);
-		border: 1px solid var(--surface-raised);
-		border-radius: 4px;
-		padding: 0.3rem 0.5rem;
-		color: var(--text);
-		font-size: 0.8rem;
-		outline: none;
-	}
-	.form-grid input:focus,
-	.form-grid select:focus { border-color: var(--accent); }
-
-	.save-template-row {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-	.save-template-row input {
-		flex: 1;
-		background: var(--bg);
-		border: 1px solid var(--surface-raised);
-		border-radius: 4px;
-		padding: 0.3rem 0.5rem;
-		color: var(--text);
-		font-size: 0.8rem;
-		outline: none;
-	}
-	.save-template-row input:focus { border-color: var(--accent); }
-
-	.dialog-footer {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.5rem;
-		padding-top: 0.5rem;
-		border-top: 1px solid var(--surface-raised);
-	}
-</style>

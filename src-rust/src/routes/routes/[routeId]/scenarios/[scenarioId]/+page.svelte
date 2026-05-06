@@ -124,58 +124,99 @@
 		return state === 'found' ? 'found' : state === 'partial' ? 'partial' : 'missing';
 	}
 
+	function acquisitionTextClass(state: string): string {
+		return state === 'found' ? 'text-[var(--ok)]' : state === 'partial' ? 'text-[var(--warn)]' : 'text-[var(--danger-text)]';
+	}
+
+	function locoBadgeClass(locoClass: Consist['locoClass']): string {
+		const base = 'rounded-[3px] px-1.5 py-0.5 text-[0.65rem] tracking-wide uppercase';
+		switch (locoClass) {
+			case 'steam':
+				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+			case 'diesel':
+				return `${base} bg-[#1a2d1a] text-[var(--success-text)]`;
+			case 'electric':
+				return `${base} bg-[#1a1a3d] text-[var(--accent-text)]`;
+			default:
+				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+		}
+	}
+
+	function vehicleBadgeClass(type: VehicleBlueprint['blueprintType']): string {
+		const base = 'inline-flex size-5 shrink-0 items-center justify-center rounded-[3px] text-[0.65rem] font-bold';
+		switch (type) {
+			case 'engine':
+				return `${base} bg-[#2d1f10] text-[var(--warn)]`;
+			case 'tender':
+				return `${base} bg-[#2d2010] text-[#fbd38d]`;
+			case 'coach':
+				return `${base} bg-[#1a2d38] text-[var(--accent-text)]`;
+			case 'wagon':
+				return `${base} bg-[#2d2a1a] text-[#f6e05e]`;
+			default:
+				return `${base} bg-[var(--surface-raised)] text-[var(--muted)]`;
+		}
+	}
+
 	$effect(() => {
 		if (scenarioBase) loadDetail();
 	});
 </script>
 
-<div class="page">
-	<nav>
-		<button class="back" onclick={backToRoute}>← {route?.name ?? 'Route'}</button>
+<div class="mx-auto max-w-[1100px] p-6">
+	<nav class="mb-4">
+		<button
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			onclick={backToRoute}>← {route?.name ?? 'Route'}</button
+		>
 	</nav>
 
 	{#if scenarioBase}
-		<header>
-			<div class="header-info">
-				<h1>{scenarioBase.name}</h1>
-				<div class="meta-row">
+		<header class="mb-6 flex items-start justify-between gap-4">
+			<div class="flex-1">
+				<h1 class="mb-1.5 text-[1.3rem] font-bold">{scenarioBase.name}</h1>
+				<div class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
 					<span>{scenarioBase.locomotive || '—'}</span>
-					<span class="sep">·</span>
+					<span class="text-[var(--border-strong)]">·</span>
 					<span>{scenarioBase.season || '—'}</span>
 					{#if scenarioBase.startLocation}
-						<span class="sep">·</span>
+						<span class="text-[var(--border-strong)]">·</span>
 						<span>{scenarioBase.startLocation}</span>
 					{/if}
 					{#if scenarioBase.playerInfo.completion}
-						<span class="sep">·</span>
-						<span class="completion">{scenarioBase.playerInfo.completion}</span>
+						<span class="text-[var(--border-strong)]">·</span>
+						<span class="text-[var(--ok)]">{scenarioBase.playerInfo.completion}</span>
 					{/if}
 				</div>
 				{#if scenarioBase.description}
-					<p class="description">{scenarioBase.description}</p>
+					<p class="mt-2 text-[0.82rem] leading-6 text-[var(--muted)]">{scenarioBase.description}</p>
 				{/if}
 			</div>
-			<button onclick={loadDetail} disabled={loading}>
+			<button
+				class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+				onclick={loadDetail}
+				disabled={loading}
+			>
 				{loading ? 'Loading…' : 'Refresh'}
 			</button>
 		</header>
 	{:else}
-		<header><h1>Scenario {scenarioId}</h1></header>
+		<header class="mb-6"><h1 class="text-[1.3rem] font-bold">Scenario {scenarioId}</h1></header>
 	{/if}
 
 	{#if error}
-		<div class="error"><strong>Error:</strong> {error}</div>
+		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>Error:</strong> {error}</div>
 	{/if}
 
 	{#if loading}
-		<div class="status">Parsing Scenario.bin…</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">Parsing Scenario.bin…</div>
 	{:else if detail}
-		<div class="consists-section">
-			<div class="section-header">
-				<h2>Consists <span class="count">({consists.length})</span></h2>
+		<div class="mt-2">
+			<div class="mb-3 flex items-center gap-4">
+				<h2 class="text-base font-semibold">Consists <span class="font-normal text-[var(--muted)]">({consists.length})</span></h2>
 				{#if consists.length > 4}
 					<input
-						class="search"
+						class="max-w-[280px] flex-1 rounded-md border border-[var(--surface-raised)] bg-[var(--surface)] px-3 py-1.5 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
 						type="search"
 						placeholder="Search consists…"
 						bind:value={search}
@@ -184,46 +225,55 @@
 			</div>
 
 			{#if consists.length === 0}
-				<div class="empty">No consists found in this scenario.</div>
+				<div class="mt-8 text-center text-sm text-[var(--muted)]">No consists found in this scenario.</div>
 			{:else}
-				<div class="consist-list">
+				<div class="flex flex-col gap-2">
 					{#each filtered as consist (consist.id || consist.serviceId)}
-						<div class="consist-card">
-							<div class="consist-header">
-								<div class="consist-title">
-									<span class="service-name">{consist.serviceName || '—'}</span>
+						<div class="overflow-hidden rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)]">
+							<div class="border-b border-[var(--surface-raised)] px-4 py-3">
+								<div class="mb-1 flex items-center gap-2">
+									<span class="text-sm font-medium">{consist.serviceName || '—'}</span>
 									{#if consist.playerDriver}
-										<span class="player-badge">Player</span>
+										<span class="rounded bg-[var(--accent-surface)] px-1.5 py-0.5 text-[0.65rem] tracking-wider text-[var(--accent-text)] uppercase">Player</span>
 									{/if}
-									<span class="acq {acquisitionClass(consist.acquisitionState)}" title={consist.acquisitionState}>
+									<span
+										class={`w-4 text-center text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
+										title={consist.acquisitionState}
+									>
 										{acquisitionIcon(consist.acquisitionState)}
 									</span>
 								</div>
-								<div class="consist-meta">
-									<span class="loco-name">{consist.locomotiveName || '—'}</span>
+								<div class="flex items-center gap-2.5 text-[0.78rem] text-[var(--muted)]">
+									<span class="italic">{consist.locomotiveName || '—'}</span>
 									{#if consist.locoAuthor}
-										<span class="author">{consist.locoAuthor}</span>
+										<span class="text-[0.73rem] text-[var(--border-strong)]">{consist.locoAuthor}</span>
 									{/if}
-									<span class="loco-class badge-{consist.locoClass}">{consist.locoClass}</span>
-									<span class="vehicle-count">{consist.vehicles.length} vehicles</span>
-									<button class="edit-btn" onclick={() => openConsistDetail(consist)}>Edit</button>
+									<span class={locoBadgeClass(consist.locoClass)}>{consist.locoClass}</span>
+									<span class="ml-auto">{consist.vehicles.length} vehicles</span>
+									<button
+										class="ml-auto shrink-0 cursor-pointer rounded border border-[var(--border-strong)] bg-transparent px-2 py-0.5 text-[0.7rem] text-[var(--muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--text)]"
+										onclick={() => openConsistDetail(consist)}>Edit</button
+									>
 								</div>
 							</div>
 
 							{#if consist.vehicles.length > 0}
-								<div class="vehicle-list">
+								<div class="py-1">
 									{#each consist.vehicles as vehicle (vehicle.index)}
-										<div class="vehicle-row">
-											<span class="veh-type badge-veh-{vehicle.blueprintType}" title={vehicle.blueprintType}>
+										<div class="flex items-center gap-2 border-t border-[var(--border)] px-4 py-1.5 text-[0.78rem] hover:bg-[var(--border)]">
+											<span class={vehicleBadgeClass(vehicle.blueprintType)} title={vehicle.blueprintType}>
 												{vehicle.blueprintType[0].toUpperCase()}
 											</span>
-											<span class="veh-name">{vehicle.name || '—'}</span>
-											<span class="veh-number">#{vehicle.uniqueNumber}</span>
-											<span class="veh-provider">{vehicle.blueprint.provider}</span>
+											<span class="flex-[2] truncate whitespace-nowrap font-medium">{vehicle.name || '—'}</span>
+											<span class="whitespace-nowrap text-[var(--border-strong)]">#{vehicle.uniqueNumber}</span>
+											<span class="flex-1 truncate whitespace-nowrap text-[0.72rem] text-[var(--border-strong)]">{vehicle.blueprint.provider}</span>
 											{#if vehicle.flipped}
-												<span class="flipped" title="Flipped">↩</span>
+												<span class="text-[0.85rem] text-[var(--muted)]" title="Flipped">↩</span>
 											{/if}
-											<span class="veh-acq {acquisitionClass(vehicle.blueprint.acquisitionState)}" title={vehicle.blueprint.acquisitionState}>
+											<span
+												class={`w-3.5 shrink-0 text-center text-[0.7rem] font-bold ${acquisitionTextClass(vehicle.blueprint.acquisitionState)}`}
+												title={vehicle.blueprint.acquisitionState}
+											>
 												{acquisitionIcon(vehicle.blueprint.acquisitionState)}
 											</span>
 										</div>
@@ -237,318 +287,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.page {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-
-	nav {
-		margin-bottom: 1rem;
-	}
-
-	.back {
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0;
-	}
-
-	.back:hover {
-		text-decoration: underline;
-	}
-
-	header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.header-info {
-		flex: 1;
-	}
-
-	h1 {
-		font-size: 1.3rem;
-		font-weight: 700;
-		margin-bottom: 0.35rem;
-	}
-
-	.meta-row {
-		font-size: 0.8rem;
-		color: var(--muted);
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		flex-wrap: wrap;
-	}
-
-	.sep {
-		color: var(--border-strong);
-	}
-
-	.completion {
-		color: var(--ok);
-	}
-
-	.description {
-		font-size: 0.82rem;
-		color: var(--muted);
-		margin-top: 0.5rem;
-		line-height: 1.5;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.4rem 1rem;
-		font-size: 0.875rem;
-		cursor: pointer;
-		flex-shrink: 0;
-	}
-
-	button:hover:not(:disabled) { background: var(--surface-hover); }
-	button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-	.status, .empty {
-		color: var(--muted);
-		font-size: 0.9rem;
-		margin-top: 2rem;
-		text-align: center;
-	}
-
-	.error {
-		background: var(--danger-surface);
-		border: 1px solid var(--danger-border);
-		border-radius: 6px;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		color: var(--danger-text);
-		margin-bottom: 1.5rem;
-	}
-
-	.consists-section {
-		margin-top: 0.5rem;
-	}
-
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 0.75rem;
-	}
-
-	h2 {
-		font-size: 1rem;
-		font-weight: 600;
-	}
-
-	.count {
-		color: var(--muted);
-		font-weight: 400;
-	}
-
-	.search {
-		flex: 1;
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.35rem 0.75rem;
-		color: var(--text);
-		font-size: 0.8rem;
-		outline: none;
-		max-width: 280px;
-	}
-
-	.search:focus { border-color: var(--accent); }
-
-	.consist-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.consist-card {
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 8px;
-		overflow: hidden;
-	}
-
-	.consist-header {
-		padding: 0.75rem 1rem;
-		border-bottom: 1px solid var(--surface-raised);
-	}
-
-	.consist-title {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.service-name {
-		font-weight: 500;
-		font-size: 0.9rem;
-	}
-
-	.player-badge {
-		font-size: 0.65rem;
-		background: var(--accent-surface);
-		color: var(--accent-text);
-		padding: 0.1rem 0.4rem;
-		border-radius: 4px;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.acq {
-		font-size: 0.75rem;
-		font-weight: 700;
-		width: 1rem;
-		text-align: center;
-	}
-
-	.acq.found { color: var(--ok); }
-	.acq.partial { color: var(--warn); }
-	.acq.missing { color: var(--danger-text); }
-
-	.consist-meta {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-size: 0.78rem;
-		color: var(--muted);
-	}
-
-	.loco-name { font-style: italic; }
-
-	.author {
-		color: var(--border-strong);
-		font-size: 0.73rem;
-	}
-
-	.loco-class {
-		font-size: 0.65rem;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		padding: 0.1rem 0.35rem;
-		border-radius: 3px;
-	}
-
-	.badge-steam    { background: #2d1f10; color: var(--warn); }
-	.badge-diesel   { background: #1a2d1a; color: var(--success-text); }
-	.badge-electric { background: #1a1a3d; color: var(--accent-text); }
-	.badge-unknown  { background: var(--surface-raised); color: var(--muted); }
-
-	.vehicle-count { margin-left: auto; }
-
-	.vehicle-list {
-		padding: 0.25rem 0;
-	}
-
-	.vehicle-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.3rem 1rem;
-		font-size: 0.78rem;
-		border-top: 1px solid var(--border);
-	}
-
-	.vehicle-row:hover {
-		background: var(--border);
-	}
-
-	.veh-type {
-		font-weight: 700;
-		font-size: 0.65rem;
-		width: 1.2rem;
-		height: 1.2rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 3px;
-		flex-shrink: 0;
-	}
-
-	.badge-veh-engine  { background: #2d1f10; color: var(--warn); }
-	.badge-veh-tender  { background: #2d2010; color: #fbd38d; }
-	.badge-veh-coach   { background: #1a2d38; color: var(--accent-text); }
-	.badge-veh-wagon   { background: #2d2a1a; color: #f6e05e; }
-	.badge-veh-unknown { background: var(--surface-raised); color: var(--muted); }
-
-	.veh-name {
-		flex: 2;
-		font-weight: 500;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.veh-number {
-		color: var(--border-strong);
-		white-space: nowrap;
-	}
-
-	.veh-provider {
-		flex: 1;
-		color: var(--border-strong);
-		font-size: 0.72rem;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.flipped {
-		color: var(--muted);
-		font-size: 0.85rem;
-	}
-
-	.veh-acq {
-		font-size: 0.7rem;
-		font-weight: 700;
-		width: 0.9rem;
-		text-align: center;
-		flex-shrink: 0;
-	}
-
-	.veh-acq.found   { color: var(--ok); }
-	.veh-acq.partial { color: var(--warn); }
-	.veh-acq.missing { color: var(--danger-text); }
-
-	.edit-btn {
-		margin-left: auto;
-		background: none;
-		border: 1px solid var(--border-strong);
-		border-radius: 4px;
-		color: var(--muted);
-		padding: 0.15rem 0.5rem;
-		font-size: 0.7rem;
-		cursor: pointer;
-		flex-shrink: 0;
-	}
-	.edit-btn:hover { background: var(--surface-raised); color: var(--text); }
-</style>

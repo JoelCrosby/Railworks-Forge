@@ -65,31 +65,43 @@
 	});
 </script>
 
-<div class="page">
-	<nav>
-		<button class="back" onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button>
+<div class="mx-auto max-w-[1100px] p-6">
+	<nav class="mb-4">
+		<button
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
+		>
 	</nav>
 
-	<header>
+	<header class="mb-6 flex items-start justify-between gap-4">
 		<div>
-			<h1>{t(locale, 'assets-title')}</h1>
+			<h1 class="text-[1.3rem] font-bold">{t(locale, 'assets-title')}</h1>
 			{#if !loading && nodes.length > 0}
-				<p class="subtitle">{filteredCount} / {totalProducts} products</p>
+				<p class="mt-1 text-[0.8rem] text-[var(--muted)]">{filteredCount} / {totalProducts} products</p>
 			{/if}
 		</div>
-		<button onclick={load} disabled={loading}>
+		<button
+			class="shrink-0 cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+			onclick={load}
+			disabled={loading}
+		>
 			{loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
 		</button>
 	</header>
 
 	{#if error}
-		<div class="error"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
+		<div class="mb-6 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 
 	{#if !loading && nodes.length > 0}
-		<div class="toolbar">
-			<input class="search" type="search" placeholder={t(locale, 'assets-search')} bind:value={search} />
-			<label class="filter-label">
+		<div class="mb-4 flex items-center gap-4">
+			<input
+				class="flex-1 rounded-md border border-[var(--surface-raised)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+				type="search"
+				placeholder={t(locale, 'assets-search')}
+				bind:value={search}
+			/>
+			<label class="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[0.8rem] text-[var(--muted)]">
 				<input type="checkbox" bind:checked={filterRailVehicles} />
 				{t(locale, 'assets-railvehicles-only')}
 			</label>
@@ -97,28 +109,37 @@
 	{/if}
 
 	{#if loading}
-		<div class="status">{t(locale, 'assets-scanning')}</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">{t(locale, 'assets-scanning')}</div>
 	{:else if groups.length === 0 && !error}
-		<div class="empty">{nodes.length === 0 ? t(locale, 'assets-no-assets') : t(locale, 'assets-no-matches')}</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">{nodes.length === 0 ? t(locale, 'assets-no-assets') : t(locale, 'assets-no-matches')}</div>
 	{:else}
-		<div class="provider-list">
+		<div class="flex flex-col gap-2">
 			{#each groups as group (group.name)}
-				<details class="provider-group" open={groups.length <= 6}>
-					<summary class="provider-name">
+				<details
+					class="overflow-hidden rounded-lg border border-[var(--surface-raised)] bg-[var(--surface)] [&[open]>summary]:border-b [&[open]>summary]:border-[var(--surface-raised)]"
+					open={groups.length <= 6}
+				>
+					<summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-sm font-semibold select-none [&::-webkit-details-marker]:hidden">
 						{group.name}
-						<span class="provider-count">({group.products.length})</span>
+						<span class="text-[0.8rem] font-normal text-[var(--muted)]">({group.products.length})</span>
 					</summary>
 
-					<div class="product-grid">
+					<div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1.5 p-2">
 						{#each group.products as node (node.product)}
-							<div class="product-card">
-								<span class="product-name">{node.product}</span>
-								<div class="flags">
+							<div class="flex items-center justify-between gap-2 rounded-md border border-[var(--surface-raised)] bg-[var(--bg)] px-3 py-2">
+								<span class="truncate text-[0.8rem]">{node.product}</span>
+								<div class="flex shrink-0 gap-1">
 									{#if node.hasRailVehicles}
-										<span class="flag rail" title="Contains RailVehicles">R</span>
+										<span
+											class="rounded-[3px] bg-[var(--accent-surface)] px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-[var(--accent-text)]"
+											title="Contains RailVehicles">R</span
+										>
 									{/if}
 									{#if node.hasPreloadData}
-										<span class="flag preload" title="Contains PreloadData">P</span>
+										<span
+											class="rounded-[3px] bg-[var(--success-border)] px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-[var(--success-text)]"
+											title="Contains PreloadData">P</span
+										>
 									{/if}
 								</div>
 							</div>
@@ -129,219 +150,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.page {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-
-	nav {
-		margin-bottom: 1rem;
-	}
-
-	.back {
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0;
-	}
-
-	.back:hover {
-		text-decoration: underline;
-	}
-
-	header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	h1 {
-		font-size: 1.3rem;
-		font-weight: 700;
-	}
-
-	.subtitle {
-		font-size: 0.8rem;
-		color: var(--muted);
-		margin-top: 0.2rem;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.4rem 1rem;
-		font-size: 0.875rem;
-		cursor: pointer;
-		flex-shrink: 0;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--surface-hover);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.toolbar {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1rem;
-	}
-
-	.search {
-		flex: 1;
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.45rem 0.75rem;
-		color: var(--text);
-		font-size: 0.875rem;
-		outline: none;
-	}
-
-	.search:focus {
-		border-color: var(--accent);
-	}
-
-	.filter-label {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-size: 0.8rem;
-		color: var(--muted);
-		cursor: pointer;
-		white-space: nowrap;
-	}
-
-	.status,
-	.empty {
-		color: var(--muted);
-		font-size: 0.9rem;
-		margin-top: 2rem;
-		text-align: center;
-	}
-
-	.error {
-		background: var(--danger-surface);
-		border: 1px solid var(--danger-border);
-		border-radius: 6px;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		color: var(--danger-text);
-		margin-bottom: 1.5rem;
-	}
-
-	.provider-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.provider-group {
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 8px;
-		overflow: hidden;
-	}
-
-	.provider-name {
-		padding: 0.65rem 1rem;
-		font-weight: 600;
-		font-size: 0.9rem;
-		cursor: pointer;
-		user-select: none;
-		list-style: none;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.provider-name::-webkit-details-marker {
-		display: none;
-	}
-
-	.provider-group[open] .provider-name {
-		border-bottom: 1px solid var(--surface-raised);
-	}
-
-	.provider-count {
-		color: var(--muted);
-		font-weight: 400;
-		font-size: 0.8rem;
-	}
-
-	.product-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 0.4rem;
-		padding: 0.5rem;
-	}
-
-	.product-card {
-		background: var(--bg);
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.5rem 0.75rem;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
-	.product-name {
-		font-size: 0.8rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.flags {
-		display: flex;
-		gap: 0.25rem;
-		flex-shrink: 0;
-	}
-
-	.flag {
-		font-size: 0.6rem;
-		font-weight: 700;
-		letter-spacing: 0.03em;
-		padding: 0.1rem 0.3rem;
-		border-radius: 3px;
-	}
-
-	.flag.rail {
-		background: var(--accent-surface);
-		color: var(--accent-text);
-	}
-
-	.flag.preload {
-		background: var(--success-border);
-		color: var(--success-text);
-	}
-</style>

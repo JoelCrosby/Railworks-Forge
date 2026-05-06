@@ -132,10 +132,10 @@
 	});
 </script>
 
-<div class="page">
-	<nav>
+<div class="mx-auto max-w-[1200px] p-6">
+	<nav class="mb-4">
 		<button
-			class="back"
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
 			onclick={() =>
 				goto(`/routes/${encodeURIComponent(routeId)}`, {
 					state: { route: route ? $state.snapshot(route) : null }
@@ -145,19 +145,27 @@
 		</button>
 	</nav>
 
-	<header>
+	<header class="mb-6 flex items-start justify-between gap-4">
 		<div>
-			<h1>Track Replacement</h1>
+			<h1 class="text-[1.3rem] font-bold">Track Replacement</h1>
 			{#if route}
-				<p class="subtitle">{route.name}</p>
+				<p class="mt-1 text-[0.82rem] text-[var(--muted)]">{route.name}</p>
 			{/if}
 		</div>
-		<div class="header-actions">
-			<button onclick={loadTracks} disabled={loading || applying}>
+		<div class="flex shrink-0 items-start gap-2">
+			<button
+				class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+				onclick={loadTracks}
+				disabled={loading || applying}
+			>
 				{loading ? 'Loading…' : 'Refresh'}
 			</button>
 			{#if pendingCount() > 0}
-				<button class="btn-primary" onclick={applyReplacements} disabled={applying}>
+				<button
+					class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+					onclick={applyReplacements}
+					disabled={applying}
+				>
 					{applying ? 'Applying…' : `Apply ${pendingCount()} replacement(s)`}
 				</button>
 			{/if}
@@ -165,61 +173,68 @@
 	</header>
 
 	{#if successMsg}
-		<div class="banner success">{successMsg}</div>
+		<div class="mb-4 rounded-md border border-[var(--success-border)] bg-[var(--success-surface)] px-4 py-3 text-sm text-[var(--success-text)]">{successMsg}</div>
 	{/if}
 	{#if error}
-		<div class="banner error"><strong>Error:</strong> {error}</div>
+		<div class="mb-4 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>Error:</strong> {error}</div>
 	{/if}
 
 	{#if loading}
-		<div class="status">Parsing Tracks.bin…</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">Parsing Tracks.bin…</div>
 	{:else if tracks.length === 0 && !error}
-		<div class="empty">No track blueprints found. The route may not have a Tracks.bin.</div>
+		<div class="mt-8 text-center text-sm text-[var(--muted)]">No track blueprints found. The route may not have a Tracks.bin.</div>
 	{:else}
-		<div class="tracks-section">
-			<div class="section-header">
-				<h2>Track Blueprints <span class="count">({tracks.length})</span></h2>
+		<div class="mt-2">
+			<div class="mb-3 flex items-center gap-4">
+				<h2 class="text-base font-semibold">Track Blueprints <span class="font-normal text-[var(--muted)]">({tracks.length})</span></h2>
 				{#if pendingCount() > 0}
-					<span class="pending-note">{pendingCount()} pending replacement(s)</span>
+					<span class="text-[0.8rem] text-[var(--warn)]">{pendingCount()} pending replacement(s)</span>
 				{/if}
 			</div>
 
-			<table class="tracks-table">
+			<table class="w-full border-collapse text-[0.8rem]">
 				<thead>
 					<tr>
-						<th>Provider</th>
-						<th>Product</th>
-						<th>Blueprint ID</th>
-						<th>Replace with</th>
-						<th></th>
+						<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Provider</th>
+						<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Product</th>
+						<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Blueprint ID</th>
+						<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]">Replace with</th>
+						<th class="border-b border-[var(--surface-raised)] px-2.5 py-1.5 text-left font-medium text-[var(--muted)]"></th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each tracks as track (trackKey(track))}
 						{@const repl = replacementFor(track)}
-						<tr class:has-replacement={repl !== null}>
-							<td class="col-provider">{track.provider}</td>
-							<td class="col-product">{track.product}</td>
-							<td class="col-bp">{track.blueprintId}</td>
-							<td class="col-repl">
+						<tr class={repl !== null ? 'bg-[#1a2020] hover:bg-[#1a2530]' : 'hover:bg-[var(--surface)]'}>
+							<td class="whitespace-nowrap border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--muted)]">{track.provider}</td>
+							<td class="whitespace-nowrap border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-[var(--muted-strong)]">{track.product}</td>
+							<td class="max-w-80 truncate border-t border-[var(--border)] px-2.5 py-1.5 align-middle text-xs text-[var(--border-strong)]">{track.blueprintId}</td>
+							<td class="max-w-96 border-t border-[var(--border)] px-2.5 py-1.5 align-middle">
 								{#if repl}
-									<div class="repl-preview">
-										<span class="repl-provider">{repl.provider}</span>
-										<span class="repl-sep">›</span>
-										<span class="repl-product">{repl.product}</span>
-										<span class="repl-sep">›</span>
-										<span class="repl-bp">{repl.blueprintId}</span>
+									<div class="flex items-center gap-1 text-xs">
+										<span class="whitespace-nowrap text-[var(--ok)]">{repl.provider}</span>
+										<span class="shrink-0 text-[var(--surface-raised)]">›</span>
+										<span class="whitespace-nowrap text-[var(--success-text)]">{repl.product}</span>
+										<span class="shrink-0 text-[var(--surface-raised)]">›</span>
+										<span class="truncate text-[var(--success-border)]">{repl.blueprintId}</span>
 									</div>
 								{:else}
-									<span class="no-repl">—</span>
+									<span class="text-[var(--surface-raised)]">—</span>
 								{/if}
 							</td>
-							<td class="col-actions">
-								<button class="btn-small" onclick={() => openEditDialog(track)}>
+							<td class="flex gap-1 whitespace-nowrap border-t border-[var(--border)] px-2.5 py-1.5 align-middle">
+								<button
+									class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-2.5 py-1 text-[0.78rem] text-[var(--text)] hover:bg-[var(--surface-hover)]"
+									onclick={() => openEditDialog(track)}
+								>
 									{repl ? 'Edit' : 'Set…'}
 								</button>
 								{#if repl}
-									<button class="btn-small btn-danger" onclick={() => clearReplacement(track)} title="Clear replacement">✕</button>
+									<button
+										class="cursor-pointer rounded-md border border-[var(--danger-border)] bg-[var(--danger-border)] px-2.5 py-1 text-[0.78rem] text-white"
+										onclick={() => clearReplacement(track)}
+										title="Clear replacement">✕</button
+									>
 								{/if}
 							</td>
 						</tr>
@@ -233,39 +248,57 @@
 <!-- Edit replacement dialog -->
 {#if editingKey !== null}
 	{@const sourceTrack = tracks.find((t) => trackKey(t) === editingKey)}
-	<div class="overlay" role="dialog" aria-modal="true">
-		<div class="dialog">
-			<div class="dialog-header">
-				<h2>Set Replacement</h2>
-				<button class="close-btn" onclick={() => (editingKey = null)}>✕</button>
+	<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70" role="dialog" aria-modal="true">
+		<div class="flex w-[min(560px,95vw)] flex-col gap-4 rounded-[10px] border border-[var(--surface-raised)] bg-[var(--surface)] p-6">
+			<div class="flex items-center justify-between">
+				<h2 class="text-base font-semibold">Set Replacement</h2>
+				<button
+					class="cursor-pointer border-0 bg-transparent p-1 text-base text-[var(--muted)] hover:text-[var(--text)]"
+					onclick={() => (editingKey = null)}>✕</button
+				>
 			</div>
 
 			{#if sourceTrack}
-				<div class="source-info">
-					<span class="label">Replacing:</span>
-					<span class="source-bp">{sourceTrack.provider} / {sourceTrack.product} / {sourceTrack.blueprintId}</span>
+				<div class="flex items-baseline gap-2 rounded-md border border-[var(--surface-raised)] bg-[var(--bg)] px-3 py-2 text-[0.8rem]">
+					<span class="shrink-0 text-[var(--muted)]">Replacing:</span>
+					<span class="truncate text-[var(--muted-strong)]">{sourceTrack.provider} / {sourceTrack.product} / {sourceTrack.blueprintId}</span>
 				</div>
 			{/if}
 
-			<div class="form-grid">
-				<label>
+			<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+				<label class="flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 					Provider
-					<input bind:value={editProvider} placeholder="e.g. DTG" />
+					<input
+						class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+						bind:value={editProvider}
+						placeholder="e.g. DTG"
+					/>
 				</label>
-				<label>
+				<label class="flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 					Product
-					<input bind:value={editProduct} placeholder="e.g. SomeTrackPack" />
+					<input
+						class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+						bind:value={editProduct}
+						placeholder="e.g. SomeTrackPack"
+					/>
 				</label>
-				<label class="col-span-2">
+				<label class="col-span-2 flex flex-col gap-1 text-[0.78rem] text-[var(--muted)]">
 					Blueprint ID
-					<input bind:value={editBlueprintId} placeholder="e.g. Track\TrackType.xml" />
+					<input
+						class="rounded border border-[var(--surface-raised)] bg-[var(--bg)] px-2 py-1 text-[0.8rem] text-[var(--text)] outline-none focus:border-[var(--accent)]"
+						bind:value={editBlueprintId}
+						placeholder="e.g. Track\TrackType.xml"
+					/>
 				</label>
 			</div>
 
-			<div class="dialog-footer">
-				<button onclick={() => (editingKey = null)}>Cancel</button>
+			<div class="flex justify-end gap-2 border-t border-[var(--surface-raised)] pt-2">
 				<button
-					class="btn-primary"
+					class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-4 py-1.5 text-sm text-[var(--text)] hover:bg-[var(--surface-hover)]"
+					onclick={() => (editingKey = null)}>Cancel</button
+				>
+				<button
+					class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-4 py-1.5 text-sm text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
 					onclick={confirmEdit}
 					disabled={!editProvider || !editProduct || !editBlueprintId}
 				>
@@ -275,363 +308,3 @@
 		</div>
 	</div>
 {/if}
-
-<style>
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-
-	nav {
-		margin-bottom: 1rem;
-	}
-
-	.back {
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0;
-	}
-
-	.back:hover {
-		text-decoration: underline;
-	}
-
-	header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	h1 {
-		font-size: 1.3rem;
-		font-weight: 700;
-	}
-
-	.subtitle {
-		font-size: 0.82rem;
-		color: var(--muted);
-		margin-top: 0.2rem;
-	}
-
-	.header-actions {
-		display: flex;
-		gap: 0.5rem;
-		flex-shrink: 0;
-		align-items: flex-start;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.4rem 1rem;
-		font-size: 0.875rem;
-		cursor: pointer;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--surface-hover);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.btn-primary {
-		background: var(--primary);
-		border-color: var(--primary-border);
-		color: #fff;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: var(--primary-hover);
-	}
-
-	.btn-danger {
-		background: var(--danger-border);
-		border-color: var(--danger-border);
-		color: #fff;
-	}
-
-	.btn-danger:hover:not(:disabled) {
-		background: var(--danger-border);
-	}
-
-	.btn-small {
-		padding: 0.25rem 0.6rem;
-		font-size: 0.78rem;
-	}
-
-	.banner {
-		padding: 0.75rem 1rem;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		margin-bottom: 1rem;
-	}
-
-	.banner.success {
-		background: var(--success-surface);
-		border: 1px solid var(--success-border);
-		color: var(--success-text);
-	}
-
-	.banner.error {
-		background: var(--danger-surface);
-		border: 1px solid var(--danger-border);
-		color: var(--danger-text);
-	}
-
-	.status,
-	.empty {
-		color: var(--muted);
-		font-size: 0.9rem;
-		margin-top: 2rem;
-		text-align: center;
-	}
-
-	.tracks-section {
-		margin-top: 0.5rem;
-	}
-
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 0.75rem;
-	}
-
-	h2 {
-		font-size: 1rem;
-		font-weight: 600;
-	}
-
-	.count {
-		color: var(--muted);
-		font-weight: 400;
-	}
-
-	.pending-note {
-		font-size: 0.8rem;
-		color: var(--warn);
-	}
-
-	.tracks-table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.8rem;
-	}
-
-	.tracks-table th {
-		text-align: left;
-		padding: 0.4rem 0.6rem;
-		color: var(--muted);
-		font-weight: 500;
-		border-bottom: 1px solid var(--surface-raised);
-	}
-
-	.tracks-table td {
-		padding: 0.35rem 0.6rem;
-		border-top: 1px solid var(--border);
-		vertical-align: middle;
-	}
-
-	.tracks-table tr:hover td {
-		background: var(--surface);
-	}
-
-	.tracks-table tr.has-replacement td {
-		background: #1a2020;
-	}
-
-	.tracks-table tr.has-replacement:hover td {
-		background: #1a2530;
-	}
-
-	.col-provider {
-		color: var(--muted);
-		white-space: nowrap;
-	}
-
-	.col-product {
-		color: var(--muted-strong);
-		white-space: nowrap;
-	}
-
-	.col-bp {
-		color: var(--border-strong);
-		font-size: 0.75rem;
-		max-width: 20rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.col-repl {
-		max-width: 24rem;
-	}
-
-	.repl-preview {
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		font-size: 0.75rem;
-	}
-
-	.repl-provider {
-		color: var(--ok);
-		white-space: nowrap;
-	}
-
-	.repl-product {
-		color: var(--success-text);
-		white-space: nowrap;
-	}
-
-	.repl-bp {
-		color: var(--success-border);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.repl-sep {
-		color: var(--surface-raised);
-		flex-shrink: 0;
-	}
-
-	.no-repl {
-		color: var(--surface-raised);
-	}
-
-	.col-actions {
-		display: flex;
-		gap: 0.3rem;
-		white-space: nowrap;
-	}
-
-	/* Dialog */
-	.overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.7);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 100;
-	}
-
-	.dialog {
-		background: var(--surface);
-		border: 1px solid var(--surface-raised);
-		border-radius: 10px;
-		width: min(560px, 95vw);
-		padding: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.dialog-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.close-btn {
-		background: none;
-		border: none;
-		color: var(--muted);
-		font-size: 1rem;
-		cursor: pointer;
-		padding: 0.25rem;
-	}
-
-	.close-btn:hover {
-		color: var(--text);
-	}
-
-	.source-info {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		font-size: 0.8rem;
-		background: var(--bg);
-		border: 1px solid var(--surface-raised);
-		border-radius: 6px;
-		padding: 0.5rem 0.75rem;
-	}
-
-	.label {
-		color: var(--muted);
-		flex-shrink: 0;
-	}
-
-	.source-bp {
-		color: var(--muted-strong);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.form-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.5rem 1rem;
-	}
-
-	.col-span-2 {
-		grid-column: span 2;
-	}
-
-	.form-grid label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		font-size: 0.78rem;
-		color: var(--muted);
-	}
-
-	.form-grid input {
-		background: var(--bg);
-		border: 1px solid var(--surface-raised);
-		border-radius: 4px;
-		padding: 0.3rem 0.5rem;
-		color: var(--text);
-		font-size: 0.8rem;
-		outline: none;
-	}
-
-	.form-grid input:focus {
-		border-color: var(--accent);
-	}
-
-	.dialog-footer {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.5rem;
-		padding-top: 0.5rem;
-		border-top: 1px solid var(--surface-raised);
-	}
-</style>

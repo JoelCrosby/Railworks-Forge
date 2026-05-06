@@ -65,202 +65,99 @@
 	});
 </script>
 
-<div class="page">
-	<nav>
-		<button class="back" onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button>
+<div class="mx-auto max-w-[760px] p-6">
+	<nav class="mb-4">
+		<button
+			class="cursor-pointer border-0 bg-transparent p-0 text-sm text-[var(--accent)] hover:underline"
+			onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button
+		>
 	</nav>
 
-	<header>
-		<h1>{t(locale, 'settings-title')}</h1>
+	<header class="mb-6">
+		<h1 class="text-[1.35rem] font-bold">{t(locale, 'settings-title')}</h1>
 	</header>
 
 	{#if error}
-		<div class="banner error"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
+		<div class="mb-4 rounded-md border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-text)]"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 	{#if success}
-		<div class="banner success">{success}</div>
+		<div class="mb-4 rounded-md border border-[var(--success-border)] bg-[var(--success-surface)] px-4 py-3 text-sm text-[var(--success-text)]">{success}</div>
 	{/if}
 
 	{#if loading}
-		<div class="status">{t(locale, 'action-loading')}</div>
+		<div class="text-center text-[var(--muted)]">{t(locale, 'action-loading')}</div>
 	{:else}
-		<section>
-			<h2>{t(locale, 'settings-game-path')}</h2>
-			<p>{t(locale, 'settings-game-path-hint')}</p>
-			<input class="path-input" bind:value={form.gamePath} placeholder="/path/to/RailWorks" />
+		<section class="mb-4 flex flex-col gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+			<h2 class="text-[0.95rem] font-semibold">{t(locale, 'settings-game-path')}</h2>
+			<p class="text-[0.82rem] text-[var(--muted)]">{t(locale, 'settings-game-path-hint')}</p>
+			<input
+				class="rounded-md border border-[var(--border-strong)] bg-[var(--bg)] px-2.5 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+				bind:value={form.gamePath}
+				placeholder="/path/to/RailWorks"
+			/>
 			{#if form.gamePath}
-				<p class="current">{t(locale, 'settings-current-path', { path: form.gamePath })}</p>
+				<p class="text-[0.82rem] text-[var(--muted)]">{t(locale, 'settings-current-path', { path: form.gamePath })}</p>
 			{/if}
 		</section>
 
-		<section>
-			<h2>{t(locale, 'settings-theme')}</h2>
-			<div class="segmented">
-				<button class:active={form.theme === 'dark'} onclick={() => setTheme('dark')}>
+		<section class="mb-4 flex flex-col gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+			<h2 class="text-[0.95rem] font-semibold">{t(locale, 'settings-theme')}</h2>
+			<div class="grid grid-cols-3 gap-1.5">
+				<button
+					class={`cursor-pointer rounded-md border px-3.5 py-2 ${form.theme === 'dark' ? 'border-[var(--accent-border)] bg-[var(--accent-surface)] text-[var(--accent-text)]' : 'border-[var(--border-strong)] bg-[var(--surface-raised)] text-[var(--text)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-surface)] hover:text-[var(--accent-text)]'}`}
+					onclick={() => setTheme('dark')}
+				>
 					{t(locale, 'settings-theme-dark')}
 				</button>
-				<button class:active={form.theme === 'light'} onclick={() => setTheme('light')}>
+				<button
+					class={`cursor-pointer rounded-md border px-3.5 py-2 ${form.theme === 'light' ? 'border-[var(--accent-border)] bg-[var(--accent-surface)] text-[var(--accent-text)]' : 'border-[var(--border-strong)] bg-[var(--surface-raised)] text-[var(--text)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-surface)] hover:text-[var(--accent-text)]'}`}
+					onclick={() => setTheme('light')}
+				>
 					{t(locale, 'settings-theme-light')}
 				</button>
-				<button class:active={form.theme === 'system'} onclick={() => setTheme('system')}>
+				<button
+					class={`cursor-pointer rounded-md border px-3.5 py-2 ${form.theme === 'system' ? 'border-[var(--accent-border)] bg-[var(--accent-surface)] text-[var(--accent-text)]' : 'border-[var(--border-strong)] bg-[var(--surface-raised)] text-[var(--text)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-surface)] hover:text-[var(--accent-text)]'}`}
+					onclick={() => setTheme('system')}
+				>
 					{t(locale, 'settings-theme-system')}
 				</button>
 			</div>
 		</section>
 
-		<section>
-			<h2>{t(locale, 'settings-language')}</h2>
-			<select bind:value={form.locale}>
+		<section class="mb-4 flex flex-col gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+			<h2 class="text-[0.95rem] font-semibold">{t(locale, 'settings-language')}</h2>
+			<select
+				class="rounded-md border border-[var(--border-strong)] bg-[var(--bg)] px-2.5 py-2 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+				bind:value={form.locale}
+			>
 				<option value="en-US">{t(locale, 'settings-language-english')}</option>
 				<option value="de-DE">{t(locale, 'settings-language-german')}</option>
 			</select>
 		</section>
 
-		<section>
-			<h2>{t(locale, 'settings-cache')}</h2>
-			<button onclick={clearCache} disabled={clearing}>
+		<section class="mb-4 flex flex-col gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+			<h2 class="text-[0.95rem] font-semibold">{t(locale, 'settings-cache')}</h2>
+			<button
+				class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3.5 py-2 text-[var(--text)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-surface)] hover:text-[var(--accent-text)] disabled:cursor-not-allowed disabled:opacity-55"
+				onclick={clearCache}
+				disabled={clearing}
+			>
 				{clearing ? t(locale, 'action-loading') : t(locale, 'settings-clear-cache')}
 			</button>
 		</section>
 
-		<footer>
-			<button class="btn-primary" onclick={save} disabled={saving}>
+		<footer class="flex justify-end gap-2">
+			<button
+				class="cursor-pointer rounded-md border border-[var(--primary-border)] bg-[var(--primary)] px-3.5 py-2 text-white hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-55"
+				onclick={save}
+				disabled={saving}
+			>
 				{saving ? t(locale, 'action-saving') : t(locale, 'action-save')}
 			</button>
-			<button onclick={() => goto('/')}>{t(locale, 'action-cancel')}</button>
+			<button
+				class="cursor-pointer rounded-md border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3.5 py-2 text-[var(--text)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-surface)] hover:text-[var(--accent-text)]"
+				onclick={() => goto('/')}>{t(locale, 'action-cancel')}</button
+			>
 		</footer>
 	{/if}
 </div>
-
-<style>
-	.page {
-		max-width: 760px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-
-	nav {
-		margin-bottom: 1rem;
-	}
-
-	.back {
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0;
-	}
-
-	header {
-		margin-bottom: 1.5rem;
-	}
-
-	h1 {
-		font-size: 1.35rem;
-	}
-
-	section {
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: 8px;
-		padding: 1rem;
-		margin-bottom: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.65rem;
-	}
-
-	h2 {
-		font-size: 0.95rem;
-	}
-
-	p,
-	.current {
-		color: var(--muted);
-		font-size: 0.82rem;
-	}
-
-	input,
-	select {
-		background: var(--bg);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		color: var(--text);
-		padding: 0.45rem 0.65rem;
-	}
-
-	input:focus,
-	select:focus {
-		border-color: var(--accent);
-		outline: none;
-	}
-
-	.segmented {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 0.35rem;
-	}
-
-	button {
-		background: var(--surface-raised);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		border-radius: 6px;
-		padding: 0.45rem 0.85rem;
-		cursor: pointer;
-	}
-
-	button:hover:not(:disabled),
-	button.active {
-		background: var(--accent-surface);
-		border-color: var(--accent-border);
-		color: var(--accent-text);
-	}
-
-	button:disabled {
-		opacity: 0.55;
-		cursor: not-allowed;
-	}
-
-	.btn-primary {
-		background: var(--primary);
-		border-color: var(--primary-border);
-		color: #fff;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: var(--primary-hover);
-		color: #fff;
-	}
-
-	.banner {
-		border-radius: 6px;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		margin-bottom: 1rem;
-	}
-
-	.banner.success {
-		background: var(--success-surface);
-		border: 1px solid var(--success-border);
-		color: var(--success-text);
-	}
-
-	.banner.error {
-		background: var(--danger-surface);
-		border: 1px solid var(--danger-border);
-		color: var(--danger-text);
-	}
-
-	.status {
-		color: var(--muted);
-		text-align: center;
-	}
-
-	footer {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.5rem;
-	}
-</style>
