@@ -16,6 +16,8 @@ pub struct Route {
     pub description: Option<String>,
     pub directory_path: PathBuf,
     pub packaging_type: PackagingType,
+    #[serde(default, skip_deserializing)]
+    pub image_data_url: Option<String>,
 }
 
 impl Route {

@@ -1,8 +1,9 @@
 use crate::{
     models::{Consist, Scenario},
+    platform::find_game_directory,
     services::{
         consist_commands::{ConsistCommand, SavedConsist, VehicleEntry},
-        persistence, scenario_service,
+        image_service, persistence, scenario_service,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -62,9 +63,10 @@ pub async fn replace_consist(request: ReplaceConsistRequest) -> Result<Scenario,
         entries: request.entries,
     };
 
-    persistence::apply_edits(request.scenario, bin_path, vec![command])
+    let scenario = persistence::apply_edits(request.scenario, bin_path, vec![command])
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    populate_images(scenario).await
 }
 
 /// Appends a single vehicle to an existing consist.
@@ -102,9 +104,10 @@ pub async fn add_vehicle(request: AddVehicleRequest) -> Result<Scenario, String>
         entries,
     };
 
-    persistence::apply_edits(request.scenario, bin_path, vec![command])
+    let scenario = persistence::apply_edits(request.scenario, bin_path, vec![command])
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    populate_images(scenario).await
 }
 
 /// Removes a vehicle from a consist by its 0-based index.
@@ -119,9 +122,10 @@ pub async fn delete_vehicle(request: DeleteVehicleRequest) -> Result<Scenario, S
         vehicle_index: request.vehicle_index,
     };
 
-    persistence::apply_edits(request.scenario, bin_path, vec![command])
+    let scenario = persistence::apply_edits(request.scenario, bin_path, vec![command])
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    populate_images(scenario).await
 }
 
 /// Removes an entire consist from a scenario.
@@ -135,9 +139,28 @@ pub async fn delete_consist(request: DeleteConsistRequest) -> Result<Scenario, S
         consist_id: request.consist_id,
     };
 
-    persistence::apply_edits(request.scenario, bin_path, vec![command])
+    let scenario = persistence::apply_edits(request.scenario, bin_path, vec![command])
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    populate_images(scenario).await
+}
+
+async fn populate_images(mut scenario: Scenario) -> Result<Scenario, String> {
+    let assets_root = find_game_directory()
+        .map_err(|e| e.to_string())?
+        .join("Assets");
+
+    scenario.consists = tokio::task::spawn_blocking({
+        let mut consists = std::mem::take(&mut scenario.consists);
+        move || {
+            image_service::populate_consist_images(&mut consists, &assets_root);
+            consists
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(scenario)
 }
 
 // ── Saved consist templates ──────────────────────────────────────────────────

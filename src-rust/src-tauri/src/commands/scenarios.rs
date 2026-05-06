@@ -1,7 +1,7 @@
 use crate::{
     models::{Route, Scenario},
     platform::find_game_directory,
-    services::{scenario_db, scenario_parser, scenario_service},
+    services::{image_service, scenario_db, scenario_parser, scenario_service},
     serz,
 };
 use anyhow::Result;
@@ -90,6 +90,18 @@ pub async fn get_scenario_detail(scenario: Scenario) -> Result<Scenario, String>
         .await
         .map_err(|e| e.to_string())?
         .map_err(|e| e.to_string())?;
+    let assets_root = find_game_directory()
+        .map_err(|e| e.to_string())?
+        .join("Assets");
+    let consists = tokio::task::spawn_blocking({
+        let mut consists = consists;
+        move || {
+            image_service::populate_consist_images(&mut consists, &assets_root);
+            consists
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?;
 
     tracing::info!(
         "scenario {}: parsed {} consists",

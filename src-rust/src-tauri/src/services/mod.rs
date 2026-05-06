@@ -1,5 +1,6 @@
 pub mod asset_service;
 pub mod consist_commands;
+pub mod image_service;
 pub mod persistence;
 pub mod profiling;
 pub mod route_service;

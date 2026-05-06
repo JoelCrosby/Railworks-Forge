@@ -1,6 +1,7 @@
 use crate::{
     archive,
     models::{PackagingType, Route},
+    services::image_service,
     xml::{parser::read_xml_file, selectors},
 };
 use anyhow::Result;
@@ -107,11 +108,15 @@ fn build_route(dir: &Path, xml: &str, packaging: PackagingType) -> Result<Route>
     let description = selectors::select_localised(xml, "Description")
         .or_else(|| selectors::select_text(xml, "Description"));
 
-    Ok(Route {
+    let mut route = Route {
         id,
         name,
         description,
         directory_path: dir.to_path_buf(),
         packaging_type: packaging,
-    })
+        image_data_url: None,
+    };
+    route.image_data_url = image_service::route_image_data_url(&route);
+
+    Ok(route)
 }

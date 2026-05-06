@@ -22,6 +22,7 @@
     description: string | null;
     directoryPath: string;
     packagingType: 'packed' | 'unpacked';
+    imageDataUrl: string | null;
   }
 
   interface Scenario {
@@ -238,13 +239,20 @@
 <div class="px-6">
   {#if route}
     <header class="mb-6 flex items-start justify-between gap-4">
-      <div>
+      <div class="min-w-0">
         <h1 class="text-[1.3rem] font-bold">{route.name}</h1>
         {#if route.description}
           <p class="mt-1 text-[0.85rem] text-muted">{route.description}</p>
         {/if}
       </div>
-      <div class="flex shrink-0 gap-2">
+      <div class="flex shrink-0 items-start gap-3">
+        {#if route.imageDataUrl}
+          <img
+            src={route.imageDataUrl}
+            alt=""
+            class="h-[92px] w-[172px] rounded-[4px] object-cover"
+          />
+        {/if}
         <button
           class="shrink-0 cursor-pointer rounded-md border border-accent-border bg-accent-surface px-4 py-1.5 text-sm text-accent-text disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() =>

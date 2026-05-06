@@ -43,6 +43,7 @@
     blueprint: Blueprint;
     vehicles: VehicleBlueprint[];
     acquisitionState: 'found' | 'partial' | 'missing';
+    imageDataUrl: string | null;
   }
 
   interface Scenario {
@@ -74,6 +75,7 @@
     description: string | null;
     directoryPath: string;
     packagingType: 'packed' | 'unpacked';
+    imageDataUrl: string | null;
   }
 
   interface VehicleEntry {
@@ -467,35 +469,44 @@
 <div class="px-6">
   {#if consist}
     <header class="mb-6 flex items-start justify-between gap-4">
-      <div class="flex-1">
-        <h1 class="mb-1.5 text-[1.3rem] font-bold">
-          {consist.serviceName || consist.locomotiveName || '—'}
-        </h1>
-        <div
-          class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-muted"
-        >
-          <span class="italic">{consist.locomotiveName || '—'}</span>
-          {#if consist.locoAuthor}
-            <span class="text-border-strong">·</span>
-            <span>{consist.locoAuthor}</span>
-          {/if}
-          <span class="text-border-strong">·</span>
-          <span class={locoBadgeClass(consist.locoClass)}
-            >{consist.locoClass}</span
+      <div class="flex min-w-0 flex-1 items-start gap-4">
+        {#if consist.imageDataUrl}
+          <img
+            src={consist.imageDataUrl}
+            alt=""
+            class="h-[76px] w-[136px] shrink-0 rounded-[4px] object-cover"
+          />
+        {/if}
+        <div class="min-w-0">
+          <h1 class="mb-1.5 text-[1.3rem] font-bold">
+            {consist.serviceName || consist.locomotiveName || '—'}
+          </h1>
+          <div
+            class="flex flex-wrap items-center gap-1.5 text-[0.8rem] text-muted"
           >
-          {#if consist.playerDriver}
+            <span class="italic">{consist.locomotiveName || '—'}</span>
+            {#if consist.locoAuthor}
+              <span class="text-border-strong">·</span>
+              <span>{consist.locoAuthor}</span>
+            {/if}
+            <span class="text-border-strong">·</span>
+            <span class={locoBadgeClass(consist.locoClass)}
+              >{consist.locoClass}</span
+            >
+            {#if consist.playerDriver}
+              <span class="text-border-strong">·</span>
+              <span
+                class="rounded bg-accent-surface px-1.5 py-0.5 text-[0.65rem] tracking-wider text-accent-text uppercase"
+                >Player</span
+              >
+            {/if}
             <span class="text-border-strong">·</span>
             <span
-              class="rounded bg-accent-surface px-1.5 py-0.5 text-[0.65rem] tracking-wider text-accent-text uppercase"
-              >Player</span
+              class={`text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
             >
-          {/if}
-          <span class="text-border-strong">·</span>
-          <span
-            class={`text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
-          >
-            {acquisitionIcon(consist.acquisitionState)}
-          </span>
+              {acquisitionIcon(consist.acquisitionState)}
+            </span>
+          </div>
         </div>
       </div>
       <div class="flex shrink-0 gap-2">

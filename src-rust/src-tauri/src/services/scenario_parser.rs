@@ -342,6 +342,7 @@ fn build_consist(
         blueprint: lead.blueprint.clone(),
         vehicles: vehicles.to_vec(),
         acquisition_state,
+        image_data_url: None,
     })
 }
 

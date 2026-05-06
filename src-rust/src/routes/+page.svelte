@@ -22,6 +22,7 @@
     description: string | null;
     directoryPath: string;
     packagingType: 'packed' | 'unpacked';
+    imageDataUrl: string | null;
   }
 
   interface ProgressEvent {
@@ -43,6 +44,14 @@
 
   const PATH_MISSING_HINT = 'could not locate railworks';
   const routeColumns: ColumnDef<Route>[] = [
+    {
+      id: 'image',
+      header: '',
+      enableSorting: false,
+      meta: {
+        columnClass: 'w-36',
+      },
+    },
     {
       accessorKey: 'name',
       header: 'Route',
@@ -209,7 +218,26 @@
             >
               {#each row.getVisibleCells() as cell (cell.id)}
                 <Table.Cell class={getDataTableCellClass(cell)}>
-                  {#if cell.column.id === 'packagingType'}
+                  {#if cell.column.id === 'image'}
+                    <div
+                      class="h-16 w-28 overflow-hidden rounded-[4px] bg-surface-raised"
+                    >
+                      {#if row.original.imageDataUrl}
+                        <img
+                          src={row.original.imageDataUrl}
+                          alt=""
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      {:else}
+                        <div
+                          class="flex h-full w-full items-center justify-center text-xs text-muted"
+                        >
+                          —
+                        </div>
+                      {/if}
+                    </div>
+                  {:else if cell.column.id === 'packagingType'}
                     <Badge variant="outline">
                       {openingRouteId === row.original.id
                         ? t(locale, 'home-opening')

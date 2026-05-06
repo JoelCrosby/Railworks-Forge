@@ -44,6 +44,7 @@
     blueprint: Blueprint;
     vehicles: VehicleBlueprint[];
     acquisitionState: 'found' | 'partial' | 'missing';
+    imageDataUrl: string | null;
   }
 
   interface Scenario {
@@ -75,6 +76,7 @@
     description: string | null;
     directoryPath: string;
     packagingType: 'packed' | 'unpacked';
+    imageDataUrl: string | null;
   }
 
   const navState = $page.state as { route?: Route; scenario?: Scenario };
@@ -104,6 +106,14 @@
   );
 
   const consistColumns: ColumnDef<Consist>[] = [
+    {
+      id: 'image',
+      header: '',
+      enableSorting: false,
+      meta: {
+        columnClass: 'w-28',
+      },
+    },
     {
       accessorKey: 'serviceName',
       header: 'Service',
@@ -377,7 +387,26 @@
                   <Table.Cell
                     class={getDataTableCellClass(cell)}
                   >
-                    {#if cell.column.id === 'serviceName'}
+                    {#if cell.column.id === 'image'}
+                      <div
+                        class="h-14 w-24 overflow-hidden rounded-[4px] bg-surface-raised"
+                      >
+                        {#if consist.imageDataUrl}
+                          <img
+                            src={consist.imageDataUrl}
+                            alt=""
+                            class="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        {:else}
+                          <div
+                            class="flex h-full w-full items-center justify-center text-xs text-muted"
+                          >
+                            —
+                          </div>
+                        {/if}
+                      </div>
+                    {:else if cell.column.id === 'serviceName'}
                       <div class="flex items-center gap-2">
                         <span class="font-medium"
                           >{consist.serviceName || '—'}</span

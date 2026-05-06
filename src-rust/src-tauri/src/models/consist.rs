@@ -46,4 +46,6 @@ pub struct Consist {
     pub blueprint: Blueprint,
     pub vehicles: Vec<VehicleBlueprint>,
     pub acquisition_state: ConsistAcquisitionState,
+    #[serde(default, skip_deserializing)]
+    pub image_data_url: Option<String>,
 }
