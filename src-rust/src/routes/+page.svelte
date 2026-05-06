@@ -208,12 +208,7 @@
               onkeydown={(event) => openRouteFromKeyboard(event, row.original)}
             >
               {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell
-                  class={getDataTableCellClass(
-                    cell,
-                    cell.column.id === 'name' ? 'font-medium' : '',
-                  )}
-                >
+                <Table.Cell>
                   {#if cell.column.id === 'packagingType'}
                     <Badge variant="outline">
                       {openingRouteId === row.original.id

@@ -45,5 +45,8 @@ export async function saveSettings(next: AppSettings): Promise<AppSettings> {
 export function applyTheme(theme: Theme): void {
 	if (typeof document === 'undefined') return;
 	const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
-	document.documentElement.dataset.theme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
+	const resolvedTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
+	document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+	document.documentElement.style.colorScheme = resolvedTheme;
+	document.documentElement.removeAttribute('data-theme');
 }

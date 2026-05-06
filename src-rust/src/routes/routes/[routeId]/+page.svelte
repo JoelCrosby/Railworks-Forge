@@ -322,13 +322,8 @@
             onclick={() => openScenario(row.original)}
             onkeydown={(event) => openScenarioFromKeyboard(event, row.original)}
           >
-              {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell
-                class={getDataTableCellClass(
-                  cell,
-                  cell.column.id === 'name' ? 'font-medium' : 'text-muted',
-                )}
-              >
+            {#each row.getVisibleCells() as cell (cell.id)}
+              <Table.Cell>
                 {#if cell.column.id === 'name'}
                   {row.original.name}
                 {:else if cell.column.id === 'locomotive'}
@@ -345,7 +340,9 @@
                   >
                 {:else if cell.column.id === 'completion'}
                   {#if row.original.playerInfo.completion}
-                    <span class="text-ok">{row.original.playerInfo.completion}</span>
+                    <span class="text-ok"
+                      >{row.original.playerInfo.completion}</span
+                    >
                   {:else}
                     <span>—</span>
                   {/if}
