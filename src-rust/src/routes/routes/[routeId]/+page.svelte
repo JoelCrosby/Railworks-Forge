@@ -7,6 +7,7 @@
   import {
     createSvelteTable,
     DataTableHeader,
+    getDataTableCellClass,
   } from '$lib/components/ui/data-table/index.js';
   import { Badge } from '$lib/components/ui/badge/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
@@ -85,8 +86,9 @@
       accessorKey: 'duration',
       header: 'Duration',
       meta: {
-        headerClass: 'w-28 text-right',
+        headerClass: 'w-28',
         headerAlign: 'right',
+        cellAlign: 'right',
       },
     },
     {
@@ -320,13 +322,12 @@
             onclick={() => openScenario(row.original)}
             onkeydown={(event) => openScenarioFromKeyboard(event, row.original)}
           >
-            {#each row.getVisibleCells() as cell (cell.id)}
-              <Table.Cell
-                class={cell.column.id === 'name'
-                  ? 'font-medium'
-                  : cell.column.id === 'duration'
-                    ? 'text-right'
-                    : 'text-muted'}
+              {#each row.getVisibleCells() as cell (cell.id)}
+                <Table.Cell
+                class={getDataTableCellClass(
+                  cell,
+                  cell.column.id === 'name' ? 'font-medium' : 'text-muted',
+                )}
               >
                 {#if cell.column.id === 'name'}
                   {row.original.name}

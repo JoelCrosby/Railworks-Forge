@@ -7,6 +7,7 @@
   import {
     createSvelteTable,
     DataTableHeader,
+    getDataTableCellClass,
   } from '$lib/components/ui/data-table/index.js';
   import { Badge } from '$lib/components/ui/badge/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
@@ -50,8 +51,9 @@
       accessorKey: 'packagingType',
       header: 'Type',
       meta: {
-        headerClass: 'w-32 text-right',
+        headerClass: 'w-32',
         headerAlign: 'right',
+        cellAlign: 'right',
       },
     },
   ];
@@ -207,15 +209,12 @@
             >
               {#each row.getVisibleCells() as cell (cell.id)}
                 <Table.Cell
-                  class={cell.column.id === 'name'
-                    ? 'font-medium'
-                    : cell.column.id === 'description'
-                      ? 'max-w-180 truncate text-muted'
-                      : 'text-right'}
+                  class={getDataTableCellClass(
+                    cell,
+                    cell.column.id === 'name' ? 'font-medium' : '',
+                  )}
                 >
-                  {#if cell.column.id === 'description'}
-                    {row.original.description ?? '—'}
-                  {:else if cell.column.id === 'packagingType'}
+                  {#if cell.column.id === 'packagingType'}
                     <Badge variant="outline">
                       {openingRouteId === row.original.id
                         ? t(locale, 'home-opening')

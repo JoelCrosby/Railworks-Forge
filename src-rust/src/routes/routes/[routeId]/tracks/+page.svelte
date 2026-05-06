@@ -6,6 +6,7 @@
   import {
     createSvelteTable,
     DataTableHeader,
+    getDataTableCellClass,
   } from '$lib/components/ui/data-table/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
@@ -61,6 +62,7 @@
       header: 'Provider',
       meta: {
         headerClass: 'w-40',
+        cellClass: 'text-muted',
       },
     },
     {
@@ -68,11 +70,15 @@
       header: 'Product',
       meta: {
         headerClass: 'w-48',
+        cellClass: 'text-muted-strong',
       },
     },
     {
       accessorKey: 'blueprintId',
       header: 'Blueprint ID',
+      meta: {
+        cellClass: 'truncate text-xs text-border-strong',
+      },
     },
     {
       id: 'replacement',
@@ -87,7 +93,8 @@
       header: '',
       enableSorting: false,
       meta: {
-        headerClass: 'w-34',
+        headerClass: 'w-36',
+        cellClass: 'whitespace-nowrap',
       },
     },
   ];
@@ -315,15 +322,7 @@
             >
               {#each row.getVisibleCells() as cell (cell.id)}
                 <Table.Cell
-                  class={cell.column.id === 'provider'
-                    ? 'text-muted'
-                    : cell.column.id === 'product'
-                      ? 'text-muted-strong'
-                      : cell.column.id === 'blueprintId'
-                        ? 'truncate text-xs text-border-strong'
-                        : cell.column.id === 'actions'
-                          ? 'whitespace-nowrap'
-                          : ''}
+                  class={getDataTableCellClass(cell)}
                 >
                   {#if cell.column.id === 'provider'}
                     {track.provider}

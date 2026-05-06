@@ -7,6 +7,7 @@
   import {
     createSvelteTable,
     DataTableHeader,
+    getDataTableCellClass,
   } from '$lib/components/ui/data-table/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
@@ -133,6 +134,7 @@
       header: '#',
       meta: {
         headerClass: 'w-12',
+        cellClass: 'text-border-strong',
       },
     },
     {
@@ -145,6 +147,9 @@
     {
       accessorKey: 'name',
       header: 'Name',
+      meta: {
+        cellClass: 'font-medium',
+      },
     },
     {
       accessorKey: 'uniqueNumber',
@@ -159,19 +164,24 @@
       header: 'Provider',
       meta: {
         headerClass: 'w-40',
+        cellClass: 'truncate text-muted',
       },
     },
     {
       id: 'blueprint',
       accessorFn: (vehicle) => vehicle.blueprint.blueprintId,
       header: 'Blueprint',
+      meta: {
+        cellClass: 'truncate text-border-strong',
+      },
     },
     {
       accessorKey: 'flipped',
       header: 'Flip',
       meta: {
-        headerClass: 'w-20 text-center',
-        headerAlign: 'right',
+        headerClass: 'w-20',
+        headerAlign: 'center',
+        cellAlign: 'center',
       },
     },
     {
@@ -179,8 +189,9 @@
       accessorFn: (vehicle) => vehicle.blueprint.acquisitionState,
       header: 'State',
       meta: {
-        headerClass: 'w-20 text-center',
-        headerAlign: 'right',
+        headerClass: 'w-20',
+        headerAlign: 'center',
+        cellAlign: 'center',
       },
     },
     {
@@ -560,18 +571,7 @@
               <Table.Row class="table w-full table-fixed hover:bg-surface">
                 {#each row.getVisibleCells() as cell (cell.id)}
                   <Table.Cell
-                    class={cell.column.id === 'index'
-                      ? 'text-border-strong'
-                      : cell.column.id === 'name'
-                        ? 'font-medium'
-                        : cell.column.id === 'provider'
-                          ? 'truncate text-muted'
-                          : cell.column.id === 'blueprint'
-                            ? 'truncate text-border-strong'
-                            : cell.column.id === 'flipped' ||
-                                cell.column.id === 'state'
-                              ? 'text-center'
-                              : ''}
+                    class={getDataTableCellClass(cell)}
                   >
                     {#if cell.column.id === 'index'}
                       {v.index + 1}

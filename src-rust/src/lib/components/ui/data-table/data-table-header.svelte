@@ -2,37 +2,38 @@
   import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
   import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
   import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
-  import type { Header } from '@tanstack/table-core';
-  import { Button } from '$lib/components/ui/button/index.js';
-  import * as Table from '$lib/components/ui/table/index.js';
-  import { cn } from '$lib/utils.js';
-  import { FlexRender } from './index.js';
+	import type { Header } from '@tanstack/table-core';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Table from '$lib/components/ui/table/index.js';
+	import { cn } from '$lib/utils.js';
+	import { FlexRender } from './index.js';
+	import type { DataTableColumnMeta } from './table-meta.js';
 
-  type Props = {
-    header: Header<TData, TValue>;
-    class?: string;
-    align?: 'left' | 'right';
-  };
-
-  type HeaderMeta = {
-    headerClass?: string;
-    headerAlign?: 'left' | 'right';
-  };
+	type Props = {
+		header: Header<TData, TValue>;
+		class?: string;
+		align?: 'left' | 'center' | 'right';
+	};
 
   let { header, class: className, align }: Props = $props();
 
-  let sortDirection = $derived(header.column.getIsSorted());
-  let headerMeta = $derived(
-    header.column.columnDef.meta as HeaderMeta | undefined,
-  );
-  let resolvedClass = $derived(
-    cn(
-      'sticky top-0 z-20 bg-bg shadow-[inset_0_-1px_0_var(--border)]',
-      headerMeta?.headerClass,
-      className,
-    ),
-  );
-  let resolvedAlign = $derived(align ?? headerMeta?.headerAlign ?? 'left');
+	let sortDirection = $derived(header.column.getIsSorted());
+	let headerMeta = $derived(
+		header.column.columnDef.meta as DataTableColumnMeta | undefined,
+	);
+	let resolvedAlign = $derived(align ?? headerMeta?.headerAlign ?? 'left');
+	let resolvedClass = $derived(
+		cn(
+			'sticky top-0 z-20 bg-bg shadow-[inset_0_-1px_0_var(--border)]',
+			resolvedAlign === 'center'
+				? 'text-center'
+				: resolvedAlign === 'right'
+					? 'text-right'
+					: '',
+			headerMeta?.headerClass,
+			className,
+		),
+	);
   let ariaSort = $derived<'ascending' | 'descending' | undefined>(
     sortDirection === 'asc'
       ? 'ascending'
@@ -40,9 +41,13 @@
         ? 'descending'
         : undefined,
   );
-  let buttonClass = $derived(
-    resolvedAlign === 'right' ? 'ml-auto -mr-2' : '-ml-2',
-  );
+	let buttonClass = $derived(
+		resolvedAlign === 'right'
+			? 'ml-auto -mr-2'
+			: resolvedAlign === 'center'
+				? 'mx-auto'
+				: '-ml-2',
+	);
 </script>
 
 <Table.Head class={resolvedClass} aria-sort={ariaSort}>

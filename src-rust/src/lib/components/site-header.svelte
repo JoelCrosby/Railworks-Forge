@@ -43,8 +43,8 @@
     <Breadcrumb />
     {#if $refreshControl.onRefresh}
       <Button
-        class="ml-auto"
-        variant="outline"
+        class="ml-auto gap-3 items-center flex"
+        variant="ghost"
         size="sm"
         onclick={refresh}
         disabled={!canRefresh}

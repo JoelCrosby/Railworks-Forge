@@ -7,6 +7,7 @@
   import {
     createSvelteTable,
     DataTableHeader,
+    getDataTableCellClass,
   } from '$lib/components/ui/data-table/index.js';
   import { Badge } from '$lib/components/ui/badge/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
@@ -123,16 +124,18 @@
       accessorFn: (consist) => consist.vehicles.length,
       header: 'Vehicles',
       meta: {
-        headerClass: 'w-24 text-right',
+        headerClass: 'w-24',
         headerAlign: 'right',
+        cellAlign: 'right',
       },
     },
     {
       accessorKey: 'acquisitionState',
       header: 'State',
       meta: {
-        headerClass: 'w-20 text-center',
-        headerAlign: 'right',
+        headerClass: 'w-20',
+        headerAlign: 'center',
+        cellAlign: 'center',
       },
     },
     {
@@ -141,6 +144,8 @@
       enableSorting: false,
       meta: {
         headerClass: 'w-20',
+        headerAlign: 'right',
+        cellAlign: 'right',
       },
     },
   ];
@@ -370,13 +375,7 @@
               <Table.Row class="table w-full table-fixed">
                 {#each row.getVisibleCells() as cell (cell.id)}
                   <Table.Cell
-                    class={cell.column.id === 'vehicles'
-                      ? 'text-right'
-                      : cell.column.id === 'acquisitionState'
-                        ? 'text-center'
-                        : cell.column.id === 'actions'
-                          ? 'text-right'
-                          : ''}
+                    class={getDataTableCellClass(cell)}
                   >
                     {#if cell.column.id === 'serviceName'}
                       <div class="flex items-center gap-2">
