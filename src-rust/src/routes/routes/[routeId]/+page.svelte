@@ -2,6 +2,14 @@
   import { invoke } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import type { ColumnDef, SortingState, Updater } from '@tanstack/table-core';
+  import { getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+  import {
+    createSvelteTable,
+    DataTableHeader,
+  } from '$lib/components/ui/data-table/index.js';
+  import { Badge } from '$lib/components/ui/badge/index.js';
+  import * as Table from '$lib/components/ui/table/index.js';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
@@ -50,6 +58,7 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let search = $state('');
+  let sorting = $state<SortingState>([]);
   let locale = $derived($settings.locale);
 
   let filtered = $derived(
@@ -62,6 +71,65 @@
         )
       : scenarios,
   );
+
+  const scenarioColumns: ColumnDef<Scenario>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Scenario',
+    },
+    {
+      accessorKey: 'locomotive',
+      header: 'Locomotive',
+    },
+    {
+      accessorKey: 'duration',
+      header: 'Duration',
+      meta: {
+        headerClass: 'w-28 text-right',
+        headerAlign: 'right',
+      },
+    },
+    {
+      accessorKey: 'season',
+      header: 'Season',
+      meta: {
+        headerClass: 'w-28',
+      },
+    },
+    {
+      accessorKey: 'scenarioClass',
+      header: 'Class',
+      meta: {
+        headerClass: 'w-32',
+      },
+    },
+    {
+      id: 'completion',
+      accessorFn: (scenario) => scenario.playerInfo.completion,
+      header: 'Completion',
+      meta: {
+        headerClass: 'w-32',
+      },
+    },
+  ];
+
+  const scenarioTable = createSvelteTable<Scenario>({
+    get data() {
+      return filtered;
+    },
+    columns: scenarioColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (scenario) => scenario.id,
+    state: {
+      get sorting() {
+        return sorting;
+      },
+    },
+    onSortingChange: (updater: Updater<SortingState>) => {
+      sorting = updater instanceof Function ? updater(sorting) : updater;
+    },
+  });
 
   async function loadRoute() {
     if (!routeId || loadingRoute || routeLoadAttemptedFor === routeId) return;
@@ -104,6 +172,12 @@
         },
       },
     );
+  }
+
+  function openScenarioFromKeyboard(event: KeyboardEvent, scenario: Scenario) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openScenario(scenario);
   }
 
   function formatDuration(mins: number): string {
@@ -222,34 +296,64 @@
       {t(locale, 'route-no-scenarios')}
     </div>
   {:else}
-    <ul class="flex list-none flex-col gap-1.5">
-      {#each filtered as scenario (scenario.id)}
-        <li>
-          <button
-            class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-surface-raised bg-surface px-4 py-3 text-left text-text transition-colors hover:border-accent"
-            onclick={() => openScenario(scenario)}
+    <Table.Root
+      class="table-fixed"
+      containerClass="overflow-x-auto rounded-md border"
+    >
+      <Table.Header class="block w-full">
+        {#each scenarioTable.getHeaderGroups() as headerGroup (headerGroup.id)}
+          <Table.Row class="table w-full table-fixed">
+            {#each headerGroup.headers as header (header.id)}
+              <DataTableHeader {header} />
+            {/each}
+          </Table.Row>
+        {/each}
+      </Table.Header>
+
+      <Table.Body
+        class="block max-h-[calc(100vh-330px)] overflow-y-auto [scrollbar-gutter:stable]"
+      >
+        {#each scenarioTable.getRowModel().rows as row (row.id)}
+          <Table.Row
+            class="table w-full table-fixed cursor-pointer"
+            tabindex={0}
+            onclick={() => openScenario(row.original)}
+            onkeydown={(event) => openScenarioFromKeyboard(event, row.original)}
           >
-            <span class="flex-2 text-sm font-medium">{scenario.name}</span>
-            <span
-              class="flex flex-3 items-center gap-3 text-[0.8rem] text-muted"
-            >
-              <span class="flex-1 truncate">{scenario.locomotive || '—'}</span>
-              <span class="whitespace-nowrap"
-                >{formatDuration(scenario.duration)}</span
+            {#each row.getVisibleCells() as cell (cell.id)}
+              <Table.Cell
+                class={cell.column.id === 'name'
+                  ? 'font-medium'
+                  : cell.column.id === 'duration'
+                    ? 'text-right'
+                    : 'text-muted'}
               >
-              <span class="whitespace-nowrap">{scenario.season || '—'}</span>
-              <span class={scenarioBadgeClass(scenario.scenarioClass)}
-                >{scenario.scenarioClass}</span
-              >
-            </span>
-            {#if scenario.playerInfo.completion}
-              <span class="whitespace-nowrap text-xs text-ok"
-                >{scenario.playerInfo.completion}</span
-              >
-            {/if}
-          </button>
-        </li>
-      {/each}
-    </ul>
+                {#if cell.column.id === 'name'}
+                  {row.original.name}
+                {:else if cell.column.id === 'locomotive'}
+                  {row.original.locomotive || '—'}
+                {:else if cell.column.id === 'duration'}
+                  {formatDuration(row.original.duration)}
+                {:else if cell.column.id === 'season'}
+                  {row.original.season || '—'}
+                {:else if cell.column.id === 'scenarioClass'}
+                  <Badge
+                    variant="outline"
+                    class={scenarioBadgeClass(row.original.scenarioClass)}
+                    >{row.original.scenarioClass}</Badge
+                  >
+                {:else if cell.column.id === 'completion'}
+                  {#if row.original.playerInfo.completion}
+                    <span class="text-ok">{row.original.playerInfo.completion}</span>
+                  {:else}
+                    <span>—</span>
+                  {/if}
+                {/if}
+              </Table.Cell>
+            {/each}
+          </Table.Row>
+        {/each}
+      </Table.Body>
+    </Table.Root>
   {/if}
 </div>

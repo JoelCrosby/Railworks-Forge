@@ -2,6 +2,14 @@
   import { invoke } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import type { ColumnDef, SortingState, Updater } from '@tanstack/table-core';
+  import { getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+  import {
+    createSvelteTable,
+    DataTableHeader,
+  } from '$lib/components/ui/data-table/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import * as Table from '$lib/components/ui/table/index.js';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
@@ -97,6 +105,7 @@
   let busy = $state(false);
   let error = $state<string | null>(null);
   let successMsg = $state<string | null>(null);
+  let vehicleSorting = $state<SortingState>([]);
 
   // ── Replace consist dialog ────────────────────────────────────────────────
   let showReplaceDialog = $state(false);
@@ -114,6 +123,94 @@
   let newType = $state<'engine' | 'tender' | 'coach' | 'wagon' | 'unknown'>(
     'wagon',
   );
+
+  let vehicles = $derived(consist?.vehicles ?? []);
+
+  const vehicleColumns: ColumnDef<VehicleBlueprint>[] = [
+    {
+      id: 'index',
+      accessorFn: (vehicle) => vehicle.index + 1,
+      header: '#',
+      meta: {
+        headerClass: 'w-12',
+      },
+    },
+    {
+      accessorKey: 'blueprintType',
+      header: 'Type',
+      meta: {
+        headerClass: 'w-20',
+      },
+    },
+    {
+      accessorKey: 'name',
+      header: 'Name',
+    },
+    {
+      accessorKey: 'uniqueNumber',
+      header: 'Number',
+      meta: {
+        headerClass: 'w-32',
+      },
+    },
+    {
+      id: 'provider',
+      accessorFn: (vehicle) => vehicle.blueprint.provider,
+      header: 'Provider',
+      meta: {
+        headerClass: 'w-40',
+      },
+    },
+    {
+      id: 'blueprint',
+      accessorFn: (vehicle) => vehicle.blueprint.blueprintId,
+      header: 'Blueprint',
+    },
+    {
+      accessorKey: 'flipped',
+      header: 'Flip',
+      meta: {
+        headerClass: 'w-20 text-center',
+        headerAlign: 'right',
+      },
+    },
+    {
+      id: 'state',
+      accessorFn: (vehicle) => vehicle.blueprint.acquisitionState,
+      header: 'State',
+      meta: {
+        headerClass: 'w-20 text-center',
+        headerAlign: 'right',
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      meta: {
+        headerClass: 'w-16',
+      },
+    },
+  ];
+
+  const vehicleTable = createSvelteTable<VehicleBlueprint>({
+    get data() {
+      return vehicles;
+    },
+    columns: vehicleColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (vehicle) => String(vehicle.index),
+    state: {
+      get sorting() {
+        return vehicleSorting;
+      },
+    },
+    onSortingChange: (updater: Updater<SortingState>) => {
+      vehicleSorting =
+        updater instanceof Function ? updater(vehicleSorting) : updater;
+    },
+  });
 
   function backToScenario() {
     goto(
@@ -441,100 +538,81 @@
           No vehicles in this consist.
         </div>
       {:else}
-        <table class="w-full border-collapse text-[0.8rem]">
-          <thead>
-            <tr>
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >#</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Type</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Name</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Number</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Provider</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Blueprint</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >Flip</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-                >State</th
-              >
-              <th
-                class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-              ></th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each consist.vehicles as v (v.index)}
-              <tr class="hover:bg-surface">
-                <td
-                  class="w-8 border-t border-border px-2.5 py-1.5 align-middle text-border-strong"
-                  >{v.index + 1}</td
-                >
-                <td class="border-t border-border px-2.5 py-1.5 align-middle">
-                  <span
-                    class={vehicleBadgeClass(v.blueprintType)}
-                    title={v.blueprintType}
-                  >
-                    {v.blueprintType[0].toUpperCase()}
-                  </span>
-                </td>
-                <td
-                  class="border-t border-border px-2.5 py-1.5 align-middle font-medium"
-                  >{v.name || '—'}</td
-                >
-                <td
-                  class="border-t border-border px-2.5 py-1.5 align-middle text-border-strong"
-                  >#{v.uniqueNumber}</td
-                >
-                <td
-                  class="max-w-32 truncate whitespace-nowrap border-t border-border px-2.5 py-1.5 align-middle text-muted"
-                  >{v.blueprint.provider}</td
-                >
-                <td
-                  class="max-w-80 truncate whitespace-nowrap border-t border-border px-2.5 py-1.5 align-middle text-border-strong"
-                  >{v.blueprint.blueprintId}</td
-                >
-                <td
-                  class="border-t border-border px-2.5 py-1.5 text-center align-middle"
-                  >{v.flipped ? '↩' : ''}</td
-                >
-                <td class="border-t border-border px-2.5 py-1.5 align-middle">
-                  <span
-                    class={`text-xs font-bold ${acquisitionTextClass(v.blueprint.acquisitionState)}`}
-                  >
-                    {acquisitionIcon(v.blueprint.acquisitionState)}
-                  </span>
-                </td>
-                <td class="border-t border-border px-2.5 py-1.5 align-middle">
-                  <button
-                    class="cursor-pointer rounded-md border border-danger-border bg-danger-border px-2.5 py-1 text-[0.78rem] text-white disabled:cursor-not-allowed disabled:opacity-50"
-                    onclick={() => deleteVehicle(v.index)}
-                    disabled={busy}
-                    title="Delete vehicle">✕</button
-                  >
-                </td>
-              </tr>
+        <Table.Root
+          class="table-fixed"
+          containerClass="overflow-x-auto rounded-md border"
+        >
+          <Table.Header class="block w-full">
+            {#each vehicleTable.getHeaderGroups() as headerGroup (headerGroup.id)}
+              <Table.Row class="table w-full table-fixed">
+                {#each headerGroup.headers as header (header.id)}
+                  <DataTableHeader {header} />
+                {/each}
+              </Table.Row>
             {/each}
-          </tbody>
-        </table>
+          </Table.Header>
+
+          <Table.Body
+            class="block max-h-[calc(100vh-330px)] overflow-y-auto [scrollbar-gutter:stable]"
+          >
+            {#each vehicleTable.getRowModel().rows as row (row.id)}
+              {@const v = row.original}
+              <Table.Row class="table w-full table-fixed hover:bg-surface">
+                {#each row.getVisibleCells() as cell (cell.id)}
+                  <Table.Cell
+                    class={cell.column.id === 'index'
+                      ? 'text-border-strong'
+                      : cell.column.id === 'name'
+                        ? 'font-medium'
+                        : cell.column.id === 'provider'
+                          ? 'truncate text-muted'
+                          : cell.column.id === 'blueprint'
+                            ? 'truncate text-border-strong'
+                            : cell.column.id === 'flipped' ||
+                                cell.column.id === 'state'
+                              ? 'text-center'
+                              : ''}
+                  >
+                    {#if cell.column.id === 'index'}
+                      {v.index + 1}
+                    {:else if cell.column.id === 'blueprintType'}
+                      <span
+                        class={vehicleBadgeClass(v.blueprintType)}
+                        title={v.blueprintType}
+                      >
+                        {v.blueprintType[0].toUpperCase()}
+                      </span>
+                    {:else if cell.column.id === 'name'}
+                      {v.name || '—'}
+                    {:else if cell.column.id === 'uniqueNumber'}
+                      <span class="text-border-strong">#{v.uniqueNumber}</span>
+                    {:else if cell.column.id === 'provider'}
+                      {v.blueprint.provider}
+                    {:else if cell.column.id === 'blueprint'}
+                      {v.blueprint.blueprintId}
+                    {:else if cell.column.id === 'flipped'}
+                      {v.flipped ? '↩' : ''}
+                    {:else if cell.column.id === 'state'}
+                      <span
+                        class={`text-xs font-bold ${acquisitionTextClass(v.blueprint.acquisitionState)}`}
+                      >
+                        {acquisitionIcon(v.blueprint.acquisitionState)}
+                      </span>
+                    {:else if cell.column.id === 'actions'}
+                      <Button
+                        variant="destructive"
+                        size="xs"
+                        onclick={() => deleteVehicle(v.index)}
+                        disabled={busy}
+                        title="Delete vehicle">✕</Button
+                      >
+                    {/if}
+                  </Table.Cell>
+                {/each}
+              </Table.Row>
+            {/each}
+          </Table.Body>
+        </Table.Root>
       {/if}
     </section>
   {/if}

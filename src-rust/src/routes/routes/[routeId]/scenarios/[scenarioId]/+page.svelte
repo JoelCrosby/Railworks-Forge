@@ -2,6 +2,15 @@
   import { invoke } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import type { ColumnDef, SortingState, Updater } from '@tanstack/table-core';
+  import { getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+  import {
+    createSvelteTable,
+    DataTableHeader,
+  } from '$lib/components/ui/data-table/index.js';
+  import { Badge } from '$lib/components/ui/badge/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import * as Table from '$lib/components/ui/table/index.js';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
@@ -78,6 +87,7 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let search = $state('');
+  let sorting = $state<SortingState>([]);
   let locale = $derived($settings.locale);
 
   let consists = $derived(detail?.consists ?? []);
@@ -91,6 +101,67 @@
         )
       : consists,
   );
+
+  const consistColumns: ColumnDef<Consist>[] = [
+    {
+      accessorKey: 'serviceName',
+      header: 'Service',
+    },
+    {
+      accessorKey: 'locomotiveName',
+      header: 'Locomotive',
+    },
+    {
+      accessorKey: 'locoClass',
+      header: 'Class',
+      meta: {
+        headerClass: 'w-28',
+      },
+    },
+    {
+      id: 'vehicles',
+      accessorFn: (consist) => consist.vehicles.length,
+      header: 'Vehicles',
+      meta: {
+        headerClass: 'w-24 text-right',
+        headerAlign: 'right',
+      },
+    },
+    {
+      accessorKey: 'acquisitionState',
+      header: 'State',
+      meta: {
+        headerClass: 'w-20 text-center',
+        headerAlign: 'right',
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      meta: {
+        headerClass: 'w-20',
+      },
+    },
+  ];
+
+  const consistTable = createSvelteTable<Consist>({
+    get data() {
+      return filtered;
+    },
+    columns: consistColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (consist) => consist.id || consist.serviceId,
+    state: {
+      get sorting() {
+        return sorting;
+      },
+    },
+    onSortingChange: (updater: Updater<SortingState>) => {
+      sorting = updater instanceof Function ? updater(sorting) : updater;
+    },
+  });
 
   async function loadDetail() {
     if (!scenarioBase) return;
@@ -277,91 +348,130 @@
           No consists found in this scenario.
         </div>
       {:else}
-        <div class="flex flex-col gap-2">
-          {#each filtered as consist (consist.id || consist.serviceId)}
-            <div
-              class="overflow-hidden rounded-lg border border-surface-raised bg-surface"
-            >
-              <div class="border-b border-surface-raised px-4 py-3">
-                <div class="mb-1 flex items-center gap-2">
-                  <span class="text-sm font-medium"
-                    >{consist.serviceName || '—'}</span
+        <Table.Root
+          class="table-fixed"
+          containerClass="overflow-x-auto rounded-md border"
+        >
+          <Table.Header class="block w-full">
+            {#each consistTable.getHeaderGroups() as headerGroup (headerGroup.id)}
+              <Table.Row class="table w-full table-fixed">
+                {#each headerGroup.headers as header (header.id)}
+                  <DataTableHeader {header} />
+                {/each}
+              </Table.Row>
+            {/each}
+          </Table.Header>
+
+          <Table.Body
+            class="block max-h-[calc(100vh-360px)] overflow-y-auto [scrollbar-gutter:stable]"
+          >
+            {#each consistTable.getRowModel().rows as row (row.id)}
+              {@const consist = row.original}
+              <Table.Row class="table w-full table-fixed">
+                {#each row.getVisibleCells() as cell (cell.id)}
+                  <Table.Cell
+                    class={cell.column.id === 'vehicles'
+                      ? 'text-right'
+                      : cell.column.id === 'acquisitionState'
+                        ? 'text-center'
+                        : cell.column.id === 'actions'
+                          ? 'text-right'
+                          : ''}
                   >
-                  {#if consist.playerDriver}
-                    <span
-                      class="rounded bg-accent-surface px-1.5 py-0.5 text-[0.65rem] tracking-wider text-accent-text uppercase"
-                      >Player</span
-                    >
-                  {/if}
-                  <span
-                    class={`w-4 text-center text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
-                    title={consist.acquisitionState}
-                  >
-                    {acquisitionIcon(consist.acquisitionState)}
-                  </span>
-                </div>
-                <div
-                  class="flex items-center gap-2.5 text-[0.78rem] text-muted"
-                >
-                  <span class="italic">{consist.locomotiveName || '—'}</span>
-                  {#if consist.locoAuthor}
-                    <span class="text-[0.73rem] text-border-strong"
-                      >{consist.locoAuthor}</span
-                    >
-                  {/if}
-                  <span class={locoBadgeClass(consist.locoClass)}
-                    >{consist.locoClass}</span
-                  >
-                  <span class="ml-auto">{consist.vehicles.length} vehicles</span
-                  >
-                  <button
-                    class="ml-auto shrink-0 cursor-pointer rounded border border-border-strong bg-transparent px-2 py-0.5 text-[0.7rem] text-muted hover:bg-surface-raised hover:text-text"
-                    onclick={() => openConsistDetail(consist)}>Edit</button
-                  >
-                </div>
-              </div>
+                    {#if cell.column.id === 'serviceName'}
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium"
+                          >{consist.serviceName || '—'}</span
+                        >
+                        {#if consist.playerDriver}
+                          <Badge variant="outline" class="text-accent-text"
+                            >Player</Badge
+                          >
+                        {/if}
+                      </div>
+                    {:else if cell.column.id === 'locomotiveName'}
+                      <div class="flex min-w-0 items-center gap-2 text-muted">
+                        <span class="truncate italic"
+                          >{consist.locomotiveName || '—'}</span
+                        >
+                        {#if consist.locoAuthor}
+                          <span class="truncate text-[0.73rem] text-border-strong"
+                            >{consist.locoAuthor}</span
+                          >
+                        {/if}
+                      </div>
+                    {:else if cell.column.id === 'locoClass'}
+                      <Badge
+                        variant="outline"
+                        class={locoBadgeClass(consist.locoClass)}
+                        >{consist.locoClass}</Badge
+                      >
+                    {:else if cell.column.id === 'vehicles'}
+                      {consist.vehicles.length}
+                    {:else if cell.column.id === 'acquisitionState'}
+                      <span
+                        class={`text-xs font-bold ${acquisitionTextClass(consist.acquisitionState)}`}
+                        title={consist.acquisitionState}
+                      >
+                        {acquisitionIcon(consist.acquisitionState)}
+                      </span>
+                    {:else if cell.column.id === 'actions'}
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onclick={() => openConsistDetail(consist)}>Edit</Button
+                      >
+                    {/if}
+                  </Table.Cell>
+                {/each}
+              </Table.Row>
 
               {#if consist.vehicles.length > 0}
-                <div class="py-1">
-                  {#each consist.vehicles as vehicle (vehicle.index)}
-                    <div
-                      class="flex items-center gap-2 border-t border-border px-4 py-1.5 text-[0.78rem] hover:bg-border"
-                    >
-                      <span
-                        class={vehicleBadgeClass(vehicle.blueprintType)}
-                        title={vehicle.blueprintType}
-                      >
-                        {vehicle.blueprintType[0].toUpperCase()}
-                      </span>
-                      <span
-                        class="flex-2 truncate whitespace-nowrap font-medium"
-                        >{vehicle.name || '—'}</span
-                      >
-                      <span class="whitespace-nowrap text-border-strong"
-                        >#{vehicle.uniqueNumber}</span
-                      >
-                      <span
-                        class="flex-1 truncate whitespace-nowrap text-[0.72rem] text-border-strong"
-                        >{vehicle.blueprint.provider}</span
-                      >
-                      {#if vehicle.flipped}
-                        <span class="text-[0.85rem] text-muted" title="Flipped"
-                          >↩</span
+                <Table.Row class="table w-full table-fixed bg-surface/40">
+                  <Table.Cell colspan={consistColumns.length} class="p-0">
+                    <div class="py-1">
+                      {#each consist.vehicles as vehicle (vehicle.index)}
+                        <div
+                          class="flex items-center gap-2 border-t border-border px-4 py-1.5 text-[0.78rem] hover:bg-border"
                         >
-                      {/if}
-                      <span
-                        class={`w-3.5 shrink-0 text-center text-[0.7rem] font-bold ${acquisitionTextClass(vehicle.blueprint.acquisitionState)}`}
-                        title={vehicle.blueprint.acquisitionState}
-                      >
-                        {acquisitionIcon(vehicle.blueprint.acquisitionState)}
-                      </span>
+                          <span
+                            class={vehicleBadgeClass(vehicle.blueprintType)}
+                            title={vehicle.blueprintType}
+                          >
+                            {vehicle.blueprintType[0].toUpperCase()}
+                          </span>
+                          <span
+                            class="flex-2 truncate whitespace-nowrap font-medium"
+                            >{vehicle.name || '—'}</span
+                          >
+                          <span class="whitespace-nowrap text-border-strong"
+                            >#{vehicle.uniqueNumber}</span
+                          >
+                          <span
+                            class="flex-1 truncate whitespace-nowrap text-[0.72rem] text-border-strong"
+                            >{vehicle.blueprint.provider}</span
+                          >
+                          {#if vehicle.flipped}
+                            <span
+                              class="text-[0.85rem] text-muted"
+                              title="Flipped">↩</span
+                            >
+                          {/if}
+                          <span
+                            class={`w-3.5 shrink-0 text-center text-[0.7rem] font-bold ${acquisitionTextClass(vehicle.blueprint.acquisitionState)}`}
+                            title={vehicle.blueprint.acquisitionState}
+                          >
+                            {acquisitionIcon(vehicle.blueprint.acquisitionState)}
+                          </span>
+                        </div>
+                      {/each}
                     </div>
-                  {/each}
-                </div>
+                  </Table.Cell>
+                </Table.Row>
               {/if}
-            </div>
-          {/each}
-        </div>
+            {/each}
+          </Table.Body>
+        </Table.Root>
       {/if}
     </div>
   {/if}

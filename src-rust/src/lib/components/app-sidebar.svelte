@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import DashboardIcon from '@tabler/icons-svelte/icons/dashboard';
+  import PackageIcon from '@tabler/icons-svelte/icons/package';
   import InnerShadowTopIcon from '@tabler/icons-svelte/icons/inner-shadow-top';
   import SearchIcon from '@tabler/icons-svelte/icons/search';
   import SettingsIcon from '@tabler/icons-svelte/icons/settings';
@@ -14,6 +15,11 @@
         title: 'Routes',
         url: '/',
         icon: DashboardIcon,
+      },
+      {
+        title: 'Assets',
+        url: '/assets',
+        icon: PackageIcon,
       },
     ],
     navSecondary: [

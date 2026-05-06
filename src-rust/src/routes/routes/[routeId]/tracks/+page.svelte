@@ -1,6 +1,14 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
   import { page } from '$app/stores';
+  import type { ColumnDef, SortingState, Updater } from '@tanstack/table-core';
+  import { getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+  import {
+    createSvelteTable,
+    DataTableHeader,
+  } from '$lib/components/ui/data-table/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import * as Table from '$lib/components/ui/table/index.js';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
@@ -35,6 +43,7 @@
   let applying = $state(false);
   let error = $state<string | null>(null);
   let successMsg = $state<string | null>(null);
+  let sorting = $state<SortingState>([]);
 
   // Per-track replacement selections.
   // Key: `${provider}|${product}|${blueprintId}` → replacement blueprint | null
@@ -45,6 +54,61 @@
   let editProvider = $state('');
   let editProduct = $state('');
   let editBlueprintId = $state('');
+
+  const trackColumns: ColumnDef<TrackBlueprint>[] = [
+    {
+      accessorKey: 'provider',
+      header: 'Provider',
+      meta: {
+        headerClass: 'w-40',
+      },
+    },
+    {
+      accessorKey: 'product',
+      header: 'Product',
+      meta: {
+        headerClass: 'w-48',
+      },
+    },
+    {
+      accessorKey: 'blueprintId',
+      header: 'Blueprint ID',
+    },
+    {
+      id: 'replacement',
+      header: 'Replace with',
+      enableSorting: false,
+      meta: {
+        headerClass: 'w-96',
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      meta: {
+        headerClass: 'w-34',
+      },
+    },
+  ];
+
+  const trackTable = createSvelteTable<TrackBlueprint>({
+    get data() {
+      return tracks;
+    },
+    columns: trackColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (track) => trackKey(track),
+    state: {
+      get sorting() {
+        return sorting;
+      },
+    },
+    onSortingChange: (updater: Updater<SortingState>) => {
+      sorting = updater instanceof Function ? updater(sorting) : updater;
+    },
+  });
 
   function trackKey(t: TrackBlueprint): string {
     return `${t.provider}|${t.product}|${t.blueprintId}`;
@@ -224,92 +288,92 @@
         {/if}
       </div>
 
-      <table class="w-full border-collapse text-[0.8rem]">
-        <thead>
-          <tr>
-            <th
-              class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-              >Provider</th
-            >
-            <th
-              class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-              >Product</th
-            >
-            <th
-              class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-              >Blueprint ID</th
-            >
-            <th
-              class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-              >Replace with</th
-            >
-            <th
-              class="border-b border-surface-raised px-2.5 py-1.5 text-left font-medium text-muted"
-            ></th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each tracks as track (trackKey(track))}
-            {@const repl = replacementFor(track)}
-            <tr
-              class={repl !== null
-                ? 'bg-[#1a2020] hover:bg-[#1a2530]'
-                : 'hover:bg-surface'}
-            >
-              <td
-                class="whitespace-nowrap border-t border-border px-2.5 py-1.5 align-middle text-muted"
-                >{track.provider}</td
-              >
-              <td
-                class="whitespace-nowrap border-t border-border px-2.5 py-1.5 align-middle text-muted-strong"
-                >{track.product}</td
-              >
-              <td
-                class="max-w-80 truncate border-t border-border px-2.5 py-1.5 align-middle text-xs text-border-strong"
-                >{track.blueprintId}</td
-              >
-              <td
-                class="max-w-96 border-t border-border px-2.5 py-1.5 align-middle"
-              >
-                {#if repl}
-                  <div class="flex items-center gap-1 text-xs">
-                    <span class="whitespace-nowrap text-ok"
-                      >{repl.provider}</span
-                    >
-                    <span class="shrink-0 text-surface-raised">›</span>
-                    <span class="whitespace-nowrap text-success-text"
-                      >{repl.product}</span
-                    >
-                    <span class="shrink-0 text-surface-raised">›</span>
-                    <span class="truncate text-success-border"
-                      >{repl.blueprintId}</span
-                    >
-                  </div>
-                {:else}
-                  <span class="text-surface-raised">—</span>
-                {/if}
-              </td>
-              <td
-                class="flex gap-1 whitespace-nowrap border-t border-border px-2.5 py-1.5 align-middle"
-              >
-                <button
-                  class="cursor-pointer rounded-md border border-border-strong bg-surface-raised px-2.5 py-1 text-[0.78rem] text-text hover:bg-surface-hover"
-                  onclick={() => openEditDialog(track)}
-                >
-                  {repl ? 'Edit' : 'Set…'}
-                </button>
-                {#if repl}
-                  <button
-                    class="cursor-pointer rounded-md border border-danger-border bg-danger-border px-2.5 py-1 text-[0.78rem] text-white"
-                    onclick={() => clearReplacement(track)}
-                    title="Clear replacement">✕</button
-                  >
-                {/if}
-              </td>
-            </tr>
+      <Table.Root
+        class="table-fixed"
+        containerClass="overflow-x-auto rounded-md border"
+      >
+        <Table.Header class="block w-full">
+          {#each trackTable.getHeaderGroups() as headerGroup (headerGroup.id)}
+            <Table.Row class="table w-full table-fixed">
+              {#each headerGroup.headers as header (header.id)}
+                <DataTableHeader {header} />
+              {/each}
+            </Table.Row>
           {/each}
-        </tbody>
-      </table>
+        </Table.Header>
+
+        <Table.Body
+          class="block max-h-[calc(100vh-330px)] overflow-y-auto [scrollbar-gutter:stable]"
+        >
+          {#each trackTable.getRowModel().rows as row (row.id)}
+            {@const track = row.original}
+            {@const repl = replacementFor(track)}
+            <Table.Row
+              class={repl !== null
+                ? 'table w-full table-fixed bg-[#1a2020] hover:bg-[#1a2530]'
+                : 'table w-full table-fixed hover:bg-surface'}
+            >
+              {#each row.getVisibleCells() as cell (cell.id)}
+                <Table.Cell
+                  class={cell.column.id === 'provider'
+                    ? 'text-muted'
+                    : cell.column.id === 'product'
+                      ? 'text-muted-strong'
+                      : cell.column.id === 'blueprintId'
+                        ? 'truncate text-xs text-border-strong'
+                        : cell.column.id === 'actions'
+                          ? 'whitespace-nowrap'
+                          : ''}
+                >
+                  {#if cell.column.id === 'provider'}
+                    {track.provider}
+                  {:else if cell.column.id === 'product'}
+                    {track.product}
+                  {:else if cell.column.id === 'blueprintId'}
+                    {track.blueprintId}
+                  {:else if cell.column.id === 'replacement'}
+                    {#if repl}
+                      <div class="flex items-center gap-1 text-xs">
+                        <span class="whitespace-nowrap text-ok"
+                          >{repl.provider}</span
+                        >
+                        <span class="shrink-0 text-surface-raised">›</span>
+                        <span class="whitespace-nowrap text-success-text"
+                          >{repl.product}</span
+                        >
+                        <span class="shrink-0 text-surface-raised">›</span>
+                        <span class="truncate text-success-border"
+                          >{repl.blueprintId}</span
+                        >
+                      </div>
+                    {:else}
+                      <span class="text-surface-raised">—</span>
+                    {/if}
+                  {:else if cell.column.id === 'actions'}
+                    <div class="flex gap-1">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onclick={() => openEditDialog(track)}
+                      >
+                        {repl ? 'Edit' : 'Set…'}
+                      </Button>
+                      {#if repl}
+                        <Button
+                          variant="destructive"
+                          size="xs"
+                          onclick={() => clearReplacement(track)}
+                          title="Clear replacement">✕</Button
+                        >
+                      {/if}
+                    </div>
+                  {/if}
+                </Table.Cell>
+              {/each}
+            </Table.Row>
+          {/each}
+        </Table.Body>
+      </Table.Root>
     </div>
   {/if}
 </div>
