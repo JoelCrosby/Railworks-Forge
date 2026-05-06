@@ -6,5 +6,6 @@ pub mod scenario_db;
 pub mod scenario_editor;
 pub mod scenario_parser;
 pub mod scenario_service;
+pub mod track_service;
 pub mod vehicle_generator;
 pub mod vehicle_templates;

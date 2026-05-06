@@ -16,7 +16,7 @@ tauri-build = { version = "2.6.0", features = [] }
 
 [dependencies]
 # Tauri
-tauri = { version = "2.11.0", features = [] }
+tauri = { version = "2.11.0", default-features = false, features = ["cef"] }
 tauri-plugin-log = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-fs = "2"
@@ -65,3 +65,7 @@ tokio-retry = "0.3"
 # Windows registry (conditional)
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"
+
+[patch.crates-io.tauri]
+git = "https://github.com/tauri-apps/tauri"
+branch = "feat/cef"

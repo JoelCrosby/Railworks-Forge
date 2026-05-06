@@ -5,27 +5,38 @@ use crate::{
 };
 use anyhow::Result;
 use std::path::Path;
-use tokio::fs;
+use tokio::{fs, task::JoinSet};
 
 /// Discovers all routes under the game's Content/Routes directory.
-/// Each route is a directory containing either RouteProperties.xml directly
-/// (Unpacked) or a MainContent.ap archive that contains it (Packed).
+///
+/// Each subdirectory is checked concurrently: all route discovery tasks are
+/// spawned into a JoinSet so I/O (XML reads + ZIP extractions) overlaps rather
+/// than serialising. With a typical 50–200 route install this is the dominant
+/// speedup over the previous sequential loop.
 pub async fn get_routes(routes_dir: &Path) -> Result<Vec<Route>> {
-    let mut routes = Vec::new();
     let mut entries = fs::read_dir(routes_dir).await?;
+    let mut tasks: JoinSet<Option<Route>> = JoinSet::new();
 
     while let Some(entry) = entries.next_entry().await? {
         let path = entry.path();
         if !path.is_dir() {
             continue;
         }
-
-        match discover_route(&path).await {
-            Ok(Some(route)) => routes.push(route),
-            Ok(None) => {}
-            Err(err) => {
-                tracing::warn!("skipping route at {}: {err:#}", path.display());
+        tasks.spawn(async move {
+            match discover_route(&path).await {
+                Ok(r) => r,
+                Err(err) => {
+                    tracing::warn!("skipping route at {}: {err:#}", path.display());
+                    None
+                }
             }
+        });
+    }
+
+    let mut routes = Vec::with_capacity(tasks.len());
+    while let Some(result) = tasks.join_next().await {
+        if let Ok(Some(route)) = result {
+            routes.push(route);
         }
     }
 
@@ -33,16 +44,27 @@ pub async fn get_routes(routes_dir: &Path) -> Result<Vec<Route>> {
     Ok(routes)
 }
 
+/// Loads a single route by directory ID.
+pub async fn get_route(routes_dir: &Path, route_id: &str) -> Result<Option<Route>> {
+    let route_dir = routes_dir.join(route_id);
+    if !fs::try_exists(&route_dir).await.unwrap_or(false) {
+        return Ok(None);
+    }
+
+    discover_route(&route_dir).await
+}
+
 async fn discover_route(dir: &Path) -> Result<Option<Route>> {
     let unpacked_props = dir.join("RouteProperties.xml");
     let packed_archive = dir.join("MainContent.ap");
 
-    if unpacked_props.exists() {
+    // Use async existence checks so we don't block the executor.
+    if fs::try_exists(&unpacked_props).await.unwrap_or(false) {
         let route = parse_route_from_file(dir, &unpacked_props, PackagingType::Unpacked).await?;
         return Ok(Some(route));
     }
 
-    if packed_archive.exists() {
+    if fs::try_exists(&packed_archive).await.unwrap_or(false) {
         let route = parse_route_from_archive(dir, &packed_archive).await?;
         return Ok(Some(route));
     }

@@ -71,13 +71,13 @@
 		entries: VehicleEntry[];
 	}
 
-	const state = $page.state as { route?: Route; scenario?: Scenario; consist?: Consist };
-	let route = $state<Route | null>(state.route ?? null);
-	let scenario = $state<Scenario | null>(state.scenario ?? null);
-	let consist = $state<Consist | null>(state.consist ?? null);
+	const navState = $page.state as { route?: Route; scenario?: Scenario; consist?: Consist };
+	let route = $state<Route | null>(navState.route ?? null);
+	let scenario = $state<Scenario | null>(navState.scenario ?? null);
+	let consist = $state<Consist | null>(navState.consist ?? null);
 
-	let routeId = $derived($page.params.routeId);
-	let scenarioId = $derived($page.params.scenarioId);
+	let routeId = $derived($page.params.routeId ?? '');
+	let scenarioId = $derived($page.params.scenarioId ?? '');
 
 	let busy = $state(false);
 	let error = $state<string | null>(null);
@@ -101,7 +101,12 @@
 	function backToScenario() {
 		goto(
 			`/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}`,
-			{ state: { route, scenario } }
+			{
+				state: {
+					route: route ? $state.snapshot(route) : null,
+					scenario: scenario ? $state.snapshot(scenario) : null
+				}
+			}
 		);
 	}
 
@@ -242,7 +247,12 @@
 			scenario = updated;
 			goto(
 				`/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}`,
-				{ state: { route, scenario: updated } }
+				{
+					state: {
+						route: route ? $state.snapshot(route) : null,
+						scenario: $state.snapshot(updated)
+					}
+				}
 			);
 		} catch (e) {
 			error = String(e);

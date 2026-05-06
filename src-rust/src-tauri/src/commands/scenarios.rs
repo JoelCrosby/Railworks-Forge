@@ -1,44 +1,69 @@
 use crate::{
     models::{Route, Scenario},
     platform::find_game_directory,
-    serz,
     services::{scenario_db, scenario_parser, scenario_service},
+    serz,
 };
+use anyhow::Result;
 use dashmap::DashMap;
 use std::sync::Arc;
+use tauri::Emitter;
 use tokio::sync::OnceCell;
 
-// Lazily initialised scenario player database, shared across commands.
 static SCENARIO_DB: OnceCell<Arc<DashMap<String, crate::models::ScenarioPlayerInfo>>> =
     OnceCell::const_new();
 
-async fn get_scenario_db() -> Arc<DashMap<String, crate::models::ScenarioPlayerInfo>> {
+#[derive(serde::Serialize, Clone)]
+#[serde(tag = "status", rename_all = "lowercase")]
+enum ScenarioDbStatus {
+    Loading,
+    Ready,
+    Failed { message: String },
+}
+
+async fn try_load_scenario_db() -> Result<Arc<DashMap<String, crate::models::ScenarioPlayerInfo>>> {
+    let game_dir = find_game_directory()?;
+    let sdb_path = game_dir.join("Content").join("SDBCache.bin");
+    scenario_db::load(&sdb_path, false).await
+}
+
+fn current_scenario_db_or_empty() -> Arc<DashMap<String, crate::models::ScenarioPlayerInfo>> {
+    SCENARIO_DB
+        .get()
+        .cloned()
+        .unwrap_or_else(|| Arc::new(DashMap::new()))
+}
+
+/// Eagerly initialises the scenario player DB in the background, emitting
+/// `scenario-db-status` events so the UI can show progress.
+pub async fn prime_scenario_db<R: tauri::Runtime>(app: tauri::AppHandle<R>) {
+    let _ = app.emit("scenario-db-status", ScenarioDbStatus::Loading);
     SCENARIO_DB
         .get_or_init(|| async {
-            let game_dir = match find_game_directory() {
-                Ok(d) => d,
-                Err(err) => {
-                    tracing::warn!("could not find game directory for scenario db: {err}");
-                    return Arc::new(DashMap::new());
+            match try_load_scenario_db().await {
+                Ok(db) => {
+                    let _ = app.emit("scenario-db-status", ScenarioDbStatus::Ready);
+                    db
                 }
-            };
-            let sdb_path = game_dir.join("Content").join("SDBCache.bin");
-            match scenario_db::load(&sdb_path, false).await {
-                Ok(db) => db,
                 Err(err) => {
-                    tracing::warn!("could not load scenario db: {err}");
+                    tracing::warn!("could not load scenario db: {err:#}");
+                    let _ = app.emit(
+                        "scenario-db-status",
+                        ScenarioDbStatus::Failed {
+                            message: err.to_string(),
+                        },
+                    );
                     Arc::new(DashMap::new())
                 }
             }
         })
-        .await
-        .clone()
+        .await;
 }
 
 /// Returns all scenarios for a given route (by route directory path).
 #[tauri::command]
 pub async fn get_scenarios(route: Route) -> Result<Vec<Scenario>, String> {
-    let db = get_scenario_db().await;
+    let db = current_scenario_db_or_empty();
     scenario_service::get_scenarios(&route, &db)
         .await
         .map_err(|e| e.to_string())
@@ -70,6 +95,8 @@ pub async fn get_scenario_detail(scenario: Scenario) -> Result<Scenario, String>
         consists.len()
     );
 
-    Ok(Scenario { consists, ..scenario })
+    Ok(Scenario {
+        consists,
+        ..scenario
+    })
 }
-

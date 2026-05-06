@@ -21,12 +21,28 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let progress = $state<string | null>(null);
+	let openingRouteId = $state<string | null>(null);
+
+	// Game path state
+	let gamePath = $state<string | null>(null);
+	let gamePathMissing = $state(false);
+	let showPathForm = $state(false);
+	let pathInput = $state('');
+	let savingPath = $state(false);
+	let savePathError = $state<string | null>(null);
+
+	const PATH_MISSING_HINT = 'could not locate railworks';
+
+	function isPathMissingError(msg: string): boolean {
+		return msg.toLowerCase().includes(PATH_MISSING_HINT);
+	}
 
 	async function loadRoutes() {
 		loading = true;
 		error = null;
 		progress = null;
 		routes = [];
+		gamePathMissing = false;
 
 		try {
 			const channel = new Channel<ProgressEvent>();
@@ -36,29 +52,107 @@
 
 			routes = await invoke<Route[]>('get_routes', { onProgress: channel });
 			progress = null;
+
+			// Refresh displayed path on success
+			gamePath = await invoke<string>('get_game_path').catch(() => null);
 		} catch (e) {
-			error = String(e);
+			const msg = String(e);
+			if (isPathMissingError(msg)) {
+				gamePathMissing = true;
+				showPathForm = true;
+			} else {
+				error = msg;
+			}
 		} finally {
 			loading = false;
 		}
 	}
 
-	function openRoute(route: Route) {
-		goto(`/routes/${encodeURIComponent(route.id)}`, { state: { route } });
+	async function savePath() {
+		if (!pathInput.trim()) return;
+		savingPath = true;
+		savePathError = null;
+		try {
+			await invoke('set_game_path', { path: pathInput.trim() });
+			gamePath = pathInput.trim();
+			showPathForm = false;
+			gamePathMissing = false;
+			await loadRoutes();
+		} catch (e) {
+			savePathError = String(e);
+		} finally {
+			savingPath = false;
+		}
+	}
+
+	async function openRoute(route: Route) {
+		openingRouteId = route.id;
+		error = null;
+		try {
+			await goto(`/routes/${encodeURIComponent(route.id)}`);
+		} catch (e) {
+			error = `Could not open route: ${String(e)}`;
+			openingRouteId = null;
+		}
 	}
 
 	$effect(() => {
-		loadRoutes();
+		// Load current game path for display, then load routes
+		invoke<string>('get_game_path')
+			.then((p) => {
+				gamePath = p;
+				pathInput = p;
+			})
+			.catch(() => {
+				pathInput = '';
+			})
+			.finally(() => loadRoutes());
 	});
 </script>
 
 <div class="page">
 	<header>
 		<h1>Railworks Forge</h1>
-		<button onclick={loadRoutes} disabled={loading}>
-			{loading ? 'Loading…' : 'Refresh'}
-		</button>
+		<div class="header-actions">
+			<button class="btn-icon" onclick={() => (showPathForm = !showPathForm)} title="Settings">⚙</button>
+			<button class="btn-secondary" onclick={() => goto('/assets')}>Assets</button>
+			<button onclick={loadRoutes} disabled={loading}>
+				{loading ? 'Loading…' : 'Refresh'}
+			</button>
+		</div>
 	</header>
+
+	<!-- Settings / game path form -->
+	{#if showPathForm}
+		<div class="settings-panel">
+			<h2>Game Path</h2>
+			<p class="settings-hint">
+				Full path to your Train Simulator / Railworks installation directory<br />
+				(e.g. <code>/home/user/.steam/steam/steamapps/common/RailWorks</code>)
+			</p>
+			<div class="path-row">
+				<input
+					class="path-input"
+					type="text"
+					placeholder="/path/to/RailWorks"
+					bind:value={pathInput}
+					onkeydown={(e) => e.key === 'Enter' && savePath()}
+				/>
+				<button class="btn-primary" onclick={savePath} disabled={savingPath || !pathInput.trim()}>
+					{savingPath ? 'Saving…' : 'Save'}
+				</button>
+				{#if !gamePathMissing}
+					<button onclick={() => (showPathForm = false)}>Cancel</button>
+				{/if}
+			</div>
+			{#if savePathError}
+				<div class="inline-error">{savePathError}</div>
+			{/if}
+			{#if gamePath && !gamePathMissing}
+				<p class="current-path">Current: <code>{gamePath}</code></p>
+			{/if}
+		</div>
+	{/if}
 
 	{#if error}
 		<div class="error">
@@ -66,20 +160,32 @@
 		</div>
 	{/if}
 
+	{#if gamePathMissing && !showPathForm}
+		<div class="error">
+			Game path is not configured. Use the ⚙ button above to set it.
+		</div>
+	{/if}
+
 	{#if loading}
 		<div class="status">{progress ?? 'Scanning routes…'}</div>
-	{:else if routes.length === 0 && !error}
+	{:else if routes.length === 0 && !error && !gamePathMissing}
 		<div class="empty">No routes found. Check your game path in settings.</div>
 	{:else}
 		<ul class="route-list">
 			{#each routes as route (route.id)}
 				<li>
-					<button class="route-card" onclick={() => openRoute(route)}>
+					<button
+						class="route-card"
+						onclick={() => openRoute(route)}
+						disabled={openingRouteId !== null}
+					>
 						<span class="route-name">{route.name}</span>
 						{#if route.description}
 							<span class="route-desc">{route.description}</span>
 						{/if}
-						<span class="badge {route.packagingType}">{route.packagingType}</span>
+						<span class="badge {route.packagingType}">
+							{openingRouteId === route.id ? 'opening' : route.packagingType}
+						</span>
 					</button>
 				</li>
 			{/each}
@@ -99,6 +205,7 @@
 		background: #0f1117;
 		color: #e2e8f0;
 		height: 100vh;
+		overflow-y: auto;
 	}
 
 	.page {
@@ -112,6 +219,12 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 2rem;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
 	}
 
 	h1 {
@@ -137,6 +250,108 @@
 	button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	.btn-primary {
+		background: #2b6cb0;
+		border-color: #3182ce;
+		color: #fff;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		background: #2c5282;
+	}
+
+	.btn-secondary {
+		background: #1a3a5c;
+		border-color: #2a5a8c;
+		color: #90cdf4;
+	}
+
+	.btn-secondary:hover:not(:disabled) {
+		background: #1e4a70;
+	}
+
+	.btn-icon {
+		background: none;
+		border: 1px solid transparent;
+		color: #718096;
+		padding: 0.3rem 0.5rem;
+		font-size: 1rem;
+		line-height: 1;
+	}
+
+	.btn-icon:hover {
+		color: #e2e8f0;
+		background: #2d3748;
+		border-color: #4a5568;
+	}
+
+	/* Settings panel */
+	.settings-panel {
+		background: #1a202c;
+		border: 1px solid #2d3748;
+		border-radius: 8px;
+		padding: 1rem 1.25rem;
+		margin-bottom: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	.settings-panel h2 {
+		font-size: 0.95rem;
+		font-weight: 600;
+	}
+
+	.settings-hint {
+		font-size: 0.78rem;
+		color: #718096;
+		line-height: 1.5;
+	}
+
+	.settings-hint code {
+		color: #a0aec0;
+		font-family: monospace;
+		font-size: 0.75rem;
+	}
+
+	.path-row {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.path-input {
+		flex: 1;
+		background: #0f1117;
+		border: 1px solid #4a5568;
+		border-radius: 6px;
+		padding: 0.4rem 0.75rem;
+		color: #e2e8f0;
+		font-size: 0.875rem;
+		font-family: monospace;
+		outline: none;
+		min-width: 0;
+	}
+
+	.path-input:focus {
+		border-color: #4a90d9;
+	}
+
+	.inline-error {
+		font-size: 0.8rem;
+		color: #fc8181;
+	}
+
+	.current-path {
+		font-size: 0.78rem;
+		color: #4a5568;
+	}
+
+	.current-path code {
+		color: #718096;
+		font-family: monospace;
 	}
 
 	.status,

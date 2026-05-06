@@ -69,7 +69,7 @@ pub async fn apply_edits(
     tokio::fs::rename(&temp_xml_path, &xml_path).await?;
 
     // Convert the modified XML back to .bin (force=true since we just changed it).
-    serz::convert_to_bin(&xml_path).await?;
+    serz::convert_to_bin(&xml_path, &bin_path).await?;
 
     // Re-parse consists from the updated XML.
     let xml_path_c = xml_path.clone();

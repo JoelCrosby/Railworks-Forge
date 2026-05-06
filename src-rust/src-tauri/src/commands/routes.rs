@@ -45,6 +45,17 @@ pub async fn get_routes(on_progress: Channel<ProgressEvent>) -> Result<Vec<Route
         .map_err(|e| e.to_string())
 }
 
+/// Loads a single route by its route directory ID.
+#[tauri::command]
+pub async fn get_route(route_id: String) -> Result<Option<Route>, String> {
+    let game_dir = find_game_directory().map_err(|e| e.to_string())?;
+    let routes_dir = game_dir.join("Content").join("Routes");
+
+    route_service::get_route(&routes_dir, &route_id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 async fn save_game_path(path: &str) -> anyhow::Result<()> {
     let config_dir = app_config_dir()?;
     tokio::fs::create_dir_all(&config_dir).await?;

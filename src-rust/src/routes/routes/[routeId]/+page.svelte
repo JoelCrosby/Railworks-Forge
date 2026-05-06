@@ -31,7 +31,9 @@
 
 	// Route is passed via navigation state; fall back to fetching if missing.
 	let route = $state<Route | null>(($page.state as { route?: Route })?.route ?? null);
-	let routeId = $derived($page.params.routeId);
+	let routeId = $derived($page.params.routeId ?? '');
+	let routeLoadAttemptedFor = $state<string | null>(null);
+	let loadingRoute = $state(false);
 
 	let scenarios = $state<Scenario[]>([]);
 	let loading = $state(false);
@@ -45,6 +47,23 @@
 				)
 			: scenarios
 	);
+
+	async function loadRoute() {
+		if (!routeId || loadingRoute || routeLoadAttemptedFor === routeId) return;
+		routeLoadAttemptedFor = routeId;
+		loadingRoute = true;
+		error = null;
+		try {
+			route = await invoke<Route | null>('get_route', { routeId });
+			if (!route) {
+				error = `Route ${routeId} was not found.`;
+			}
+		} catch (e) {
+			error = String(e);
+		} finally {
+			loadingRoute = false;
+		}
+	}
 
 	async function loadScenarios() {
 		if (!route) return;
@@ -62,7 +81,10 @@
 
 	function openScenario(scenario: Scenario) {
 		goto(`/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenario.id)}`, {
-			state: { route, scenario }
+			state: {
+				route: route ? $state.snapshot(route) : null,
+				scenario: $state.snapshot(scenario)
+			}
 		});
 	}
 
@@ -74,7 +96,11 @@
 	}
 
 	$effect(() => {
-		if (route) loadScenarios();
+		if (route) {
+			loadScenarios();
+		} else {
+			loadRoute();
+		}
 	});
 </script>
 
@@ -91,9 +117,20 @@
 					<p class="subtitle">{route.description}</p>
 				{/if}
 			</div>
-			<button onclick={loadScenarios} disabled={loading}>
-				{loading ? 'Loading…' : 'Refresh'}
-			</button>
+			<div class="header-actions">
+				<button
+					class="btn-secondary"
+					onclick={() =>
+						goto(`/routes/${encodeURIComponent(routeId)}/tracks`, {
+							state: { route: route ? $state.snapshot(route) : null }
+						})}
+				>
+					Tracks
+				</button>
+				<button onclick={loadScenarios} disabled={loading}>
+					{loading ? 'Loading…' : 'Refresh'}
+				</button>
+			</div>
 		</header>
 	{:else}
 		<header><h1>Route {routeId}</h1></header>
@@ -115,7 +152,9 @@
 		</div>
 	{/if}
 
-	{#if loading}
+	{#if loadingRoute}
+		<div class="status">Opening route…</div>
+	{:else if loading}
 		<div class="status">Loading scenarios…</div>
 	{:else if scenarios.length === 0 && !error}
 		<div class="empty">No scenarios found for this route.</div>
@@ -197,6 +236,12 @@
 		margin-top: 0.25rem;
 	}
 
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-shrink: 0;
+	}
+
 	button {
 		background: #2d3748;
 		color: #e2e8f0;
@@ -206,6 +251,16 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		flex-shrink: 0;
+	}
+
+	.btn-secondary {
+		background: #1a3a5c;
+		border-color: #2a5a8c;
+		color: #90cdf4;
+	}
+
+	.btn-secondary:hover:not(:disabled) {
+		background: #1e4a70;
 	}
 
 	button:hover:not(:disabled) {

@@ -3,8 +3,8 @@ mod cache;
 mod commands;
 mod models;
 mod platform;
-mod serz;
 mod services;
+mod serz;
 mod xml;
 
 use commands::{assets, consists, routes, scenarios, tracks};
@@ -22,8 +22,16 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                scenarios::prime_scenario_db(handle).await;
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             routes::get_routes,
+            routes::get_route,
             routes::get_game_path,
             routes::set_game_path,
             scenarios::get_scenarios,

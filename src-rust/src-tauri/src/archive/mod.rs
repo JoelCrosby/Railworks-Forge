@@ -1,8 +1,5 @@
 use anyhow::{Context, Result};
-use std::{
-    io::Read,
-    path::Path,
-};
+use std::{io::Read, path::Path};
 use zip::ZipArchive;
 
 /// Checks whether an entry exists inside a .ap (ZIP) archive.
@@ -22,6 +19,23 @@ pub fn entry_exists(archive_path: &Path, entry_name: &str) -> bool {
     })
 }
 
+/// Checks whether any entry inside a .ap archive starts with the given prefix.
+pub fn entry_with_prefix_exists(archive_path: &Path, prefix: &str) -> bool {
+    let Ok(file) = std::fs::File::open(archive_path) else {
+        return false;
+    };
+    let Ok(mut archive) = ZipArchive::new(file) else {
+        return false;
+    };
+    let normalised_prefix = normalise_entry_name(prefix);
+    (0..archive.len()).any(|i| {
+        archive
+            .by_index(i)
+            .map(|e| normalise_entry_name(e.name()).starts_with(&normalised_prefix))
+            .unwrap_or(false)
+    })
+}
+
 /// Reads the raw bytes of a named entry from a .ap archive.
 pub fn read_entry(archive_path: &Path, entry_name: &str) -> Result<Vec<u8>> {
     let file = std::fs::File::open(archive_path)
@@ -37,7 +51,12 @@ pub fn read_entry(archive_path: &Path, entry_name: &str) -> Result<Vec<u8>> {
                 .map(|e| normalise_entry_name(e.name()) == normalised)
                 .unwrap_or(false)
         })
-        .with_context(|| format!("entry '{entry_name}' not found in {}", archive_path.display()))?;
+        .with_context(|| {
+            format!(
+                "entry '{entry_name}' not found in {}",
+                archive_path.display()
+            )
+        })?;
 
     let mut entry = archive.by_index(index)?;
     let mut bytes = Vec::with_capacity(entry.size() as usize);

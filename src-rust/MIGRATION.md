@@ -189,10 +189,10 @@ Five cache layers mirroring the existing C# app:
 
 ### Phase 4 — Asset Management
 
-- [ ] `AssetDatabase` — provider/product directory tree with preload + RailVehicles flags
-- [ ] Asset browser page in Svelte
-- [ ] `TrackService` — streaming `Tracks.bin.xml` parser + replacement writer
-- [ ] Track replacement dialog
+- [x] `AssetDatabase` — provider/product directory tree with preload + RailVehicles flags
+- [x] Asset browser page in Svelte
+- [x] `TrackService` — streaming `Tracks.bin.xml` parser + replacement writer
+- [x] Track replacement dialog
 
 ### Phase 5 — Polish
 

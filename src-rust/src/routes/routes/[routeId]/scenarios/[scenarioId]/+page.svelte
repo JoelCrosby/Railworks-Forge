@@ -58,12 +58,12 @@
 		packagingType: 'packed' | 'unpacked';
 	}
 
-	const state = $page.state as { route?: Route; scenario?: Scenario };
-	let route = $state<Route | null>(state.route ?? null);
-	let scenarioBase = $state<Scenario | null>(state.scenario ?? null);
+	const navState = $page.state as { route?: Route; scenario?: Scenario };
+	let route = $state<Route | null>(navState.route ?? null);
+	let scenarioBase = $state<Scenario | null>(navState.scenario ?? null);
 
-	let routeId = $derived($page.params.routeId);
-	let scenarioId = $derived($page.params.scenarioId);
+	let routeId = $derived($page.params.routeId ?? '');
+	let scenarioId = $derived($page.params.scenarioId ?? '');
 
 	let detail = $state<Scenario | null>(null);
 	let loading = $state(false);
@@ -97,14 +97,22 @@
 	}
 
 	function backToRoute() {
-		goto(`/routes/${encodeURIComponent(routeId)}`, { state: { route } });
+		goto(`/routes/${encodeURIComponent(routeId)}`, {
+			state: { route: route ? $state.snapshot(route) : null }
+		});
 	}
 
 	function openConsistDetail(consist: Consist) {
 		if (!detail) return;
 		goto(
 			`/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}/consists/${encodeURIComponent(consist.id)}`,
-			{ state: { route, scenario: detail, consist } }
+			{
+				state: {
+					route: route ? $state.snapshot(route) : null,
+					scenario: $state.snapshot(detail),
+					consist: $state.snapshot(consist)
+				}
+			}
 		);
 	}
 
