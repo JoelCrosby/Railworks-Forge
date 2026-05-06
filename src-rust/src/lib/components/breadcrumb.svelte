@@ -1,36 +1,25 @@
 <script lang="ts">
-  import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-
-  interface BreadcrumbItem {
-    label: string;
-    onclick?: () => void;
-  }
-
-  let { items }: { items: BreadcrumbItem[] } = $props();
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import { breadcrumbItems } from '$lib/stores/breadcrumb';
 </script>
 
 <Breadcrumb.Root>
-  <Breadcrumb.List>
-    <Breadcrumb.Item>
-      <Breadcrumb.Link href="/">Home</Breadcrumb.Link>
-    </Breadcrumb.Item>
-    <Breadcrumb.Separator />
-  </Breadcrumb.List>
+	<Breadcrumb.List class="min-w-0 flex-nowrap">
+		{#each $breadcrumbItems as item, i (item.href ?? `${item.label}-${i}`)}
+			<Breadcrumb.Item class="min-w-0">
+				{#if i === $breadcrumbItems.length - 1 || !item.href}
+					<Breadcrumb.Page class="inline-block max-w-60 truncate"
+						>{item.label}</Breadcrumb.Page
+					>
+				{:else}
+					<Breadcrumb.Link class="inline-block max-w-44 truncate" href={item.href}
+						>{item.label}</Breadcrumb.Link
+					>
+				{/if}
+			</Breadcrumb.Item>
+			{#if i < $breadcrumbItems.length - 1}
+				<Breadcrumb.Separator />
+			{/if}
+		{/each}
+	</Breadcrumb.List>
 </Breadcrumb.Root>
-
-<nav class="mb-4 flex items-center gap-1.5 text-sm">
-  {#each items as item, i}
-    {#if i > 0}
-      <span class="text-border-strong">/</span>
-    {/if}
-    {#if i === items.length - 1}
-      <span class="text-muted-strong truncate">{item.label}</span>
-    {:else}
-      <button
-        class="cursor-pointer border-0 bg-transparent p-0 text-accent hover:underline"
-        onclick={item.onclick}>{item.label}</button
-      >
-    {/if}
-  {/each}
-</nav>

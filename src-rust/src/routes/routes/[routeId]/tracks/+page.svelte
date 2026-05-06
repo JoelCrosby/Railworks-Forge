@@ -1,7 +1,9 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
+  import { settings } from '$lib/settings';
+  import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
   interface Route {
     id: string;
@@ -25,6 +27,7 @@
   const navState = $page.state as { route?: Route };
   let route = $state<Route | null>(navState.route ?? null);
   let routeId = $derived($page.params.routeId ?? '');
+  let locale = $derived($settings.locale);
 
   let tracks = $state<TrackBlueprint[]>([]);
   let loading = $state(false);
@@ -128,6 +131,22 @@
 
   $effect(() => {
     if (route) loadTracks();
+  });
+
+  $effect(() => {
+    setBreadcrumbs([
+      { label: t(locale, 'nav-routes'), href: '/' },
+      {
+        label: route?.name ?? `Route ${routeId}`,
+        href: routeId ? `/routes/${encodeURIComponent(routeId)}` : undefined,
+      },
+      {
+        label: t(locale, 'route-tracks'),
+        href: routeId
+          ? `/routes/${encodeURIComponent(routeId)}/tracks`
+          : undefined,
+      },
+    ]);
   });
 
   $effect(() => {

@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/settings';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
 	interface Route {
 		id: string;
@@ -68,12 +69,18 @@
 		openingRouteId = route.id;
 		error = null;
 		try {
-			await goto(`/routes/${encodeURIComponent(route.id)}`);
+			await goto(`/routes/${encodeURIComponent(route.id)}`, {
+				state: { route: $state.snapshot(route) }
+			});
 		} catch (e) {
 			error = `Could not open route: ${String(e)}`;
 			openingRouteId = null;
 		}
 	}
+
+	$effect(() => {
+		setBreadcrumbs([{ label: t(locale, 'nav-routes'), href: '/' }]);
+	});
 
 	$effect(() => {
 		// Load current game path for display, then load routes

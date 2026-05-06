@@ -4,7 +4,7 @@
   import { page } from '$app/stores';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
-  import Breadcrumb from '$lib/components/breadcrumb.svelte';
+  import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
   interface Route {
     id: string;
@@ -137,6 +137,16 @@
     } else {
       loadRoute();
     }
+  });
+
+  $effect(() => {
+    setBreadcrumbs([
+      { label: t(locale, 'nav-routes'), href: '/' },
+      {
+        label: route?.name ?? `Route ${routeId}`,
+        href: routeId ? `/routes/${encodeURIComponent(routeId)}` : undefined,
+      },
+    ]);
   });
 </script>
 

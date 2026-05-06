@@ -2,6 +2,9 @@
   import { invoke } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
+  import { settings } from '$lib/settings';
+  import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
   interface Blueprint {
     provider: string;
@@ -74,6 +77,7 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let search = $state('');
+  let locale = $derived($settings.locale);
 
   let consists = $derived(detail?.consists ?? []);
   let filtered = $derived(
@@ -177,6 +181,23 @@
 
   $effect(() => {
     if (scenarioBase) loadDetail();
+  });
+
+  $effect(() => {
+    setBreadcrumbs([
+      { label: t(locale, 'nav-routes'), href: '/' },
+      {
+        label: route?.name ?? `Route ${routeId}`,
+        href: routeId ? `/routes/${encodeURIComponent(routeId)}` : undefined,
+      },
+      {
+        label: scenarioBase?.name ?? `Scenario ${scenarioId}`,
+        href:
+          routeId && scenarioId
+            ? `/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}`
+            : undefined,
+      },
+    ]);
   });
 </script>
 

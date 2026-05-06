@@ -2,6 +2,9 @@
   import { invoke } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
+  import { settings } from '$lib/settings';
+  import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
   interface Blueprint {
     provider: string;
@@ -87,6 +90,8 @@
 
   let routeId = $derived($page.params.routeId ?? '');
   let scenarioId = $derived($page.params.scenarioId ?? '');
+  let consistId = $derived($page.params.consistId ?? '');
+  let locale = $derived($settings.locale);
 
   let busy = $state(false);
   let error = $state<string | null>(null);
@@ -317,6 +322,33 @@
       busy = false;
     }
   }
+
+  $effect(() => {
+    setBreadcrumbs([
+      { label: t(locale, 'nav-routes'), href: '/' },
+      {
+        label: route?.name ?? `Route ${routeId}`,
+        href: routeId ? `/routes/${encodeURIComponent(routeId)}` : undefined,
+      },
+      {
+        label: scenario?.name ?? `Scenario ${scenarioId}`,
+        href:
+          routeId && scenarioId
+            ? `/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}`
+            : undefined,
+      },
+      {
+        label:
+          consist?.serviceName ||
+          consist?.locomotiveName ||
+          `Service ${consistId}`,
+        href:
+          routeId && scenarioId && consistId
+            ? `/routes/${encodeURIComponent(routeId)}/scenarios/${encodeURIComponent(scenarioId)}/consists/${encodeURIComponent(consistId)}`
+            : undefined,
+      },
+    ]);
+  });
 </script>
 
 <div class="mx-auto max-w-300 p-6">

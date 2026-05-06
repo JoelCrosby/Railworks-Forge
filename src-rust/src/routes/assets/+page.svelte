@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { invoke } from '@tauri-apps/api/core';
-	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/settings';
-	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumb';
 
 	interface AssetNode {
 		provider: string;
@@ -64,14 +63,16 @@
 	$effect(() => {
 		load();
 	});
+
+	$effect(() => {
+		setBreadcrumbs([
+			{ label: t(locale, 'nav-routes'), href: '/' },
+			{ label: t(locale, 'nav-assets'), href: '/assets' }
+		]);
+	});
 </script>
 
 <div class="mx-auto max-w-275 p-6">
-	<Breadcrumb items={[
-		{ label: t(locale, 'nav-routes'), onclick: () => goto('/') },
-		{ label: t(locale, 'nav-assets') }
-	]} />
-
 	<header class="mb-6 flex items-start justify-between gap-4">
 		<div>
 			<h1 class="text-[1.3rem] font-bold">{t(locale, 'assets-title')}</h1>
