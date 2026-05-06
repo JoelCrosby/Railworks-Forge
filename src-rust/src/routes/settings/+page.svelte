@@ -4,6 +4,7 @@
 	import { t } from '$lib/i18n';
 	import { applyTheme, loadSettings, saveSettings, settings, type AppSettings, type Theme } from '$lib/settings';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+	import { clearRefreshControl } from '$lib/stores/refresh';
 
 	let form = $state<AppSettings>({ gamePath: null, theme: 'dark', locale: 'en-US' });
 	let loading = $state(true);
@@ -70,6 +71,10 @@
 			{ label: t(locale, 'nav-routes'), href: '/' },
 			{ label: t(locale, 'nav-settings'), href: '/settings' }
 		]);
+	});
+
+	$effect(() => {
+		clearRefreshControl();
 	});
 </script>
 

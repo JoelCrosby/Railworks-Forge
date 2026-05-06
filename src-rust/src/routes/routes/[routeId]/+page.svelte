@@ -5,6 +5,7 @@
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { setRefreshControl } from '$lib/stores/refresh';
 
   interface Route {
     id: string;
@@ -148,9 +149,17 @@
       },
     ]);
   });
+
+  $effect(() => {
+    setRefreshControl({
+      onRefresh: loadScenarios,
+      disabled: !route || loading || loadingRoute,
+      loading,
+    });
+  });
 </script>
 
-<div class="mx-auto max-w-275 p-6">
+<div class="px-6">
   {#if route}
     <header class="mb-6 flex items-start justify-between gap-4">
       <div>
@@ -168,13 +177,6 @@
             })}
         >
           {t(locale, 'route-tracks')}
-        </button>
-        <button
-          class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
-          onclick={loadScenarios}
-          disabled={loading}
-        >
-          {loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
         </button>
       </div>
     </header>

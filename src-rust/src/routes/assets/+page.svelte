@@ -3,6 +3,7 @@
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/settings';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+	import { setRefreshControl } from '$lib/stores/refresh';
 
 	interface AssetNode {
 		provider: string;
@@ -70,6 +71,14 @@
 			{ label: t(locale, 'nav-assets'), href: '/assets' }
 		]);
 	});
+
+	$effect(() => {
+		setRefreshControl({
+			onRefresh: load,
+			disabled: loading,
+			loading
+		});
+	});
 </script>
 
 <div class="mx-auto max-w-275 p-6">
@@ -80,13 +89,6 @@
 				<p class="mt-1 text-[0.8rem] text-muted">{filteredCount} / {totalProducts} products</p>
 			{/if}
 		</div>
-		<button
-			class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
-			onclick={load}
-			disabled={loading}
-		>
-			{loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
-		</button>
 	</header>
 
 	{#if error}

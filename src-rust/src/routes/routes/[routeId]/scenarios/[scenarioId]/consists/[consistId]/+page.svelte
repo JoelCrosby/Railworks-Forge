@@ -5,6 +5,7 @@
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { clearRefreshControl } from '$lib/stores/refresh';
 
   interface Blueprint {
     provider: string;
@@ -349,9 +350,13 @@
       },
     ]);
   });
+
+  $effect(() => {
+    clearRefreshControl();
+  });
 </script>
 
-<div class="mx-auto max-w-300 p-6">
+<div class="px-6">
   {#if consist}
     <header class="mb-6 flex items-start justify-between gap-4">
       <div class="flex-1">

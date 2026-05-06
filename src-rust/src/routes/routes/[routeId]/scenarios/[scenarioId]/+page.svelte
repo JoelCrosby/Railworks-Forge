@@ -5,6 +5,7 @@
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { setRefreshControl } from '$lib/stores/refresh';
 
   interface Blueprint {
     provider: string;
@@ -199,9 +200,17 @@
       },
     ]);
   });
+
+  $effect(() => {
+    setRefreshControl({
+      onRefresh: loadDetail,
+      disabled: !scenarioBase || loading,
+      loading,
+    });
+  });
 </script>
 
-<div class="mx-auto max-w-275 p-6">
+<div class="px-6">
   {#if scenarioBase}
     <header class="mb-6 flex items-start justify-between gap-4">
       <div class="flex-1">
@@ -227,13 +236,6 @@
           </p>
         {/if}
       </div>
-      <button
-        class="shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
-        onclick={loadDetail}
-        disabled={loading}
-      >
-        {loading ? 'Loading…' : 'Refresh'}
-      </button>
     </header>
   {:else}
     <header class="mb-6">

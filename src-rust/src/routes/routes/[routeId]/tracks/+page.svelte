@@ -4,6 +4,7 @@
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { setRefreshControl } from '$lib/stores/refresh';
 
   interface Route {
     id: string;
@@ -150,6 +151,14 @@
   });
 
   $effect(() => {
+    setRefreshControl({
+      onRefresh: loadTracks,
+      disabled: !route || loading || applying,
+      loading,
+    });
+  });
+
+  $effect(() => {
     if (successMsg) {
       const id = setTimeout(() => (successMsg = null), 4000);
       return () => clearTimeout(id);
@@ -166,13 +175,6 @@
       {/if}
     </div>
     <div class="flex shrink-0 items-start gap-2">
-      <button
-        class="cursor-pointer rounded-md border border-border-strong bg-surface-raised px-4 py-1.5 text-sm text-text hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
-        onclick={loadTracks}
-        disabled={loading || applying}
-      >
-        {loading ? 'Loading…' : 'Refresh'}
-      </button>
       {#if pendingCount() > 0}
         <button
           class="cursor-pointer rounded-md border border-primary-border bg-primary px-4 py-1.5 text-sm text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
