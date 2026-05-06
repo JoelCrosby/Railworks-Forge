@@ -61,7 +61,7 @@
       accessorKey: 'provider',
       header: 'Provider',
       meta: {
-        headerClass: 'w-40',
+        columnClass: 'w-40',
         cellClass: 'text-muted',
       },
     },
@@ -69,7 +69,7 @@
       accessorKey: 'product',
       header: 'Product',
       meta: {
-        headerClass: 'w-48',
+        columnClass: 'w-48',
         cellClass: 'text-muted-strong',
       },
     },
@@ -85,7 +85,7 @@
       header: 'Replace with',
       enableSorting: false,
       meta: {
-        headerClass: 'w-96',
+        columnClass: 'w-96',
       },
     },
     {
@@ -93,7 +93,7 @@
       header: '',
       enableSorting: false,
       meta: {
-        headerClass: 'w-36',
+        columnClass: 'w-36',
         cellClass: 'whitespace-nowrap',
       },
     },

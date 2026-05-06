@@ -51,7 +51,7 @@
       accessorKey: 'packagingType',
       header: 'Type',
       meta: {
-        headerClass: 'w-32',
+        columnClass: 'w-32',
         headerAlign: 'right',
         cellAlign: 'right',
       },
@@ -197,7 +197,7 @@
         </Table.Header>
 
         <Table.Body
-          class="block max-h-[calc(100vh-240px)] overflow-y-auto [scrollbar-gutter:stable]"
+          class="block max-h-[calc(100vh-156px)] overflow-y-auto [scrollbar-gutter:stable]"
         >
           {#each table.getRowModel().rows as row (row.id)}
             <Table.Row
@@ -208,7 +208,7 @@
               onkeydown={(event) => openRouteFromKeyboard(event, row.original)}
             >
               {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell>
+                <Table.Cell class={getDataTableCellClass(cell)}>
                   {#if cell.column.id === 'packagingType'}
                     <Badge variant="outline">
                       {openingRouteId === row.original.id

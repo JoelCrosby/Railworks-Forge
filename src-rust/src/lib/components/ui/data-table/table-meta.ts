@@ -2,6 +2,7 @@ import type { Cell } from '@tanstack/table-core';
 import { cn } from '$lib/utils.js';
 
 export type DataTableColumnMeta = {
+	columnClass?: string;
 	headerClass?: string;
 	headerAlign?: 'left' | 'center' | 'right';
 	cellClass?: string;
@@ -25,6 +26,7 @@ export function getDataTableCellClass<TData, TValue>(
 ) {
 	const meta = cell.column.columnDef.meta as DataTableColumnMeta | undefined;
 	return cn(
+		meta?.columnClass,
 		alignClass(meta?.cellAlign ?? meta?.headerAlign),
 		meta?.cellClass,
 		className,

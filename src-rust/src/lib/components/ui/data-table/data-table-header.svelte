@@ -30,6 +30,7 @@
 				: resolvedAlign === 'right'
 					? 'text-right'
 					: '',
+			headerMeta?.columnClass,
 			headerMeta?.headerClass,
 			className,
 		),

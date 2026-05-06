@@ -133,7 +133,7 @@
       accessorFn: (vehicle) => vehicle.index + 1,
       header: '#',
       meta: {
-        headerClass: 'w-12',
+        columnClass: 'w-12',
         cellClass: 'text-border-strong',
       },
     },
@@ -141,7 +141,7 @@
       accessorKey: 'blueprintType',
       header: 'Type',
       meta: {
-        headerClass: 'w-20',
+        columnClass: 'w-20',
       },
     },
     {
@@ -155,7 +155,7 @@
       accessorKey: 'uniqueNumber',
       header: 'Number',
       meta: {
-        headerClass: 'w-32',
+        columnClass: 'w-32',
       },
     },
     {
@@ -163,7 +163,7 @@
       accessorFn: (vehicle) => vehicle.blueprint.provider,
       header: 'Provider',
       meta: {
-        headerClass: 'w-40',
+        columnClass: 'w-40',
         cellClass: 'truncate text-muted',
       },
     },
@@ -179,7 +179,7 @@
       accessorKey: 'flipped',
       header: 'Flip',
       meta: {
-        headerClass: 'w-20',
+        columnClass: 'w-20',
         headerAlign: 'center',
         cellAlign: 'center',
       },
@@ -189,7 +189,7 @@
       accessorFn: (vehicle) => vehicle.blueprint.acquisitionState,
       header: 'State',
       meta: {
-        headerClass: 'w-20',
+        columnClass: 'w-20',
         headerAlign: 'center',
         cellAlign: 'center',
       },
@@ -199,7 +199,7 @@
       header: '',
       enableSorting: false,
       meta: {
-        headerClass: 'w-16',
+        columnClass: 'w-16',
       },
     },
   ];
@@ -570,9 +570,7 @@
               {@const v = row.original}
               <Table.Row class="table w-full table-fixed hover:bg-surface">
                 {#each row.getVisibleCells() as cell (cell.id)}
-                  <Table.Cell
-                    class={getDataTableCellClass(cell)}
-                  >
+                  <Table.Cell class={getDataTableCellClass(cell)}>
                     {#if cell.column.id === 'index'}
                       {v.index + 1}
                     {:else if cell.column.id === 'blueprintType'}

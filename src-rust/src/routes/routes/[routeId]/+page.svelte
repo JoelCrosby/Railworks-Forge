@@ -86,7 +86,7 @@
       accessorKey: 'duration',
       header: 'Duration',
       meta: {
-        headerClass: 'w-28',
+        columnClass: 'w-28',
         headerAlign: 'right',
         cellAlign: 'right',
       },
@@ -95,14 +95,14 @@
       accessorKey: 'season',
       header: 'Season',
       meta: {
-        headerClass: 'w-28',
+        columnClass: 'w-28',
       },
     },
     {
       accessorKey: 'scenarioClass',
       header: 'Class',
       meta: {
-        headerClass: 'w-32',
+        columnClass: 'w-32',
       },
     },
     {
@@ -110,7 +110,7 @@
       accessorFn: (scenario) => scenario.playerInfo.completion,
       header: 'Completion',
       meta: {
-        headerClass: 'w-32',
+        columnClass: 'w-32',
       },
     },
   ];
@@ -323,7 +323,7 @@
             onkeydown={(event) => openScenarioFromKeyboard(event, row.original)}
           >
             {#each row.getVisibleCells() as cell (cell.id)}
-              <Table.Cell>
+              <Table.Cell class={getDataTableCellClass(cell)}>
                 {#if cell.column.id === 'name'}
                   {row.original.name}
                 {:else if cell.column.id === 'locomotive'}

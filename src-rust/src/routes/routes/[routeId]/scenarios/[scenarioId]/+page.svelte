@@ -116,7 +116,7 @@
       accessorKey: 'locoClass',
       header: 'Class',
       meta: {
-        headerClass: 'w-28',
+        columnClass: 'w-28',
       },
     },
     {
@@ -124,7 +124,7 @@
       accessorFn: (consist) => consist.vehicles.length,
       header: 'Vehicles',
       meta: {
-        headerClass: 'w-24',
+        columnClass: 'w-24',
         headerAlign: 'right',
         cellAlign: 'right',
       },
@@ -133,7 +133,7 @@
       accessorKey: 'acquisitionState',
       header: 'State',
       meta: {
-        headerClass: 'w-20',
+        columnClass: 'w-20',
         headerAlign: 'center',
         cellAlign: 'center',
       },
@@ -143,7 +143,7 @@
       header: '',
       enableSorting: false,
       meta: {
-        headerClass: 'w-20',
+        columnClass: 'w-20',
         headerAlign: 'right',
         cellAlign: 'right',
       },
