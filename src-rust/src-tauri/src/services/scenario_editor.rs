@@ -14,20 +14,31 @@ use std::{
 /// For `ReplaceVehicles` commands the replacement vehicle XML is pre-generated before
 /// the streaming pass begins so only one pass through the (potentially 500 MB) file
 /// is required.
-pub fn apply_edits(input_path: &Path, output_path: &Path, commands: &[ConsistCommand]) -> Result<()> {
+pub fn apply_edits(
+    input_path: &Path,
+    output_path: &Path,
+    commands: &[ConsistCommand],
+) -> Result<()> {
     // Pre-compute replacement vehicle XMLs for every ReplaceVehicles command.
     let mut replacements: HashMap<String, Vec<String>> = HashMap::new();
     for cmd in commands {
-        if let ConsistCommand::ReplaceVehicles { consist_id, entries } = cmd {
-            let xmls: Vec<String> = entries.iter().map(vehicle_generator::generate_vehicle_xml).collect();
+        if let ConsistCommand::ReplaceVehicles {
+            consist_id,
+            entries,
+        } = cmd
+        {
+            let xmls: Vec<String> = entries
+                .iter()
+                .map(vehicle_generator::generate_vehicle_xml)
+                .collect();
             replacements.insert(consist_id.clone(), xmls);
         }
     }
 
-    let in_file = File::open(input_path)
-        .with_context(|| format!("opening {}", input_path.display()))?;
-    let out_file = File::create(output_path)
-        .with_context(|| format!("creating {}", output_path.display()))?;
+    let in_file =
+        File::open(input_path).with_context(|| format!("opening {}", input_path.display()))?;
+    let out_file =
+        File::create(output_path).with_context(|| format!("creating {}", output_path.display()))?;
 
     let mut reader = Reader::from_reader(BufReader::new(in_file));
     // Preserve whitespace so the output is structurally identical to the input.
@@ -178,7 +189,12 @@ impl<'a> EditorState<'a> {
                     && self.skip_vehicle_depth.is_none() =>
             {
                 // Only process direct children of <RailVehicles>.
-                if self.depth != self.rail_vehicles_depth.map(|d| d + 1).unwrap_or(usize::MAX) {
+                if self.depth
+                    != self
+                        .rail_vehicles_depth
+                        .map(|d| d + 1)
+                        .unwrap_or(usize::MAX)
+                {
                     return true;
                 }
 
@@ -218,9 +234,7 @@ impl<'a> EditorState<'a> {
 
         let name = name_bytes_str(e.name().as_ref());
 
-        if name == "RailVehicles"
-            && self.replacing
-            && self.rail_vehicles_depth == Some(self.depth)
+        if name == "RailVehicles" && self.replacing && self.rail_vehicles_depth == Some(self.depth)
         {
             if let Some(id) = &self.current_consist_id {
                 if let Some(xmls) = self.replacements.get(id) {

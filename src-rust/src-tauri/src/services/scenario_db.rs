@@ -1,8 +1,5 @@
 use crate::{
-    models::ScenarioPlayerInfo,
-    platform::app_cache_dir,
-    serz::convert_to_xml,
-    xml::parser,
+    models::ScenarioPlayerInfo, platform::app_cache_dir, serz::convert_to_xml, xml::parser,
 };
 use anyhow::Result;
 use dashmap::DashMap;
@@ -14,7 +11,10 @@ const CACHE_FILE: &str = "SDBCache.json";
 
 /// Loads the scenario player database from SDBCache.bin.
 /// Results are cached to JSON; subsequent calls return from cache unless `force` is true.
-pub async fn load(sdb_bin_path: &Path, force: bool) -> Result<Arc<DashMap<String, ScenarioPlayerInfo>>> {
+pub async fn load(
+    sdb_bin_path: &Path,
+    force: bool,
+) -> Result<Arc<DashMap<String, ScenarioPlayerInfo>>> {
     let cache_path = app_cache_dir()?.join(CACHE_FILE);
 
     if !force && cache_path.exists() {
@@ -48,7 +48,9 @@ fn parse_scenario_db(xml: &str) -> Result<DashMap<String, ScenarioPlayerInfo>> {
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(e)) => {
-                let name = std::str::from_utf8(e.name().as_ref()).unwrap_or("").to_string();
+                let name = std::str::from_utf8(e.name().as_ref())
+                    .unwrap_or("")
+                    .to_string();
                 match name.as_str() {
                     "sSDScenario" => {
                         in_scenario = true;
@@ -78,7 +80,9 @@ fn parse_scenario_db(xml: &str) -> Result<DashMap<String, ScenarioPlayerInfo>> {
                 }
             }
             Ok(Event::End(e)) => {
-                if std::str::from_utf8(e.name().as_ref()).unwrap_or("") == "sSDScenario" && in_scenario {
+                if std::str::from_utf8(e.name().as_ref()).unwrap_or("") == "sSDScenario"
+                    && in_scenario
+                {
                     if !current_id.is_empty() {
                         db.insert(
                             current_id.clone(),
@@ -124,8 +128,10 @@ async fn persist_to_json_cache(
     if let Some(parent) = path.parent() {
         tokio::fs::create_dir_all(parent).await?;
     }
-    let map: std::collections::HashMap<String, ScenarioPlayerInfo> =
-        db.iter().map(|e| (e.key().clone(), e.value().clone())).collect();
+    let map: std::collections::HashMap<String, ScenarioPlayerInfo> = db
+        .iter()
+        .map(|e| (e.key().clone(), e.value().clone()))
+        .collect();
     let json = serde_json::to_string_pretty(&map)?;
     tokio::fs::write(path, json).await?;
     Ok(())

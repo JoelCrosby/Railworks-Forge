@@ -12,16 +12,16 @@ Full rewrite of the C#/Avalonia desktop app in Rust + Tauri 2 + Svelte. The prim
 |---|---|---|
 | Language | Rust (stable) | Memory safety + zero-cost abstractions |
 | GUI framework | Tauri 2.x | Native webview shell; Rust backend with JS/TS frontend |
-| Frontend framework | SvelteKit | Lightest reactive framework, minimal bundle |
+| Frontend framework | SvelteKit in SPA mode | Svelte UI with file-based routing; static output embedded by Tauri |
 | Async runtime | Tokio | Industry standard; Tauri already uses it |
 | XML parsing | `quick-xml` | Zero-copy, pull-based SAX-style, extremely fast |
 | ZIP / .ap archives | `zip` crate | .ap files are standard ZIP |
-| Concurrency | `dashmap` + `rayon` | Lock-free maps; data-parallelism for route/image loading |
+| Concurrency | `dashmap` + `rayon` | Lock-free maps; data-parallelism for route/asset loading |
 | Serialisation | `serde` + `serde_json` | Config files, SDBCache JSON cache |
 | Error handling | `anyhow` + `thiserror` | Application errors / library boundary errors |
-| Logging | `tracing` + `tracing-subscriber` | Structured async-aware logging |
+| Logging | `tracing` + `tracing-subscriber` + `tracing-appender` | Structured async-aware logging with rolling file output |
 | Retry | `tokio-retry` | Replaces Polly |
-| i18n | `fluent-rs` (Phase 5) | Mozilla Project Fluent |
+| i18n | Fluent message catalogs (`@fluent/bundle`) | English + German UI strings in the Svelte client |
 | Windows registry | `winreg` (cfg-gated) | Railworks install path detection |
 
 ---
@@ -42,7 +42,8 @@ src-rust/
 │   │   │   ├── scenarios.rs        # get_scenarios, get_scenario_detail
 │   │   │   ├── consists.rs         # get_consist_detail, save_consist, replace_consist, add/delete_vehicle
 │   │   │   ├── tracks.rs           # get_tracks, replace_tracks
-│   │   │   └── assets.rs           # check_assets, get_asset_tree
+│   │   │   ├── assets.rs           # check_assets, get_asset_tree
+│   │   │   └── settings.rs         # get_settings, save_settings, clear_xml_cache
 │   │   ├── services/               # Business logic
 │   │   │   ├── mod.rs
 │   │   │   ├── route_service.rs    # Route discovery + RouteProperties.xml parsing
@@ -53,26 +54,25 @@ src-rust/
 │   │   │   ├── mod.rs
 │   │   │   ├── route.rs            # Route, PackagingType
 │   │   │   ├── scenario.rs         # Scenario, ScenarioClass, ScenarioPlayerInfo
-│   │   │   ├── consist.rs          # Consist, LocoClass, ConsistAcquisitionState, PreloadConsist
+│   │   │   ├── consist.rs          # Consist, LocoClass, ConsistAcquisitionState
 │   │   │   ├── blueprint.rs        # Blueprint, AcquisitionState
 │   │   │   └── vehicle.rs          # VehicleBlueprint, BlueprintType
 │   │   ├── xml/                    # XML parsing layer
 │   │   │   ├── mod.rs
 │   │   │   ├── parser.rs           # quick-xml pull-parser helpers + async file reader
-│   │   │   ├── selectors.rs        # Element query helpers (mirrors AngleSharp extensions)
-│   │   │   └── writer.rs           # In-place XML element mutation
+│   │   │   └── selectors.rs        # Element query helpers (mirrors AngleSharp extensions)
 │   │   ├── serz/                   # Serz binary <-> XML bridge
 │   │   │   ├── mod.rs
 │   │   │   └── process.rs          # Spawns serz64.exe (native on Windows, Wine on Linux/macOS)
-│   │   ├── cache/                  # Multi-level cache
+│   │   ├── cache/                  # Disk caches
 │   │   │   ├── mod.rs
 │   │   │   ├── xml_cache.rs        # Disk cache for .bin -> .xml conversions (MD5-keyed, mtime-invalidated)
-│   │   │   └── image_cache.rs      # In-memory LRU bitmap cache (256 entries)
 │   │   ├── archive/                # ZIP / .ap archive access
 │   │   │   └── mod.rs
 │   │   └── platform/               # OS-specific logic
 │   │       ├── mod.rs
-│   │       └── paths.rs            # Game dir detection, config/cache dirs, to_windows_path
+│   │       ├── paths.rs            # Game dir detection, config/cache/log dirs, to_windows_path
+│   │       └── settings.rs         # Persisted game path, theme, locale
 │   ├── Cargo.toml
 │   └── tauri.conf.json
 ├── package.json
@@ -132,15 +132,12 @@ Long-running operations (Serz conversion, route discovery) stream progress to th
 
 ## Caching Strategy
 
-Five cache layers mirroring the existing C# app:
+Active cache layers:
 
 | Cache | Storage | Key | Invalidation |
 |---|---|---|---|
 | XML file cache | Disk (`xml-cache/`) | MD5 of source path | mtime on source .bin |
 | Scenario DB | Disk (`SDBCache.json`) | N/A | mtime on SDBCache.bin |
-| Route assets | Disk (`route-assets/{id}.csv`) | Route ID | mtime on route dir |
-| Blueprint | In-memory `DashMap` | BlueprintId | Session |
-| Image | In-memory LRU (256 entries) | Archive path + entry name | LRU eviction |
 
 ---
 
@@ -153,11 +150,9 @@ Five cache layers mirroring the existing C# app:
 - [x] `archive/mod.rs` — ZIP / .ap archive reading (entry lookup, read, list, prefix filter)
 - [x] `serz/process.rs` — Serz CLI bridge (native on Windows, Wine on Linux/macOS); result cached
 - [x] `cache/xml_cache.rs` — disk cache with MD5 keys and mtime invalidation
-- [x] `cache/image_cache.rs` — in-memory LRU cache with thread-safe access
 - [x] All domain models: `Route`, `Scenario`, `Consist`, `Blueprint`, `VehicleBlueprint`
 - [x] `xml/parser.rs` — `quick-xml` pull-parser helpers, async file reader
 - [x] `xml/selectors.rs` — element query helpers (mirrors AngleSharp CSS selector extensions)
-- [x] `xml/writer.rs` — in-place element text mutation
 - [x] `services/route_service.rs` — route discovery + `RouteProperties.xml` parsing (packed + unpacked)
 - [x] `services/scenario_service.rs` — scenario loading, packed/unpacked merge, deduplication
 - [x] `services/scenario_db.rs` — streaming `SDBCache.bin.xml` parser + JSON cache
@@ -194,13 +189,14 @@ Five cache layers mirroring the existing C# app:
 - [x] `TrackService` — streaming `Tracks.bin.xml` parser + replacement writer
 - [x] Track replacement dialog
 
-### Phase 5 — Polish
+### Phase 5 — Polish ✅ Complete
 
-- [ ] i18n via Fluent (English + German, matching existing translations)
-- [ ] `tracing` with rolling file sink (replaces Serilog)
-- [ ] Settings page (game path, theme)
-- [ ] Dark/light theme
-- [ ] Performance profiling — confirm streaming parser benchmarks
+- [x] i18n via Fluent message catalogs (English + German)
+- [x] `tracing` with rolling file sink (replaces Serilog)
+- [x] Settings page (game path, theme, language, XML cache clear)
+- [x] Dark/light/system theme
+- [x] Performance profiling spans for route/scenario/track parsing and edit operations
+- [x] Removed stale scaffolding: unused XML writer, image cache, preload consist placeholders, and backend search helpers
 
 ---
 
@@ -228,6 +224,6 @@ Five cache layers mirroring the existing C# app:
 
 - DOM-based XML → streaming pull-parser for all large files
 - Typed explicit parsers instead of CSS selector queries (eliminates runtime query errors)
-- LRU eviction on image cache (existing C# cache grows unbounded)
+- Stale image-cache scaffolding removed until route thumbnails/asset previews are implemented
 - Cancellation support via Tauri async command lifecycle
 - `MaxDegreeOfParallelism=8` hardcode → configurable `Semaphore` bound

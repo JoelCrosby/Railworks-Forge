@@ -7,6 +7,7 @@
 		"start": "tauri dev",
 		"dev": "vite dev",
 		"build": "vite build",
+		"build:tauri": "tauri build --bundles deb",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -24,6 +25,7 @@
 		"vite": "^8.0.7"
 	},
 	"dependencies": {
+		"@fluent/bundle": "^0.19.1",
 		"@tauri-apps/api": "^2.11.0"
 	}
 }

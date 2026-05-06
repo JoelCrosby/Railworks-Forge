@@ -42,13 +42,3 @@ pub enum ConsistCommand {
         entries: Vec<VehicleEntry>,
     },
 }
-
-impl ConsistCommand {
-    pub fn consist_id(&self) -> &str {
-        match self {
-            Self::DeleteVehicle { consist_id, .. } => consist_id,
-            Self::DeleteConsist { consist_id } => consist_id,
-            Self::ReplaceVehicles { consist_id, .. } => consist_id,
-        }
-    }
-}

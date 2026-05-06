@@ -22,6 +22,7 @@ enum ScenarioDbStatus {
 }
 
 async fn try_load_scenario_db() -> Result<Arc<DashMap<String, crate::models::ScenarioPlayerInfo>>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("load_scenario_db");
     let game_dir = find_game_directory()?;
     let sdb_path = game_dir.join("Content").join("SDBCache.bin");
     scenario_db::load(&sdb_path, false).await
@@ -76,6 +77,7 @@ pub async fn get_scenarios(route: Route) -> Result<Vec<Scenario>, String> {
 /// the route's `MainContent.ap`.
 #[tauri::command]
 pub async fn get_scenario_detail(scenario: Scenario) -> Result<Scenario, String> {
+    let _profile = crate::services::profiling::ProfileSpan::new("get_scenario_detail");
     let bin_path = scenario_service::resolve_scenario_bin(&scenario)
         .await
         .map_err(|e| e.to_string())?;

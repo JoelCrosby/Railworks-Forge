@@ -2,6 +2,8 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { t } from '$lib/i18n';
+	import { settings } from '$lib/settings';
 
 	interface Route {
 		id: string;
@@ -39,6 +41,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let search = $state('');
+	let locale = $derived($settings.locale);
 
 	let filtered = $derived(
 		search.trim()
@@ -106,7 +109,7 @@
 
 <div class="page">
 	<nav>
-		<button class="back" onclick={() => goto('/')}>← Routes</button>
+		<button class="back" onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button>
 	</nav>
 
 	{#if route}
@@ -125,10 +128,10 @@
 							state: { route: route ? $state.snapshot(route) : null }
 						})}
 				>
-					Tracks
+					{t(locale, 'route-tracks')}
 				</button>
 				<button onclick={loadScenarios} disabled={loading}>
-					{loading ? 'Loading…' : 'Refresh'}
+					{loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
 				</button>
 			</div>
 		</header>
@@ -137,7 +140,7 @@
 	{/if}
 
 	{#if error}
-		<div class="error"><strong>Error:</strong> {error}</div>
+		<div class="error"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 
 	{#if !loading && scenarios.length > 0}
@@ -145,7 +148,7 @@
 			<input
 				class="search"
 				type="search"
-				placeholder="Search scenarios…"
+				placeholder={t(locale, 'route-search-scenarios')}
 				bind:value={search}
 			/>
 			<span class="count">{filtered.length} / {scenarios.length}</span>
@@ -153,11 +156,11 @@
 	{/if}
 
 	{#if loadingRoute}
-		<div class="status">Opening route…</div>
+		<div class="status">{t(locale, 'route-opening')}</div>
 	{:else if loading}
-		<div class="status">Loading scenarios…</div>
+		<div class="status">{t(locale, 'route-loading-scenarios')}</div>
 	{:else if scenarios.length === 0 && !error}
-		<div class="empty">No scenarios found for this route.</div>
+		<div class="empty">{t(locale, 'route-no-scenarios')}</div>
 	{:else}
 		<ul class="scenario-list">
 			{#each filtered as scenario (scenario.id)}
@@ -189,8 +192,8 @@
 
 	:global(body) {
 		font-family: system-ui, sans-serif;
-		background: #0f1117;
-		color: #e2e8f0;
+		background: var(--bg);
+		color: var(--text);
 		height: 100vh;
 	}
 
@@ -207,7 +210,7 @@
 	.back {
 		background: none;
 		border: none;
-		color: #4a90d9;
+		color: var(--accent);
 		font-size: 0.875rem;
 		cursor: pointer;
 		padding: 0;
@@ -232,7 +235,7 @@
 
 	.subtitle {
 		font-size: 0.85rem;
-		color: #718096;
+		color: var(--muted);
 		margin-top: 0.25rem;
 	}
 
@@ -243,9 +246,9 @@
 	}
 
 	button {
-		background: #2d3748;
-		color: #e2e8f0;
-		border: 1px solid #4a5568;
+		background: var(--surface-raised);
+		color: var(--text);
+		border: 1px solid var(--border-strong);
 		border-radius: 6px;
 		padding: 0.4rem 1rem;
 		font-size: 0.875rem;
@@ -254,17 +257,17 @@
 	}
 
 	.btn-secondary {
-		background: #1a3a5c;
-		border-color: #2a5a8c;
-		color: #90cdf4;
+		background: var(--accent-surface);
+		border-color: var(--accent-border);
+		color: var(--accent-text);
 	}
 
 	.btn-secondary:hover:not(:disabled) {
-		background: #1e4a70;
+		background: var(--accent-surface);
 	}
 
 	button:hover:not(:disabled) {
-		background: #3a4a5c;
+		background: var(--surface-hover);
 	}
 
 	button:disabled {
@@ -281,40 +284,40 @@
 
 	.search {
 		flex: 1;
-		background: #1a202c;
-		border: 1px solid #2d3748;
+		background: var(--surface);
+		border: 1px solid var(--surface-raised);
 		border-radius: 6px;
 		padding: 0.45rem 0.75rem;
-		color: #e2e8f0;
+		color: var(--text);
 		font-size: 0.875rem;
 		outline: none;
 	}
 
 	.search:focus {
-		border-color: #4a90d9;
+		border-color: var(--accent);
 	}
 
 	.count {
 		font-size: 0.8rem;
-		color: #718096;
+		color: var(--muted);
 		white-space: nowrap;
 	}
 
 	.status,
 	.empty {
-		color: #718096;
+		color: var(--muted);
 		font-size: 0.9rem;
 		margin-top: 2rem;
 		text-align: center;
 	}
 
 	.error {
-		background: #2d1a1a;
-		border: 1px solid #742a2a;
+		background: var(--danger-surface);
+		border: 1px solid var(--danger-border);
 		border-radius: 6px;
 		padding: 0.75rem 1rem;
 		font-size: 0.875rem;
-		color: #fc8181;
+		color: var(--danger-text);
 		margin-bottom: 1.5rem;
 	}
 
@@ -328,8 +331,8 @@
 	.scenario-card {
 		width: 100%;
 		text-align: left;
-		background: #1a202c;
-		border: 1px solid #2d3748;
+		background: var(--surface);
+		border: 1px solid var(--surface-raised);
 		border-radius: 8px;
 		padding: 0.75rem 1rem;
 		display: flex;
@@ -339,7 +342,7 @@
 	}
 
 	.scenario-card:hover {
-		border-color: #4a90d9;
+		border-color: var(--accent);
 	}
 
 	.scenario-name {
@@ -354,7 +357,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		font-size: 0.8rem;
-		color: #718096;
+		color: var(--muted);
 	}
 
 	.loco {
@@ -371,7 +374,7 @@
 
 	.completion {
 		font-size: 0.75rem;
-		color: #68d391;
+		color: var(--ok);
 		white-space: nowrap;
 	}
 
@@ -384,9 +387,9 @@
 		flex-shrink: 0;
 	}
 
-	.badge.passenger { background: #2a4365; color: #90cdf4; }
-	.badge.freight    { background: #3d2a14; color: #f6ad55; }
-	.badge.shunting   { background: #2d3a1a; color: #9ae6b4; }
+	.badge.passenger { background: var(--accent-surface); color: var(--accent-text); }
+	.badge.freight    { background: #3d2a14; color: var(--warn); }
+	.badge.shunting   { background: #2d3a1a; color: var(--success-text); }
 	.badge.mixed      { background: #3a2a4a; color: #d6bcfa; }
-	.badge.empty      { background: #2d3748; color: #718096; }
+	.badge.empty      { background: var(--surface-raised); color: var(--muted); }
 </style>

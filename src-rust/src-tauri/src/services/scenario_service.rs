@@ -18,6 +18,7 @@ pub async fn get_scenarios(
     route: &Route,
     player_db: &dashmap::DashMap<String, ScenarioPlayerInfo>,
 ) -> Result<Vec<Scenario>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("get_scenarios");
     let (unpacked, packed) = tokio::join!(
         load_unpacked_scenarios(route, player_db),
         load_packed_scenarios(route, player_db),
@@ -229,6 +230,7 @@ fn build_scenario(
 /// Returns the path to `Scenario.bin`, extracting it from the route archive first
 /// when the scenario is packed.
 pub async fn resolve_scenario_bin(scenario: &Scenario) -> anyhow::Result<PathBuf> {
+    let _profile = crate::services::profiling::ProfileSpan::new("resolve_scenario_bin");
     let bin_path = scenario.binary_path();
     if bin_path.exists() {
         return Ok(bin_path);

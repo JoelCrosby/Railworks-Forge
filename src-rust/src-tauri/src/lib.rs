@@ -7,16 +7,12 @@ mod services;
 mod serz;
 mod xml;
 
-use commands::{assets, consists, routes, scenarios, tracks};
+use commands::{assets, consists, routes, scenarios, settings, tracks};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
+    init_logging();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -48,7 +44,41 @@ pub fn run() {
             tracks::replace_tracks,
             assets::check_assets,
             assets::get_asset_tree,
+            settings::get_settings,
+            settings::save_settings,
+            settings::clear_xml_cache,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn init_logging() {
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        tracing_subscriber::EnvFilter::new("info,railworks_forge::profile=info")
+    });
+
+    let stdout_layer = tracing_subscriber::fmt::layer()
+        .compact()
+        .with_target(false);
+
+    let log_dir = platform::app_log_dir().ok();
+    if let Some(dir) = log_dir {
+        let _ = std::fs::create_dir_all(&dir);
+        let file_appender = tracing_appender::rolling::daily(dir, "railworks-forge.log");
+        let file_layer = tracing_subscriber::fmt::layer()
+            .json()
+            .with_writer(file_appender)
+            .with_target(true);
+
+        tracing_subscriber::registry()
+            .with(env_filter)
+            .with(stdout_layer)
+            .with(file_layer)
+            .init();
+    } else {
+        tracing_subscriber::registry()
+            .with(env_filter)
+            .with(stdout_layer)
+            .init();
+    }
 }

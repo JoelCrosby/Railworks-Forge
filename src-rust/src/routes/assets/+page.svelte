@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { invoke } from '@tauri-apps/api/core';
 	import { goto } from '$app/navigation';
+	import { t } from '$lib/i18n';
+	import { settings } from '$lib/settings';
 
 	interface AssetNode {
 		provider: string;
@@ -19,6 +21,7 @@
 	let error = $state<string | null>(null);
 	let search = $state('');
 	let filterRailVehicles = $state(false);
+	let locale = $derived($settings.locale);
 
 	let groups = $derived.by<ProviderGroup[]>(() => {
 		const filtered = nodes.filter((n) => {
@@ -64,39 +67,39 @@
 
 <div class="page">
 	<nav>
-		<button class="back" onclick={() => goto('/')}>← Routes</button>
+		<button class="back" onclick={() => goto('/')}>← {t(locale, 'nav-routes')}</button>
 	</nav>
 
 	<header>
 		<div>
-			<h1>Asset Browser</h1>
+			<h1>{t(locale, 'assets-title')}</h1>
 			{#if !loading && nodes.length > 0}
 				<p class="subtitle">{filteredCount} / {totalProducts} products</p>
 			{/if}
 		</div>
 		<button onclick={load} disabled={loading}>
-			{loading ? 'Loading…' : 'Refresh'}
+			{loading ? t(locale, 'action-loading') : t(locale, 'action-refresh')}
 		</button>
 	</header>
 
 	{#if error}
-		<div class="error"><strong>Error:</strong> {error}</div>
+		<div class="error"><strong>{t(locale, 'error-label')}:</strong> {error}</div>
 	{/if}
 
 	{#if !loading && nodes.length > 0}
 		<div class="toolbar">
-			<input class="search" type="search" placeholder="Search provider or product…" bind:value={search} />
+			<input class="search" type="search" placeholder={t(locale, 'assets-search')} bind:value={search} />
 			<label class="filter-label">
 				<input type="checkbox" bind:checked={filterRailVehicles} />
-				RailVehicles only
+				{t(locale, 'assets-railvehicles-only')}
 			</label>
 		</div>
 	{/if}
 
 	{#if loading}
-		<div class="status">Scanning assets…</div>
+		<div class="status">{t(locale, 'assets-scanning')}</div>
 	{:else if groups.length === 0 && !error}
-		<div class="empty">{nodes.length === 0 ? 'No assets found.' : 'No matches for current filter.'}</div>
+		<div class="empty">{nodes.length === 0 ? t(locale, 'assets-no-assets') : t(locale, 'assets-no-matches')}</div>
 	{:else}
 		<div class="provider-list">
 			{#each groups as group (group.name)}
@@ -136,8 +139,8 @@
 
 	:global(body) {
 		font-family: system-ui, sans-serif;
-		background: #0f1117;
-		color: #e2e8f0;
+		background: var(--bg);
+		color: var(--text);
 		height: 100vh;
 		overflow-y: auto;
 	}
@@ -155,7 +158,7 @@
 	.back {
 		background: none;
 		border: none;
-		color: #4a90d9;
+		color: var(--accent);
 		font-size: 0.875rem;
 		cursor: pointer;
 		padding: 0;
@@ -180,14 +183,14 @@
 
 	.subtitle {
 		font-size: 0.8rem;
-		color: #718096;
+		color: var(--muted);
 		margin-top: 0.2rem;
 	}
 
 	button {
-		background: #2d3748;
-		color: #e2e8f0;
-		border: 1px solid #4a5568;
+		background: var(--surface-raised);
+		color: var(--text);
+		border: 1px solid var(--border-strong);
 		border-radius: 6px;
 		padding: 0.4rem 1rem;
 		font-size: 0.875rem;
@@ -196,7 +199,7 @@
 	}
 
 	button:hover:not(:disabled) {
-		background: #3a4a5c;
+		background: var(--surface-hover);
 	}
 
 	button:disabled {
@@ -213,17 +216,17 @@
 
 	.search {
 		flex: 1;
-		background: #1a202c;
-		border: 1px solid #2d3748;
+		background: var(--surface);
+		border: 1px solid var(--surface-raised);
 		border-radius: 6px;
 		padding: 0.45rem 0.75rem;
-		color: #e2e8f0;
+		color: var(--text);
 		font-size: 0.875rem;
 		outline: none;
 	}
 
 	.search:focus {
-		border-color: #4a90d9;
+		border-color: var(--accent);
 	}
 
 	.filter-label {
@@ -231,26 +234,26 @@
 		align-items: center;
 		gap: 0.4rem;
 		font-size: 0.8rem;
-		color: #718096;
+		color: var(--muted);
 		cursor: pointer;
 		white-space: nowrap;
 	}
 
 	.status,
 	.empty {
-		color: #718096;
+		color: var(--muted);
 		font-size: 0.9rem;
 		margin-top: 2rem;
 		text-align: center;
 	}
 
 	.error {
-		background: #2d1a1a;
-		border: 1px solid #742a2a;
+		background: var(--danger-surface);
+		border: 1px solid var(--danger-border);
 		border-radius: 6px;
 		padding: 0.75rem 1rem;
 		font-size: 0.875rem;
-		color: #fc8181;
+		color: var(--danger-text);
 		margin-bottom: 1.5rem;
 	}
 
@@ -261,8 +264,8 @@
 	}
 
 	.provider-group {
-		background: #1a202c;
-		border: 1px solid #2d3748;
+		background: var(--surface);
+		border: 1px solid var(--surface-raised);
 		border-radius: 8px;
 		overflow: hidden;
 	}
@@ -284,11 +287,11 @@
 	}
 
 	.provider-group[open] .provider-name {
-		border-bottom: 1px solid #2d3748;
+		border-bottom: 1px solid var(--surface-raised);
 	}
 
 	.provider-count {
-		color: #718096;
+		color: var(--muted);
 		font-weight: 400;
 		font-size: 0.8rem;
 	}
@@ -301,8 +304,8 @@
 	}
 
 	.product-card {
-		background: #0f1117;
-		border: 1px solid #2d3748;
+		background: var(--bg);
+		border: 1px solid var(--surface-raised);
 		border-radius: 6px;
 		padding: 0.5rem 0.75rem;
 		display: flex;
@@ -333,12 +336,12 @@
 	}
 
 	.flag.rail {
-		background: #2a4365;
-		color: #90cdf4;
+		background: var(--accent-surface);
+		color: var(--accent-text);
 	}
 
 	.flag.preload {
-		background: #276227;
-		color: #9ae6b4;
+		background: var(--success-border);
+		color: var(--success-text);
 	}
 </style>

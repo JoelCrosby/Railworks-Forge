@@ -19,7 +19,11 @@ pub struct Blueprint {
 }
 
 impl Blueprint {
-    pub fn new(provider: impl Into<String>, product: impl Into<String>, blueprint_id: impl Into<String>) -> Self {
+    pub fn new(
+        provider: impl Into<String>,
+        product: impl Into<String>,
+        blueprint_id: impl Into<String>,
+    ) -> Self {
         Self {
             provider: provider.into(),
             product: product.into(),

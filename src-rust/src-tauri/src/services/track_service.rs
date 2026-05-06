@@ -16,6 +16,7 @@ use std::{
 
 /// Converts Tracks.bin → XML (cached), then streaming-parses unique track blueprints.
 pub async fn get_tracks(route: &Route) -> Result<Vec<TrackBlueprint>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("get_tracks");
     let bin_path = route.tracks_binary_path();
     anyhow::ensure!(
         bin_path.exists(),
@@ -29,6 +30,7 @@ pub async fn get_tracks(route: &Route) -> Result<Vec<TrackBlueprint>> {
 
 /// Converts Tracks.bin → XML, applies blueprint replacements, converts back, updates RouteProperties.xml.
 pub async fn replace_tracks(route: &Route, replacements: &[TrackReplacement]) -> Result<()> {
+    let _profile = crate::services::profiling::ProfileSpan::new("replace_tracks");
     if replacements.iter().all(|r| r.to.is_none()) {
         return Ok(());
     }
@@ -77,6 +79,7 @@ pub async fn replace_tracks(route: &Route, replacements: &[TrackReplacement]) ->
 /// Extracts unique Provider/Product/BlueprintID triples from
 /// `Network-cSectionGenericProperties > BlueprintID > iBlueprintLibrary-cAbsoluteBlueprintID`.
 pub fn parse_tracks(xml_path: &Path) -> Result<Vec<TrackBlueprint>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("parse_tracks");
     let file = std::fs::File::open(xml_path)
         .with_context(|| format!("opening tracks xml: {}", xml_path.display()))?;
     let mut reader = Reader::from_reader(BufReader::new(file));
@@ -211,6 +214,7 @@ pub fn apply_track_replacements(
     output_path: &Path,
     replacements: &[TrackReplacement],
 ) -> Result<()> {
+    let _profile = crate::services::profiling::ProfileSpan::new("apply_track_replacements");
     // Build a lookup from old → new blueprint.
     type Key = (String, String, String);
     let map: std::collections::HashMap<Key, &TrackBlueprint> = replacements

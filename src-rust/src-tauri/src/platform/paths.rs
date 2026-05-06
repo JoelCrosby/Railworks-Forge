@@ -48,9 +48,8 @@ pub fn find_game_directory() -> Result<PathBuf> {
         return Ok(path);
     }
 
-    find_from_steam_library().context(
-        "Could not locate Railworks installation. Set the game path in Settings.",
-    )
+    find_from_steam_library()
+        .context("Could not locate Railworks installation. Set the game path in Settings.")
 }
 
 #[cfg(windows)]
@@ -65,11 +64,11 @@ fn find_from_registry() -> Result<PathBuf> {
 }
 
 fn find_from_settings() -> Result<PathBuf> {
-    let settings_path = app_config_dir()?.join("settings.json");
+    let settings_path = super::settings::settings_path()?;
     let content = std::fs::read_to_string(settings_path)?;
-    let value: serde_json::Value = serde_json::from_str(&content)?;
-    let path = value["gamePath"]
-        .as_str()
+    let settings: super::settings::AppSettings = serde_json::from_str(&content)?;
+    let path = settings
+        .game_path
         .context("gamePath not set in settings.json")?;
     Ok(PathBuf::from(path))
 }
@@ -90,21 +89,16 @@ fn steam_library_candidates() -> Vec<PathBuf> {
     #[cfg(target_os = "linux")]
     {
         if let Some(home) = dirs::home_dir() {
-            candidates.push(
-                home.join(".steam/steam/steamapps/common/RailWorks"),
-            );
-            candidates.push(
-                home.join(".local/share/Steam/steamapps/common/RailWorks"),
-            );
+            candidates.push(home.join(".steam/steam/steamapps/common/RailWorks"));
+            candidates.push(home.join(".local/share/Steam/steamapps/common/RailWorks"));
         }
     }
 
     #[cfg(target_os = "macos")]
     {
         if let Some(home) = dirs::home_dir() {
-            candidates.push(
-                home.join("Library/Application Support/Steam/steamapps/common/RailWorks"),
-            );
+            candidates
+                .push(home.join("Library/Application Support/Steam/steamapps/common/RailWorks"));
         }
     }
 

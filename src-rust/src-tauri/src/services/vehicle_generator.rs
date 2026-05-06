@@ -23,11 +23,7 @@ pub fn generate_vehicle_xml(entry: &VehicleEntry) -> String {
 
     // Assign IDs to all empty d:id="" placeholders.
     while xml.contains(r#"d:id="""#) {
-        xml = xml.replacen(
-            r#"d:id="""#,
-            &format!(r#"d:id="{}""#, next_entity_id()),
-            1,
-        );
+        xml = xml.replacen(r#"d:id="""#, &format!(r#"d:id="{}""#, next_entity_id()), 1);
     }
 
     // Update blueprint fields inside <BlueprintID>.

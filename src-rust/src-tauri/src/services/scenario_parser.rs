@@ -12,6 +12,7 @@ use std::{io::BufReader, path::Path};
 /// The document can exceed 500 MB; this parser uses quick-xml's pull API so it
 /// never holds more than one consist subtree in memory at a time.
 pub fn parse_consists(path: &Path) -> Result<Vec<Consist>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("parse_scenario_consists");
     let file = std::fs::File::open(path)
         .with_context(|| format!("opening scenario xml: {}", path.display()))?;
     let mut reader = Reader::from_reader(BufReader::new(file));
@@ -135,42 +136,26 @@ pub fn parse_consists(path: &Path) -> Result<Vec<Consist>> {
                     }
 
                     // ── Direct vehicle fields (depth == vehicle_at + 1) ───
-                    "Name"
-                        if vehicle_at.is_some()
-                            && !in_veh_bp_outer
-                            && !in_veh_component =>
-                    {
+                    "Name" if vehicle_at.is_some() && !in_veh_bp_outer && !in_veh_component => {
                         capture = Some("veh_name");
                     }
                     "UniqueNumber"
-                        if vehicle_at.is_some()
-                            && !in_veh_bp_outer
-                            && !in_veh_component =>
+                        if vehicle_at.is_some() && !in_veh_bp_outer && !in_veh_component =>
                     {
                         capture = Some("veh_unique");
                     }
                     "LocoClass"
-                        if vehicle_at.is_some()
-                            && !in_veh_bp_outer
-                            && !in_veh_component =>
+                        if vehicle_at.is_some() && !in_veh_bp_outer && !in_veh_component =>
                     {
                         capture = Some("veh_loco_class");
                     }
-                    "Flipped"
-                        if vehicle_at.is_some()
-                            && !in_veh_bp_outer
-                            && !in_veh_component =>
-                    {
+                    "Flipped" if vehicle_at.is_some() && !in_veh_bp_outer && !in_veh_component => {
                         capture = Some("veh_flipped");
                     }
 
                     // ── Blueprint nesting ──────────────────────────────────
                     // Outer <BlueprintID> wrapper of the vehicle entity
-                    "BlueprintID"
-                        if vehicle_at.is_some()
-                            && !in_veh_bp_outer
-                            && !in_veh_abs_bp =>
-                    {
+                    "BlueprintID" if vehicle_at.is_some() && !in_veh_bp_outer && !in_veh_abs_bp => {
                         in_veh_bp_outer = true;
                     }
                     "iBlueprintLibrary-cAbsoluteBlueprintID" if in_veh_bp_outer => {
@@ -235,8 +220,7 @@ pub fn parse_consists(path: &Path) -> Result<Vec<Consist>> {
 
                 // ── Vehicle finalization ───────────────────────────────────
                 if name == "cOwnedEntity" && vehicle_at == Some(depth) {
-                    let blueprint =
-                        Blueprint::new(&vb_provider, &vb_product, &vb_blueprint_id);
+                    let blueprint = Blueprint::new(&vb_provider, &vb_product, &vb_blueprint_id);
                     let blueprint_type = BlueprintType::from_str(&vb_component_type);
                     cb_vehicles.push(VehicleBlueprint {
                         blueprint,
@@ -344,8 +328,8 @@ fn build_consist(
     let loco_class = LocoClass::from_str(loco_class_str);
     let acquisition_state = acquisition_state(vehicles);
 
-    let loco_author = (!lead.blueprint.provider.is_empty())
-        .then(|| lead.blueprint.provider.clone());
+    let loco_author =
+        (!lead.blueprint.provider.is_empty()).then(|| lead.blueprint.provider.clone());
 
     Some(Consist {
         id: id.to_string(),

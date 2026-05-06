@@ -2,8 +2,7 @@ use crate::{
     models::{Consist, Scenario},
     services::{
         consist_commands::{ConsistCommand, SavedConsist, VehicleEntry},
-        persistence,
-        scenario_service,
+        persistence, scenario_service,
     },
 };
 use serde::{Deserialize, Serialize};

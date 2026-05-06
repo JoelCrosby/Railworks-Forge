@@ -14,6 +14,7 @@ use tokio::{fs, task::JoinSet};
 /// than serialising. With a typical 50–200 route install this is the dominant
 /// speedup over the previous sequential loop.
 pub async fn get_routes(routes_dir: &Path) -> Result<Vec<Route>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("get_routes");
     let mut entries = fs::read_dir(routes_dir).await?;
     let mut tasks: JoinSet<Option<Route>> = JoinSet::new();
 
@@ -46,6 +47,7 @@ pub async fn get_routes(routes_dir: &Path) -> Result<Vec<Route>> {
 
 /// Loads a single route by directory ID.
 pub async fn get_route(routes_dir: &Path, route_id: &str) -> Result<Option<Route>> {
+    let _profile = crate::services::profiling::ProfileSpan::new("get_route");
     let route_dir = routes_dir.join(route_id);
     if !fs::try_exists(&route_dir).await.unwrap_or(false) {
         return Ok(None);

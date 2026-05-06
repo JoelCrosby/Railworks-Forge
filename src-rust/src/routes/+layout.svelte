@@ -1,6 +1,9 @@
 <script lang="ts">
+	import '../app.css';
 	import { listen } from '@tauri-apps/api/event';
 	import favicon from '$lib/assets/favicon.svg';
+	import { t } from '$lib/i18n';
+	import { applyTheme, loadSettings, settings } from '$lib/settings';
 
 	let { children } = $props();
 
@@ -10,8 +13,15 @@
 		| { status: 'failed'; message: string };
 
 	let dbStatus = $state<DbStatus | null>(null);
+	let locale = $derived($settings.locale);
 
 	$effect(() => {
+		loadSettings().catch(() => applyTheme('dark'));
+
+		const themeWatcher = window.matchMedia?.('(prefers-color-scheme: dark)');
+		const onThemeChange = () => applyTheme($settings.theme);
+		themeWatcher?.addEventListener('change', onThemeChange);
+
 		const unlisten = listen<DbStatus>('scenario-db-status', (event) => {
 			dbStatus = event.payload;
 			if (event.payload.status === 'ready') {
@@ -22,6 +32,7 @@
 		});
 		return () => {
 			unlisten.then((fn) => fn());
+			themeWatcher?.removeEventListener('change', onThemeChange);
 		};
 	});
 </script>
@@ -35,10 +46,10 @@
 {#if dbStatus !== null && dbStatus.status !== 'ready'}
 	<div class="db-status {dbStatus.status}">
 		{#if dbStatus.status === 'loading'}
-			<span class="dot"></span> Loading player data…
+			<span class="dot"></span> {t(locale, 'status-loading-player-data')}
 		{:else}
-			<span class="dot"></span> Player data unavailable: {dbStatus.message}
-			<button onclick={() => (dbStatus = null)}>×</button>
+			<span class="dot"></span> {t(locale, 'status-player-data-unavailable', { message: dbStatus.message })}
+			<button aria-label="Dismiss" onclick={() => (dbStatus = null)}>x</button>
 		{/if}
 	</div>
 {/if}
@@ -48,12 +59,12 @@
 		position: fixed;
 		bottom: 1rem;
 		right: 1rem;
-		background: #1a202c;
-		border: 1px solid #2d3748;
+		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: 6px;
 		padding: 0.4rem 0.75rem;
 		font-size: 0.78rem;
-		color: #a0aec0;
+		color: var(--muted-strong);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -62,21 +73,21 @@
 	}
 
 	.db-status.failed {
-		border-color: #742a2a;
-		color: #fc8181;
+		border-color: var(--danger-border);
+		color: var(--danger-text);
 	}
 
 	.dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: #4a90d9;
+		background: var(--accent);
 		flex-shrink: 0;
 		animation: pulse 1.2s ease-in-out infinite;
 	}
 
 	.failed .dot {
-		background: #fc8181;
+		background: var(--danger-text);
 		animation: none;
 	}
 

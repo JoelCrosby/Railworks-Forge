@@ -1,12 +1,11 @@
 use crate::{
     models::Scenario,
-    platform::{app_config_dir},
-    serz,
+    platform::app_config_dir,
     services::{
         consist_commands::{ConsistCommand, SavedConsist},
-        scenario_editor,
-        scenario_parser,
+        scenario_editor, scenario_parser,
     },
+    serz,
 };
 use anyhow::Result;
 use std::path::{Path, PathBuf};
@@ -34,7 +33,11 @@ pub async fn backup_scenario_bin(bin_path: &Path) -> Result<PathBuf> {
 
     let backup_path = backup_dir.join(format!("Scenario.{ts}.bin.bak"));
     tokio::fs::copy(bin_path, &backup_path).await?;
-    tracing::info!("backed up {} → {}", bin_path.display(), backup_path.display());
+    tracing::info!(
+        "backed up {} → {}",
+        bin_path.display(),
+        backup_path.display()
+    );
     Ok(backup_path)
 }
 
@@ -63,8 +66,10 @@ pub async fn apply_edits(
         let xml_path_c = xml_path.clone();
         let temp_c = temp_xml_path.clone();
         let cmds_c = commands.clone();
-        tokio::task::spawn_blocking(move || scenario_editor::apply_edits(&xml_path_c, &temp_c, &cmds_c))
-            .await??;
+        tokio::task::spawn_blocking(move || {
+            scenario_editor::apply_edits(&xml_path_c, &temp_c, &cmds_c)
+        })
+        .await??;
     }
     tokio::fs::rename(&temp_xml_path, &xml_path).await?;
 
@@ -73,8 +78,8 @@ pub async fn apply_edits(
 
     // Re-parse consists from the updated XML.
     let xml_path_c = xml_path.clone();
-    let consists = tokio::task::spawn_blocking(move || scenario_parser::parse_consists(&xml_path_c))
-        .await??;
+    let consists =
+        tokio::task::spawn_blocking(move || scenario_parser::parse_consists(&xml_path_c)).await??;
 
     tracing::info!(
         "scenario {}: {} consists after edit",
@@ -82,7 +87,10 @@ pub async fn apply_edits(
         consists.len()
     );
 
-    Ok(Scenario { consists, ..scenario })
+    Ok(Scenario {
+        consists,
+        ..scenario
+    })
 }
 
 // ── Saved consist templates ──────────────────────────────────────────────────

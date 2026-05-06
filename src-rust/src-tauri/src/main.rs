@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  railworks_forge_lib::run();
+    railworks_forge_lib::run();
 }

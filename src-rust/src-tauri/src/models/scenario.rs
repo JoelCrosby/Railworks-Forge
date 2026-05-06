@@ -66,24 +66,7 @@ pub struct Scenario {
 }
 
 impl Scenario {
-    pub fn properties_path(&self) -> PathBuf {
-        self.directory_path.join("ScenarioProperties.xml")
-    }
-
     pub fn binary_path(&self) -> PathBuf {
         self.directory_path.join("Scenario.bin")
-    }
-
-    pub fn scenario_archive_path(&self) -> PathBuf {
-        self.directory_path.join("MainContent.ap")
-    }
-
-    pub fn search_index(&self) -> String {
-        format!(
-            "{} {} {}",
-            self.name.to_lowercase(),
-            self.locomotive.to_lowercase(),
-            self.season.to_lowercase()
-        )
     }
 }
