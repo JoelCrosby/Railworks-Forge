@@ -45,7 +45,7 @@
 </svelte:head>
 
 <Sidebar.Provider
-  style="--sidebar-width: calc(var(--spacing) * 64); --header-height: calc(var(--spacing) * 12);"
+  style="--sidebar-width: calc(var(--spacing) * 52); --header-height: calc(var(--spacing) * 12);"
 >
   <AppSidebar variant="inset" />
   <Sidebar.Inset>

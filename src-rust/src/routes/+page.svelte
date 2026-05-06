@@ -2,6 +2,14 @@
   import { invoke } from '@tauri-apps/api/core';
   import { Channel } from '@tauri-apps/api/core';
   import { goto } from '$app/navigation';
+  import type { ColumnDef, SortingState, Updater } from '@tanstack/table-core';
+  import { getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+  import {
+    createSvelteTable,
+    DataTableHeader,
+  } from '$lib/components/ui/data-table/index.js';
+  import { Badge } from '$lib/components/ui/badge/index.js';
+  import * as Table from '$lib/components/ui/table/index.js';
   import { t } from '$lib/i18n';
   import { settings } from '$lib/settings';
   import { setBreadcrumbs } from '$lib/stores/breadcrumb';
@@ -26,12 +34,45 @@
   let error = $state<string | null>(null);
   let progress = $state<string | null>(null);
   let openingRouteId = $state<string | null>(null);
+  let sorting = $state<SortingState>([]);
 
   // Game path state
   let gamePathMissing = $state(false);
   let locale = $derived($settings.locale);
 
   const PATH_MISSING_HINT = 'could not locate railworks';
+  const routeColumns: ColumnDef<Route>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Route',
+    },
+    {
+      accessorKey: 'packagingType',
+      header: 'Type',
+      meta: {
+        headerClass: 'w-32 text-right',
+        headerAlign: 'right',
+      },
+    },
+  ];
+
+  const table = createSvelteTable<Route>({
+    get data() {
+      return routes;
+    },
+    columns: routeColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (route) => route.id,
+    state: {
+      get sorting() {
+        return sorting;
+      },
+    },
+    onSortingChange: (updater: Updater<SortingState>) => {
+      sorting = updater instanceof Function ? updater(sorting) : updater;
+    },
+  });
 
   function isPathMissingError(msg: string): boolean {
     return msg.toLowerCase().includes(PATH_MISSING_HINT);
@@ -67,6 +108,7 @@
   }
 
   async function openRoute(route: Route) {
+    if (openingRouteId !== null) return;
     openingRouteId = route.id;
     error = null;
     try {
@@ -77,6 +119,12 @@
       error = `Could not open route: ${String(e)}`;
       openingRouteId = null;
     }
+  }
+
+  function openRouteFromKeyboard(event: KeyboardEvent, route: Route) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openRoute(route);
   }
 
   $effect(() => {
@@ -131,30 +179,57 @@
       {t(locale, 'home-no-routes')}
     </div>
   {:else}
-    <ul class="flex list-none flex-col gap-2">
-      {#each routes as route (route.id)}
-        <li>
-          <button
-            class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-surface-raised bg-surface px-4 py-3.5 text-left text-text transition-colors hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onclick={() => openRoute(route)}
-            disabled={openingRouteId !== null}
-          >
-            <span class="flex-1 text-[0.95rem] font-medium">{route.name}</span>
-            {#if route.description}
-              <span class="flex-2 truncate text-[0.8rem] text-muted"
-                >{route.description}</span
-              >
-            {/if}
-            <span
-              class={`shrink-0 rounded px-2 py-0.5 text-[0.7rem] tracking-wider uppercase ${route.packagingType === 'packed' ? 'bg-accent-surface text-accent-text' : 'bg-success-surface text-ok'}`}
+    <div>
+      <Table.Root
+        class="table-fixed"
+        containerClass="overflow-x-auto rounded-md border"
+      >
+        <Table.Header class="block w-full">
+          {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+            <Table.Row class="table w-full table-fixed">
+              {#each headerGroup.headers as header (header.id)}
+                <DataTableHeader {header} />
+              {/each}
+            </Table.Row>
+          {/each}
+        </Table.Header>
+
+        <Table.Body
+          class="block max-h-[calc(100vh-240px)] overflow-y-auto [scrollbar-gutter:stable]"
+        >
+          {#each table.getRowModel().rows as row (row.id)}
+            <Table.Row
+              class={`table w-full table-fixed cursor-pointer ${openingRouteId !== null ? 'opacity-50' : ''}`}
+              tabindex={openingRouteId === null ? 0 : -1}
+              aria-disabled={openingRouteId !== null}
+              onclick={() => openRoute(row.original)}
+              onkeydown={(event) => openRouteFromKeyboard(event, row.original)}
             >
-              {openingRouteId === route.id
-                ? t(locale, 'home-opening')
-                : route.packagingType}
-            </span>
-          </button>
-        </li>
-      {/each}
-    </ul>
+              {#each row.getVisibleCells() as cell (cell.id)}
+                <Table.Cell
+                  class={cell.column.id === 'name'
+                    ? 'font-medium'
+                    : cell.column.id === 'description'
+                      ? 'max-w-180 truncate text-muted'
+                      : 'text-right'}
+                >
+                  {#if cell.column.id === 'description'}
+                    {row.original.description ?? '—'}
+                  {:else if cell.column.id === 'packagingType'}
+                    <Badge variant="outline">
+                      {openingRouteId === row.original.id
+                        ? t(locale, 'home-opening')
+                        : row.original.packagingType}
+                    </Badge>
+                  {:else}
+                    {row.original.name}
+                  {/if}
+                </Table.Cell>
+              {/each}
+            </Table.Row>
+          {/each}
+        </Table.Body>
+      </Table.Root>
+    </div>
   {/if}
 </div>
