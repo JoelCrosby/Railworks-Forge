@@ -1,0 +1,94 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+        x:DataType="vm:RouteDetailViewModel">
+    <Design.PreviewWith>
+        <DataGrid ItemsSource="{Binding Scenarios}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Locomotive" Binding="{Binding Locomotive}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Design.PreviewWith>
+
+    <Design.DataContext>
+        <vm:DesignRouteDetailViewModel />
+    </Design.DataContext>
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                  <SolidColorBrush x:Key="DataGridColumnHeaderForegroundBrush" Color="{DynamicResource SystemBaseMediumColor}" />
+                  <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Color="{DynamicResource SystemAltHighColor}" />
+                  <SolidColorBrush x:Key="DataGridColumnHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+                  <SolidColorBrush x:Key="DataGridColumnHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+                  <SolidColorBrush x:Key="DataGridColumnHeaderDraggedBackgroundBrush" Color="{DynamicResource SystemChromeMediumLowColor}" />
+                  <SolidColorBrush x:Key="DataGridRowGroupHeaderBackgroundBrush" Color="{DynamicResource SystemChromeMediumColor}" />
+                  <SolidColorBrush x:Key="DataGridRowGroupHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+                  <SolidColorBrush x:Key="DataGridRowGroupHeaderForegroundBrush" Color="{DynamicResource SystemBaseHighColor}" />
+                  <SolidColorBrush x:Key="DataGridRowGroupHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+                  <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemListLowColor}" />
+                  <SolidColorBrush x:Key="DataGridRowInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
+                  <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                  <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                  <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                  <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                  <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="{DynamicResource SystemBaseHighColor}" />
+                  <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="{DynamicResource SystemAltMediumColor}" />
+                  <SolidColorBrush x:Key="DataGridCellInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
+                  <SolidColorBrush x:Key="DataGridGridLinesBrush" Opacity="0.4" Color="{DynamicResource SystemBaseMediumLowColor}" />
+                  <SolidColorBrush x:Key="DataGridDetailsPresenterBackgroundBrush" Color="{DynamicResource SystemChromeMediumLowColor}" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="DataGridColumnHeaderForegroundBrush" Color="{DynamicResource SystemBaseMediumColor}" />
+                    <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Color="{DynamicResource SystemAltHighColor}" />
+                    <SolidColorBrush x:Key="DataGridColumnHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+                    <SolidColorBrush x:Key="DataGridColumnHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+                    <SolidColorBrush x:Key="DataGridColumnHeaderDraggedBackgroundBrush" Color="{DynamicResource SystemChromeMediumLowColor}" />
+                    <SolidColorBrush x:Key="DataGridRowGroupHeaderBackgroundBrush" Color="{DynamicResource SystemChromeMediumColor}" />
+                    <SolidColorBrush x:Key="DataGridRowGroupHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+                    <SolidColorBrush x:Key="DataGridRowGroupHeaderForegroundBrush" Color="{DynamicResource SystemBaseHighColor}" />
+                    <SolidColorBrush x:Key="DataGridRowGroupHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+                    <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemListLowColor}" />
+                    <SolidColorBrush x:Key="DataGridRowInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
+                    <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="{DynamicResource SystemBaseHighColor}" />
+                    <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="{DynamicResource SystemAltMediumColor}" />
+                    <SolidColorBrush x:Key="DataGridCellInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
+                    <SolidColorBrush x:Key="DataGridGridLinesBrush" Opacity="0.4" Color="{DynamicResource SystemBaseMediumLowColor}" />
+                    <SolidColorBrush x:Key="DataGridDetailsPresenterBackgroundBrush" Color="{DynamicResource SystemChromeMediumLowColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <Style Selector="DataGrid">
+        <Setter Property="BorderBrush" Value="{DynamicResource DataGridGridLinesBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="GridLinesVisibility" Value="All" />
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
+    </Style>
+
+    <Style Selector="DataGridRow">
+        <Setter Property="MinHeight" Value="32" />
+    </Style>
+
+    <Style Selector="DataGridCell">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Padding" Value="12,0" />
+    </Style>
+
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="12,0" />
+    </Style>
+
+</Styles>

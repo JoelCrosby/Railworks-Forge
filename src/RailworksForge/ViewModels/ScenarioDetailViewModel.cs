@@ -10,14 +10,12 @@ using System.Threading.Tasks;
 using AngleSharp.Xml;
 
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
-using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -43,8 +41,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private List<ConsistViewModel> _cachedServices = [];
 
-    private ObservableCollection<ConsistViewModel> Services { get; }
-    public FlatTreeDataGridSource<ConsistViewModel> ServicesSource { get; }
+    public ObservableCollection<ConsistViewModel> Services { get; }
 
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
@@ -57,7 +54,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceConsistCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteConsistCommand { get; }
 
-    private IReadOnlyList<ConsistViewModel> SelectedItems => ServicesSource.RowSelection?.SelectedItems as IReadOnlyList<ConsistViewModel> ?? [];
+    public IReadOnlyList<ConsistViewModel> SelectedItems { get; set; } = [];
 
     private ConsistViewModel? SelectedConsistViewModel => SelectedItems.Count is 1 ? SelectedItems[0] : null;
 
@@ -199,22 +196,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         });
 
         Services = [];
-
-        ServicesSource = new FlatTreeDataGridSource<ConsistViewModel>(Services)
-        {
-            Columns =
-            {
-                new TemplateColumn<ConsistViewModel>("Image", "ImageCell"),
-                new TranslatedColumn<ConsistViewModel, AcquisitionState>("consist_state", x => x.Consist.ConsistAcquisitionState),
-                new TranslatedColumn<ConsistViewModel, bool>("is_player_driver", x => x.Consist.PlayerDriver),
-                new TranslatedColumn<ConsistViewModel, string>("locomotive_name", x => x.Consist.LocomotiveName),
-                new TranslatedColumn<ConsistViewModel, int>("consist_length", x => x.Consist.Length),
-                new TranslatedColumn<ConsistViewModel, string>("service_name", x => x.Consist.ServiceName),
-                new TranslatedColumn<ConsistViewModel, string>("provider", x => x.Consist.BlueprintSetIdProvider),
-                new TranslatedColumn<ConsistViewModel, string>("product", x => x.Consist.BlueprintSetIdProduct),
-                new TranslatedColumn<ConsistViewModel, string>("blueprint_id", x => x.Consist.BlueprintId),
-            },
-        };
 
         Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
 

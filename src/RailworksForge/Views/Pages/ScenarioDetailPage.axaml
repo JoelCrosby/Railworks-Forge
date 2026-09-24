@@ -63,32 +63,45 @@
             <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.services}}" />
         </StackPanel>
 
-        <TreeDataGrid
+        <DataGrid
             Name="ServicesDataGrid"
-            Source="{Binding ServicesSource}"
+            ItemsSource="{Binding Services}"
+            SelectionMode="Extended"
+            SelectionChanged="ServicesDataGrid_OnSelectionChanged"
             DoubleTapped="ServicesDataGrid_OnDoubleTapped"
         >
-            <TreeDataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="vm:ConsistViewModel">
+                            <Image Height="64" Source="{Binding ImageBitmap}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.consist_state}}" Binding="{Binding Consist.ConsistAcquisitionState}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.is_player_driver}}" Binding="{Binding Consist.PlayerDriver}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive_name}}" Binding="{Binding Consist.LocomotiveName}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.consist_length}}" Binding="{Binding Consist.Length}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.service_name}}" Binding="{Binding Consist.ServiceName}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.provider}}" Binding="{Binding Consist.BlueprintSetIdProvider}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.product}}" Binding="{Binding Consist.BlueprintSetIdProduct}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Consist.BlueprintId}" />
+            </DataGrid.Columns>
+
+            <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding ClickedConsistCommand}" />
                     <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_with_quick_drive_consist}}" Command="{Binding ReplaceConsistCommand}"  />
                     <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_service}}" Command="{Binding DeleteConsistCommand}" />
                 </ContextMenu>
-            </TreeDataGrid.ContextMenu>
+            </DataGrid.ContextMenu>
 
-            <TreeDataGrid.Resources>
-                <DataTemplate x:Key="ImageCell" DataType="vm:ConsistViewModel">
-                    <Image Height="64" Source="{Binding ImageBitmap}"/>
-                </DataTemplate>
-            </TreeDataGrid.Resources>
-
-            <TreeDataGrid.Styles>
-                <Style Selector="TreeDataGridRow">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
                     <Setter Property="MinHeight" Value="64" />
                 </Style>
-            </TreeDataGrid.Styles>
-
-        </TreeDataGrid>
+            </DataGrid.Styles>
+        </DataGrid>
 
     </DockPanel>
 </UserControl>

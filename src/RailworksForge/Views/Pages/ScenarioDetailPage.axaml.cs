@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Subjects;
 
@@ -12,7 +13,7 @@ namespace RailworksForge.Views.Pages;
 
 public partial class ScenarioDetailPage : UserControl
 {
-    private readonly TreeDataGridSortHandler _servicesDataGridSortHandler;
+    private readonly DataGridSortHandler _servicesDataGridSortHandler;
 
     public ScenarioDetailPage()
     {
@@ -29,9 +30,28 @@ public partial class ScenarioDetailPage : UserControl
     }
 
     // ReSharper disable once UnusedParameter.Local
+    private void ServicesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not ScenarioDetailViewModel context)
+        {
+            return;
+        }
+
+        context.SelectedItems = ServicesDataGrid.SelectedItems.Cast<ConsistViewModel>().ToList();
+    }
+
+    // ReSharper disable once UnusedParameter.Local
     private void ServicesDataGrid_OnDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (DataContext is not ScenarioDetailViewModel context) return;
+        if (!e.IsFromDataGridRow())
+        {
+            return;
+        }
+
+        if (DataContext is not ScenarioDetailViewModel context)
+        {
+            return;
+        }
 
         context.ClickedConsistCommand.Execute().Subscribe(new Subject<Unit>());
     }

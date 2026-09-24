@@ -5,6 +5,8 @@
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
         xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceConsistDialog"
         x:DataType="vm:ReplaceConsistViewModel"
@@ -61,13 +63,26 @@
                         <controls:TableHeader Text="Consist" />
                     </StackPanel>
 
-                    <TreeDataGrid Source="{Binding PreloadConsistsSource}" Name="PreloadConsistsDataGrid">
-                        <TreeDataGrid.Resources>
-                            <DataTemplate x:Key="ImageCell" DataType="vm:PreloadConsistViewModel">
-                                <Image Height="64" Source="{Binding ImageBitmap}"/>
-                            </DataTemplate>
-                        </TreeDataGrid.Resources>
-                    </TreeDataGrid>
+                    <DataGrid
+                        Name="PreloadConsistsDataGrid"
+                        ItemsSource="{Binding PreloadConsists}"
+                        SelectedItem="{Binding SelectedConsist, Mode=TwoWay}"
+                        SelectionMode="Single"
+                    >
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:PreloadConsistViewModel">
+                                        <Image Height="64" Source="{Binding ImageBitmap}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive_name}}" Binding="{Binding Consist.LocomotiveName}" />
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.display_name}}" Binding="{Binding Consist.DisplayName}" />
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.engine_type}}" Binding="{Binding Consist.EngineType}" />
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.length}}" Binding="{Binding Consist.ConsistEntries.Count}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
                 </DockPanel>
             </Border>
@@ -76,7 +91,7 @@
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Click="CancelButtonOnClick">Cancel</Button>
-                <Button IsEnabled="{Binding PreloadConsistsSource.RowSelection.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                <Button IsEnabled="{Binding SelectedConsist, Converter={x:Static ObjectConverters.IsNotNull}}"
                         Command="{Binding ReplaceConsistCommand}">
                     Replace Consist
                 </Button>

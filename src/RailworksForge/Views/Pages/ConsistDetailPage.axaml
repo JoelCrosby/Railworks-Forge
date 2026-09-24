@@ -23,19 +23,32 @@
                 <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
                 <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}" />
 
-                <TreeDataGrid
+                <DataGrid
                     Name="ConsistVehiclesDataGrid"
-                    Source="{Binding RailVehiclesSource}"
+                    ItemsSource="{Binding RailVehicles}"
+                    SelectionMode="Extended"
+                    SelectionChanged="ConsistVehiclesDataGrid_OnSelectionChanged"
                     DoubleTapped="ConsistVehiclesDataGrid_OnDoubleTapped"
                 >
-                    <TreeDataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.index}}" Binding="{Binding Index}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" Binding="{Binding AcquisitionState}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive_name}}" Binding="{Binding LocomotiveName}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.unique_number}}" Binding="{Binding UniqueNumber}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.is_flipped}}" Binding="{Binding Flipped}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.product}}" Binding="{Binding BlueprintSetIdProduct}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.provider}}" Binding="{Binding BlueprintSetIdProvider}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding BlueprintId}" />
+                    </DataGrid.Columns>
+
+                    <DataGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
                             <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_vehicle_with_selected}}" Command="{Binding ReplaceVehicleCommand}"  />
                             <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_vehicle}}" Command="{Binding DeleteVehicleCommand}"  />
                         </ContextMenu>
-                    </TreeDataGrid.ContextMenu>
-                </TreeDataGrid>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
 
             </StackPanel>
         </DockPanel>
@@ -81,17 +94,24 @@
                        <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
                    </StackPanel>
 
-                   <TreeDataGrid
-                       Source="{Binding AvailableStockSource}"
-                       CanUserSortColumns="True"
+                   <DataGrid
                        Name="AvailableStockDataGrid"
+                       ItemsSource="{Binding AvailableStock}"
+                       SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
+                       SelectionMode="Single"
                    >
-                       <TreeDataGrid.ContextMenu>
+                       <DataGrid.Columns>
+                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
+                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding BlueprintType}" />
+                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Blueprint.BlueprintId}" />
+                       </DataGrid.Columns>
+
+                       <DataGrid.ContextMenu>
                            <ContextMenu>
                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}"  />
                            </ContextMenu>
-                       </TreeDataGrid.ContextMenu>
-                   </TreeDataGrid>
+                       </DataGrid.ContextMenu>
+                   </DataGrid>
 
                </DockPanel>
            </Grid>

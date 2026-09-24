@@ -10,14 +10,12 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
-using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
@@ -43,10 +41,10 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<BrowserDirectory> _directoryTree;
 
-    private ObservableCollection<PreloadConsistViewModel> PreloadConsists { get; }
-    public FlatTreeDataGridSource<PreloadConsistViewModel> PreloadConsistsSource { get; }
+    public ObservableCollection<PreloadConsistViewModel> PreloadConsists { get; }
 
-    public PreloadConsistViewModel? SelectedConsist => PreloadConsistsSource.RowSelection?.SelectedItem;
+    [ObservableProperty]
+    private PreloadConsistViewModel? _selectedConsist;
 
     public ReplaceConsistViewModel()
     {
@@ -62,17 +60,6 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             Launcher.Open(SelectedDirectory.AssetDirectory.Path);
         });
 
-        PreloadConsistsSource = new FlatTreeDataGridSource<PreloadConsistViewModel>(PreloadConsists)
-        {
-            Columns =
-            {
-                new TemplateColumn<PreloadConsistViewModel>("Image", "ImageCell"),
-                new TranslatedColumn<PreloadConsistViewModel, string>("locomotive_name", x => x.Consist.LocomotiveName),
-                new TranslatedColumn<PreloadConsistViewModel, string>("display_name", x => x.Consist.DisplayName),
-                new TranslatedColumn<PreloadConsistViewModel, LocoClass>("engine_type", x => x.Consist.EngineType),
-                new TranslatedColumn<PreloadConsistViewModel, int>("length", x => x.Consist.ConsistEntries.Count),
-            },
-        };
     }
 
     private async Task LoadAvailableStock()

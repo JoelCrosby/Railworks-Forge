@@ -5,31 +5,41 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
-using RailworksForge.Controls;
+using RailworksForge.Util;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
-public partial class RouteDetailPage : TreeDataGridUserControl
+public partial class RouteDetailPage : UserControl
 {
-    protected override TreeDataGrid DataGrid => ScenariosDataGrid;
+    private readonly DataGridSortHandler _scenariosDataGridSortHandler;
 
     public RouteDetailPage()
     {
         InitializeComponent();
+
+        _scenariosDataGridSortHandler = new (ScenariosDataGrid);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
-        SortColumns();
+        _scenariosDataGridSortHandler.SortColumns();
     }
 
     // ReSharper disable once UnusedParameter.Local
     private void ScenariosDataGrid_OnDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (DataContext is not RouteDetailViewModel context) return;
+        if (!e.IsFromDataGridRow())
+        {
+            return;
+        }
+
+        if (DataContext is not RouteDetailViewModel context)
+        {
+            return;
+        }
 
         context.DetailsClickedCommand.Execute().Subscribe(new Subject<Unit>());
     }

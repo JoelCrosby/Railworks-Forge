@@ -15,7 +15,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
-using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -44,9 +43,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private BrowserDirectory? _selectedDirectory;
 
-    private RollingStockEntry? SelectedVehicle => AvailableStockSource.RowSelection?.SelectedItem;
-    private ConsistRailVehicle? SelectedConsistVehicle  => RailVehiclesSource.RowSelection?.SelectedItem;
-    private IReadOnlyList<ConsistRailVehicle> SelectedConsistVehicles => RailVehiclesSource.RowSelection?.SelectedItems as IReadOnlyList<ConsistRailVehicle> ?? [];
+    [ObservableProperty]
+    private RollingStockEntry? _selectedVehicle;
+
+    public IReadOnlyList<ConsistRailVehicle> SelectedConsistVehicles { get; set; } = [];
+
+    private ConsistRailVehicle? SelectedConsistVehicle => SelectedConsistVehicles.Count is 1 ? SelectedConsistVehicles[0] : null;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -65,11 +67,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<BrowserDirectory> _directoryTree;
 
-    private ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
-    public FlatTreeDataGridSource<ConsistRailVehicle> RailVehiclesSource { get; }
+    public ObservableCollection<ConsistRailVehicle> RailVehicles { get; }
 
-    private ObservableCollection<RollingStockEntry> AvailableStock { get; }
-    public FlatTreeDataGridSource<RollingStockEntry> AvailableStockSource { get; }
+    public ObservableCollection<RollingStockEntry> AvailableStock { get; }
 
     public ConsistDetailViewModel(Scenario scenario, Consist consist, AssetDirectoryTreeService directoryTreeService)
     {
@@ -101,31 +101,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AddVehicleCommand = ReactiveCommand.CreateFromTask(AddVehicle);
         DeleteVehicleCommand = ReactiveCommand.CreateFromTask(DeleteVehicle);
         ReplaceVehicleCommand = ReactiveCommand.CreateFromTask(ReplaceVehicle);
-
-        RailVehiclesSource = new FlatTreeDataGridSource<ConsistRailVehicle>(RailVehicles)
-        {
-            Columns =
-            {
-                new TranslatedColumn<ConsistRailVehicle, int>("index", x => x.Index),
-                new TranslatedColumn<ConsistRailVehicle, AcquisitionState>("state", x => x.AcquisitionState),
-                new TranslatedColumn<ConsistRailVehicle, string>("locomotive_name", x => x.LocomotiveName),
-                new TranslatedColumn<ConsistRailVehicle, string>("unique_number", x => x.UniqueNumber),
-                new TranslatedColumn<ConsistRailVehicle, bool>("is_flipped", x => x.Flipped),
-                new TranslatedColumn<ConsistRailVehicle, string>("product", x => x.BlueprintSetIdProduct),
-                new TranslatedColumn<ConsistRailVehicle, string>("provider", x => x.BlueprintSetIdProvider),
-                new TranslatedColumn<ConsistRailVehicle, string>("blueprint_id", x => x.BlueprintId),
-            },
-        };
-
-        AvailableStockSource = new FlatTreeDataGridSource<RollingStockEntry>(AvailableStock)
-        {
-            Columns =
-            {
-                new TranslatedColumn<RollingStockEntry, string>("name", x => x.DisplayName),
-                new TranslatedColumn<RollingStockEntry, BlueprintType>("type", x => x.BlueprintType),
-                new TranslatedColumn<RollingStockEntry, string>("blueprint_id", x => x.Blueprint.BlueprintId),
-            },
-        };
 
         this.PropertyChanged += (_, e) =>
         {

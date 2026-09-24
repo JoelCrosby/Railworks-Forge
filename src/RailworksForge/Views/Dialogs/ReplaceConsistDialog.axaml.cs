@@ -15,7 +15,7 @@ namespace RailworksForge.Views.Dialogs;
 
 public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewModel>
 {
-    private readonly TreeDataGridSortHandler _preloadConsistsDataGridSortHandler;
+    private readonly DataGridSortHandler _preloadConsistsDataGridSortHandler;
 
     public ReplaceConsistDialog()
     {

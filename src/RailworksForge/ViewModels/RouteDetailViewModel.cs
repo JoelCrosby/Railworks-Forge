@@ -6,13 +6,11 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using DynamicData;
 
-using RailworksForge.Controls;
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Util;
@@ -28,7 +26,7 @@ public partial class RouteDetailViewModel : ViewModelBase
     [ObservableProperty]
     private RouteViewModel _route;
 
-    private ObservableCollection<Scenario> Scenarios { get; }
+    public ObservableCollection<Scenario> Scenarios { get; }
 
     private List<Scenario>? _cachedScenarios;
 
@@ -39,12 +37,11 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ReplaceTrackCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckAssetsCommand { get; }
 
-    private Scenario? SelectedItem => ScenariosSource.RowSelection?.SelectedItem;
+    [ObservableProperty]
+    private Scenario? _selectedItem;
 
     [ObservableProperty]
     private string? _searchTerm;
-
-    public FlatTreeDataGridSource<Scenario> ScenariosSource { get; }
 
     public RouteDetailViewModel(RouteViewModel route, ScenarioService scenarioService)
     {
@@ -93,22 +90,6 @@ public partial class RouteDetailViewModel : ViewModelBase
         });
 
         Scenarios = new (GetScenarios());
-
-        ScenariosSource = new FlatTreeDataGridSource<Scenario>(Scenarios)
-        {
-            Columns =
-            {
-                new TranslatedColumn<Scenario, PackagingType>("packaging_type", x => x.PackagingType),
-                new TranslatedColumn<Scenario, string>("name", x => x.Name) { Options = { CanUserSortColumn = true,  }},
-                new TranslatedColumn<Scenario, string>("locomotive", x => x.Locomotive),
-                new TranslatedColumn<Scenario, ScenarioClass>("type", x => x.ScenarioClass),
-                new TranslatedColumn<Scenario, int>("duration", x => x.Duration),
-                new TranslatedColumn<Scenario, int>("rating", x => x.Rating),
-                new TranslatedColumn<Scenario, string>("season", x => x.Season),
-                new TranslatedColumn<Scenario, int>("score", x => x.PlayerInfo.Score),
-                new TemplateColumn<Scenario>("completion", "CompletionCell"),
-            },
-        };
 
         this.PropertyChanged += (_, e) =>
         {

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RailworksForge.Core/RailworksForge.Core.csproj" />
+  <Project Path="RailworksForge.Translations/RailworksForge.Translations.csproj" />
+  <Project Path="RailworksForge.UnitTests/RailworksForge.UnitTests.csproj" />
+  <Project Path="RailworksForge/RailworksForge.csproj" />
+</Solution>
