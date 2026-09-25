@@ -45,7 +45,8 @@ internal sealed class Program
             .With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan] })
             .LogToTrace()
             .UseReactiveUI(rxui => rxui.WithExceptionHandler(new ExceptionObserver()))
-            .UsePlatformDetect();
+            .UsePlatformDetect()
+            .UseWaylandWithFallback();
 
     private static void HandleUnobservedTaskExceptions(object? _, UnobservedTaskExceptionEventArgs args)
     {
