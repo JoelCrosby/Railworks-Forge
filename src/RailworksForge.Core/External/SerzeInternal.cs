@@ -29,7 +29,39 @@ public class SerzInternal
         return new SerzInternal(ref input).ToXml();
     }
 
+    public static void Convert(string inputPath, string outputPath, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var input = File.ReadAllBytes(inputPath);
+        var converter = new SerzInternal(ref input);
+        var temporaryPath = outputPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+
+        try
+        {
+            using (var output = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                converter.WriteXml(output, cancellationToken);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            File.Move(temporaryPath, outputPath, true);
+        }
+        finally
+        {
+            File.Delete(temporaryPath);
+        }
+    }
+
     public IDocument ToXml()
+    {
+        using var output = new MemoryStream();
+        WriteXml(output, CancellationToken.None);
+        output.Position = 0;
+
+        return XmlParser.ParseDocument(output);
+    }
+
+    private void WriteXml(Stream output, CancellationToken cancellationToken)
     {
         _position = 0;
         _nextChunk = 0;
@@ -41,7 +73,6 @@ public class SerzInternal
             throw InvalidData("Unsupported SERZ header");
         }
 
-        using var output = new MemoryStream();
         var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true };
         using (var writer = XmlWriter.Create(output, settings))
         {
@@ -51,6 +82,7 @@ public class SerzInternal
 
             while (_position < _data.Length)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var chunk = ReadChunk();
 
                 switch (chunk.Kind)
@@ -157,10 +189,6 @@ public class SerzInternal
 
             writer.WriteEndDocument();
         }
-
-        output.Position = 0;
-
-        return XmlParser.ParseDocument(output);
     }
 
     private static void WriteBlob(XmlWriter writer, ReadOnlySpan<byte> bytes)

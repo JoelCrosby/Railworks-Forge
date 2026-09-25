@@ -19,7 +19,7 @@ public class SerzInternalTests
     [InlineData("SerzCache.bin")]
     [InlineData("SerzFeatures.bin")]
     [InlineData("SerzFloats.bin")]
-    public void ToXml_MatchesSerzOutput(string name)
+    public void Conversion_MatchesSerzOutput(string name)
     {
         var data = GetResourceBytes(name);
         using var expectedStream = new MemoryStream(GetResourceBytes(name + ".xml"));
@@ -28,6 +28,25 @@ public class SerzInternalTests
         var actual = XDocument.Parse(document.ToXml());
 
         Assert.Equal(expected.ToString(), actual.ToString());
+
+        var directory = Directory.CreateTempSubdirectory("railworks-serz-");
+
+        try
+        {
+            var inputPath = Path.Join(directory.FullName, "input.bin");
+            var outputPath = Path.Join(directory.FullName, "output.xml");
+            File.WriteAllBytes(inputPath, data);
+            File.WriteAllText(outputPath, "previous output");
+            SerzInternal.Convert(inputPath, outputPath);
+            var streamed = XDocument.Load(outputPath);
+
+            Assert.Equal(expected.ToString(), streamed.ToString());
+            Assert.Equal(2, Directory.GetFiles(directory.FullName).Length);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
     }
 
     [Fact]
@@ -84,6 +103,42 @@ public class SerzInternalTests
         var exception = Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
 
         Assert.Contains("byte offset", exception.Message);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Convert_FailurePreservesExistingOutput(bool cancel)
+    {
+        var directory = Directory.CreateTempSubdirectory("railworks-serz-");
+
+        try
+        {
+            var inputPath = Path.Join(directory.FullName, "input.bin");
+            var outputPath = Path.Join(directory.FullName, "output.xml");
+            var data = GetResourceBytes("SerzNodes.bin");
+            File.WriteAllBytes(inputPath, data[..^1]);
+            File.WriteAllText(outputPath, "previous output");
+            using var cancellation = new CancellationTokenSource();
+
+            if (cancel)
+            {
+                cancellation.Cancel();
+                Assert.Throws<OperationCanceledException>(() =>
+                    SerzInternal.Convert(inputPath, outputPath, cancellation.Token));
+            }
+            else
+            {
+                Assert.Throws<InvalidDataException>(() => SerzInternal.Convert(inputPath, outputPath));
+            }
+
+            Assert.Equal("previous output", File.ReadAllText(outputPath));
+            Assert.Equal(2, Directory.GetFiles(directory.FullName).Length);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
     }
 
     private static byte[] GetResourceBytes(string name)

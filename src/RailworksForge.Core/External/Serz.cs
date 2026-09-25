@@ -1,7 +1,5 @@
 using System.Diagnostics;
 
-using AngleSharp.Xml;
-
 using CliWrap;
 
 using RailworksForge.Core.Config;
@@ -42,13 +40,7 @@ public class Serz
 
         if (useInternalSerz)
         {
-            var xml = await Task.Run(() =>
-            {
-                var document = SerzInternal.Convert(inputPath);
-
-                return document.ToXml();
-            }, token);
-            await File.WriteAllTextAsync(outputPath, xml, token);
+            await Task.Run(() => SerzInternal.Convert(inputPath, outputPath, token), token);
         }
         else
         {
