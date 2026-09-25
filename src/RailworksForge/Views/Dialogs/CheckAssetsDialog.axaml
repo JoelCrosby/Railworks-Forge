@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loading="using:RailworksForge.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
@@ -27,7 +28,7 @@
         <StackPanel Grid.Row="1" IsVisible="{Binding IsLoading}" VerticalAlignment="Bottom">
             <Border Padding="48">
                 <Grid RowDefinitions="*,Auto,Auto,Auto">
-                    <controls:LoadingSpinner Grid.Row="0" HorizontalAlignment="Center" IsActive="{Binding IsLoading}" Height="256" />
+                    <loading:LoadingState Grid.Row="0" DataContext="{Binding Loading}" />
                     <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" MaxHeight="128" />
                     <TextBlock Grid.Row="2" Margin="0,12,0,0" Text="{Binding LoadingMessage}" HorizontalAlignment="Stretch" />
                     <TextBlock Grid.Row="3" Margin="0,12,0,0" Text="{Binding LoadingStatusMessage}" HorizontalAlignment="Stretch" />
@@ -35,7 +36,8 @@
             </Border>
         </StackPanel>
 
-        <Border Grid.Row="1" IsVisible="{Binding !IsLoading}">
+        <DockPanel Grid.Row="1" IsVisible="{Binding !IsLoading}">
+            <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
             <DataGrid BorderThickness="0,1,0,0"
                       BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
                       ItemsSource="{Binding Blueprints}"
@@ -53,7 +55,7 @@
                     <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
                 </DataGrid.Columns>
             </DataGrid>
-        </Border>
+        </DockPanel>
 
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">

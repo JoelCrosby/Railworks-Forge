@@ -61,8 +61,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             DataContext = interaction.Input,
         };
 
-        var result = await dialog.ShowDialog<TOutput?>(this);
-
-        interaction.SetOutput(result);
+        try
+        {
+            var result = await dialog.ShowDialog<TOutput?>(this);
+            interaction.SetOutput(result);
+        }
+        finally
+        {
+            interaction.Input.CancelLoading();
+        }
     }
 }

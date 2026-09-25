@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:controls="using:RailworksForge.Views.TemplatedControls"
+             x:Class="RailworksForge.Views.Controls.LoadingState"
+             x:DataType="vm:LoadingOperation"
+             x:CompileBindings="True"
+             IsVisible="{Binding IsVisible}">
+    <Border Padding="16" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+        <StackPanel Spacing="8" HorizontalAlignment="Center" MaxWidth="600">
+            <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding IsLoading}">
+                <controls:LoadingSpinner Width="24" Height="24" IsActive="{Binding IsLoading}" />
+                <TextBlock Text="{Binding Message}" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" IsVisible="{Binding HasError}" />
+            <Button Content="Retry" Command="{Binding RetryCommand}" IsVisible="{Binding CanRetry}"
+                    HorizontalAlignment="Center" />
+        </StackPanel>
+    </Border>
+</UserControl>

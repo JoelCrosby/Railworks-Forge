@@ -29,6 +29,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
 {
     private readonly Scenario _scenario;
     private readonly Consist _consist;
+    private readonly AssetDirectoryTreeService _directoryTreeService;
+
+    public LoadingOperation StockLoading { get; } = new();
 
     public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
@@ -47,12 +50,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public IReadOnlyList<ConsistRailVehicle> SelectedConsistVehicles { get; set; } = [];
 
     private ConsistRailVehicle? SelectedConsistVehicle => SelectedConsistVehicles.Count is 1 ? SelectedConsistVehicles[0] : null;
-
-    [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
-    private int _loadAvailableStockProgress;
 
     [ObservableProperty]
     private string? _searchTerm;
@@ -78,9 +75,10 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock = [];
         RailVehicles = [];
 
-        DirectoryTree = [..directoryTreeService.GetDirectoryTree()];
+        _directoryTreeService = directoryTreeService;
+        DirectoryTree = [];
 
-        LoadAvailableStockCommand = ReactiveCommand.CreateFromObservable(() => Observable.StartAsync(LoadAvailableStock));
+        LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
 
         OpenInExplorerCommand = ReactiveCommand.Create(() =>
         {
@@ -127,106 +125,92 @@ public partial class ConsistDetailViewModel : ViewModelBase
         Refresh();
     }
 
+    public override void CancelLoading()
+    {
+        base.CancelLoading();
+        StockLoading.Cancel();
+    }
+
+    partial void OnSelectedDirectoryChanged(BrowserDirectory? value)
+    {
+        StockLoading.Cancel();
+        AvailableStock.Clear();
+        SelectedVehicle = null;
+    }
+
     private void Refresh()
     {
-        IsLoading = true;
-
-        Cache.BlueprintAcquisitionStates.Clear();
-        Cache.ArchiveCache.Clear();
-
-        Observable.StartAsync(GetRailVehicles, RxSchedulers.MainThreadScheduler);
-    }
-
-    private async Task LoadAvailableStock()
-    {
-        if (SelectedDirectory?.AssetDirectory is null or not ProductDirectory)
+        _ = Loading.RunAsync("Loading consist vehicles…", async token =>
         {
-            return;
-        }
+            Cache.BlueprintAcquisitionStates.Clear();
+            Cache.ArchiveCache.Clear();
+            await _directoryTreeService.LoadDirectoryTree();
+            token.ThrowIfCancellationRequested();
+            var directories = _directoryTreeService.GetDirectoryTree().ToList();
+            var vehicles = string.IsNullOrWhiteSpace(_consist.BlueprintId)
+                ? []
+                : await _scenario.GetServiceConsistVehicles(_consist);
 
-        var binFiles = Directory
-            .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.bin", SearchOption.AllDirectories)
-            .Where(path =>
+            foreach (var vehicle in vehicles)
             {
-                if (Utilities.RollingStockFolders.Any(path.Contains))
-                {
-                    return true;
-                }
+                token.ThrowIfCancellationRequested();
+                _ = vehicle.AcquisitionState;
+            }
 
-                return path.Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase) is not true;
-            })
-            .ToList();
-
-        Dispatcher.UIThread.Post(() => AvailableStock.Clear());
-
-        await ProcessBinaries(binFiles);
-        await ProcessArchives();
-    }
-
-    private async Task ProcessArchives()
-    {
-        if (SelectedDirectory?.AssetDirectory is null or not ProductDirectory)
+            return (Directories: directories, Vehicles: vehicles);
+        }, result =>
         {
-            return;
-        }
-
-        var packages = Directory
-            .EnumerateFiles(SelectedDirectory.AssetDirectory.Path, "*.ap", SearchOption.AllDirectories);
-
-        var binFiles = new List<string>();
-
-        foreach (var package in packages)
-        {
-            var archiveBinaries = Archives.ExtractFilesOfType(package, ".bin");
-            binFiles.AddRange(archiveBinaries);
-        }
-
-        await ProcessBinaries(binFiles);
-    }
-
-    private async Task ProcessBinaries(List<string> binFiles)
-    {
-        LoadAvailableStockProgress = 0;
-
-        var processedCount = 0;
-        var processed = binFiles.Count;
-
-        await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
-        {
-            var exported = await Serz.Convert(binFile, cancellationToken);
-            var models = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
-
-            processedCount++;
-
-            LoadAvailableStockProgress = (int) Math.Ceiling((double)(100 * processedCount) / processed);
-
-            Dispatcher.UIThread.Post(() => AvailableStock.AddRange(models));
-        });
-    }
-
-    private async Task GetRailVehicles()
-    {
-        if (string.IsNullOrWhiteSpace(_consist.BlueprintId))
-        {
-            return;
-        }
-
-        var consists = await _scenario.GetServiceConsistVehicles(_consist);
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            _cachedRailVehicles = consists;
-
+            DirectoryTree = [..result.Directories];
+            _cachedRailVehicles = result.Vehicles;
             RailVehicles.Clear();
-            RailVehicles.AddRange(consists);
-            IsLoading = false;
+            RailVehicles.AddRange(result.Vehicles);
         });
+    }
+
+    private Task LoadAvailableStock()
+    {
+        var directory = SelectedDirectory?.AssetDirectory;
+
+        if (directory is not ProductDirectory)
+        {
+            return Task.CompletedTask;
+        }
+
+        AvailableStock.Clear();
+
+        return StockLoading.RunAsync("Loading available rolling stock…", async token =>
+        {
+            var binFiles = Directory.EnumerateFiles(directory.Path, "*.bin", SearchOption.AllDirectories)
+                .Where(path => !Path.GetFileName(path).Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var package in Directory.EnumerateFiles(directory.Path, "*.ap", SearchOption.AllDirectories))
+            {
+                token.ThrowIfCancellationRequested();
+                binFiles.AddRange(Archives.ExtractFilesOfType(package, ".bin"));
+            }
+
+            var results = new System.Collections.Concurrent.ConcurrentBag<RollingStockEntry>();
+            var options = new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = 4 };
+            await Parallel.ForEachAsync(binFiles, options, async (binFile, cancellationToken) =>
+            {
+                var exported = await Serz.Convert(binFile, cancellationToken);
+                var models = await GetConsistBlueprint(exported.OutputPath, cancellationToken);
+
+                foreach (var model in models)
+                {
+                    results.Add(model);
+                }
+            });
+
+            return results.OrderBy(model => model.DisplayName).ToList();
+        }, models => AvailableStock.AddRange(models));
     }
 
     private static async Task<List<RollingStockEntry>> GetConsistBlueprint(string path, CancellationToken cancellationToken)
     {
-        var text = File.OpenRead(path);
-        var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
+        using var text = File.OpenRead(path);
+        using var doc = await XmlParser.ParseDocumentAsync(text, cancellationToken);
         var blueprint = Blueprint.FromPath(path);
 
         return doc
@@ -251,9 +235,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
             Commands = [new AddConsistVehicle(request)],
         };
 
-        await runner.Run();
+        await Loading.RunAsync("Updating consist…", _ => runner.Run());
 
-        Refresh();
+        if (!Loading.HasError && IsActive)
+        {
+            Refresh();
+        }
     }
 
     private async Task ReplaceVehicle()
@@ -283,9 +270,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
             Commands = [new ReplaceConsistVehicles(request)],
         };
 
-        await runner.Run();
+        await Loading.RunAsync("Updating consist…", _ => runner.Run());
 
-        Refresh();
+        if (!Loading.HasError && IsActive)
+        {
+            Refresh();
+        }
     }
 
     private async Task DeleteVehicle()
@@ -304,8 +294,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
             Commands = [new DeleteConsistVehicle(request)],
         };
 
-        await runner.Run();
+        await Loading.RunAsync("Updating consist…", _ => runner.Run());
 
-        Refresh();
+        if (!Loading.HasError && IsActive)
+        {
+            Refresh();
+        }
     }
 }

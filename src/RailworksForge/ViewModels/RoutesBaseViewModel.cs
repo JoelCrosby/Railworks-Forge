@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Input.Platform;
@@ -25,10 +26,8 @@ public partial class RoutesBaseViewModel : ViewModelBase
 
     public RouteViewModel? SelectedItem { get; set; }
 
-    private List<RouteViewModel>? _cachedRoutes;
-
-    [ObservableProperty]
-    private bool _isLoading;
+    private readonly Lock _routeLock = new();
+    private Task<List<RouteViewModel>>? _routeLoad;
 
     public RoutesBaseViewModel()
     {
@@ -56,34 +55,44 @@ public partial class RoutesBaseViewModel : ViewModelBase
         });
     }
 
-    public async Task GetAllRoutes(string? searchTerm = null)
+    public Task GetAllRoutes(string? searchTerm = null)
     {
-        IsLoading = true;
+        return Loading.RunAsync("Loading routes…", async token =>
+        {
+            var routes = await GetRoutesTask().WaitAsync(token);
+            token.ThrowIfCancellationRequested();
+            var invariant = searchTerm?.ToLowerInvariant();
+            var results = invariant is null ? routes : routes.Where(route => route.SearchIndex.Contains(invariant));
 
-        var invariant = searchTerm?.ToLowerInvariant();
-        var routes = _cachedRoutes ?? await LoadRoutes();
-        var results = invariant is null ? routes : routes.Where(route => route.SearchIndex.Contains(invariant));
-
-        ListItems.Clear();
-        ListItems.AddRange(results);
-
-        IsLoading = false;
+            return results.ToList();
+        }, result =>
+        {
+            ListItems.Clear();
+            ListItems.AddRange(result);
+        });
     }
 
-    private async ValueTask<List<RouteViewModel>> LoadRoutes()
+    private Task<List<RouteViewModel>> GetRoutesTask()
+    {
+        lock (_routeLock)
+        {
+
+            if (_routeLoad is null || _routeLoad.IsFaulted || _routeLoad.IsCanceled)
+            {
+                _routeLoad = LoadRoutes();
+            }
+
+            return _routeLoad;
+        }
+    }
+
+    private static async Task<List<RouteViewModel>> LoadRoutes()
     {
         var items = RouteService.GetRoutes();
         var models = items.Select(item => new RouteViewModel(item)).ToList();
-
-        var options = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = 8,
-        };
-
+        var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
         await Parallel.ForEachAsync(models, options, (route, _) => route.LoadImage());
 
-        _cachedRoutes = models;
-
-        return _cachedRoutes;
+        return models;
     }
 }

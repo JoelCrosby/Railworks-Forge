@@ -22,6 +22,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public NavigationBarViewModel NavigationBar { get; }
     public StatusBarViewModel StatusBar { get; }
     public ProgressIndicatorViewModel ProgressIndicator { get; }
+
+    public LoadingOperation ToolsLoading { get; } = new();
     private RoutesViewModel Routes { get; }
 
     public Interaction<SaveConsistViewModel, SavedConsist?> ShowSaveConsistDialog { get; }
@@ -73,9 +75,8 @@ public partial class MainWindowViewModel : ViewModelBase
         NavigationBar.Scenario = null;
         NavigationBar.Consist = null;
 
-        Routes.LoadRoutes();
-
         ContentViewModel = Routes;
+        Routes.LoadRoutes();
     }
 
     public void SelectScenario(Scenario scenario)
@@ -107,8 +108,8 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        NavigationBar.Scenario.Refresh();
         ContentViewModel = NavigationBar.Scenario;
+        NavigationBar.Scenario.Refresh();
     }
 
     public void SelectScenarioConsist(Scenario scenario, Consist consist)
@@ -132,20 +133,35 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void UpdateProgressIndicator(InstallProgress model)
     {
-        ProgressIndicator.UpdateProgress(model);
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => ProgressIndicator.UpdateProgress(model));
     }
 
     public void ClearProgressIndicator()
     {
-        ProgressIndicator.ClearProgress();
+        Avalonia.Threading.Dispatcher.UIThread.Post(ProgressIndicator.ClearProgress);
+    }
+
+    partial void OnContentViewModelChanging(ViewModelBase value)
+    {
+
+        if (!ReferenceEquals(ContentViewModel, value))
+        {
+            ContentViewModel?.CancelLoading();
+        }
+    }
+
+    partial void OnContentViewModelChanged(ViewModelBase value)
+    {
+        value.Activate();
     }
 
     public void OnLoaded()
     {
-        Task.Run(() =>
+        _ = Loading.RunAsync("Loading scenario information…", async _ =>
         {
-            Observable.Start(_scenarioDatabaseService.LoadScenarioDatabase, RxSchedulers.MainThreadScheduler);
-            Observable.Start(_assetDirectoryTreeService.LoadDirectoryTree, RxSchedulers.MainThreadScheduler);
-        });
+            await _scenarioDatabaseService.LoadScenarioDatabase();
+
+            return true;
+        }, _ => { });
     }
 }

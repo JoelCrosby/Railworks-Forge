@@ -17,6 +17,10 @@ namespace RailworksForge.ViewModels;
 
 public class MainMenuViewModel : ViewModelBase
 {
+    public LoadingOperation Operations => Avalonia.Controls.Design.IsDesignMode
+        ? Loading
+        : Utils.GetApplicationViewModel().ToolsLoading;
+
     public ReactiveCommand<Unit, Unit> ExitCommand { get; } = ReactiveCommand.Create(() => Environment.Exit(0));
 
     public ReactiveCommand<Unit, Unit> ConvertBinToXmlCommand { get; }
@@ -58,9 +62,18 @@ public class MainMenuViewModel : ViewModelBase
 
             if (extension is not ".bin") return;
 
-            var result = await Serz.Convert(path, token, true);
+            var loading = Utils.GetApplicationViewModel().ToolsLoading;
 
-            File.Copy(result.OutputPath, path.Replace(extension, $"{extension}.xml"));
+            if (loading.IsLoading)
+            {
+                return;
+            }
+
+            await loading.RunAsync("Converting file…", async cancellationToken =>
+            {
+                var result = await Serz.Convert(path, cancellationToken, true);
+                File.Copy(result.OutputPath, path.Replace(extension, $"{extension}.xml"));
+            });
         });
 
         ConvertXmlToBinCommand = ReactiveCommand.CreateFromTask(async (token) =>
@@ -74,9 +87,18 @@ public class MainMenuViewModel : ViewModelBase
 
             if (extension is not ".xml") return;
 
-            var result = await Serz.Convert(path, token, true);
+            var loading = Utils.GetApplicationViewModel().ToolsLoading;
 
-            File.Copy(result.OutputPath, path.Replace($"{extension}.xml", extension));
+            if (loading.IsLoading)
+            {
+                return;
+            }
+
+            await loading.RunAsync("Converting file…", async cancellationToken =>
+            {
+                var result = await Serz.Convert(path, cancellationToken, true);
+                File.Copy(result.OutputPath, path.Replace($"{extension}.xml", extension));
+            });
         });
 
         OpenSettingsDirectoryCommand = ReactiveCommand.Create(() =>
@@ -93,17 +115,25 @@ public class MainMenuViewModel : ViewModelBase
             var packager = new Packager();
             var mainWindow = Utils.GetApplicationViewModel();
 
-            packager.PackageInstallProgressSubject.Subscribe(args =>
+            using var subscription = packager.PackageInstallProgressSubject.Subscribe(args =>
             {
                 mainWindow.UpdateProgressIndicator(args);
             });
 
-            foreach (var file in files)
+            try
             {
-                await packager.InstallPackage(file.Path.LocalPath);
+                await mainWindow.ToolsLoading.RunAsync("Installing packages…", async _ =>
+                {
+                    foreach (var file in files)
+                    {
+                        await packager.InstallPackage(file.Path.LocalPath);
+                    }
+                });
             }
-
-            mainWindow.ClearProgressIndicator();
+            finally
+            {
+                mainWindow.ClearProgressIndicator();
+            }
         });
 
         SystemThemeCommand = ReactiveCommand.Create(() =>

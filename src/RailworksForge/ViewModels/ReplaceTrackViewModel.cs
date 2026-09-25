@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -27,18 +28,39 @@ public partial class ReplaceTrackViewModel : ViewModelBase
     private Route _route;
 
     [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
     private List<SelectTrackViewModel> _routeTracks;
 
     public ReactiveCommand<Unit, ReplaceTracksRequest> ReplaceTracksCommand { get; }
+
+    public bool CanReplace
+    {
+        get
+        {
+            var isReady = !Loading.IsLoading && !Loading.HasError;
+            var tracksReady = RouteTracks.All(track => !track.Loading.IsLoading && !track.Loading.HasError);
+            var hasSelection = RouteTracks.Any(track => track.SelectedTrack is not null);
+
+            return isReady && tracksReady && hasSelection;
+        }
+    }
+
+    partial void OnRouteTracksChanged(List<SelectTrackViewModel> value)
+    {
+        foreach (var track in value)
+        {
+            track.PropertyChanged += (_, _) => OnPropertyChanged(nameof(CanReplace));
+            track.Loading.PropertyChanged += (_, _) => OnPropertyChanged(nameof(CanReplace));
+        }
+
+        OnPropertyChanged(nameof(CanReplace));
+    }
 
     public ReplaceTrackViewModel(Route route)
     {
         Route = route;
         IsLoading = true;
         RouteTracks = [];
+        Loading.PropertyChanged += (_, _) => OnPropertyChanged(nameof(CanReplace));
 
         ReplaceTracksCommand = ReactiveCommand.Create(() =>
         {
@@ -54,26 +76,33 @@ public partial class ReplaceTrackViewModel : ViewModelBase
 
         if (Design.IsDesignMode is false)
         {
-            Observable.FromAsync(GetRouteTracks, RxSchedulers.TaskpoolScheduler).Subscribe(tracks =>
-            {
-                Dispatcher.UIThread.Post(() => RouteTracks = tracks);
-            });
+            _ = Loading.RunAsync("Loading route tracks…", _ => GetRouteTracks(), tracks => RouteTracks = tracks);
+        }
+    }
+
+    public override void CancelLoading()
+    {
+        base.CancelLoading();
+
+        foreach (var track in RouteTracks)
+        {
+            track.CancelLoading();
         }
     }
 
     private async Task<List<SelectTrackViewModel>> GetRouteTracks()
     {
         var blueprints = await Route.GetTrackBlueprints();
+        var providers = Paths.GetAssetProviders().ConvertAll(directory => new DirectoryItem(directory.Name, directory));
 
         var  models = blueprints
             .Select(blueprint => new SelectTrackViewModel
             {
+                Providers = providers,
                 RouteBlueprint = blueprint.Blueprint,
                 TrackCount = blueprint.Count,
             })
             .ToList();
-
-        Dispatcher.UIThread.Post(() => IsLoading = false);
 
         return models;
     }
@@ -86,7 +115,7 @@ public record DirectoryItem(string Name, DirectoryInfo Directory)
 
 public partial class SelectTrackViewModel : ViewModelBase
 {
-    public static List<DirectoryItem> Providers => Paths.GetAssetProviders().ConvertAll(d => new DirectoryItem(d.Name, d));
+    public List<DirectoryItem> Providers { get; init; } = [];
 
     [ObservableProperty]
     private ObservableCollection<DirectoryItem> _products = [];
@@ -109,21 +138,48 @@ public partial class SelectTrackViewModel : ViewModelBase
 
     partial void OnSelectedProviderChanged(DirectoryItem? value)
     {
-        if (value is null) return;
+        Loading.Cancel();
+        SelectedProduct = null;
+        SelectedTrack = null;
+        Products.Clear();
+        Tracks.Clear();
 
-        var products = Paths.GetAssetProviderProducts(value.Name);
-        var items = products.ConvertAll(p => new DirectoryItem(p.Name, p));
-
-        Products = new ObservableCollection<DirectoryItem>(items);
-    }
-
-    partial void OnSelectedProductChanged(DirectoryItem? value)
-    {
-        if (value is null || SelectedProvider is null || SelectedProduct is null)
+        if (value is null)
         {
             return;
         }
 
+        _ = Loading.RunAsync("Loading products…", _ =>
+        {
+            var products = Paths.GetAssetProviderProducts(value.Name);
+            var items = products.ConvertAll(product => new DirectoryItem(product.Name, product));
+
+            return Task.FromResult(items);
+        }, items => Products = new ObservableCollection<DirectoryItem>(items));
+    }
+
+    partial void OnSelectedProductChanged(DirectoryItem? value)
+    {
+        Loading.Cancel();
+        SelectedTrack = null;
+        Tracks.Clear();
+        var provider = SelectedProvider;
+
+        if (value is null || provider is null)
+        {
+            return;
+        }
+
+        _ = Loading.RunAsync("Loading track blueprints…",
+            token => GetTracks(provider, value, token),
+            tracks => Tracks = new ObservableCollection<Track>(tracks));
+    }
+
+    private static async Task<List<Track>> GetTracks(
+        DirectoryItem provider,
+        DirectoryItem value,
+        CancellationToken token)
+    {
         var directory = value.Directory;
 
         var networkTracksPath = Path.Join(directory.FullName, "RailNetwork");
@@ -147,8 +203,8 @@ public partial class SelectTrackViewModel : ViewModelBase
                 return new Blueprint
                 {
                     BlueprintId = blueprintId,
-                    BlueprintSetIdProduct = SelectedProduct.Name,
-                    BlueprintSetIdProvider = SelectedProvider.Name,
+                    BlueprintSetIdProduct = value.Name,
+                    BlueprintSetIdProvider = provider.Name,
                 };
             })
             .ToHashSet();
@@ -165,8 +221,8 @@ public partial class SelectTrackViewModel : ViewModelBase
             var binaries = networkFiles.Concat(trackFiles).Select(file => new Blueprint
             {
                 BlueprintId = file.Replace(".XSec", ".xml"),
-                BlueprintSetIdProduct = SelectedProduct.Name,
-                BlueprintSetIdProvider = SelectedProvider.Name,
+                BlueprintSetIdProduct = value.Name,
+                BlueprintSetIdProvider = provider.Name,
             });
 
             blueprints.AddRange(binaries);
@@ -176,7 +232,8 @@ public partial class SelectTrackViewModel : ViewModelBase
 
         foreach (var blueprint in blueprints)
         {
-            var document = blueprint.GetBlueprintXmlInternal();
+            token.ThrowIfCancellationRequested();
+            using var document = await blueprint.GetXmlDocument();
             var displayName = document.SelectLocalisedStringContent("cTrackSectionBlueprint DisplayName");
             var name = document.SelectTextContent("Name");
 
@@ -191,7 +248,8 @@ public partial class SelectTrackViewModel : ViewModelBase
 
         var sorted = tracks.OrderBy(t => t.Name);
 
-        Tracks = new ObservableCollection<Track>(sorted);
+
+        return sorted.ToList();
     }
 
     private static List<string> GetTrackBinaryPaths(string path)

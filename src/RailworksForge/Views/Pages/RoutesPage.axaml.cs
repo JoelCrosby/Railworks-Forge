@@ -11,8 +11,9 @@ public partial class RoutesPage : UserControl
         InitializeComponent();
     }
 
-    protected override void OnInitialized()
+    protected override void OnLoaded(Avalonia.Interactivity.RoutedEventArgs e)
     {
+        base.OnLoaded(e);
         if (DataContext is not RoutesViewModel model)
         {
             return;

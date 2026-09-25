@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
@@ -47,7 +48,7 @@
             </Border>
         </Grid>
 
-        <StackPanel DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
+        <StackPanel IsEnabled="{Binding Loading.IsIdle}" DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
             <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
             <Button Command="{Binding OpenBackupsFolder}" Content="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" />
             <Button Command="{Binding ExportBinXmlCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" />
@@ -55,7 +56,7 @@
             <Button Command="{Binding ExtractScenariosCommand}" Content="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" />
         </StackPanel>
 
-        <controls:LoadingSpinner DockPanel.Dock="Top"  IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Height="128" />
+        <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
 
         <StackPanel DockPanel.Dock="Top">
             <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
@@ -64,6 +65,7 @@
 
         <DataGrid
             Name="ServicesDataGrid"
+            IsEnabled="{Binding Loading.IsIdle}"
             ItemsSource="{Binding Services}"
             SelectionMode="Extended"
             SelectionChanged="ServicesDataGrid_OnSelectionChanged"

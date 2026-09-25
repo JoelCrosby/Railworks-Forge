@@ -43,18 +43,18 @@
                 </StackPanel>
             </Button>
 
-            <Button Command="{Binding InstallPackageCommand}" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.install_package}}">
+            <Button IsEnabled="{Binding Operations.IsIdle}" Command="{Binding InstallPackageCommand}" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.install_package}}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <lucideAvalonia:Lucide Icon="Package" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
                 </StackPanel>
             </Button>
 
             <SplitButton Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}"
-                         Command="{Binding ConvertBinToXmlCommand}">
+                         IsEnabled="{Binding Operations.IsIdle}" Command="{Binding ConvertBinToXmlCommand}">
                 <SplitButton.Flyout>
                     <MenuFlyout Placement="RightEdgeAlignedTop">
                         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}"
-                                  Command="{Binding ConvertXmlToBinCommand}" />
+                                  IsEnabled="{Binding Operations.IsIdle}" Command="{Binding ConvertXmlToBinCommand}" />
                     </MenuFlyout>
                 </SplitButton.Flyout>
             </SplitButton>

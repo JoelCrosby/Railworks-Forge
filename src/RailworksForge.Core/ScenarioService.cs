@@ -14,22 +14,23 @@ public class ScenarioService
         _scenarioDatabaseService = scenarioDatabaseService;
     }
 
-    public List<Scenario> GetScenarios(Route route)
+    public List<Scenario> GetScenarios(Route route, CancellationToken cancellationToken = default)
     {
         var scenarios = new HashSet<Scenario>();
 
-        AddUnPackedScenarios(route, scenarios);
-        AddPackedScenarios(route, scenarios);
+        AddUnPackedScenarios(route, scenarios, cancellationToken);
+        AddPackedScenarios(route, scenarios, cancellationToken);
 
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
     }
 
-    private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
     {
         foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
         {
             foreach (var path in ReadCompressedScenarios(package))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var scenario = Scenario.New(route, path);
 
                 if (scenario is null) continue;
@@ -40,22 +41,23 @@ public class ScenarioService
         }
     }
 
-    private void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios)
+    private void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
     {
         if (GetScenarioDirectory(route) is not {} dir) return;
 
-        foreach (var scenario in ReadScenarioFiles(route, dir))
+        foreach (var scenario in ReadScenarioFiles(route, dir, cancellationToken))
         {
             scenarios.Add(scenario);
         }
     }
 
-    private List<Scenario> ReadScenarioFiles(Route route, string directory)
+    private List<Scenario> ReadScenarioFiles(Route route, string directory, CancellationToken cancellationToken)
     {
         var scenarios = new List<Scenario>();
 
         foreach (var scenarioDir in Directory.EnumerateDirectories(directory))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var scenarioPath = Path.Join(scenarioDir, "ScenarioProperties.xml");
 
             if (!Paths.Exists(scenarioPath)) continue;
@@ -91,6 +93,6 @@ public class ScenarioService
             Path = path,
             IsArchivePath = true,
             ArchivePath = e.FullName,
-        });
+        }).ToList();
     }
 }

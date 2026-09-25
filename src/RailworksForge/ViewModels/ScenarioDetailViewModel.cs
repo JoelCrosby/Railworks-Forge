@@ -32,9 +32,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private Scenario _scenario;
 
     [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
     private string? _searchTerm;
 
     private List<ConsistViewModel> _cachedServices = [];
@@ -44,7 +41,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenBackupsFolder { get; }
     public ReactiveCommand<Unit, Unit> ExportBinXmlCommand { get; }
-    public ReactiveCommand<Unit, string> ExportXmlBinCommand { get; }
+    public ReactiveCommand<Unit, Unit> ExportXmlBinCommand { get; }
     public ReactiveCommand<Unit, Unit> ExtractScenariosCommand { get; }
     public ReactiveCommand<Unit, Unit> ClickedConsistCommand { get; }
 
@@ -73,20 +70,26 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         ExportBinXmlCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            var path = await scenario.ExportBinToXml();
-
-            if (Path.GetDirectoryName(path) is {} dirname)
+            await Loading.RunAsync("Exporting scenario XML…", _ => scenario.ExportBinToXml(), path =>
             {
-                Launcher.Open(dirname);
-            }
+
+                if (Path.GetDirectoryName(path) is {} directory)
+                {
+                    Launcher.Open(directory);
+                }
+            }, allowRetry: false);
         });
 
-        ExportXmlBinCommand = ReactiveCommand.CreateFromTask(scenario.ConvertXmlToBin);
+        ExportXmlBinCommand = ReactiveCommand.CreateFromTask(() =>
+            Loading.RunAsync("Converting scenario XML…", _ => scenario.ConvertXmlToBin()));
 
-        ExtractScenariosCommand = ReactiveCommand.CreateFromObservable(() =>
-        {
-            return Observable.Start(scenario.Route.ExtractScenarios);
-        });
+        ExtractScenariosCommand = ReactiveCommand.CreateFromTask(() =>
+            Loading.RunAsync("Extracting scenarios…", _ =>
+            {
+                scenario.Route.ExtractScenarios();
+
+                return Task.CompletedTask;
+            }));
 
         ClickedConsistCommand = ReactiveCommand.Create(() =>
         {
@@ -102,7 +105,14 @@ public partial class ScenarioDetailViewModel : ViewModelBase
                 return;
             }
 
-            var consistElement = await GetSavedConsistRailVehicleElement();
+            string? consistElement = null;
+            await Loading.RunAsync("Preparing consist…", _ => GetSavedConsistRailVehicleElement(),
+                xml => consistElement = xml, allowRetry: false);
+
+            if (consistElement is null)
+            {
+                return;
+            }
 
             var result = await Utils.GetApplicationViewModel().ShowSaveConsistDialog.Handle(new SaveConsistViewModel
             {
@@ -133,8 +143,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             if (result is null) return;
 
-            IsLoading = true;
-
             var target = new TargetConsist(SelectedItems.Select(x => x.Consist));
 
             var request = new ReplaceConsistRequest
@@ -149,9 +157,12 @@ public partial class ScenarioDetailViewModel : ViewModelBase
                 Commands = [new ReplaceConsist(request)],
             };
 
-            await runner.Run();
+            await Loading.RunAsync("Updating scenario…", _ => runner.Run());
 
-            Refresh();
+            if (!Loading.HasError && IsActive)
+            {
+                await LoadScenario();
+            }
         });
 
         DeleteConsistCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -178,8 +189,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             if (!result) return;
 
-            IsLoading = true;
-
             var target = new TargetConsist(SelectedItems.Select(x => x.Consist));
 
             var runner = new ConsistCommandRunner
@@ -188,14 +197,17 @@ public partial class ScenarioDetailViewModel : ViewModelBase
                 Commands = [new DeleteConsist(target)],
             };
 
-            await runner.Run();
+            await Loading.RunAsync("Updating scenario…", _ => runner.Run());
 
-            Refresh();
+            if (!Loading.HasError && IsActive)
+            {
+                await LoadScenario();
+            }
         });
 
         Services = [];
 
-        Observable.Start(GetAllScenarioConsists, RxSchedulers.MainThreadScheduler);
+        Refresh();
 
         this.PropertyChanged += (_, e) =>
         {
@@ -230,49 +242,44 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public void Refresh()
     {
-        IsLoading = true;
-
-        Cache.BlueprintAcquisitionStates.Clear();
-        Cache.ArchiveCache.Clear();
-
-        var updatedScenario = Scenario.Refresh();
-
-        if (updatedScenario is null) return;
-
-        Observable.Start(GetAllScenarioConsists, RxSchedulers.MainThreadScheduler);
-        Dispatcher.UIThread.Post(() => Scenario = updatedScenario);
+        _ = LoadScenario();
     }
 
-    private async Task GetAllScenarioConsists()
+    private Task LoadScenario()
     {
-        using var document = await Scenario.GetXmlDocument(false);
-        var consists = document.QuerySelectorAll("cConsist");
+        var scenario = Scenario;
 
-        Cache.ConsistAcquisitionStates.Clear();
-
-        var results = consists
-            .Select(Consist.ParseScenarioConsist)
-            .Where(r => r is not null)
-            .Cast<Consist>()
-            .ToList()
-            .ConvertAll(e => new ConsistViewModel(e));
-
-        Dispatcher.UIThread.Post(() =>
+        return Loading.RunAsync("Loading scenario services…", async token =>
         {
-            Services.Clear();
-            Services.AddRange(results);
+            Cache.BlueprintAcquisitionStates.Clear();
+            Cache.ArchiveCache.Clear();
+            var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
+            using var document = await updated.GetXmlDocument(false);
+            token.ThrowIfCancellationRequested();
+            Cache.ConsistAcquisitionStates.Clear();
+            var results = document.QuerySelectorAll("cConsist")
+                .Select(Consist.ParseScenarioConsist)
+                .OfType<Consist>()
+                .Select(consist => new ConsistViewModel(consist))
+                .ToList();
 
-            _cachedServices = results;
-
-            IsLoading = false;
-
-            Task.Run(() =>
+            foreach (var result in results)
             {
-                foreach (var result in results)
-                {
-                    result.LoadImage();
-                }
-            });
+                token.ThrowIfCancellationRequested();
+                result.LoadImage();
+            }
+
+            return (Scenario: updated, Services: results);
+        }, result =>
+        {
+            Scenario = result.Scenario;
+            _cachedServices = result.Services;
+            var invariant = SearchTerm?.ToLowerInvariant();
+            var services = invariant is null
+                ? _cachedServices
+                : _cachedServices.Where(service => service.Consist.SearchIndex.Contains(invariant));
+            Services.Clear();
+            Services.AddRange(services);
         });
     }
 }

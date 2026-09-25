@@ -22,7 +22,11 @@
             <ContentControl Content="{Binding ContentViewModel}" />
         </Border>
 
-        <controls:ProgressIndicator Grid.Row="3" DataContext="{Binding ProgressIndicator}" IsVisible="{Binding IsVisible}" />
+        <StackPanel Grid.Row="3">
+            <controls:LoadingState DataContext="{Binding Loading}" />
+            <controls:LoadingState DataContext="{Binding ToolsLoading}" />
+            <controls:ProgressIndicator DataContext="{Binding ProgressIndicator}" IsVisible="{Binding IsVisible}" />
+        </StackPanel>
         <controls:StatusBar Grid.Row="4" DataContext="{Binding StatusBar}"/>
     </Grid>
 </Window>

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loading="using:RailworksForge.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
@@ -26,7 +27,7 @@
             </StackPanel>
         </Border>
 
-        <controls:LoadingSpinner Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Height="128" />
+        <loading:LoadingState Grid.Row="1" DataContext="{Binding Loading}" />
 
         <Grid Grid.Row="1" ColumnDefinitions="*,12,*" IsVisible="{Binding !IsLoading}" Margin="12,24,12,12">
 
@@ -65,7 +66,8 @@
                                             </TextBlock>
                                         </StackPanel>
 
-                                        <Grid ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
+                                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
+                                            <loading:LoadingState Grid.Row="1" Grid.ColumnSpan="5" DataContext="{Binding Loading}" />
                                             <ComboBox
                                                 Grid.Column="0"
                                                 HorizontalAlignment="Stretch"
@@ -132,7 +134,7 @@
         <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Click="CancelButtonOnClick">Cancel</Button>
-                <Button Command="{Binding ReplaceTracksCommand}">
+                <Button IsEnabled="{Binding CanReplace}" Command="{Binding ReplaceTracksCommand}">
                     Replace Tracks
                 </Button>
             </StackPanel>

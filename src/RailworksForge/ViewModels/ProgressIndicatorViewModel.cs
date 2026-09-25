@@ -7,9 +7,6 @@ namespace RailworksForge.ViewModels;
 public partial class ProgressIndicatorViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
     private int _progress;
 
     [ObservableProperty]

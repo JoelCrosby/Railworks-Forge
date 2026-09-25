@@ -31,6 +31,8 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> LoadAvailableStockCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInExplorerCommand { get; }
 
+    public LoadingOperation StockLoading { get; } = new();
+
     public required Scenario Scenario { get; init; }
 
     [ObservableProperty]
@@ -47,7 +49,14 @@ public partial class ReplaceConsistViewModel : ViewModelBase
     public ReplaceConsistViewModel()
     {
         PreloadConsists = [];
-        DirectoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser());
+        DirectoryTree = [];
+
+        if (!Design.IsDesignMode)
+        {
+            _ = Loading.RunAsync("Loading asset providers…",
+                _ => Task.FromResult(BrowserDirectory.ViewAllBrowser().ToList()),
+                items => DirectoryTree = new ObservableCollection<BrowserDirectory>(items));
+        }
 
         ReplaceConsistCommand = ReactiveCommand.Create(() => SelectedConsist?.Consist);
         LoadAvailableStockCommand = ReactiveCommand.CreateFromTask(LoadAvailableStock);
@@ -60,30 +69,53 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
     }
 
-    private async Task LoadAvailableStock()
+    public override void CancelLoading()
     {
-        Dispatcher.UIThread.Post(PreloadConsists.Clear);
+        base.CancelLoading();
+        StockLoading.Cancel();
+    }
 
-        if (SelectedDirectory is null) return;
+    partial void OnSelectedDirectoryChanged(BrowserDirectory? value)
+    {
+        StockLoading.Cancel();
+        PreloadConsists.Clear();
+        SelectedConsist = null;
+    }
 
-        var preloadDirectory = GetPreloadDirectory(SelectedDirectory);
+    private Task LoadAvailableStock()
+    {
+        var directory = SelectedDirectory;
+        PreloadConsists.Clear();
 
-        if (preloadDirectory is null || !Paths.Exists(preloadDirectory)) return;
-
-        var binFiles = Directory
-            .EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories)
-            .Where(f => f.Equals("MetaData.bin", StringComparison.OrdinalIgnoreCase) is not true);
-
-        await Parallel.ForEachAsync(binFiles, async (binFile, cancellationToken) =>
+        if (directory is null)
         {
-            var exported = await Serz.Convert(binFile, cancellationToken);
-            var consists = await GetConsistBlueprints(exported.OutputPath, cancellationToken);
-            var models = consists.ConvertAll(c => new PreloadConsistViewModel(c));
+            return Task.CompletedTask;
+        }
 
-            LoadImages(models);
+        return StockLoading.RunAsync("Loading replacement consists…", async token =>
+        {
+            var preloadDirectory = GetPreloadDirectory(directory);
 
-            Dispatcher.UIThread.Post(() => PreloadConsists.AddRange(models));
-        });
+            if (preloadDirectory is null || !Paths.Exists(preloadDirectory))
+            {
+                return new List<PreloadConsistViewModel>();
+            }
+
+            var binFiles = Directory.EnumerateFiles(preloadDirectory, "*.bin", SearchOption.AllDirectories);
+            var results = new List<PreloadConsistViewModel>();
+
+            foreach (var binFile in binFiles)
+            {
+                token.ThrowIfCancellationRequested();
+                var exported = await Serz.Convert(binFile, token);
+                var consists = await GetConsistBlueprints(exported.OutputPath, token);
+                var models = consists.ConvertAll(consist => new PreloadConsistViewModel(consist));
+                LoadImages(models);
+                results.AddRange(models);
+            }
+
+            return results;
+        }, models => PreloadConsists.AddRange(models));
     }
 
     private static void LoadImages(IEnumerable<PreloadConsistViewModel> items)
@@ -116,13 +148,14 @@ public partial class ReplaceConsistViewModel : ViewModelBase
             Archives.ExtractDirectory(package, "PreLoad");
         }
 
-        return preloadDirectory;
+        return Directory.GetDirectories(directory.AssetDirectory.Path)
+            .FirstOrDefault(path => path.Contains("PreLoad", StringComparison.OrdinalIgnoreCase));
     }
 
     private static async Task<List<PreloadConsist>> GetConsistBlueprints(string path, CancellationToken cancellationToken = default)
     {
-        var file = File.OpenRead(path);
-        var doc = await XmlParser.ParseDocumentAsync(file, cancellationToken);
+        using var file = File.OpenRead(path);
+        using var doc = await XmlParser.ParseDocumentAsync(file, cancellationToken);
 
         var blueprints = doc.QuerySelectorAll("Blueprint cConsistBlueprint").ToList();
 
@@ -142,7 +175,7 @@ public partial class ReplaceConsistViewModel : ViewModelBase
 
                 if (parsed.Blueprint.BlueprintId.Contains("fragment", StringComparison.OrdinalIgnoreCase))
                 {
-                    var fragmentDocument = await parsed.Blueprint.GetXmlDocument();
+                    using var fragmentDocument = await parsed.Blueprint.GetXmlDocument();
                     var fragmentBlueprints = fragmentDocument.QuerySelectorAll("Blueprint cConsistFragmentBlueprint").ToList();
 
                     await Inner(fragmentBlueprints);

@@ -31,12 +31,12 @@
 
         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.tools}}">
             <MenuItem Command="{Binding OpenSettingsDirectoryCommand}" Header="{echoes:Translate {x:Static translations:Strings.open_settings_folder}}"/>
-            <MenuItem Command="{Binding ConvertBinToXmlCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}"/>
-            <MenuItem Command="{Binding ConvertXmlToBinCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}"/>
+            <MenuItem IsEnabled="{Binding Operations.IsIdle}" Command="{Binding ConvertBinToXmlCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}"/>
+            <MenuItem IsEnabled="{Binding Operations.IsIdle}" Command="{Binding ConvertXmlToBinCommand}" Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}"/>
         </MenuItem>
 
         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.packages}}">
-            <MenuItem Command="{Binding InstallPackageCommand}" Header="{echoes:Translate {x:Static translations:Strings.install_package}}"/>
+            <MenuItem IsEnabled="{Binding Operations.IsIdle}" Command="{Binding InstallPackageCommand}" Header="{echoes:Translate {x:Static translations:Strings.install_package}}"/>
         </MenuItem>
     </Menu>
 

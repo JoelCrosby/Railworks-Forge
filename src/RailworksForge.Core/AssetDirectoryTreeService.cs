@@ -7,18 +7,28 @@ namespace RailworksForge.Core;
 public class AssetDirectoryTreeService
 {
     private ObservableCollection<BrowserDirectory> _directoryTree = [];
+    private readonly Lock _lock = new();
+    private Task? _loadTask;
 
     public ObservableCollection<BrowserDirectory> GetDirectoryTree()
     {
         return _directoryTree;
     }
 
-    public async Task LoadDirectoryTree()
+    public Task LoadDirectoryTree()
     {
-        _directoryTree.Clear();
+        lock (_lock)
+        {
 
-        var directories = await Task.Run(() => new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser()));
+            if (_loadTask is null || _loadTask.IsFaulted || _loadTask.IsCanceled)
+            {
+                _loadTask = Task.Run(() =>
+                {
+                    _directoryTree = new ObservableCollection<BrowserDirectory>(BrowserDirectory.ViewAllBrowser());
+                });
+            }
 
-        _directoryTree = [..directories];
+            return _loadTask;
+        }
     }
 }

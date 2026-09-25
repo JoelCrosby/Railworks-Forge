@@ -60,8 +60,14 @@ public partial class RoutesViewModel : ViewModelBase
 
     }
 
+    public override void CancelLoading()
+    {
+        base.CancelLoading();
+        _context.CancelLoading();
+    }
+
     public void LoadRoutes()
     {
-        Observable.FromAsync(() => _context.GetAllRoutes(SearchTerm), RxSchedulers.TaskpoolScheduler).Subscribe();
+        _ = _context.GetAllRoutes(SearchTerm);
     }
 }

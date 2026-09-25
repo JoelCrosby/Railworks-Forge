@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -80,7 +81,7 @@ public partial class RouteDetailViewModel : ViewModelBase
 
             if (result is null) return;
 
-            await TrackService.ReplaceTracks(Route.Model, result);
+            await Loading.RunAsync("Replacing tracks…", _ => TrackService.ReplaceTracks(Route.Model, result));
         });
 
         CheckAssetsCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -88,31 +89,46 @@ public partial class RouteDetailViewModel : ViewModelBase
             await Utils.GetApplicationViewModel().ShowCheckAssetsDialog.Handle(new CheckAssetsViewModel(Route.Model));
         });
 
-        Scenarios = new (GetScenarios());
+        Scenarios = [];
+
+        if (!Design.IsDesignMode)
+        {
+            _ = Loading.RunAsync("Loading scenarios…", token => Task.FromResult(GetScenarios(token)), items =>
+            {
+                _cachedScenarios = items;
+                FilterScenarios();
+            });
+        }
+        else
+        {
+            Scenarios.AddRange(GetScenarios());
+        }
 
         this.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is not nameof(SearchTerm)) return;
 
-            var invariant = _searchTerm?.ToLowerInvariant();
-            var scenarios = _cachedScenarios ?? GetScenarios();
-            var indexed = invariant is null ? scenarios : scenarios.Where(scenario => scenario.SearchIndex.Contains(invariant));
-
-            Scenarios.Clear();
-            Scenarios.AddRange(indexed);
+            FilterScenarios();
         };
     }
 
-    private List<Scenario> GetScenarios()
+    private void FilterScenarios()
+    {
+        var invariant = SearchTerm?.ToLowerInvariant();
+        var scenarios = _cachedScenarios ?? [];
+        var indexed = invariant is null ? scenarios : scenarios.Where(scenario => scenario.SearchIndex.Contains(invariant));
+        Scenarios.Clear();
+        Scenarios.AddRange(indexed);
+    }
+
+    private List<Scenario> GetScenarios(CancellationToken cancellationToken = default)
     {
         if (Design.IsDesignMode)
         {
             return [..DesignData.DesignData.Scenarios];
         }
 
-        var items = _scenarioService.GetScenarios(Route.Model);
-
-        _cachedScenarios = items;
+        var items = _scenarioService.GetScenarios(Route.Model, cancellationToken);
 
         return items;
     }

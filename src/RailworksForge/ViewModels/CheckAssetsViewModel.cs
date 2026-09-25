@@ -36,9 +36,6 @@ public partial class CheckAssetsViewModel : ViewModelBase
     private Route _route;
 
     [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
     private int _loadingProgress;
 
     [ObservableProperty]
@@ -50,7 +47,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<Blueprint> _blueprints;
 
-    private readonly CancellationTokenSource _cts = new ();
+
 
     public CheckAssetsViewModel(Route route)
     {
@@ -65,18 +62,30 @@ public partial class CheckAssetsViewModel : ViewModelBase
             return;
         }
 
-        Observable.Start(RunAssetCheck, RxSchedulers.TaskpoolScheduler);
+        _ = RunAssetCheck();
     }
 
-    private async Task RunAssetCheck()
+    private Task RunAssetCheck()
     {
-        var blueprints = await GetBlueprints();
-        var missing = await GetMissingAssets(blueprints);
+        return Loading.RunAsync("Checking route assets…", async token =>
+        {
+            var blueprints = await GetBlueprints(token);
+            var missing = GetMissingAssets(blueprints, token);
 
+            return missing;
+        }, missing => Blueprints = new ObservableCollection<Blueprint>(missing));
+    }
+
+    private void ReportProgress(int percentage, string message, CancellationToken token)
+    {
         Dispatcher.UIThread.Post(() =>
         {
-            Blueprints.AddRange(missing);
-            IsLoading = false;
+
+            if (!token.IsCancellationRequested)
+            {
+                LoadingProgress = percentage;
+                LoadingMessage = message;
+            }
         });
     }
 
@@ -109,7 +118,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
         return Paths.Exists(path);
     }
 
-    private async Task<List<Blueprint>> GetBlueprints()
+    private async Task<List<Blueprint>> GetBlueprints(CancellationToken token)
     {
         if (HasCachedBlueprints())
         {
@@ -121,7 +130,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
         var binFiles = sceneryBinFiles.Concat(networkBinFiles).ToList();
 
-        var blueprintDictionary = await GetBlueprintsFromBinaries(binFiles);
+        var blueprintDictionary = await GetBlueprintsFromBinaries(binFiles, token);
         var blueprints = blueprintDictionary.Keys.ToList();
 
         await CacheBlueprintResults(blueprints);
@@ -129,19 +138,22 @@ public partial class CheckAssetsViewModel : ViewModelBase
         return blueprints;
     }
 
-    private async Task<ConcurrentDictionary<Blueprint, byte>> GetBlueprintsFromBinaries(List<string> binFiles)
+    private async Task<ConcurrentDictionary<Blueprint, byte>> GetBlueprintsFromBinaries(List<string> binFiles, CancellationToken cancellationToken)
     {
         var results = new ConcurrentDictionary<Blueprint, byte>();
 
         var processedCount = 0;
         var amountToProcess = binFiles.Count;
 
-        await Parallel.ForEachAsync(binFiles, _cts.Token, async (path, token) =>
+        var options = new ParallelOptions { CancellationToken = cancellationToken, MaxDegreeOfParallelism = 4 };
+        var lastPercentage = -1;
+
+        await Parallel.ForEachAsync(binFiles, options, async (path, token) =>
         {
             try
             {
                 var serialised = await Serz.Convert(path, token);
-                var xml = File.OpenRead(serialised.OutputPath);
+                using var xml = File.OpenRead(serialised.OutputPath);
 
                 // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                 using var document = XmlParser.ParseDocument(xml);
@@ -165,56 +177,49 @@ public partial class CheckAssetsViewModel : ViewModelBase
                     results.TryAdd(blueprint, byte.MinValue);
                 }
 
-                processedCount++;
+                var count = Interlocked.Increment(ref processedCount);
+                var percentage = (int)(100L * count / amountToProcess);
 
-                var count = processedCount;
-
-                LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToProcess);
-                LoadingMessage = $"Processed {count} of {amountToProcess} files ( %{LoadingProgress} )";
-                LoadingStatusMessage = $"Processing path: {path}";
+                if (Interlocked.Exchange(ref lastPercentage, percentage) != percentage)
+                {
+                    ReportProgress(percentage, $"Processed {count} of {amountToProcess} files", token);
+                }
             }
             catch (Exception e)
             {
-                Log.Error(e, "check assets for path path failed");
+                throw new IOException($"Unable to check {path}", e);
             }
         });
 
         return results;
     }
 
-    private async Task<List<Blueprint>> GetMissingAssets(List<Blueprint> blueprints)
+    private List<Blueprint> GetMissingAssets(List<Blueprint> blueprints, CancellationToken token)
     {
-        var amountCheckedCount = 0;
-        var amountToCheck = blueprints.Count;
+        var notFound = new List<Blueprint>();
+        var lastPercentage = -1;
 
-        var missing = await Observable.Start(() =>
+        for (var index = 0; index < blueprints.Count; index++)
         {
-            var notFound = new List<Blueprint>();
+            token.ThrowIfCancellationRequested();
+            var blueprint = blueprints[index];
 
-            foreach (var blueprint in blueprints)
+            if (blueprint.AcquisitionState is not AcquisitionState.Found)
             {
-                amountCheckedCount++;
-
-                var count = amountCheckedCount;
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    LoadingProgress = (int) Math.Ceiling((double)(100 * count) / amountToCheck);
-                    LoadingMessage = $"Checked {count} of {amountToCheck} blueprints ( %{LoadingProgress} )";
-                    LoadingStatusMessage = $"Processing blueprint at path: {blueprint.BinaryPath}";
-                });
-
-                if (blueprint.AcquisitionState is not AcquisitionState.Found)
-                {
-                    notFound.Add(blueprint);
-                }
+                notFound.Add(blueprint);
             }
 
-            return notFound.OrderBy(n => n.BlueprintSetIdProvider).ToList();
+            var count = index + 1;
+            var percentage = (int)(100L * count / blueprints.Count);
 
-        }, RxSchedulers.TaskpoolScheduler);
+            if (percentage != lastPercentage)
+            {
+                lastPercentage = percentage;
+                ReportProgress(percentage, $"Checked {count} of {blueprints.Count} blueprints", token);
+            }
+        }
 
-        return missing;
+        return notFound.OrderBy(blueprint => blueprint.BlueprintSetIdProvider).ToList();
     }
 
     private List<string> GetBinFiles(string directory, bool allDirectories)
@@ -241,6 +246,6 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
     public void OnClose()
     {
-        _cts.Cancel();
+        CancelLoading();
     }
 }
