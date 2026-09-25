@@ -1,14 +1,13 @@
 _pkgbasename=railworks-forge
 pkgname=railworks-forge-git
-pkgver=0.1
+pkgver=r250.2b6431c
 pkgrel=1
 pkgdesc="Program for managing Railworks assets, scenarios and locomotives"
 arch=(x86_64)
 url="https://github.com/joelcrosby/railworks-forge.git"
 license=('GPL3')
-depends=(dotnet-runtime)
+depends=(icu fontconfig)
 makedepends=(dotnet-sdk)
-checkdepends=(dotnet-runtime)
 optdepends=()
 provides=(railworks-forge)
 conflicts=(railworks-forge)
@@ -16,9 +15,15 @@ options=(!strip)
 source=("${pkgname}::git+${url}")
 sha512sums=('SKIP')
 
+pkgver() {
+	cd "${pkgname}"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
 build() {
 	cd "${pkgname}"
-	dotnet publish -r linux-x64 "src/RailworksForge" -c Release
+	rm -rf publish
+	dotnet publish "src/RailworksForge" -r linux-x64 -c Release -o publish
 }
 
 package() {
@@ -27,7 +32,7 @@ package() {
 	mkdir -pv "$pkgdir/opt/$_pkgbasename"
 	mkdir -pv "$pkgdir/usr/share/applications/"
 
-	cp -R "src/RailworksForge/bin/Release/net9.0/linux-x64/publish/." "$pkgdir/opt/$_pkgbasename/"
+	cp -R "publish/." "$pkgdir/opt/$_pkgbasename/"
 
 	cp railworks-forge.desktop "$pkgdir/usr/share/applications/"
 	cp railworks-forge-icon.png "$pkgdir/opt/$_pkgbasename/"
