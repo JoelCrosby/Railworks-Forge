@@ -1,7 +1,7 @@
 using System;
 
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 
 using RailworksForge.ViewModels;
 

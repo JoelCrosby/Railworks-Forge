@@ -15,14 +15,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using Dameng.SepEx;
 
-using DynamicData;
-
 using nietras.SeparatedValues;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
+using RailworksForge.Util;
 using RailworksForge.Core.Models.Common;
 
 using ReactiveUI;
@@ -66,7 +65,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
             return;
         }
 
-        Observable.Start(RunAssetCheck, RxApp.TaskpoolScheduler);
+        Observable.Start(RunAssetCheck, RxSchedulers.TaskpoolScheduler);
     }
 
     private async Task RunAssetCheck()
@@ -213,7 +212,7 @@ public partial class CheckAssetsViewModel : ViewModelBase
 
             return notFound.OrderBy(n => n.BlueprintSetIdProvider).ToList();
 
-        }, RxApp.TaskpoolScheduler);
+        }, RxSchedulers.TaskpoolScheduler);
 
         return missing;
     }

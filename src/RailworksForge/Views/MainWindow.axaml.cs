@@ -3,7 +3,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 
 using RailworksForge.Core.Models;
 using RailworksForge.ViewModels;

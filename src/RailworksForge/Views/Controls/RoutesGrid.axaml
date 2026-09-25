@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
@@ -11,12 +11,10 @@
 
     <ScrollViewer>
         <Panel>
-            <li:LoadingIndicator VerticalAlignment="Center"
-                                 IsVisible="{Binding IsLoading}"
-                                 IsActive="{Binding IsLoading}"
-                                 Mode="Arcs"
-                                 SpeedRatio="1.2"
-                                 MaxHeight="256" />
+            <controls:LoadingSpinner VerticalAlignment="Center"
+                                     IsVisible="{Binding IsLoading}"
+                                     IsActive="{Binding IsLoading}"
+                                     Height="256" />
 
             <Border Padding="12" IsVisible="{Binding !IsLoading}">
                 <ListBox

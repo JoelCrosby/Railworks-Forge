@@ -21,7 +21,7 @@
                          VerticalContentAlignment="Center"
                          Padding="16,4"
                          Classes="search"
-                         Watermark="{echoes:Translate {x:Static translations:Strings.search}}"
+                         PlaceholderText="{echoes:Translate {x:Static translations:Strings.search}}"
                          FontSize="20"
                          HorizontalAlignment="Stretch"
                          Background="Transparent"

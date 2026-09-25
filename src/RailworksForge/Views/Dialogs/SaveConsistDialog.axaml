@@ -27,7 +27,7 @@
 
                                 <StackPanel HorizontalAlignment="Stretch" Margin="0,16,0,8" Spacing="8">
                                         <TextBlock FontWeight="SemiBold" FontSize="12">Name</TextBlock>
-                                        <TextBox Text="{Binding Name}" Watermark="Consist Name" />
+                                        <TextBox Text="{Binding Name}" PlaceholderText="Consist Name" />
                                 </StackPanel>
                         </StackPanel>
 

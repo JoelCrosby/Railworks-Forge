@@ -13,7 +13,6 @@
             <converters:RowHighlightStateConverter x:Key="RowHighlightStateConverter" />
 
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://LoadingIndicators.Avalonia/LoadingIndicators.axaml" />
                 <ResourceInclude Source="avares://RailworksForge/Styles/Colours.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -58,6 +57,7 @@
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableHeader.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableSearchBox.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/NameValueDisplay.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/LoadingSpinner.axaml"/>
 
         <Style Selector="DataGrid:focus DataGridCell /template/ Grid#FocusVisual">
             <Setter Property="IsVisible" Value="False" />

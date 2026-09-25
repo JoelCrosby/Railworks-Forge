@@ -29,14 +29,12 @@
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
-    <PackageReference Include="Avalonia.ReactiveUI" />
-    <PackageReference Include="Avalonia.Xaml.Interactivity" />
+    <PackageReference Include="ReactiveUI.Avalonia" />
+    <PackageReference Include="Xaml.Behaviors.Interactivity" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Echoes.Avalonia" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
-    <PackageReference Include="LoadingIndicators.Avalonia" />
-    <PackageReference Include="LucideAvalonia" />
+    <PackageReference Include="DragonFruit.LucideAvalonia" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />

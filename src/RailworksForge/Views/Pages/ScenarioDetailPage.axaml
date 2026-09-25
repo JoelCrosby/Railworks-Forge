@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -56,7 +55,7 @@
             <Button Command="{Binding ExtractScenariosCommand}" Content="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" />
         </StackPanel>
 
-        <li:LoadingIndicator DockPanel.Dock="Top"  VerticalAlignment="Stretch" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+        <controls:LoadingSpinner DockPanel.Dock="Top"  IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Height="128" />
 
         <StackPanel DockPanel.Dock="Top">
             <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />

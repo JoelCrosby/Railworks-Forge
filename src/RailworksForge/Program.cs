@@ -1,5 +1,5 @@
 ﻿using Avalonia;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using System;
 using System.Threading.Tasks;
 
@@ -26,7 +26,6 @@ internal sealed class Program
 
             TaskScheduler.UnobservedTaskException += HandleUnobservedTaskExceptions;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            RxApp.DefaultExceptionHandler = new ExceptionObserver();
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
@@ -45,7 +44,7 @@ internal sealed class Program
             .WithInterFont()
             .With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan] })
             .LogToTrace()
-            .UseReactiveUI()
+            .UseReactiveUI(rxui => rxui.WithExceptionHandler(new ExceptionObserver()))
             .UsePlatformDetect();
 
     private static void HandleUnobservedTaskExceptions(object? _, UnobservedTaskExceptionEventArgs args)

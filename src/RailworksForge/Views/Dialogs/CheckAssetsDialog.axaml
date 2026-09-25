@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.CheckAssetsDialog"
         x:DataType="vm:CheckAssetsViewModel"
@@ -27,7 +27,7 @@
         <StackPanel Grid.Row="1" IsVisible="{Binding IsLoading}" VerticalAlignment="Bottom">
             <Border Padding="48">
                 <Grid RowDefinitions="*,Auto,Auto,Auto">
-                    <li:LoadingIndicator Grid.Row="0" HorizontalAlignment="Center" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" Height="256" />
+                    <controls:LoadingSpinner Grid.Row="0" HorizontalAlignment="Center" IsActive="{Binding IsLoading}" Height="256" />
                     <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Value="{Binding LoadingProgress}" Minimum="0" Maximum="100" MaxHeight="128" />
                     <TextBlock Grid.Row="2" Margin="0,12,0,0" Text="{Binding LoadingMessage}" HorizontalAlignment="Stretch" />
                     <TextBlock Grid.Row="3" Margin="0,12,0,0" Text="{Binding LoadingStatusMessage}" HorizontalAlignment="Stretch" />

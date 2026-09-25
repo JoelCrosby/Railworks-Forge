@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:vm="clr-namespace:RailworksForge.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="64"
              x:Class="RailworksForge.Views.Controls.ProgressIndicator"
@@ -18,14 +18,13 @@
             ColumnDefinitions="Auto,Auto,*,Auto"
             Height="48"
         >
-            <li:LoadingIndicator
+            <controls:LoadingSpinner
                 Margin="16,0"
                 Grid.Column="0"
                 IsVisible="{Binding IsLoading}"
                 IsActive="{Binding IsLoading}"
-                Mode="Arc"
-                SpeedRatio="1.2"
                 VerticalAlignment="Center"
+                Height="24"
             />
 
             <StackPanel IsVisible="{Binding IsLoading}" Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="32,0" VerticalAlignment="Center">

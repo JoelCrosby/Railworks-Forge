@@ -1,5 +1,5 @@
 using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 
 using RailworksForge.ViewModels;
 

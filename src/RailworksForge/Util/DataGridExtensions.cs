@@ -1,7 +1,4 @@
-using System.Linq;
-
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
@@ -12,16 +9,6 @@ namespace RailworksForge.Util;
 
 public static class DataGridExtensions
 {
-    public static DataGridSortDescription? GetSort(this DataGridColumn column, DataGrid dataGrid)
-    {
-        var bindingPath = column.GetSortBindingPath();
-        var sortDescriptions = dataGrid.CollectionView.SortDescriptions;
-        var description =  sortDescriptions.FirstOrDefault(d => d.PropertyPath == bindingPath);
-
-        return description;
-    }
-
-
     public static bool IsFromDataGridRow(this RoutedEventArgs args)
     {
         var row = (args.Source as Visual)?.FindAncestorOfType<DataGridRow>(includeSelf: true);
@@ -44,7 +31,7 @@ public static class DataGridExtensions
         return boundColumn.Binding switch
         {
             Binding binding => binding.Path,
-            CompiledBindingExtension compiledBinding => compiledBinding.Path.ToString(),
+            CompiledBindingExtension compiledBinding => compiledBinding.Path?.ToString(),
             _ => null,
         };
     }

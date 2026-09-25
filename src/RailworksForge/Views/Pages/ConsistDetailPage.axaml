@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:li="using:LoadingIndicators.Avalonia"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
@@ -17,7 +16,7 @@
     <Grid ColumnDefinitions="2*, 4, *">
 
         <DockPanel Grid.Column="0">
-            <li:LoadingIndicator DockPanel.Dock="Top" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+            <controls:LoadingSpinner DockPanel.Dock="Top" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Height="128" />
 
             <StackPanel IsVisible="{Binding !IsLoading}" DockPanel.Dock="Top" Orientation="Vertical">
                 <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />

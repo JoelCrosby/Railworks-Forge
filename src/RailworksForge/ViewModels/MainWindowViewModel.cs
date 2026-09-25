@@ -144,8 +144,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Task.Run(() =>
         {
-            Observable.Start(_scenarioDatabaseService.LoadScenarioDatabase, RxApp.MainThreadScheduler);
-            Observable.Start(_assetDirectoryTreeService.LoadDirectoryTree, RxApp.MainThreadScheduler);
+            Observable.Start(_scenarioDatabaseService.LoadScenarioDatabase, RxSchedulers.MainThreadScheduler);
+            Observable.Start(_assetDirectoryTreeService.LoadDirectoryTree, RxSchedulers.MainThreadScheduler);
         });
     }
 }

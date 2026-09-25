@@ -1,0 +1,47 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls">
+    <Design.PreviewWith>
+        <controls:LoadingSpinner Height="128" />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|LoadingSpinner">
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Template">
+            <ControlTemplate>
+
+                <Viewbox Stretch="Uniform">
+                    <Panel Width="40" Height="40">
+                        <Ellipse Stroke="{DynamicResource SystemControlForegroundBaseLowBrush}" StrokeThickness="3" />
+
+                        <Arc Name="PART_Arc"
+                             StartAngle="0"
+                             SweepAngle="100"
+                             Stroke="{DynamicResource SystemControlHighlightAccentBrush}"
+                             StrokeThickness="3"
+                             StrokeLineCap="Round"
+                             RenderTransformOrigin="50%,50%">
+                            <Arc.RenderTransform>
+                                <RotateTransform />
+                            </Arc.RenderTransform>
+                        </Arc>
+                    </Panel>
+                </Viewbox>
+
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|LoadingSpinner[IsVisible=True][IsActive=True] /template/ Arc#PART_Arc">
+        <Style.Animations>
+            <Animation Duration="0:0:0.9" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+</Styles>

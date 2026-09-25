@@ -15,7 +15,7 @@
                     <TextBox Text="{Binding SearchTerm, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                              VerticalContentAlignment="Center"
                              Classes="search-table"
-                             Watermark="{echoes:Translate {x:Static translations:Strings.search}}"
+                             PlaceholderText="{echoes:Translate {x:Static translations:Strings.search}}"
                              HorizontalAlignment="Stretch"
                              Background="Transparent"
                     />

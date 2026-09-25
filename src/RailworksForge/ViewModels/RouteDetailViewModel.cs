@@ -6,10 +6,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 
 using CommunityToolkit.Mvvm.ComponentModel;
-
-using DynamicData;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;

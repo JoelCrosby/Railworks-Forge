@@ -18,7 +18,7 @@ internal class ExceptionObserver : IObserver<Exception>
 
         Log.Error(value, "ReactiveUI subscription exception thrown");
 
-        RxApp.MainThreadScheduler.Schedule(() => throw value) ;
+        RxSchedulers.MainThreadScheduler.Schedule(() => throw value) ;
     }
 
     public void OnNext(Exception value)
@@ -27,6 +27,6 @@ internal class ExceptionObserver : IObserver<Exception>
 
         Log.Error(value, "ReactiveUI subscription exception thrown");
 
-        RxApp.MainThreadScheduler.Schedule(() => throw value) ;
+        RxSchedulers.MainThreadScheduler.Schedule(() => throw value) ;
     }
 }

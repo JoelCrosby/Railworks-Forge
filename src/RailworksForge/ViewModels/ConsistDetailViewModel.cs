@@ -13,8 +13,6 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using DynamicData;
-
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -136,7 +134,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         Cache.BlueprintAcquisitionStates.Clear();
         Cache.ArchiveCache.Clear();
 
-        Observable.StartAsync(GetRailVehicles, RxApp.MainThreadScheduler);
+        Observable.StartAsync(GetRailVehicles, RxSchedulers.MainThreadScheduler);
     }
 
     private async Task LoadAvailableStock()

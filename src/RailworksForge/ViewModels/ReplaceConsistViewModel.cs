@@ -14,8 +14,6 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using DynamicData;
-
 using RailworksForge.Core;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;

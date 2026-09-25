@@ -54,7 +54,7 @@ public partial class ReplaceTrackViewModel : ViewModelBase
 
         if (Design.IsDesignMode is false)
         {
-            Observable.FromAsync(GetRouteTracks, RxApp.TaskpoolScheduler).Subscribe(tracks =>
+            Observable.FromAsync(GetRouteTracks, RxSchedulers.TaskpoolScheduler).Subscribe(tracks =>
             {
                 Dispatcher.UIThread.Post(() => RouteTracks = tracks);
             });

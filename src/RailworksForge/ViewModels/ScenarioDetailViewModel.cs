@@ -14,8 +14,6 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using DynamicData;
-
 using RailworksForge.Core;
 using RailworksForge.Core.Commands;
 using RailworksForge.Core.Commands.Common;
@@ -197,7 +195,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         Services = [];
 
-        Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
+        Observable.Start(GetAllScenarioConsists, RxSchedulers.MainThreadScheduler);
 
         this.PropertyChanged += (_, e) =>
         {
@@ -241,7 +239,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         if (updatedScenario is null) return;
 
-        Observable.Start(GetAllScenarioConsists, RxApp.MainThreadScheduler);
+        Observable.Start(GetAllScenarioConsists, RxSchedulers.MainThreadScheduler);
         Dispatcher.UIThread.Post(() => Scenario = updatedScenario);
     }
 

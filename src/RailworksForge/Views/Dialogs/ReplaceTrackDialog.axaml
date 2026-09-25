@@ -3,9 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        xmlns:li="clr-namespace:LoadingIndicators.Avalonia;assembly=LoadingIndicators.Avalonia"
+        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
         xmlns:bh="using:RailworksForge.Behaviours"
-        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.ReplaceTrackDialog"
         x:DataType="vm:ReplaceTrackViewModel"
@@ -26,7 +26,7 @@
             </StackPanel>
         </Border>
 
-        <li:LoadingIndicator Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" />
+        <controls:LoadingSpinner Grid.Row="1" IsVisible="{Binding IsLoading}" IsActive="{Binding IsLoading}" Height="128" />
 
         <Grid Grid.Row="1" ColumnDefinitions="*,12,*" IsVisible="{Binding !IsLoading}" Margin="12,24,12,12">
 
@@ -80,7 +80,7 @@
                                                 Height="32"
                                                 IsTextCompletionEnabled="True"
                                                 FilterMode="Contains"
-                                                Watermark="Select Provider"
+                                                PlaceholderText="Select Provider"
                                                 ItemsSource="{Binding Providers}"
                                                 SelectedItem="{Binding SelectedProvider}"
                                             >
@@ -94,7 +94,7 @@
                                                 Height="32"
                                                 IsTextCompletionEnabled="True"
                                                 FilterMode="Contains"
-                                                Watermark="Select Product"
+                                                PlaceholderText="Select Product"
                                                 ItemsSource="{Binding Products}"
                                                 SelectedItem="{Binding SelectedProduct}"
                                                 IsEnabled="{Binding SelectedProvider, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -109,7 +109,7 @@
                                                 Height="32"
                                                 IsTextCompletionEnabled="True"
                                                 FilterMode="Contains"
-                                                Watermark="Select Track Blueprint"
+                                                PlaceholderText="Select Track Blueprint"
                                                 ItemsSource="{Binding Tracks}"
                                                 SelectedItem="{Binding SelectedTrack}"
                                                 IsEnabled="{Binding SelectedProduct, Converter={x:Static ObjectConverters.IsNotNull}}"

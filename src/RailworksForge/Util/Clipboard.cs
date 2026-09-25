@@ -4,7 +4,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input.Platform;
-using Avalonia.VisualTree;
 
 using RailworksForge.Views;
 
@@ -21,9 +20,9 @@ public class Clipboard
 
         if (Application.Current?.ApplicationLifetime is ISingleViewApplicationLifetime app)
         {
-            var visualRoot = app.MainView?.GetVisualRoot();
+            var topLevel = TopLevel.GetTopLevel(app.MainView);
 
-            if (visualRoot is TopLevel topLevel)
+            if (topLevel is not null)
             {
                 return topLevel.Clipboard ?? throw new Exception("unable to get clipboard instance from top level view");
             }
