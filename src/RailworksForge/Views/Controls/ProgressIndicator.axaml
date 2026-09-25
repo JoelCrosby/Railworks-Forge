@@ -29,9 +29,9 @@
 
             <StackPanel IsVisible="{Binding IsLoading}" Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="32,0" VerticalAlignment="Center">
                 <TextBlock VerticalAlignment="Center">
-                    <Run Text="%" FontSize="12" FontWeight="SemiBold" />
-                    <Run Text="{Binding Progress}" FontSize="12" FontWeight="SemiBold" />
-                    <Run Text="{Binding ProgressMessage}" FontSize="12" FontWeight="Regular" />
+                    <Run Text="%" FontSize="{StaticResource CaptionFontSize}" FontWeight="SemiBold" />
+                    <Run Text="{Binding Progress}" FontSize="{StaticResource CaptionFontSize}" FontWeight="SemiBold" />
+                    <Run Text="{Binding ProgressMessage}" FontSize="{StaticResource CaptionFontSize}" FontWeight="Regular" />
                 </TextBlock>
             </StackPanel>
 
@@ -39,7 +39,7 @@
 
             <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="280" Margin="32,0">
                 <Border Background="{DynamicResource SystemChromeDisabledHighColor}" CornerRadius="32" Padding="32,4" HorizontalAlignment="Left">
-                    <TextBlock VerticalAlignment="Center"  Text="{Binding StatusMessage}" FontSize="12" FontWeight="SemiBold" />
+                    <TextBlock VerticalAlignment="Center"  Text="{Binding StatusMessage}" FontSize="{StaticResource CaptionFontSize}" FontWeight="SemiBold" />
                 </Border>
             </StackPanel>
         </Grid>

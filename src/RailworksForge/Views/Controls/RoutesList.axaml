@@ -38,7 +38,7 @@
                                 <TextBlock Margin="3" VerticalAlignment="Center"
                                            Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
                                            FontFamily="monospace"
-                                           FontSize="13"/>
+                                           FontSize="{StaticResource CaptionFontSize}"/>
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

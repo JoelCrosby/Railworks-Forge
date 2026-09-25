@@ -20,13 +20,13 @@
                         <StackPanel DockPanel.Dock="Top">
                                 <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8">
                                         <StackPanel Spacing="4">
-                                                <TextBlock FontWeight="SemiBold" FontSize="12">Selected Consist</TextBlock>
+                                                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}">Selected Consist</TextBlock>
                                                 <TextBlock Text="{Binding LocomotiveName}" />
                                         </StackPanel>
                                 </Border>
 
                                 <StackPanel HorizontalAlignment="Stretch" Margin="0,16,0,8" Spacing="8">
-                                        <TextBlock FontWeight="SemiBold" FontSize="12">Name</TextBlock>
+                                        <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}">Name</TextBlock>
                                         <TextBox Text="{Binding Name}" PlaceholderText="Consist Name" />
                                 </StackPanel>
                         </StackPanel>

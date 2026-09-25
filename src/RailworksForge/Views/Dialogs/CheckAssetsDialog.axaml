@@ -21,7 +21,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="16">Check Route Asset Availability</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}">Check Route Asset Availability</TextBlock>
             </StackPanel>
         </Border>
 

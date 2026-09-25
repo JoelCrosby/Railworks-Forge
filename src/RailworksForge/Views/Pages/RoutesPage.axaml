@@ -22,7 +22,7 @@
                          Padding="16,4"
                          Classes="search"
                          PlaceholderText="{echoes:Translate {x:Static translations:Strings.search}}"
-                         FontSize="20"
+                         FontSize="{StaticResource BodyFontSize}"
                          HorizontalAlignment="Stretch"
                          Background="Transparent"
 

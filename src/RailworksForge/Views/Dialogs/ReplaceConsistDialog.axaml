@@ -23,7 +23,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="16">Select Consist</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}">Select Consist</TextBlock>
             </StackPanel>
         </Border>
 

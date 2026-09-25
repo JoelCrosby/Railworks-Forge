@@ -10,7 +10,7 @@
             <ControlTemplate>
 
                 <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
-                    <TextBlock Text="{TemplateBinding Text}" FontSize="12" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" />
+                    <TextBlock Text="{TemplateBinding Text}" FontSize="{StaticResource CaptionFontSize}" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" />
                 </Border>
 
             </ControlTemplate>

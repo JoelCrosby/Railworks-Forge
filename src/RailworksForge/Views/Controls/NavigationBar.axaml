@@ -17,13 +17,18 @@
 
     <UserControl.Styles>
         <Style Selector="TextBlock">
-            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
         </Style>
 
         <Style Selector="Button">
-            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
             <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}" />
             <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+        </Style>
+
+        <Style Selector="DockPanel > Button TextBlock">
+            <Setter Property="MaxWidth" Value="360" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
         <Style Selector="Button.active">
@@ -31,48 +36,48 @@
         </Style>
     </UserControl.Styles>
 
-    <DockPanel Margin="8">
+    <DockPanel Margin="8" HorizontalSpacing="12">
         <Button DockPanel.Dock="Right"
                 Classes.active="{Binding IsSettingsActive}"
                 Command="{Binding SettingsClickedCommand}"
                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}">
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <lucideAvalonia:Lucide Icon="Settings" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                <lucideAvalonia:Lucide Icon="Settings" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" />
                 <TextBlock Text="{echoes:Translate {x:Static translations:Strings.settings}}" />
             </StackPanel>
         </Button>
 
-        <StackPanel Orientation="Horizontal" Spacing="12">
+        <!-- A StackPanel would give the crumbs unlimited width; DockPanel limits each to the space left, so long names trim instead of covering Settings. -->
+        <DockPanel LastChildFill="False" HorizontalSpacing="12" ClipToBounds="True">
+            <Image DockPanel.Dock="Left" Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32" />
 
-            <Image Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32"  />
-
-            <Button Command="{Binding RoutesClickedCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                    <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
-                </StackPanel>
+            <Button DockPanel.Dock="Left" Command="{Binding RoutesClickedCommand}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <lucideAvalonia:Lucide Grid.Column="0" Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="1" Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
+                </Grid>
             </Button>
 
-            <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" >
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="Milestone" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                    <TextBlock Text="{Binding Route.Route.Name}" />
-                </StackPanel>
+            <Button DockPanel.Dock="Left" Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Route.Route.Name}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <lucideAvalonia:Lucide Grid.Column="0" Icon="Milestone" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Route.Route.Name}" />
+                </Grid>
             </Button>
 
-            <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" >
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="ListEnd" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                    <TextBlock Text="{Binding Scenario.Scenario.Name}"/>
-                </StackPanel>
+            <Button DockPanel.Dock="Left" Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Scenario.Scenario.Name}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <lucideAvalonia:Lucide Grid.Column="0" Icon="ListEnd" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Scenario.Scenario.Name}" />
+                </Grid>
             </Button>
 
-            <Button Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="TrainFront" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                    <TextBlock Text="{Binding Consist.ServiceName}"/>
-                </StackPanel>
+            <Button DockPanel.Dock="Left" Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Consist.ServiceName}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <lucideAvalonia:Lucide Grid.Column="0" Icon="TrainFront" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Consist.ServiceName}" />
+                </Grid>
             </Button>
-        </StackPanel>
+        </DockPanel>
     </DockPanel>
 </UserControl>

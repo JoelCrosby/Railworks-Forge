@@ -23,7 +23,7 @@
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="16">Replace Tracks</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}">Replace Tracks</TextBlock>
             </StackPanel>
         </Border>
 
@@ -34,7 +34,7 @@
             <Grid.Styles>
                 <Style Selector="TextBlock">
                     <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
                     <Setter Property="Opacity" Value="0.7" />
                 </Style>
             </Grid.Styles>
