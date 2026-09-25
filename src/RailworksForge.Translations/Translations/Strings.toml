@@ -71,3 +71,6 @@ tools = 'Tools'
 type = 'Type'
 unique_number = 'UniqueNumber'
 view = 'View'
+
+use_internal_serz = 'Use internal SERZ for BIN → XML'
+use_internal_serz_description = 'Convert BIN files without the game executable. XML to BIN still requires serz64.exe.'

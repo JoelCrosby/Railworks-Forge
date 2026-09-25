@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Test xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0">
+	<Text d:type="cDeltaString">é日本 &amp; test</Text>
+	<d:blob d:size="4">00FF0180</d:blob>
+	<Next d:type="sInt32">-42</Next>
+	<Nil>
+		<d:nil/>
+		<Next d:type="sUInt32">4000000000</Next>
+	</Nil>
+</Test>

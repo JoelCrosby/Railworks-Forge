@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Test xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0" d:id="-1">
+	<Empty/>
+	<Ref d:type="ref">-2</Ref>
+	<Names-Nested>
+		<e d:type="cDeltaString">é日本 &amp; &lt;value&gt;</e>
+	</Names-Nested>
+	<FloatVector d:numElements="3" d:elementType="sFloat32" d:precision="string">1.2345679 -0.0000000 123456792.0000000</FloatVector>
+	<DoubleVector d:numElements="3" d:elementType="sFloat64" d:precision="string">1.2345679 -0.0000000 123456789.0000000</DoubleVector>
+	<Integers d:numElements="2" d:elementType="sUInt32" d:precision="string">4294967295 2147483648</Integers>
+	<d:blob d:size="80">0001020304050607 08090A0B0C0D0E0F 1011121314151617 18191A1B1C1D1E1F
+2021222324252627 28292A2B2C2D2E2F 3031323334353637 38393A3B3C3D3E3F
+4041424344454647 48494A4B4C4D4E4F</d:blob>
+</Test>

@@ -17,6 +17,11 @@
 
         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.settings}}">
 
+            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.use_internal_serz}}"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding UseInternalSerz, Mode=TwoWay}"
+                      ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.use_internal_serz_description}}" />
+
             <MenuItem Header="{echoes:Translate {x:Static translations:Strings.theme}}">
                 <MenuItem Command="{Binding SystemThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.system}}"/>
                 <MenuItem Command="{Binding DarkThemeCommand}" Header="{echoes:Translate {x:Static translations:Strings.dark}}"/>

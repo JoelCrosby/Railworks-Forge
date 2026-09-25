@@ -1,249 +1,345 @@
+using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
+using System.Xml;
 
 using AngleSharp.Dom;
-
-using RailworksForge.Core.Extensions;
-
-
-// ReSharper disable NotAccessedField.Local
-// ReSharper disable UnusedMember.Local
-// ReSharper disable NotAccessedVariable
-// ReSharper disable RedundantAssignment
 
 namespace RailworksForge.Core.External;
 
 public class SerzInternal
 {
-    private int _childCount;
-    private readonly List<SChunk> _chunkCache = new(1000);
-
-    private EChunkKind _chunkKind;
-    private string? _chunkName;
-    private readonly byte[] _mData;
-    private int _dataIx = 8;
-    private int _lastStringCacheIx;
-    private int _parentCount;
-    private readonly List<string> _stringCache = new(1000);
-    private string? _typeName;
+    private const string DeltaNamespace = "http://www.kuju.com/TnT/2003/Delta";
+    private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+    private readonly byte[] _data;
+    private readonly List<string> _strings = [];
+    private readonly Chunk?[] _chunks = new Chunk[255];
+    private int _position;
+    private int _nextChunk;
 
     public SerzInternal(ref byte[] data)
     {
-        _mData = data;
+        _data = data;
     }
 
     public static IDocument Convert(string inputPath)
     {
         var input = File.ReadAllBytes(inputPath);
+
         return new SerzInternal(ref input).ToXml();
     }
 
     public IDocument ToXml()
     {
-        var xmlDoc = XmlParser.ParseDocument("<root></root>");
-        var currentXmlNode = xmlDoc.DocumentElement;
+        _position = 0;
+        _nextChunk = 0;
+        _strings.Clear();
+        Array.Clear(_chunks);
 
-        if (currentXmlNode is null)
+        if (!ReadBytes(8).SequenceEqual("SERZ\0\0\x01\0"u8))
         {
-            throw new Exception("could not create xml doc");
+            throw InvalidData("Unsupported SERZ header");
         }
 
-        var chunkIx = 8;
-
-        while (_dataIx < _mData.Length)
+        using var output = new MemoryStream();
+        var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true };
+        using (var writer = XmlWriter.Create(output, settings))
         {
-            chunkIx = _dataIx;
+            writer.WriteStartDocument();
+            var parents = new Stack<string>();
+            var hasRoot = false;
 
-            var index1 = (int)_mData[_dataIx++];
-
-            SChunk sChunk;
-
-            if (index1 == byte.MaxValue)
+            while (_position < _data.Length)
             {
-                sChunk.MKind = _chunkKind = (EChunkKind)_mData[_dataIx++];
+                var chunk = ReadChunk();
 
-                if (_chunkKind != EChunkKind.Control)
+                switch (chunk.Kind)
                 {
-                    _chunkName = ReadString();
+                    case 'C':
+                        ReadBytes(5);
+                        break;
+                    case 'P':
+                        var id = BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4));
+                        ReadUInt32();
+                        writer.WriteStartElement(XmlName(chunk.Name));
+
+                        if (!hasRoot)
+                        {
+                            writer.WriteAttributeString("xmlns", "d", null, DeltaNamespace);
+                            Attribute(writer, "version", "1.0");
+                            hasRoot = true;
+                        }
+
+                        if (id != 0)
+                        {
+                            Attribute(writer, "id", id.ToString(Invariant));
+                        }
+
+                        parents.Push(chunk.Name);
+                        break;
+                    case 'p':
+                        var hasParent = parents.TryPop(out var parentName);
+                        var closesCurrentParent = hasParent && parentName == chunk.Name;
+
+                        if (!closesCurrentParent)
+                        {
+                            throw InvalidData("Mismatched closing element");
+                        }
+
+                        writer.WriteEndElement();
+                        break;
+                    case 'V':
+                        writer.WriteStartElement(XmlName(chunk.Name));
+                        Attribute(writer, "type", chunk.Type);
+                        var isFloat = chunk.Type is "sFloat32" or "sFloat64";
+
+                        if (isFloat)
+                        {
+                            var value = ReadFloat(chunk.Type);
+                            var bits = new byte[8];
+                            BinaryPrimitives.WriteDoubleLittleEndian(bits, value);
+                            Attribute(writer, "alt_encoding", System.Convert.ToHexString(bits));
+                            Attribute(writer, "precision", "string");
+                            writer.WriteString(FormatFloat(value, "G6"));
+                        }
+                        else
+                        {
+                            writer.WriteString(ReadValue(chunk.Type));
+                        }
+
+                        writer.WriteEndElement();
+                        break;
+                    case 'A':
+                        var count = ReadByte();
+                        writer.WriteStartElement(XmlName(chunk.Name));
+                        Attribute(writer, "numElements", count.ToString(Invariant));
+                        Attribute(writer, "elementType", chunk.Type);
+                        Attribute(writer, "precision", "string");
+                        var values = new string[count];
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            values[i] = ReadValue(chunk.Type);
+                        }
+
+                        writer.WriteString(string.Join(" ", values));
+                        writer.WriteEndElement();
+                        break;
+                    case 'R':
+                        writer.WriteStartElement(XmlName(chunk.Name));
+                        Attribute(writer, "type", "ref");
+                        writer.WriteString(BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4)).ToString(Invariant));
+                        writer.WriteEndElement();
+                        break;
+                    case 'N':
+                        writer.WriteStartElement("d", "nil", DeltaNamespace);
+                        writer.WriteEndElement();
+                        break;
+                    case 'B':
+                        var size = ReadLength();
+                        var bytes = ReadBytes(size);
+                        writer.WriteStartElement("d", "blob", DeltaNamespace);
+                        Attribute(writer, "size", size.ToString(Invariant));
+                        WriteBlob(writer, bytes);
+                        writer.WriteEndElement();
+                        break;
+                    default:
+                        throw InvalidData($"Unsupported chunk '{chunk.Kind}'");
                 }
-
-                sChunk.MNameIx = _lastStringCacheIx;
-
-                if (_chunkKind is EChunkKind.Value or EChunkKind.Vector)
-                {
-                    _typeName = ReadString();
-                }
-
-                sChunk.MTypeNameIx = _lastStringCacheIx;
-                _chunkCache.Add(sChunk);
             }
-            else
+
+            var isComplete = hasRoot && parents.Count == 0;
+
+            if (!isComplete)
             {
-                sChunk = _chunkCache.ElementAtOrDefault(index1);
-                _chunkKind = sChunk.MKind;
-                _chunkName = _stringCache.ElementAtOrDefault(sChunk.MNameIx);
-                _typeName = _stringCache.ElementAtOrDefault(sChunk.MTypeNameIx) ?? string.Empty;
+                throw InvalidData("Incomplete XML document");
             }
 
-            if (currentXmlNode is null)
-            {
-                throw new Exception("could get currentXmlNode");
-            }
-
-            switch (_chunkKind)
-            {
-                case EChunkKind.Vector:
-                    var num1 = (int)_mData[_dataIx++];
-                    var str = "";
-
-                    for (var index2 = 0; index2 < num1; ++index2)
-                        str = str + ReadValue(_typeName) + " ";
-
-                    var element1 = xmlDoc.CreateXmlElement(_chunkName ?? "e");
-                    element1.SetTextContent(str.Trim());
-                    element1.SetAttribute("d:numElements", num1.ToString());
-                    element1.SetAttribute("d:elementType", _typeName);
-                    element1.SetAttribute("d:precision", "string");
-                    currentXmlNode.AppendChild(element1);
-                    continue;
-                case EChunkKind.Control:
-                    _dataIx += 5;
-                    continue;
-                case EChunkKind.BeginParent:
-                    ++_parentCount;
-                    var num2 = ReadInt32();
-                    _childCount = ReadInt32();
-                    var element2 = xmlDoc.CreateXmlElement(_chunkName!.Replace("::", "-"));
-
-                    if (num2 != 0)
-                    {
-                        element2.SetAttribute("d:id", num2.ToString());
-                    }
-
-                    currentXmlNode.AppendChild(element2);
-                    currentXmlNode = element2;
-                    continue;
-                case EChunkKind.Value:
-                    var element3 = xmlDoc.CreateXmlElement(_chunkName?.Length == 0 ? "e" : _chunkName ?? "e");
-                    element3.SetTextContent(ReadValue(_typeName));
-                    element3.SetAttribute("d:type", _typeName);
-                    currentXmlNode.AppendChild(element3);
-                    continue;
-                case EChunkKind.EndParent:
-                    currentXmlNode = currentXmlNode.ParentElement ?? currentXmlNode;
-                    --_parentCount;
-                    continue;
-                case EChunkKind.Nil:
-                    var nilElement = xmlDoc.CreateXmlElement("d:nil");
-                    currentXmlNode.AppendChild(nilElement);
-                    currentXmlNode = currentXmlNode.ParentElement ?? currentXmlNode;
-                    --_parentCount;
-                    continue;
-                default:
-                    Console.WriteLine("ERK " + _chunkKind, _mData);
-                    continue;
-            }
+            writer.WriteEndDocument();
         }
 
-        return xmlDoc;
+        output.Position = 0;
+
+        return XmlParser.ParseDocument(output);
+    }
+
+    private static void WriteBlob(XmlWriter writer, ReadOnlySpan<byte> bytes)
+    {
+        for (var offset = 0; offset < bytes.Length; offset += 8)
+        {
+
+            if (offset != 0)
+            {
+                var separator = offset % 32 == 0 ? "\n" : " ";
+                writer.WriteString(separator);
+            }
+
+            var count = Math.Min(8, bytes.Length - offset);
+            var hex = System.Convert.ToHexString(bytes.Slice(offset, count));
+            writer.WriteString(hex);
+        }
+    }
+
+    private Chunk ReadChunk()
+    {
+        var index = ReadByte();
+
+        if (index != byte.MaxValue)
+        {
+            return _chunks[index] ?? throw InvalidData($"Unknown chunk index {index}");
+        }
+
+        var kind = (char)ReadByte();
+        var hasName = kind is 'P' or 'p' or 'V' or 'A' or 'R';
+        var name = hasName ? ReadString() : string.Empty;
+        var hasType = kind is 'V' or 'A';
+        var type = hasType ? ReadString() : string.Empty;
+        var chunk = new Chunk(kind, name, type);
+        _chunks[_nextChunk] = chunk;
+        _nextChunk = (_nextChunk + 1) % _chunks.Length;
+
+        return chunk;
     }
 
     private string ReadString()
     {
-        var index = _mData[_dataIx++] | (_mData[_dataIx++] << 8);
+        var index = BinaryPrimitives.ReadUInt16LittleEndian(ReadBytes(2));
 
-        string? str;
-
-        if (index == ushort.MaxValue)
+        if (index != ushort.MaxValue)
         {
-            var count = Math.Abs(ReadInt32());
 
-            if (count > _mData.Length - _dataIx)
+            if (index >= _strings.Count)
             {
-                count = _mData.Length - _dataIx;
+                throw InvalidData($"Unknown string index {index}");
             }
 
-            str = Encoding.UTF8.GetString(_mData, _dataIx, count);
-            _dataIx += count;
-
-            _stringCache.Add(str);
-
-            _lastStringCacheIx = _stringCache.Count - 1;
+            return _strings[index];
         }
-        else
+
+        var count = ReadLength();
+        var start = _position;
+
+        // SERZ counts Unicode characters rather than UTF-8 bytes.
+        for (var i = 0; i < count; i++)
         {
-            str = _stringCache.ElementAtOrDefault(index) ?? string.Empty;
-            _lastStringCacheIx = index;
+            var status = Rune.DecodeFromUtf8(_data.AsSpan(_position), out _, out var consumed);
+
+            if (status != System.Buffers.OperationStatus.Done)
+            {
+                throw InvalidData("Invalid or truncated UTF-8 string");
+            }
+
+            _position += consumed;
         }
 
-        return str;
+        var value = Encoding.UTF8.GetString(_data, start, _position - start);
+        _strings.Add(value);
+
+        return value;
     }
 
-    private int ReadInt32()
+    private string ReadValue(string type)
     {
-        return _mData[_dataIx++] | (_mData[_dataIx++] << 8) | (_mData[_dataIx++] << 16) | (_mData[_dataIx++] << 24);
-    }
-
-    private int ReadInt16()
-    {
-        return _mData[_dataIx++] | (_mData[_dataIx++] << 8);
-    }
-
-    private int ReadUInt8()
-    {
-        return _mData[_dataIx++];
-    }
-
-    private string ReadValue(string? deltaType)
-    {
-        switch (deltaType)
+        return type switch
         {
-            case "sUInt64":
-                var num = (ulong)ReadInt32();
-                return (((ulong)ReadInt32() << 32) | num).ToString();
-            case "cDeltaString":
-                return ReadString();
-            case "sFloat32":
-                var single = BitConverter.ToSingle(_mData, _dataIx);
-                _dataIx += 4;
-                return single.ToString(CultureInfo.InvariantCulture);
-            case "sInt32":
-                return ReadInt32().ToString();
-            case "sUInt32":
-                var num32 = (ulong)ReadInt16();
-                return (((ulong)ReadInt16() << 32) | num32).ToString();
-            case "sUInt8":
-                var value = ReadUInt8().ToString();
-                return value;
-            case "bool":
-                var boolean = BitConverter.ToBoolean(_mData, _dataIx);
-                _dataIx += 1;
-                return boolean ? "1" : "0";
-            default:
-                Console.WriteLine("unhandled value type: " + deltaType);
-                return "ARSE";
+            "cDeltaString" => ReadString(),
+            "bool" => ReadByte() == 0 ? "0" : "1",
+            "sInt8" => unchecked((sbyte)ReadByte()).ToString(Invariant),
+            "sUInt8" => ReadByte().ToString(Invariant),
+            "sInt16" => BinaryPrimitives.ReadInt16LittleEndian(ReadBytes(2)).ToString(Invariant),
+            "sUInt16" => BinaryPrimitives.ReadUInt16LittleEndian(ReadBytes(2)).ToString(Invariant),
+            "sInt32" => BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4)).ToString(Invariant),
+            "sUInt32" => ReadUInt32().ToString(Invariant),
+            "sInt64" => BinaryPrimitives.ReadInt64LittleEndian(ReadBytes(8)).ToString(Invariant),
+            "sUInt64" => BinaryPrimitives.ReadUInt64LittleEndian(ReadBytes(8)).ToString(Invariant),
+            "sFloat32" or "sFloat64" => FormatFloat(ReadFloat(type), "F7"),
+            _ => throw InvalidData($"Unsupported value type '{type}'"),
+        };
+    }
+
+    private static string FormatFloat(double value, string format)
+    {
+
+        if (double.IsPositiveInfinity(value))
+        {
+            return "inf";
         }
+
+        if (double.IsNegativeInfinity(value))
+        {
+            return "-inf";
+        }
+
+        return value.ToString(format, Invariant).ToLowerInvariant();
     }
 
-    private enum EChunkKind
+    private double ReadFloat(string type)
     {
-        Vector = 65, // 0x00000041
-        Blob = 66, // 0x00000042
-        Control = 67, // 0x00000043
-        Nil = 78, // 0x0000004E
-        BeginParent = 80, // 0x00000050
-        Reference = 82, // 0x00000052
-        UnusedChunkCache = 85, // 0x00000055
-        Value = 86, // 0x00000056
-        EndParent = 112, // 0x00000070
-        Unknown = 255,
-        EndOfFile = 256, // 0x00000100
+
+        if (type == "sFloat32")
+        {
+            return BinaryPrimitives.ReadSingleLittleEndian(ReadBytes(4));
+        }
+
+        return BinaryPrimitives.ReadDoubleLittleEndian(ReadBytes(8));
     }
 
-    private struct SChunk
+    private byte ReadByte()
     {
-        public EChunkKind MKind;
-        public int MNameIx;
-        public int MTypeNameIx;
+        return ReadBytes(1)[0];
     }
+
+    private uint ReadUInt32()
+    {
+        return BinaryPrimitives.ReadUInt32LittleEndian(ReadBytes(4));
+    }
+
+    private int ReadLength()
+    {
+        var length = ReadUInt32();
+
+        if (length > _data.Length - _position)
+        {
+            throw InvalidData("Length exceeds remaining input");
+        }
+
+        return (int)length;
+    }
+
+    private ReadOnlySpan<byte> ReadBytes(int count)
+    {
+
+        if (count > _data.Length - _position)
+        {
+            throw InvalidData("Unexpected end of input");
+        }
+
+        var bytes = _data.AsSpan(_position, count);
+        _position += count;
+
+        return bytes;
+    }
+
+    private InvalidDataException InvalidData(string message)
+    {
+        return new InvalidDataException($"{message} at SERZ byte offset {_position}.");
+    }
+
+    private static string XmlName(string name)
+    {
+
+        if (name.Length == 0)
+        {
+            return "e";
+        }
+
+        return name.Replace("::", "-", StringComparison.Ordinal);
+    }
+
+    private static void Attribute(XmlWriter writer, string name, string value)
+    {
+        writer.WriteAttributeString("d", name, DeltaNamespace, value);
+    }
+
+    private sealed record Chunk(char Kind, string Name, string Type);
 }

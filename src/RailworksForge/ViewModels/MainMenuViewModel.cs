@@ -27,6 +27,24 @@ public class MainMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> DarkThemeCommand { get; }
     public ReactiveCommand<Unit, Unit> LightThemeCommand { get; }
 
+    private bool _useInternalSerz = Configuration.Get().UseInternalSerz;
+
+    public bool UseInternalSerz
+    {
+        get => _useInternalSerz;
+        set
+        {
+
+            if (_useInternalSerz == value)
+            {
+                return;
+            }
+
+            Configuration.Set(Configuration.Get() with { UseInternalSerz = value });
+            SetProperty(ref _useInternalSerz, value);
+        }
+    }
+
     public MainMenuViewModel()
     {
         ConvertBinToXmlCommand = ReactiveCommand.CreateFromTask(async (token) =>

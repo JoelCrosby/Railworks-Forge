@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Test xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0">
+	<V d:type="sFloat32" d:alt_encoding="000000A0F2D77A3E" d:precision="string">1e-07</V>
+	<V d:type="sFloat32" d:alt_encoding="000000205FA00242" d:precision="string">1e+10</V>
+	<V d:type="sFloat64" d:alt_encoding="7DC39425AD49B254" d:precision="string">1e+100</V>
+	<V d:type="sFloat32" d:alt_encoding="0000000000000080" d:precision="string">-0</V>
+	<V d:type="sFloat32" d:alt_encoding="000000000000F07F" d:precision="string">inf</V>
+	<V d:type="sFloat32" d:alt_encoding="000000E0FFFFFF7F" d:precision="string">nan</V>
+</Test>

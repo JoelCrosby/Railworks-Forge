@@ -1,50 +1,104 @@
+using System.Globalization;
+using System.Xml.Linq;
+
+using AngleSharp.Xml;
+
 using RailworksForge.Core.External;
 
 namespace RailworksForge.UnitTests;
 
 public class SerzInternalTests
 {
-    [Fact]
-    public void SerzInternal_ScenarioNetworkProperties_CreatesDocument()
+    [Theory]
+    [InlineData("ScenarioNetworkProperties.bin")]
+    [InlineData("Scenario.bin")]
+    [InlineData("+000000+000000.bin")]
+    [InlineData("ScenaryItem.bin")]
+    [InlineData("SerzTypes.bin")]
+    [InlineData("SerzNodes.bin")]
+    [InlineData("SerzCache.bin")]
+    [InlineData("SerzFeatures.bin")]
+    [InlineData("SerzFloats.bin")]
+    public void ToXml_MatchesSerzOutput(string name)
     {
-        var data = GetResourceStream("ScenarioNetworkProperties.bin");
+        var data = GetResourceBytes(name);
+        using var expectedStream = new MemoryStream(GetResourceBytes(name + ".xml"));
+        var expected = XDocument.Load(expectedStream);
         var document = new SerzInternal(ref data).ToXml();
+        var actual = XDocument.Parse(document.ToXml());
 
-        Assert.NotNull(document.DocumentElement);
+        Assert.Equal(expected.ToString(), actual.ToString());
     }
 
     [Fact]
-    public void SerzInternal_Scenario_CreatesDocument()
+    public void ToXml_IsRepeatableAndCultureIndependent()
     {
-        var data = GetResourceStream("Scenario.bin");
-        var document = new SerzInternal(ref data).ToXml();
+        var data = GetResourceBytes("SerzTypes.bin");
+        var converter = new SerzInternal(ref data);
+        var expected = converter.ToXml().ToXml();
+        var previousCulture = CultureInfo.CurrentCulture;
 
-        Assert.NotNull(document.DocumentElement);
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            var actual = converter.ToXml().ToXml();
+
+            Assert.Equal(expected, actual);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
     }
 
     [Fact]
-    public void SerzInternal_CreatesExpected_Document()
+    public void ToXml_RejectsInvalidHeader()
     {
-        var data = GetResourceStream("+000000+000000.bin");
-        var document = new SerzInternal(ref data).ToXml();
+        var data = new byte[8];
 
-        Assert.NotNull(document.DocumentElement);
+        Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
     }
 
-    private static byte[] GetResourceStream(string name)
+    [Fact]
+    public void ToXml_RejectsTruncatedInput()
+    {
+        var complete = GetResourceBytes("SerzNodes.bin");
+
+        for (var length = 0; length < complete.Length; length++)
+        {
+            var data = complete[..length];
+
+            Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
+        }
+    }
+
+    [Theory]
+    [InlineData("00")]
+    [InlineData("FF5A")]
+    [InlineData("FF500000")]
+    [InlineData("FF42FFFFFFFF")]
+    [InlineData("FF50FFFF01000000FF")]
+    public void ToXml_RejectsInvalidChunks(string payload)
+    {
+        byte[] data = [.. "SERZ\0\0\x01\0"u8, .. Convert.FromHexString(payload)];
+        var exception = Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
+
+        Assert.Contains("byte offset", exception.Message);
+    }
+
+    private static byte[] GetResourceBytes(string name)
     {
         var assembly = typeof(SerzInternalTests).Assembly;
-
         using var resource = assembly.GetManifestResourceStream($"RailworksForge.UnitTests.Resources.{name}");
 
         if (resource is null)
         {
-            throw new Exception($"could not resource in assembly with name {name}");
+            throw new Exception($"Could not find resource {name}");
         }
 
-        var buffer = new byte[resource.Length];
-        _ = resource.Read(buffer, 0, buffer.Length);
+        using var buffer = new MemoryStream();
+        resource.CopyTo(buffer);
 
-        return buffer;
+        return buffer.ToArray();
     }
 }

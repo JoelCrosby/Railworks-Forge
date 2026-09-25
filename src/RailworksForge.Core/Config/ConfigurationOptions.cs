@@ -12,6 +12,8 @@ public record ConfigurationOptions
 
     public string Theme { get; set; }
 
+    public bool UseInternalSerz { get; set; }
+
     public ConfigurationOptions()
     {
         GameDirectoryPath = string.Empty;

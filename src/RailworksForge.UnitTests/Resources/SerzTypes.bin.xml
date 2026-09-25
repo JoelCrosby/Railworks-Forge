@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Test xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0">
+	<V d:type="sInt8">-100</V>
+	<V d:type="sUInt8">254</V>
+	<V d:type="sInt16">-30000</V>
+	<V d:type="sUInt16">60000</V>
+	<V d:type="sInt32">-2000000000</V>
+	<V d:type="sUInt32">4000000000</V>
+	<V d:type="sInt64">-9000000000000000000</V>
+	<V d:type="sUInt64">18000000000000000000</V>
+	<V d:type="sFloat32" d:alt_encoding="00000040CAC0F33F" d:precision="string">1.23457</V>
+	<V d:type="sFloat64" d:alt_encoding="DD598C42CAC0F33F" d:precision="string">1.23457</V>
+	<V d:type="bool">1</V>
+</Test>
