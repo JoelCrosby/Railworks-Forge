@@ -6,8 +6,6 @@
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
-             xmlns:menuItems="clr-namespace:RailworksForge.ViewModels.MenuItems"
-             xmlns:controls="clr-namespace:RailworksForge.Views.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="48"
              x:Class="RailworksForge.Views.Controls.Toolbar"
              x:CompileBindings="True"
@@ -31,18 +29,6 @@
 
     <Border Padding="6,4" Height="48" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
         <StackPanel Orientation="Horizontal" Spacing="12">
-            <Button Command="{Binding SettingsClickedCommand}" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="Settings" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                </StackPanel>
-            </Button>
-
-            <Button Command="{Binding OpenSettingsDirectoryCommand}" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.open_settings_folder}}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <lucideAvalonia:Lucide Icon="FolderOpen" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                </StackPanel>
-            </Button>
-
             <Button IsEnabled="{Binding Operations.IsIdle}" Command="{Binding InstallPackageCommand}" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.install_package}}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <lucideAvalonia:Lucide Icon="Package" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
@@ -56,24 +42,6 @@
                         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}"
                                   IsEnabled="{Binding Operations.IsIdle}" Command="{Binding ConvertXmlToBinCommand}" />
                     </MenuFlyout>
-                </SplitButton.Flyout>
-            </SplitButton>
-
-            <SplitButton Content="{Binding SelectedLanguage}">
-                <SplitButton.Flyout>
-                        <MenuFlyout ItemsSource="{Binding Cultures}" >
-                            <MenuFlyout.ItemContainerTheme>
-                                <ControlTheme TargetType="MenuItem"
-                                              BasedOn="{StaticResource {x:Type MenuItem}}"
-                                              x:DataType="menuItems:CultureMenuItem">
-
-                                    <Setter Property="Header" Value="{Binding Header}"/>
-                                    <Setter Property="Command" Value="{Binding $parent[controls:Toolbar].((vm:ToolbarViewModel)DataContext).ChangeLanguageCommand}" />
-                                    <Setter Property="CommandParameter" Value="{Binding}" />
-                                </ControlTheme>
-                            </MenuFlyout.ItemContainerTheme>
-
-                        </MenuFlyout>
                 </SplitButton.Flyout>
             </SplitButton>
 

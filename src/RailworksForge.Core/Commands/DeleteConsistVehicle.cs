@@ -90,7 +90,6 @@ public class DeleteConsistVehicle : IConsistCommand
         serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID", vehicle.Blueprint.BlueprintId);
         serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", vehicle.Blueprint.BlueprintSetIdProvider);
         serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", vehicle.Blueprint.BlueprintSetIdProduct);
-        // serviceElement.UpdateTextElement("LocoClass", LocoClassUtils.ToLongFormString(vehicle.BlueprintType));
         serviceElement.UpdateTextElement("LocoAuthor", vehicle.Blueprint.BlueprintSetIdProvider);
     }
 

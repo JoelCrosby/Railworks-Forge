@@ -21,6 +21,9 @@ public partial class NavigationBarViewModel : ViewModelBase
     [ObservableProperty]
     private Consist? _consist;
 
+    [ObservableProperty]
+    private bool _isSettingsActive;
+
     public ReactiveCommand<Unit, Unit> RoutesClickedCommand { get; } = ReactiveCommand.Create(() =>
     {
         Utils.GetApplicationViewModel().SelectAllRoutes();
@@ -34,6 +37,11 @@ public partial class NavigationBarViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ScenarioClickedCommand { get; } = ReactiveCommand.Create(() =>
     {
         Utils.GetApplicationViewModel().SelectCurrentScenario();
+    });
+
+    public ReactiveCommand<Unit, Unit> SettingsClickedCommand { get; } = ReactiveCommand.Create(() =>
+    {
+        Utils.GetApplicationViewModel().SelectSettings();
     });
 
     public ReactiveCommand<Unit, Unit> ConsistClickedCommand { get; } = ReactiveCommand.Create(() =>

@@ -83,6 +83,16 @@ public static class Paths
 
     public static void SetGameDirectory()
     {
+        var configuredPath = Configuration.Get().GameDirectoryPath;
+        var hasConfiguredPath = IsValidGameDirectory(configuredPath);
+
+        if (hasConfiguredPath)
+        {
+            _gameDirectory = configuredPath;
+
+            return;
+        }
+
         if (OperatingSystem.IsWindows())
         {
             lock (RegLock)
@@ -97,7 +107,21 @@ public static class Paths
             }
         }
 
-        _gameDirectory = Configuration.Get().GameDirectoryPath;
+        _gameDirectory = configuredPath;
+    }
+
+    public static bool IsValidGameDirectory(string? path)
+    {
+
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+        {
+            return false;
+        }
+
+        var hasAssets = Exists(Path.Join(path, "Assets"), path);
+        var hasContent = Exists(Path.Join(path, "Content"), path);
+
+        return hasAssets && hasContent;
     }
 
     [SupportedOSPlatform("windows")]

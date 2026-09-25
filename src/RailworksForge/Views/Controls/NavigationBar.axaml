@@ -25,38 +25,54 @@
             <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}" />
             <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
         </Style>
+
+        <Style Selector="Button.active">
+            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+        </Style>
     </UserControl.Styles>
 
-    <StackPanel Margin="8" Orientation="Horizontal" Spacing="12">
-
-        <Image Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32"  />
-
-        <Button Command="{Binding RoutesClickedCommand}">
+    <DockPanel Margin="8">
+        <Button DockPanel.Dock="Right"
+                Classes.active="{Binding IsSettingsActive}"
+                Command="{Binding SettingsClickedCommand}"
+                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}">
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <lucideAvalonia:Lucide Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
+                <lucideAvalonia:Lucide Icon="Settings" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.settings}}" />
             </StackPanel>
         </Button>
 
-        <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" >
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <lucideAvalonia:Lucide Icon="Milestone" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                <TextBlock Text="{Binding Route.Route.Name}" />
-            </StackPanel>
-        </Button>
+        <StackPanel Orientation="Horizontal" Spacing="12">
 
-        <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" >
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <lucideAvalonia:Lucide Icon="ListEnd" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                <TextBlock Text="{Binding Scenario.Scenario.Name}"/>
-            </StackPanel>
-        </Button>
+            <Image Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32"  />
 
-        <Button Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <lucideAvalonia:Lucide Icon="TrainFront" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
-                <TextBlock Text="{Binding Consist.ServiceName}"/>
-            </StackPanel>
-        </Button>
-    </StackPanel>
+            <Button Command="{Binding RoutesClickedCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <lucideAvalonia:Lucide Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                    <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
+                </StackPanel>
+            </Button>
+
+            <Button Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" >
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <lucideAvalonia:Lucide Icon="Milestone" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                    <TextBlock Text="{Binding Route.Route.Name}" />
+                </StackPanel>
+            </Button>
+
+            <Button Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" >
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <lucideAvalonia:Lucide Icon="ListEnd" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                    <TextBlock Text="{Binding Scenario.Scenario.Name}"/>
+                </StackPanel>
+            </Button>
+
+            <Button Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <lucideAvalonia:Lucide Icon="TrainFront" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="18" Height="18" />
+                    <TextBlock Text="{Binding Consist.ServiceName}"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </DockPanel>
 </UserControl>

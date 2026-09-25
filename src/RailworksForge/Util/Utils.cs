@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -66,6 +68,44 @@ public class Utils
         });
 
         return files.ToList();
+    }
+
+    public static async Task<IStorageFolder?> OpenFolderPickerAsync(string title)
+    {
+        var window = GetApplicationWindow();
+        var provider = window.StorageProvider;
+
+        var folders = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+        });
+
+        return folders.Count >= 1 ? folders[0] : null;
+    }
+
+    public static void RestartApplication()
+    {
+
+        if (Environment.ProcessPath is not {} processPath)
+        {
+            return;
+        }
+
+        var startInfo = new ProcessStartInfo(processPath) { UseShellExecute = false };
+        var isDotnetHost = Path.GetFileNameWithoutExtension(processPath) == "dotnet";
+
+        if (isDotnetHost)
+        {
+            startInfo.ArgumentList.Add(Environment.GetCommandLineArgs()[0]);
+        }
+
+        Process.Start(startInfo);
+
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
     }
 
     public static string GetTranslation(string key)

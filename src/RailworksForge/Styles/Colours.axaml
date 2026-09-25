@@ -6,12 +6,14 @@
             <SolidColorBrush x:Key="ErrorBrush">#FF3C0000</SolidColorBrush>
             <SolidColorBrush x:Key="PartialBrush">#FF56260F</SolidColorBrush>
             <SolidColorBrush x:Key="IsPlayerBrush">#FF001C37</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningTextBrush">#FF9D5D00</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="SuccessBrush">LightGreen</SolidColorBrush>
             <SolidColorBrush x:Key="ErrorBrush">#FF3C0000</SolidColorBrush>
             <SolidColorBrush x:Key="PartialBrush">#FF56260F</SolidColorBrush>
             <SolidColorBrush x:Key="IsPlayerBrush">#FF001C37</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningTextBrush">#FFFCE100</SolidColorBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

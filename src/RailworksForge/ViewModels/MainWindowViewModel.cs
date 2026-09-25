@@ -17,7 +17,6 @@ namespace RailworksForge.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public MainMenuViewModel MainMenu { get; }
     public ToolbarViewModel Toolbar { get; }
     public NavigationBarViewModel NavigationBar { get; }
     public StatusBarViewModel StatusBar { get; }
@@ -38,11 +37,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly AssetDirectoryTreeService _assetDirectoryTreeService;
     private readonly ScenarioDatabaseService _scenarioDatabaseService;
     private readonly ScenarioService _scenarioService;
+    private readonly IServiceProvider _provider;
 
     public MainWindowViewModel(IServiceProvider provider)
     {
         Routes = provider.GetRequiredService<RoutesViewModel>();
-        MainMenu = provider.GetRequiredService<MainMenuViewModel>();
         NavigationBar = provider.GetRequiredService<NavigationBarViewModel>();
         StatusBar = provider.GetRequiredService<StatusBarViewModel>();
         ProgressIndicator = provider.GetRequiredService<ProgressIndicatorViewModel>();
@@ -59,6 +58,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _assetDirectoryTreeService = provider.GetRequiredService<AssetDirectoryTreeService>();
         _scenarioDatabaseService = provider.GetRequiredService<ScenarioDatabaseService>();
         _scenarioService = provider.GetRequiredService<ScenarioService>();
+        _provider = provider;
     }
 
     public void SelectRoute(RouteViewModel route)
@@ -152,11 +152,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnContentViewModelChanged(ViewModelBase value)
     {
+        NavigationBar.IsSettingsActive = value is SettingsViewModel;
         value.Activate();
+    }
+
+    public void SelectSettings()
+    {
+
+        if (ContentViewModel is SettingsViewModel)
+        {
+            return;
+        }
+
+        ContentViewModel = _provider.GetRequiredService<SettingsViewModel>();
     }
 
     public void OnLoaded()
     {
+
+        if (!Paths.IsValidGameDirectory(Paths.GetGameDirectory()))
+        {
+            SelectSettings();
+
+            return;
+        }
+
         _ = Loading.RunAsync("Loading scenario information…", async _ =>
         {
             await _scenarioDatabaseService.LoadScenarioDatabase();

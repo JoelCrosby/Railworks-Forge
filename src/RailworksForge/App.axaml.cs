@@ -29,7 +29,18 @@ public class App : Application
 
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(config.Language));
 
-        RequestedThemeVariant = config.Theme switch
+        ApplyTheme(config.Theme);
+    }
+
+    public static void ApplyTheme(string theme)
+    {
+
+        if (Current is null)
+        {
+            return;
+        }
+
+        Current.RequestedThemeVariant = theme switch
         {
             "Light" => ThemeVariant.Light,
             "Dark" => ThemeVariant.Dark,
@@ -63,7 +74,6 @@ public class App : Application
     private static void RegisterViews()
     {
         ViewLocator.Register<MainWindowViewModel, MainWindow>();
-        ViewLocator.Register<MainMenuViewModel, MainMenu>();
         ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
         ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
         ViewLocator.Register<ToolbarViewModel, Toolbar>();
@@ -77,12 +87,12 @@ public class App : Application
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
         ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
         ViewLocator.Register<StatusBarViewModel, StatusBar>();
+        ViewLocator.Register<SettingsViewModel, SettingsPage>();
     }
 
     private static void RegisterServices(IServiceCollection services)
     {
         services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<MainMenuViewModel>();
         services.AddTransient<ConsistDetailViewModel>();
         services.AddTransient<ToolbarViewModel>();
         services.AddTransient<NavigationBarViewModel>();
@@ -97,6 +107,7 @@ public class App : Application
         services.AddTransient<ScenarioDetailViewModel>();
         services.AddTransient<StatusBarViewModel>();
         services.AddTransient<ProgressIndicatorViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         services.AddTransient<RouteService>();
         services.AddTransient<ScenarioService>();
