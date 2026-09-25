@@ -12,7 +12,10 @@ originally used to create them.
 - `SerzFeatures`: empty parents, signed IDs/references, nested names, vectors,
   and blob grouping across lines.
 - `SerzFloats`: scientific notation, negative zero, infinity, and NaN.
+- `SerzControlChars`: strings containing NUL and other characters XML forbids,
+  mixed with markup and line breaks. `serz64.exe` writes these as raw bytes, so
+  its output is not well-formed XML and is compared using AngleSharp instead.
 
-Tests compare parsed XML, allowing serialization whitespace and empty-element
+Other tests compare parsed XML, allowing serialization whitespace and empty-element
 syntax to differ while requiring element names, attributes, and values to match.
 They require neither a game installation nor Wine.

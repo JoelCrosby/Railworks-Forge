@@ -60,7 +60,12 @@ public class SerzInternal
     private void WriteXml(Stream output, CancellationToken cancellationToken)
     {
         var reader = new SerzReader(_data);
-        var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true };
+        var settings = new XmlWriterSettings
+        {
+            Encoding = new UTF8Encoding(false),
+            Indent = true,
+            CheckCharacters = false,
+        };
 
         using (var writer = XmlWriter.Create(output, settings))
         {
@@ -116,7 +121,7 @@ public class SerzInternal
                         }
                         else
                         {
-                            writer.WriteString(reader.Value);
+                            WriteText(writer, reader.Value);
                         }
 
                         writer.WriteEndElement();
@@ -126,7 +131,7 @@ public class SerzInternal
                         Attribute(writer, "numElements", reader.Values.Length.ToString(Invariant));
                         Attribute(writer, "elementType", reader.Type);
                         Attribute(writer, "precision", "string");
-                        writer.WriteString(string.Join(" ", reader.Values));
+                        WriteText(writer, string.Join(" ", reader.Values));
                         writer.WriteEndElement();
                         break;
                     case SerzNodeKind.Reference:
@@ -157,6 +162,66 @@ public class SerzInternal
 
             writer.WriteEndDocument();
         }
+    }
+
+    // serz64.exe writes characters that XML forbids, such as NUL, as raw bytes rather than rejecting or escaping them.
+    // XmlWriter would emit &#x0; instead, which AngleSharp refuses to parse.
+    private static void WriteText(XmlWriter writer, string text)
+    {
+
+        if (IsValidXmlText(text))
+        {
+            writer.WriteString(text);
+
+            return;
+        }
+
+        var escaped = new StringBuilder(text.Length + 16);
+
+        foreach (var character in text)
+        {
+            var entity = character switch
+            {
+                '&' => "&amp;",
+                '<' => "&lt;",
+                '>' => "&gt;",
+                '"' => "&quot;",
+                '\'' => "&apos;",
+                _ => null,
+            };
+
+            if (entity is null)
+            {
+                escaped.Append(character);
+            }
+            else
+            {
+                escaped.Append(entity);
+            }
+        }
+
+        writer.WriteRaw(escaped.ToString());
+    }
+
+    private static bool IsValidXmlText(string text)
+    {
+        for (var i = 0; i < text.Length; i++)
+        {
+            var isSurrogatePair = i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]);
+
+            if (isSurrogatePair)
+            {
+                i++;
+                continue;
+            }
+
+            if (!XmlConvert.IsXmlChar(text[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void WriteBlob(XmlWriter writer, ReadOnlySpan<byte> bytes)

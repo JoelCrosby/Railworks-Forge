@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Xml.Linq;
 
 using AngleSharp.Xml;
+using AngleSharp.Xml.Parser;
 
 using RailworksForge.Core.External;
 
@@ -42,6 +43,34 @@ public class SerzInternalTests
 
             Assert.Equal(expected.ToString(), streamed.ToString());
             Assert.Equal(2, Directory.GetFiles(directory.FullName).Length);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Fact]
+    public void Conversion_WritesForbiddenCharactersLikeSerz()
+    {
+        var data = GetResourceBytes("SerzControlChars.bin");
+        var expectedXml = GetResourceBytes("SerzControlChars.bin.xml");
+        var expected = GetLeafValues(expectedXml);
+        var directory = Directory.CreateTempSubdirectory("railworks-serz-");
+
+        try
+        {
+            var inputPath = Path.Join(directory.FullName, "input.bin");
+            var outputPath = Path.Join(directory.FullName, "output.xml");
+            File.WriteAllBytes(inputPath, data);
+            SerzInternal.Convert(inputPath, outputPath);
+            var converted = GetLeafValues(File.ReadAllBytes(outputPath));
+            var document = new SerzInternal(ref data).ToXml();
+            var parsed = document.QuerySelectorAll("cRoot > *").Select(element => (element.LocalName, element.TextContent));
+
+            Assert.Equal(expected, converted);
+            Assert.Equal(expected, parsed);
+            Assert.Contains(expected, value => value.Text == "x\0y");
         }
         finally
         {
@@ -139,6 +168,14 @@ public class SerzInternalTests
         {
             directory.Delete(true);
         }
+    }
+
+    private static List<(string Name, string Text)> GetLeafValues(byte[] xml)
+    {
+        using var stream = new MemoryStream(xml);
+        var document = new XmlParser().ParseDocument(stream);
+
+        return document.QuerySelectorAll("cRoot > *").Select(element => (element.LocalName, element.TextContent)).ToList();
     }
 
     private static byte[] GetResourceBytes(string name)
