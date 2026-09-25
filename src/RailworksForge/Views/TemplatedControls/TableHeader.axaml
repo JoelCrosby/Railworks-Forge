@@ -2,17 +2,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:RailworksForge.Views.TemplatedControls">
     <Design.PreviewWith>
-        <controls:TableHeader />
+        <controls:TableHeader Text="Scenarios" Width="600">
+            <controls:TableSearchBox />
+        </controls:TableHeader>
     </Design.PreviewWith>
 
     <Style Selector="controls|TableHeader">
         <Setter Property="Template">
             <ControlTemplate>
-
-                <Border Padding="16, 8" Background="{DynamicResource DataGridColumnHeaderBackgroundBrush}" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" BorderThickness="0,1,0,0">
-                    <TextBlock Text="{TemplateBinding Text}" FontSize="{StaticResource CaptionFontSize}" Foreground="{DynamicResource DataGridColumnHeaderForegroundBrush}" />
+                <Border Padding="16,8" MinHeight="48">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{TemplateBinding Text}" />
+                        <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0" Content="{TemplateBinding Tools}" />
+                    </Grid>
                 </Border>
-
             </ControlTemplate>
         </Setter>
     </Style>

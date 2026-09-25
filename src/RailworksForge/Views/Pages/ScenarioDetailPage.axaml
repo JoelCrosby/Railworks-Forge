@@ -57,8 +57,9 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top">
-            <controls:TableSearchBox SearchTerm="{Binding SearchTerm}"  />
-            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.services}}" />
+            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.services}}">
+                <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
+            </controls:TableHeader>
         </StackPanel>
 
         <Panel>
@@ -74,7 +75,7 @@
                     <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" CanUserSort="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
-                                <Image Height="64" Source="{Binding ImageBitmap}"/>
+                                <Border Classes="thumbnail"><Image Height="52" Stretch="UniformToFill" Source="{Binding ImageBitmap}" /></Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

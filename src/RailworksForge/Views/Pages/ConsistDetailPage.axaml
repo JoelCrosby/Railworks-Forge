@@ -18,8 +18,9 @@
 
         <Panel Grid.Column="0">
             <DockPanel IsEnabled="{Binding Loading.IsIdle}">
-                <controls:TableSearchBox DockPanel.Dock="Top" SearchTerm="{Binding SearchTerm}"  />
-                <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}" />
+                <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}">
+                    <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
+                </controls:TableHeader>
 
                 <DataGrid
                     Name="ConsistVehiclesDataGrid"
@@ -59,8 +60,9 @@
            <Grid RowDefinitions="*,4,*">
                <DockPanel>
                    <StackPanel DockPanel.Dock="Top">
-                       <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}"  />
-                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}" />
+                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}">
+                           <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}" Width="200" />
+                       </controls:TableHeader>
                    </StackPanel>
 
                    <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">

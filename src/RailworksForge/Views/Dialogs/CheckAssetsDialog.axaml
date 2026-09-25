@@ -41,7 +41,6 @@
                 <DataGrid BorderThickness="0,1,0,0"
                           BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
                           ItemsSource="{Binding Blueprints}"
-                          GridLinesVisibility="All"
                           SelectionMode="Single"
                           IsReadOnly="True"
                           CanUserResizeColumns="True"

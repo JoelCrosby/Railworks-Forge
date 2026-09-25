@@ -10,12 +10,41 @@
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
              x:DataType="vm:RoutesBaseViewModel">
 
+    <UserControl.Styles>
+        <Style Selector="ListBox.route-cards ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+
+        <Style Selector="ListBox.route-cards ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="Border.route-card">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        </Style>
+
+        <Style Selector="ListBox.route-cards ListBoxItem:pointerover Border.route-card">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
+        </Style>
+
+        <Style Selector="ListBox.route-cards ListBoxItem:selected Border.route-card">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+        </Style>
+    </UserControl.Styles>
+
     <DockPanel>
         <Panel>
             <ScrollViewer>
 
                 <Border Padding="12" IsVisible="{Binding !IsLoading}">
                     <ListBox
+                        Classes="route-cards"
                         VerticalAlignment="Top"
                         ItemsSource="{Binding ListItems}"
                         Background="Transparent"
@@ -29,13 +58,16 @@
 
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,4,0,0" Width="256"
-                                        BorderBrush="{DynamicResource DataGridGridLinesBrush}"
-                                        BorderThickness="1">
+                                <Border Classes="route-card" Width="256">
                                     <StackPanel Orientation="Vertical">
-                                        <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill" />
-                                        <Border Padding="12,8">
-                                            <TextBlock Text="{Binding Name}" />
+                                        <!-- Border.ClipToBounds clips square corners, so round the image's top corners itself; the clip extends past the bottom edge to leave those square. -->
+                                        <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill">
+                                            <Image.Clip>
+                                                <RectangleGeometry Rect="0,0,252,140" RadiusX="6" RadiusY="6" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Padding="12,10">
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
                                         </Border>
                                     </StackPanel>
                                 </Border>

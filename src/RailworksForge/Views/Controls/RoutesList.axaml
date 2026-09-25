@@ -14,7 +14,6 @@
         <DataGrid IsEnabled="{Binding Loading.IsIdle}" ItemsSource="{Binding ListItems}"
                   IsReadOnly="True"
                   DoubleTapped="DataGrid_OnDoubleTapped"
-                  GridLinesVisibility="All"
                   SelectionMode="Single"
                   RowHeight="64"
                   SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
@@ -24,7 +23,7 @@
                 <DataGridTemplateColumn Header="Image" Width="128">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Height="64" Source="{Binding ImageBitmap}" />
+                            <Border Classes="thumbnail"><Image Height="52" Stretch="UniformToFill" Source="{Binding ImageBitmap}" /></Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

@@ -3,17 +3,17 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="SuccessBrush">DarkGreen</SolidColorBrush>
-            <SolidColorBrush x:Key="ErrorBrush">#FF3C0000</SolidColorBrush>
-            <SolidColorBrush x:Key="PartialBrush">#FF56260F</SolidColorBrush>
-            <SolidColorBrush x:Key="IsPlayerBrush">#FF001C37</SolidColorBrush>
             <SolidColorBrush x:Key="WarningTextBrush">#FF9D5D00</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="SuccessBrush">LightGreen</SolidColorBrush>
-            <SolidColorBrush x:Key="ErrorBrush">#FF3C0000</SolidColorBrush>
-            <SolidColorBrush x:Key="PartialBrush">#FF56260F</SolidColorBrush>
-            <SolidColorBrush x:Key="IsPlayerBrush">#FF001C37</SolidColorBrush>
             <SolidColorBrush x:Key="WarningTextBrush">#FFFCE100</SolidColorBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+
+    <!-- Consist row highlights are translucent so one colour reads well on both the light and dark backgrounds,
+         and rows coloured before a theme switch still look right afterwards. -->
+    <SolidColorBrush x:Key="ErrorBrush">#40E81123</SolidColorBrush>
+    <SolidColorBrush x:Key="PartialBrush">#40F7630C</SolidColorBrush>
+    <SolidColorBrush x:Key="IsPlayerBrush">#3800B7C3</SolidColorBrush>
 </ResourceDictionary>

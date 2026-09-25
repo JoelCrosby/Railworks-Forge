@@ -78,7 +78,7 @@
                                 <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate DataType="vm:PreloadConsistViewModel">
-                                            <Image Height="64" Source="{Binding ImageBitmap}"/>
+                                            <Border Classes="thumbnail"><Image Height="52" Stretch="UniformToFill" Source="{Binding ImageBitmap}" /></Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
