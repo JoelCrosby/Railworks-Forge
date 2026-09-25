@@ -27,7 +27,7 @@
             </StackPanel>
         </Border>
 
-        <loading:LoadingState Grid.Row="1" DataContext="{Binding Loading}" />
+        <loading:LoadingState Grid.Row="1" Grid.RowSpan="2" DataContext="{Binding Loading}" />
 
         <Grid Grid.Row="1" ColumnDefinitions="*,12,*" IsVisible="{Binding !IsLoading}" Margin="12,24,12,12">
 
@@ -66,8 +66,8 @@
                                             </TextBlock>
                                         </StackPanel>
 
-                                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
-                                            <loading:LoadingState Grid.Row="1" Grid.ColumnSpan="5" DataContext="{Binding Loading}" />
+                                        <Grid ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
+                                            <loading:LoadingState Classes="compact" Grid.ColumnSpan="5" DataContext="{Binding Loading}" />
                                             <ComboBox
                                                 Grid.Column="0"
                                                 HorizontalAlignment="Stretch"

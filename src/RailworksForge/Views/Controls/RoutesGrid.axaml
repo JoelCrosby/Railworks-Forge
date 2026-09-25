@@ -11,39 +11,41 @@
              x:DataType="vm:RoutesBaseViewModel">
 
     <DockPanel>
-        <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
-        <ScrollViewer>
+        <Panel>
+            <ScrollViewer>
 
-            <Border Padding="12" IsVisible="{Binding !IsLoading}">
-                <ListBox
-                    VerticalAlignment="Top"
-                    ItemsSource="{Binding ListItems}"
-                    Background="Transparent"
-                    DoubleTapped="DataGrid_OnDoubleTapped"
-                    SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
+                <Border Padding="12" IsVisible="{Binding !IsLoading}">
+                    <ListBox
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ListItems}"
+                        Background="Transparent"
+                        DoubleTapped="DataGrid_OnDoubleTapped"
+                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
 
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,4,0,0" Width="256"
-                                    BorderBrush="{DynamicResource DataGridGridLinesBrush}"
-                                    BorderThickness="1">
-                                <StackPanel Orientation="Vertical">
-                                    <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill" />
-                                    <Border Padding="12,8">
-                                        <TextBlock Text="{Binding Name}" />
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Border>
-        </ScrollViewer>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,4,0,0" Width="256"
+                                        BorderBrush="{DynamicResource DataGridGridLinesBrush}"
+                                        BorderThickness="1">
+                                    <StackPanel Orientation="Vertical">
+                                        <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill" />
+                                        <Border Padding="12,8">
+                                            <TextBlock Text="{Binding Name}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </ScrollViewer>
+            <loading:LoadingState DataContext="{Binding Loading}" />
+        </Panel>
     </DockPanel>
 
 

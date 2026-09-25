@@ -20,8 +20,6 @@
     </Design.DataContext>
 
     <DockPanel>
-        <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
-
         <Grid Margin="12,12,12,0" DockPanel.Dock="Top" ColumnDefinitions="280,*" >
             <Grid.Styles>
                 <Style Selector="StackPanel">
@@ -68,40 +66,43 @@
         </StackPanel>
 
 
-        <DataGrid
-            Name="ScenariosDataGrid"
-            IsEnabled="{Binding Loading.IsIdle}"
-            ItemsSource="{Binding Scenarios}"
-            SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-            SelectionMode="Single"
-            DoubleTapped="ScenariosDataGrid_OnDoubleTapped"
-        >
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.packaging_type}}" Binding="{Binding PackagingType}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" Binding="{Binding Locomotive}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding ScenarioClass}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" Binding="{Binding Duration}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.rating}}" Binding="{Binding Rating}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" Binding="{Binding Season}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.score}}" Binding="{Binding PlayerInfo.Score}" />
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completion}}" SortMemberPath="PlayerInfo.Completion">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
-                            <lucideAvalonia:Lucide Icon="CircleCheckBig" IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}" StrokeBrush="{DynamicResource SuccessBrush}" StrokeThickness="3" Width="20" Height="20" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
+        <Panel>
+            <DataGrid
+                Name="ScenariosDataGrid"
+                IsEnabled="{Binding Loading.IsIdle}"
+                ItemsSource="{Binding Scenarios}"
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                SelectionMode="Single"
+                DoubleTapped="ScenariosDataGrid_OnDoubleTapped"
+            >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.packaging_type}}" Binding="{Binding PackagingType}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" Binding="{Binding Locomotive}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding ScenarioClass}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" Binding="{Binding Duration}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.rating}}" Binding="{Binding Rating}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" Binding="{Binding Season}" />
+                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.score}}" Binding="{Binding PlayerInfo.Score}" />
+                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completion}}" SortMemberPath="PlayerInfo.Completion">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="models:Scenario">
+                                <lucideAvalonia:Lucide Icon="CircleCheckBig" IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}" StrokeBrush="{DynamicResource SuccessBrush}" StrokeThickness="3" Width="20" Height="20" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
 
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding DetailsClickedCommand}" />
-                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyClickedCommand}" />
-                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-        </DataGrid>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding DetailsClickedCommand}" />
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyClickedCommand}" />
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
+            <loading:LoadingState DataContext="{Binding Loading}" />
+        </Panel>
 
     </DockPanel>
 

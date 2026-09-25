@@ -10,53 +10,55 @@
              x:DataType="vm:RoutesBaseViewModel">
 
     <DockPanel>
-    <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
-    <DataGrid IsEnabled="{Binding Loading.IsIdle}" ItemsSource="{Binding ListItems}"
-              IsReadOnly="True"
-              DoubleTapped="DataGrid_OnDoubleTapped"
-              GridLinesVisibility="All"
-              SelectionMode="Single"
-              RowHeight="64"
-              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-    >
+    <Panel>
+        <DataGrid IsEnabled="{Binding Loading.IsIdle}" ItemsSource="{Binding ListItems}"
+                  IsReadOnly="True"
+                  DoubleTapped="DataGrid_OnDoubleTapped"
+                  GridLinesVisibility="All"
+                  SelectionMode="Single"
+                  RowHeight="64"
+                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+        >
 
-        <DataGrid.Columns>
-            <DataGridTemplateColumn Header="Image" Width="128">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Image Height="64" Source="{Binding ImageBitmap}" />
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Image" Width="128">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Height="64" Source="{Binding ImageBitmap}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-            <DataGridTemplateColumn Header="Id">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="2"
-                                Margin="12, 4"
-                                VerticalAlignment="Center">
-                            <TextBlock Margin="3" VerticalAlignment="Center"
-                                       Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
-                                       FontFamily="monospace"
-                                       FontSize="13"/>
-                        </Border>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="2"
+                                    Margin="12, 4"
+                                    VerticalAlignment="Center">
+                                <TextBlock Margin="3" VerticalAlignment="Center"
+                                           Text="{Binding Id, Converter={StaticResource IdValueConverter}}"
+                                           FontFamily="monospace"
+                                           FontSize="13"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-            <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-            <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
-        </DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
+            </DataGrid.Columns>
 
-        <DataGrid.ContextMenu>
-            <ContextMenu>
-                <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
-                <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
-                <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
-            </ContextMenu>
-        </DataGrid.ContextMenu>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
+                    <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
+                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
 
-    </DataGrid>
+        </DataGrid>
+        <loading:LoadingState DataContext="{Binding Loading}" />
+    </Panel>
     </DockPanel>
 
 </UserControl>

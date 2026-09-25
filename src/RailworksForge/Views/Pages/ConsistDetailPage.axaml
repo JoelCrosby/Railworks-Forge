@@ -16,9 +16,7 @@
 
     <Grid ColumnDefinitions="2*, 4, *">
 
-        <DockPanel Grid.Column="0">
-            <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
-
+        <Panel Grid.Column="0">
             <DockPanel IsEnabled="{Binding Loading.IsIdle}">
                 <controls:TableSearchBox DockPanel.Dock="Top" SearchTerm="{Binding SearchTerm}"  />
                 <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}" />
@@ -51,7 +49,9 @@
                 </DataGrid>
 
             </DockPanel>
-        </DockPanel>
+
+            <loading:LoadingState DataContext="{Binding Loading}" />
+        </Panel>
 
         <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Columns"/>
 
@@ -86,31 +86,32 @@
                <GridSplitter Grid.Row="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Rows"/>
 
                <DockPanel Grid.Row="2">
-                   <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding StockLoading}" />
-
                    <StackPanel DockPanel.Dock="Top">
                        <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
                    </StackPanel>
 
-                   <DataGrid
-                       Name="AvailableStockDataGrid"
-                       IsEnabled="{Binding StockLoading.IsIdle}"
-                       ItemsSource="{Binding AvailableStock}"
-                       SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
-                       SelectionMode="Single"
-                   >
-                       <DataGrid.Columns>
-                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
-                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding BlueprintType}" />
-                           <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Blueprint.BlueprintId}" />
-                       </DataGrid.Columns>
+                   <Panel>
+                       <DataGrid
+                           Name="AvailableStockDataGrid"
+                           IsEnabled="{Binding StockLoading.IsIdle}"
+                           ItemsSource="{Binding AvailableStock}"
+                           SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
+                           SelectionMode="Single"
+                       >
+                           <DataGrid.Columns>
+                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
+                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding BlueprintType}" />
+                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Blueprint.BlueprintId}" />
+                           </DataGrid.Columns>
 
-                       <DataGrid.ContextMenu>
-                           <ContextMenu>
-                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}"  />
-                           </ContextMenu>
-                       </DataGrid.ContextMenu>
-                   </DataGrid>
+                           <DataGrid.ContextMenu>
+                               <ContextMenu>
+                                   <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}"  />
+                               </ContextMenu>
+                           </DataGrid.ContextMenu>
+                       </DataGrid>
+                       <loading:LoadingState DataContext="{Binding StockLoading}" />
+                   </Panel>
 
                </DockPanel>
            </Grid>

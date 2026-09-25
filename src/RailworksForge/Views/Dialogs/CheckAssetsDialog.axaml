@@ -37,24 +37,26 @@
         </StackPanel>
 
         <DockPanel Grid.Row="1" IsVisible="{Binding !IsLoading}">
-            <loading:LoadingState DockPanel.Dock="Top" DataContext="{Binding Loading}" />
-            <DataGrid BorderThickness="0,1,0,0"
-                      BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-                      ItemsSource="{Binding Blueprints}"
-                      GridLinesVisibility="All"
-                      SelectionMode="Single"
-                      IsReadOnly="True"
-                      CanUserResizeColumns="True"
-                      CanUserReorderColumns="True"
-                      CanUserSortColumns="True"
-            >
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Availablity State" Binding="{Binding AcquisitionState}" />
-                    <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                    <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                    <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <Panel>
+                <DataGrid BorderThickness="0,1,0,0"
+                          BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                          ItemsSource="{Binding Blueprints}"
+                          GridLinesVisibility="All"
+                          SelectionMode="Single"
+                          IsReadOnly="True"
+                          CanUserResizeColumns="True"
+                          CanUserReorderColumns="True"
+                          CanUserSortColumns="True"
+                >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Availablity State" Binding="{Binding AcquisitionState}" />
+                        <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
+                        <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
+                        <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <loading:LoadingState DataContext="{Binding Loading}" />
+            </Panel>
         </DockPanel>
 
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
