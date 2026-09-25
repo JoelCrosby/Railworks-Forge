@@ -14,6 +14,20 @@ public class ScenarioService
         _scenarioDatabaseService = scenarioDatabaseService;
     }
 
+    public event Action? PlayerInfoUpdated
+    {
+        add => _scenarioDatabaseService.Updated += value;
+        remove => _scenarioDatabaseService.Updated -= value;
+    }
+
+    public void RefreshPlayerInfo(IEnumerable<Scenario> scenarios)
+    {
+        foreach (var scenario in scenarios)
+        {
+            scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
+        }
+    }
+
     public List<Scenario> GetScenarios(Route route, CancellationToken cancellationToken = default)
     {
         var scenarios = new HashSet<Scenario>();

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
+using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -96,6 +97,7 @@ public partial class RouteDetailViewModel : ViewModelBase
             _ = Loading.RunAsync("Loading scenarios…", token => Task.FromResult(GetScenarios(token)), items =>
             {
                 _cachedScenarios = items;
+                RefreshPlayerInfo();
                 FilterScenarios();
             });
         }
@@ -104,12 +106,40 @@ public partial class RouteDetailViewModel : ViewModelBase
             Scenarios.AddRange(GetScenarios());
         }
 
+        _scenarioService.PlayerInfoUpdated += OnPlayerInfoUpdated;
+
         this.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is not nameof(SearchTerm)) return;
 
             FilterScenarios();
         };
+    }
+
+    public override void Activate()
+    {
+        base.Activate();
+
+        _scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
+        _scenarioService.PlayerInfoUpdated += OnPlayerInfoUpdated;
+        RefreshPlayerInfo();
+    }
+
+    public override void CancelLoading()
+    {
+        base.CancelLoading();
+
+        _scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
+    }
+
+    private void OnPlayerInfoUpdated()
+    {
+        Dispatcher.UIThread.Post(RefreshPlayerInfo);
+    }
+
+    private void RefreshPlayerInfo()
+    {
+        _scenarioService.RefreshPlayerInfo(_cachedScenarios ?? []);
     }
 
     private void FilterScenarios()

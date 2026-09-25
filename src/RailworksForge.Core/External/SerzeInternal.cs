@@ -12,10 +12,6 @@ public class SerzInternal
     private const string DeltaNamespace = "http://www.kuju.com/TnT/2003/Delta";
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
     private readonly byte[] _data;
-    private readonly List<string> _strings = [];
-    private readonly Chunk?[] _chunks = new Chunk[255];
-    private int _position;
-    private int _nextChunk;
 
     public SerzInternal(ref byte[] data)
     {
@@ -63,37 +59,23 @@ public class SerzInternal
 
     private void WriteXml(Stream output, CancellationToken cancellationToken)
     {
-        _position = 0;
-        _nextChunk = 0;
-        _strings.Clear();
-        Array.Clear(_chunks);
-
-        if (!ReadBytes(8).SequenceEqual("SERZ\0\0\x01\0"u8))
-        {
-            throw InvalidData("Unsupported SERZ header");
-        }
-
+        var reader = new SerzReader(_data);
         var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true };
+
         using (var writer = XmlWriter.Create(output, settings))
         {
             writer.WriteStartDocument();
             var parents = new Stack<string>();
             var hasRoot = false;
 
-            while (_position < _data.Length)
+            while (reader.Read())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var chunk = ReadChunk();
 
-                switch (chunk.Kind)
+                switch (reader.Kind)
                 {
-                    case 'C':
-                        ReadBytes(5);
-                        break;
-                    case 'P':
-                        var id = BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4));
-                        ReadUInt32();
-                        writer.WriteStartElement(XmlName(chunk.Name));
+                    case SerzNodeKind.Open:
+                        writer.WriteStartElement(XmlName(reader.Name));
 
                         if (!hasRoot)
                         {
@@ -102,81 +84,67 @@ public class SerzInternal
                             hasRoot = true;
                         }
 
-                        if (id != 0)
+                        if (reader.Id != 0)
                         {
-                            Attribute(writer, "id", id.ToString(Invariant));
+                            Attribute(writer, "id", reader.Id.ToString(Invariant));
                         }
 
-                        parents.Push(chunk.Name);
+                        parents.Push(reader.Name);
                         break;
-                    case 'p':
+                    case SerzNodeKind.Close:
                         var hasParent = parents.TryPop(out var parentName);
-                        var closesCurrentParent = hasParent && parentName == chunk.Name;
+                        var closesCurrentParent = hasParent && parentName == reader.Name;
 
                         if (!closesCurrentParent)
                         {
-                            throw InvalidData("Mismatched closing element");
+                            throw reader.InvalidData("Mismatched closing element");
                         }
 
                         writer.WriteEndElement();
                         break;
-                    case 'V':
-                        writer.WriteStartElement(XmlName(chunk.Name));
-                        Attribute(writer, "type", chunk.Type);
-                        var isFloat = chunk.Type is "sFloat32" or "sFloat64";
+                    case SerzNodeKind.Value:
+                        writer.WriteStartElement(XmlName(reader.Name));
+                        Attribute(writer, "type", reader.Type);
 
-                        if (isFloat)
+                        if (reader.IsFloat)
                         {
-                            var value = ReadFloat(chunk.Type);
                             var bits = new byte[8];
-                            BinaryPrimitives.WriteDoubleLittleEndian(bits, value);
+                            BinaryPrimitives.WriteDoubleLittleEndian(bits, reader.FloatValue);
                             Attribute(writer, "alt_encoding", System.Convert.ToHexString(bits));
                             Attribute(writer, "precision", "string");
-                            writer.WriteString(FormatFloat(value, "G6"));
+                            writer.WriteString(SerzReader.FormatFloat(reader.FloatValue, "G6"));
                         }
                         else
                         {
-                            writer.WriteString(ReadValue(chunk.Type));
+                            writer.WriteString(reader.Value);
                         }
 
                         writer.WriteEndElement();
                         break;
-                    case 'A':
-                        var count = ReadByte();
-                        writer.WriteStartElement(XmlName(chunk.Name));
-                        Attribute(writer, "numElements", count.ToString(Invariant));
-                        Attribute(writer, "elementType", chunk.Type);
+                    case SerzNodeKind.Array:
+                        writer.WriteStartElement(XmlName(reader.Name));
+                        Attribute(writer, "numElements", reader.Values.Length.ToString(Invariant));
+                        Attribute(writer, "elementType", reader.Type);
                         Attribute(writer, "precision", "string");
-                        var values = new string[count];
-
-                        for (var i = 0; i < count; i++)
-                        {
-                            values[i] = ReadValue(chunk.Type);
-                        }
-
-                        writer.WriteString(string.Join(" ", values));
+                        writer.WriteString(string.Join(" ", reader.Values));
                         writer.WriteEndElement();
                         break;
-                    case 'R':
-                        writer.WriteStartElement(XmlName(chunk.Name));
+                    case SerzNodeKind.Reference:
+                        writer.WriteStartElement(XmlName(reader.Name));
                         Attribute(writer, "type", "ref");
-                        writer.WriteString(BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4)).ToString(Invariant));
+                        writer.WriteString(reader.Value);
                         writer.WriteEndElement();
                         break;
-                    case 'N':
+                    case SerzNodeKind.Nil:
                         writer.WriteStartElement("d", "nil", DeltaNamespace);
                         writer.WriteEndElement();
                         break;
-                    case 'B':
-                        var size = ReadLength();
-                        var bytes = ReadBytes(size);
+                    case SerzNodeKind.Blob:
                         writer.WriteStartElement("d", "blob", DeltaNamespace);
-                        Attribute(writer, "size", size.ToString(Invariant));
-                        WriteBlob(writer, bytes);
+                        Attribute(writer, "size", reader.Blob.Length.ToString(Invariant));
+                        WriteBlob(writer, reader.Blob.Span);
                         writer.WriteEndElement();
                         break;
-                    default:
-                        throw InvalidData($"Unsupported chunk '{chunk.Kind}'");
                 }
             }
 
@@ -184,7 +152,7 @@ public class SerzInternal
 
             if (!isComplete)
             {
-                throw InvalidData("Incomplete XML document");
+                throw reader.InvalidData("Incomplete XML document");
             }
 
             writer.WriteEndDocument();
@@ -208,151 +176,6 @@ public class SerzInternal
         }
     }
 
-    private Chunk ReadChunk()
-    {
-        var index = ReadByte();
-
-        if (index != byte.MaxValue)
-        {
-            return _chunks[index] ?? throw InvalidData($"Unknown chunk index {index}");
-        }
-
-        var kind = (char)ReadByte();
-        var hasName = kind is 'P' or 'p' or 'V' or 'A' or 'R';
-        var name = hasName ? ReadString() : string.Empty;
-        var hasType = kind is 'V' or 'A';
-        var type = hasType ? ReadString() : string.Empty;
-        var chunk = new Chunk(kind, name, type);
-        _chunks[_nextChunk] = chunk;
-        _nextChunk = (_nextChunk + 1) % _chunks.Length;
-
-        return chunk;
-    }
-
-    private string ReadString()
-    {
-        var index = BinaryPrimitives.ReadUInt16LittleEndian(ReadBytes(2));
-
-        if (index != ushort.MaxValue)
-        {
-
-            if (index >= _strings.Count)
-            {
-                throw InvalidData($"Unknown string index {index}");
-            }
-
-            return _strings[index];
-        }
-
-        var count = ReadLength();
-        var start = _position;
-
-        // SERZ counts Unicode characters rather than UTF-8 bytes.
-        for (var i = 0; i < count; i++)
-        {
-            var status = Rune.DecodeFromUtf8(_data.AsSpan(_position), out _, out var consumed);
-
-            if (status != System.Buffers.OperationStatus.Done)
-            {
-                throw InvalidData("Invalid or truncated UTF-8 string");
-            }
-
-            _position += consumed;
-        }
-
-        var value = Encoding.UTF8.GetString(_data, start, _position - start);
-        _strings.Add(value);
-
-        return value;
-    }
-
-    private string ReadValue(string type)
-    {
-        return type switch
-        {
-            "cDeltaString" => ReadString(),
-            "bool" => ReadByte() == 0 ? "0" : "1",
-            "sInt8" => unchecked((sbyte)ReadByte()).ToString(Invariant),
-            "sUInt8" => ReadByte().ToString(Invariant),
-            "sInt16" => BinaryPrimitives.ReadInt16LittleEndian(ReadBytes(2)).ToString(Invariant),
-            "sUInt16" => BinaryPrimitives.ReadUInt16LittleEndian(ReadBytes(2)).ToString(Invariant),
-            "sInt32" => BinaryPrimitives.ReadInt32LittleEndian(ReadBytes(4)).ToString(Invariant),
-            "sUInt32" => ReadUInt32().ToString(Invariant),
-            "sInt64" => BinaryPrimitives.ReadInt64LittleEndian(ReadBytes(8)).ToString(Invariant),
-            "sUInt64" => BinaryPrimitives.ReadUInt64LittleEndian(ReadBytes(8)).ToString(Invariant),
-            "sFloat32" or "sFloat64" => FormatFloat(ReadFloat(type), "F7"),
-            _ => throw InvalidData($"Unsupported value type '{type}'"),
-        };
-    }
-
-    private static string FormatFloat(double value, string format)
-    {
-
-        if (double.IsPositiveInfinity(value))
-        {
-            return "inf";
-        }
-
-        if (double.IsNegativeInfinity(value))
-        {
-            return "-inf";
-        }
-
-        return value.ToString(format, Invariant).ToLowerInvariant();
-    }
-
-    private double ReadFloat(string type)
-    {
-
-        if (type == "sFloat32")
-        {
-            return BinaryPrimitives.ReadSingleLittleEndian(ReadBytes(4));
-        }
-
-        return BinaryPrimitives.ReadDoubleLittleEndian(ReadBytes(8));
-    }
-
-    private byte ReadByte()
-    {
-        return ReadBytes(1)[0];
-    }
-
-    private uint ReadUInt32()
-    {
-        return BinaryPrimitives.ReadUInt32LittleEndian(ReadBytes(4));
-    }
-
-    private int ReadLength()
-    {
-        var length = ReadUInt32();
-
-        if (length > _data.Length - _position)
-        {
-            throw InvalidData("Length exceeds remaining input");
-        }
-
-        return (int)length;
-    }
-
-    private ReadOnlySpan<byte> ReadBytes(int count)
-    {
-
-        if (count > _data.Length - _position)
-        {
-            throw InvalidData("Unexpected end of input");
-        }
-
-        var bytes = _data.AsSpan(_position, count);
-        _position += count;
-
-        return bytes;
-    }
-
-    private InvalidDataException InvalidData(string message)
-    {
-        return new InvalidDataException($"{message} at SERZ byte offset {_position}.");
-    }
-
     private static string XmlName(string name)
     {
 
@@ -368,6 +191,4 @@ public class SerzInternal
     {
         writer.WriteAttributeString("d", name, DeltaNamespace, value);
     }
-
-    private sealed record Chunk(char Kind, string Name, string Type);
 }

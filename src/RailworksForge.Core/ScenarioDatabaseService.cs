@@ -1,13 +1,10 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-
-using AngleSharp.Common;
 
 using RailworksForge.Core.Config;
-using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
 using RailworksForge.Core.Models;
 
@@ -15,113 +12,195 @@ using Serilog;
 
 namespace RailworksForge.Core;
 
-public class ScenarioDatabaseService
+public class ScenarioDatabaseService : IDisposable
 {
-    private ConcurrentDictionary<string, ScenarioPlayerInfo>? _scenarioDictionary;
+    // The game rewrites the database and its MD5 file in several steps, so wait for writes to settle.
+    private static readonly TimeSpan ChangeSettleDelay = TimeSpan.FromSeconds(2);
 
-    private readonly BehaviorSubject<bool> IsLoaded = new (false);
+    private readonly SemaphoreSlim _loadLock = new (1, 1);
+    private readonly Subject<Unit> _databaseChanges = new ();
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
+    private Dictionary<string, ScenarioPlayerInfo> _scenarios = new (StringComparer.OrdinalIgnoreCase);
+    private bool _hasScenarios;
+    private FileSystemWatcher? _watcher;
+    private IDisposable? _changeSubscription;
+
+    public event Action? Updated;
+
+    public async Task LoadScenarioDatabase(CancellationToken cancellationToken = default)
     {
-        AllowTrailingCommas = true,
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        TypeInfoResolver = SourceGenerationContext.Default,
-    };
+        await _loadLock.WaitAsync(cancellationToken);
 
-    private async Task ParseDatabase(bool useCache, CancellationToken cancellationToken)
-    {
-        if (useCache && GetJsonCache() is {} jsonCache)
+        try
         {
-            Log.Information("using cached scenario database");
-
-            _scenarioDictionary = jsonCache;
+            await LoadLatestScenarios(cancellationToken);
         }
-        else
+        finally
         {
-            _scenarioDictionary = await GetScenarioDictionary(cancellationToken);
+            _loadLock.Release();
         }
-
-        IsLoaded.OnNext(true);
     }
 
-    private static async Task<ConcurrentDictionary<string, ScenarioPlayerInfo>> GetScenarioDictionary(CancellationToken cancellationToken)
+    public void WatchForChanges()
     {
-        var sw = Stopwatch.StartNew();
 
-        var path = Path.Join(Paths.GetGameDirectory(), "Content", "SDBCache.bin");
-
-        if (!Paths.Exists(path))
+        if (_watcher is not null)
         {
-            throw new Exception($"failed to get find scenario database in expected path: {path}");
+            return;
         }
 
-        var serialised = await Serz.Convert(path, cancellationToken, true);
-        var file = File.OpenRead(serialised.OutputPath);
+        var databasePath = GetDatabasePath();
 
-        var document = await XmlParser.ParseDocumentAsync(file, cancellationToken);
-
-        Log.Information("parsed scenario database in {Elapsed}ms", sw.ElapsedMilliseconds);
-
-        sw.Restart();
-
-        var scenarioDictionary = new ConcurrentDictionary<string, ScenarioPlayerInfo>();
-
-        foreach (var element in document.QuerySelectorAll("sSDScenario"))
+        _watcher = new FileSystemWatcher(Path.GetDirectoryName(databasePath)!, Path.GetFileName(databasePath))
         {
-            var id = element.SelectTextContent("ScenarioID DevString");
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
+        };
 
-            if (string.IsNullOrWhiteSpace(id)) continue;
+        _watcher.Changed += (_, _) => _databaseChanges.OnNext(Unit.Default);
+        _watcher.Created += (_, _) => _databaseChanges.OnNext(Unit.Default);
+        _watcher.Renamed += (_, _) => _databaseChanges.OnNext(Unit.Default);
 
-            var score = element.SelectInteger("Score");
-            var completion = element.SelectTextContent("Completion");
-            var medalsAwarded = element.SelectInteger("MedalsAwarded");
+        _changeSubscription = _databaseChanges
+            .Throttle(ChangeSettleDelay)
+            .Select(_ => Observable.FromAsync(ReloadAfterChange))
+            .Concat()
+            .Subscribe();
 
-            scenarioDictionary.TryAdd(id, new ScenarioPlayerInfo
+        _watcher.EnableRaisingEvents = true;
+
+        Log.Information("watching scenario database for changes @ {Path}", databasePath);
+    }
+
+    public ScenarioPlayerInfo GetScenario(string id)
+    {
+        return _scenarios.GetValueOrDefault(id) ?? ScenarioPlayerInfo.Empty;
+    }
+
+    public void Dispose()
+    {
+        _changeSubscription?.Dispose();
+        _watcher?.Dispose();
+        _databaseChanges.Dispose();
+        _loadLock.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private async Task LoadLatestScenarios(CancellationToken cancellationToken)
+    {
+        var databasePath = GetDatabasePath();
+
+        if (!Paths.Exists(databasePath))
+        {
+            throw new Exception($"failed to get find scenario database in expected path: {databasePath}");
+        }
+
+        var fingerprint = GetFingerprint(databasePath);
+
+        if (!_hasScenarios && ReadCache() is {} cache)
+        {
+            SetScenarios(cache.Scenarios);
+
+            if (cache.Fingerprint == fingerprint)
             {
-                ScenarioId = id,
-                Score = score,
-                Completion = completion,
-                MedalsAwarded = medalsAwarded,
-            });
+                Log.Information("using cached scenario database");
+
+                return;
+            }
         }
 
-        Log.Information("built scenario cache in {Elapsed}ms", sw.ElapsedMilliseconds);
+        var sw = Stopwatch.StartNew();
+        var data = await File.ReadAllBytesAsync(databasePath, cancellationToken);
+        var scenarios = await Task.Run(() => ScenarioDatabaseReader.Read(data, cancellationToken), cancellationToken);
 
-        var cachePath = GetCachePath();
-        var jsonCache = JsonSerializer.Serialize(scenarioDictionary, JsonSerializerOptions);
+        Log.Information("read {Count} scenarios from scenario database in {Elapsed}ms", scenarios.Count, sw.ElapsedMilliseconds);
 
-        await File.WriteAllTextAsync(cachePath, jsonCache, cancellationToken);
+        SetScenarios(scenarios);
 
-        return scenarioDictionary;
+        var updatedCache = new ScenarioDatabaseCache
+        {
+            Fingerprint = fingerprint,
+            Scenarios = scenarios,
+        };
+
+        await WriteCache(updatedCache, cancellationToken);
     }
 
-    private static ConcurrentDictionary<string, ScenarioPlayerInfo>? GetJsonCache()
+    private async Task ReloadAfterChange()
+    {
+        try
+        {
+            Log.Information("scenario database changed, reloading");
+            await LoadScenarioDatabase();
+        }
+        catch (Exception e)
+        {
+            Log.Warning(e, "failed to reload changed scenario database");
+        }
+    }
+
+    private void SetScenarios(Dictionary<string, ScenarioPlayerInfo> scenarios)
+    {
+        _scenarios = new Dictionary<string, ScenarioPlayerInfo>(scenarios, StringComparer.OrdinalIgnoreCase);
+        _hasScenarios = true;
+
+        Updated?.Invoke();
+    }
+
+    // Size and modified time catch almost every rewrite; the game's own MD5 also catches a restored file with an old timestamp.
+    private static string GetFingerprint(string databasePath)
+    {
+        var info = new FileInfo(databasePath);
+        var hashPath = databasePath + ".MD5";
+        var hash = File.Exists(hashPath) ? Convert.ToHexString(File.ReadAllBytes(hashPath)) : string.Empty;
+
+        return $"{hash}:{info.Length}:{info.LastWriteTimeUtc.Ticks}";
+    }
+
+    private static ScenarioDatabaseCache? ReadCache()
     {
         var cachePath = GetCachePath();
 
-        if (!Paths.Exists(cachePath)) return null;
+        if (!File.Exists(cachePath))
+        {
+            return null;
+        }
 
-        Log.Information("found cached scenario database @ {Path}", cachePath);
+        try
+        {
+            using var json = File.OpenRead(cachePath);
 
-        using var json = File.OpenRead(cachePath);
+            return JsonSerializer.Deserialize(json, SourceGenerationContext.Default.ScenarioDatabaseCache);
+        }
+        catch (JsonException e)
+        {
+            Log.Warning(e, "ignoring unreadable scenario database cache @ {Path}", cachePath);
 
-        return JsonSerializer.Deserialize<ConcurrentDictionary<string, ScenarioPlayerInfo>>(json, Configuration.JsonSerializerOptions);
+            return null;
+        }
+    }
+
+    private static async Task WriteCache(ScenarioDatabaseCache cache, CancellationToken cancellationToken)
+    {
+        var cachePath = GetCachePath();
+        var temporaryPath = cachePath + ".tmp";
+
+        await using (var output = File.Create(temporaryPath))
+        {
+            await JsonSerializer.SerializeAsync(output, cache, SourceGenerationContext.Default.ScenarioDatabaseCache, cancellationToken);
+        }
+
+        File.Move(temporaryPath, cachePath, true);
+    }
+
+    private static string GetDatabasePath()
+    {
+        return Path.Join(Paths.GetGameDirectory(), "Content", "SDBCache.bin");
     }
 
     private static string GetCachePath()
     {
         Directory.CreateDirectory(Paths.GetCacheFolder());
-        return Path.Join(Paths.GetCacheFolder(), "SDBCache.json");
-    }
 
-    public async Task LoadScenarioDatabase()
-    {
-        await ParseDatabase(false, CancellationToken.None);
-    }
-
-    public ScenarioPlayerInfo GetScenario(string id)
-    {
-        return _scenarioDictionary?.GetOrDefault(id, null) ?? ScenarioPlayerInfo.Empty;
+        return Path.Join(Paths.GetCacheFolder(), "ScenarioDatabase.json");
     }
 }

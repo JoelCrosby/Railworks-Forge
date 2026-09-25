@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
 
@@ -11,8 +12,10 @@ using RailworksForge.Core.Types;
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{Name}")]
-public record Scenario
+public record Scenario : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public required string Id { get; init; }
 
     public required Route Route { get; init; }
@@ -47,7 +50,21 @@ public record Scenario
 
     public ScenarioClass ScenarioClass { get; init; }
 
-    public ScenarioPlayerInfo PlayerInfo { get; set; } = ScenarioPlayerInfo.Empty;
+    public ScenarioPlayerInfo PlayerInfo
+    {
+        get;
+        set
+        {
+
+            if (ReferenceEquals(field, value))
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayerInfo)));
+        }
+    } = ScenarioPlayerInfo.Empty;
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 

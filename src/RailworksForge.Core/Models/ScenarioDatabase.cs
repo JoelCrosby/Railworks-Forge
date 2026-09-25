@@ -18,3 +18,10 @@ public class ScenarioPlayerInfo
         MedalsAwarded = 0,
     };
 }
+
+public class ScenarioDatabaseCache
+{
+    public required string Fingerprint { get; init; }
+
+    public required Dictionary<string, ScenarioPlayerInfo> Scenarios { get; init; }
+}

@@ -31,7 +31,7 @@ public class ViewModelBase : ObservableObject
 
     public bool IsActive { get; private set; } = true;
 
-    public void Activate()
+    public virtual void Activate()
     {
         IsActive = true;
     }

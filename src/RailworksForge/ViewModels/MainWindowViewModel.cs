@@ -160,6 +160,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = Loading.RunAsync("Loading scenario information…", async _ =>
         {
             await _scenarioDatabaseService.LoadScenarioDatabase();
+            _scenarioDatabaseService.WatchForChanges();
 
             return true;
         }, _ => { });
