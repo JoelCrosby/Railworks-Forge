@@ -29,7 +29,8 @@
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderForegroundBrush" Color="{DynamicResource SystemBaseHighColor}" />
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
-                    <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemListLowColor}" />
+                    <!-- Hover is drawn over the row's own background, so it must be translucent or it hides the consist state colours. -->
+                    <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.07" />
                     <SolidColorBrush x:Key="DataGridRowInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
                     <!-- A tint of the accent rather than a solid block keeps selected rows readable. -->
                     <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.3" />
@@ -53,7 +54,8 @@
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderPressedBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderForegroundBrush" Color="{DynamicResource SystemBaseHighColor}" />
                     <SolidColorBrush x:Key="DataGridRowGroupHeaderHoveredBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
-                    <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemListLowColor}" />
+                    <!-- Hover is drawn over the row's own background, so it must be translucent or it hides the consist state colours. -->
+                    <SolidColorBrush x:Key="DataGridRowHoveredBackgroundColor" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.07" />
                     <SolidColorBrush x:Key="DataGridRowInvalidBrush" Color="{DynamicResource SystemErrorTextColor}" />
                     <!-- A tint of the accent rather than a solid block keeps selected rows readable. -->
                     <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.3" />
