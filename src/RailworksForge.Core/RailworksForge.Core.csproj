@@ -9,7 +9,6 @@
     <ItemGroup>
       <PackageReference Include="AngleSharp" />
       <PackageReference Include="AngleSharp.Xml" />
-      <PackageReference Include="Avalonia" />
       <PackageReference Include="CliWrap" />
       <PackageReference Include="Dameng.SepEx" />
       <PackageReference Include="Gameloop.Vdf" />

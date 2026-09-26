@@ -19,6 +19,7 @@ public enum RoutesLayout
 public partial class RoutesViewModel(
     RouteService routeService,
     NavigationService navigation,
+    ImageService images,
     LauncherService launcher,
     ClipboardService clipboard) : ViewModelBase
 {
@@ -70,7 +71,7 @@ public partial class RoutesViewModel(
                 MaxDegreeOfParallelism = MaxParallelImageLoads,
             };
 
-            await Parallel.ForEachAsync(models, options, (route, _) => route.LoadImage());
+            Parallel.ForEach(models, options, route => route.ImageBitmap = images.GetRouteImage(route.Model));
 
             return models;
         }, models =>

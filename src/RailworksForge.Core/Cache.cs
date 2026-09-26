@@ -1,8 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-using Avalonia.Media.Imaging;
-
 using RailworksForge.Core.Models;
 
 using Serilog;
@@ -16,8 +14,6 @@ public class Cache
     public static readonly ConcurrentDictionary<string, AcquisitionState?> BlueprintAcquisitionStates = new ();
 
     public static readonly ConcurrentDictionary<string, HashSet<string>> ArchiveCache = new();
-
-    public static readonly ConcurrentDictionary<string, Bitmap?> ImageCache = new();
 
     public static void ClearScenarioCache(Scenario scenario)
     {

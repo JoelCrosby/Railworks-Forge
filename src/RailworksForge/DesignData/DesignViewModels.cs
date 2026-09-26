@@ -48,7 +48,7 @@ public static class DesignViewModels
             var route = new RouteViewModel(DesignData.Route);
             var viewModel = DesignServices.Create<RouteDetailViewModel>(route);
 
-            viewModel.Scenarios.Reset(DesignData.Scenarios);
+            viewModel.Scenarios.Reset(DesignData.Scenarios.ConvertAll(scenario => new ScenarioRowViewModel(scenario)));
 
             return viewModel;
         }

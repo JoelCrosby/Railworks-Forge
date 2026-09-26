@@ -76,6 +76,7 @@ public class App : Application
         services.AddSingleton<ThemeService>();
         services.AddSingleton<AppLifetimeService>();
         services.AddSingleton<ToolsActivity>();
+        services.AddSingleton<ImageService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<ToolbarViewModel>();

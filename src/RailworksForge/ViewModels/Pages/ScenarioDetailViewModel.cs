@@ -20,6 +20,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private readonly NavigationService _navigation;
     private readonly DialogService _dialogs;
     private readonly LauncherService _launcher;
+    private readonly ImageService _images;
 
     [ObservableProperty]
     public partial Scenario Scenario { get; set; }
@@ -37,7 +38,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         ConsistEditService consistEdits,
         NavigationService navigation,
         DialogService dialogs,
-        LauncherService launcher)
+        LauncherService launcher,
+        ImageService images)
     {
         Scenario = scenario;
         _scenarioService = scenarioService;
@@ -45,6 +47,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         _navigation = navigation;
         _dialogs = dialogs;
         _launcher = launcher;
+        _images = images;
 
         SelectedServices.CollectionChanged += (_, _) => NotifySelectionCommands();
     }
@@ -77,7 +80,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             foreach (var service in services)
             {
                 token.ThrowIfCancellationRequested();
-                service.LoadImage();
+                service.ImageBitmap = _images.GetConsistImage(service.Consist);
             }
 
             return (loaded.Scenario, Services: services);

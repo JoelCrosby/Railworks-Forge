@@ -84,7 +84,7 @@
                 <DataGrid.Columns>
                 <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completed}}" SortMemberPath="PlayerInfo.Completion">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <Viewbox Classes="cell-icon"
                                      IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}"
                                      ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.completed}}">
@@ -95,100 +95,100 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Scenario.Name}" />
                 <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive intact. -->
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Locomotive">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Scenario.Locomotive">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,6">
                                 <controls:VehicleThumbnail Width="64" Height="36" Source="{Binding LocomotiveImage}" />
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Locomotive}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Locomotive}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="ScenarioClass">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="Scenario.ScenarioClass">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
                                 <Panel VerticalAlignment="Center">
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Standard}}">
+                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Standard}}">
                                         <lucideAvalonia:Lucide Icon="Flag" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.FreeRoam}}">
+                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.FreeRoam}}">
                                         <lucideAvalonia:Lucide Icon="MapPinned" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Career}}">
+                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Career}}">
                                         <lucideAvalonia:Lucide Icon="Trophy" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Timetable}}">
+                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Timetable}}">
                                         <lucideAvalonia:Lucide Icon="CalendarClock" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Template}}">
+                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Template}}">
                                         <lucideAvalonia:Lucide Icon="LayoutTemplate" />
                                     </Viewbox>
                                 </Panel>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding ScenarioClass}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" SortMemberPath="Duration">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" SortMemberPath="Scenario.Duration">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0">
                                 <Viewbox Classes="inline-icon">
                                     <lucideAvalonia:Lucide Icon="Clock3" />
                                 </Viewbox>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Duration, Converter={x:Static converters:ValueConverters.DurationConverter}}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Duration, Converter={x:Static converters:ValueConverters.DurationConverter}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.rating}}" SortMemberPath="Rating">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.rating}}" SortMemberPath="Scenario.Rating">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <TextBlock Margin="12,0"
                                        VerticalAlignment="Center"
                                        LetterSpacing="1"
                                        Foreground="{DynamicResource SystemAccentColor}"
-                                       Text="{Binding Rating, Converter={x:Static converters:ValueConverters.RatingConverter}}"
-                                       ToolTip.Tip="{Binding Rating}" />
+                                       Text="{Binding Scenario.Rating, Converter={x:Static converters:ValueConverters.RatingConverter}}"
+                                       ToolTip.Tip="{Binding Scenario.Rating}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" SortMemberPath="Season">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" SortMemberPath="Scenario.Season">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
                                 <Panel VerticalAlignment="Center">
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Spring}">
+                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Spring}">
                                         <lucideAvalonia:Lucide Icon="Flower2" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Summer}">
+                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Summer}">
                                         <lucideAvalonia:Lucide Icon="SunMedium" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Autumn}">
+                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Autumn}">
                                         <lucideAvalonia:Lucide Icon="Leaf" />
                                     </Viewbox>
                                     <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Winter}">
+                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Winter}">
                                         <lucideAvalonia:Lucide Icon="Snowflake" />
                                     </Viewbox>
                                 </Panel>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Season}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -196,18 +196,18 @@
 
                 <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.score}}" Binding="{Binding PlayerInfo.Score}" />
 
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.packaging}}" SortMemberPath="PackagingType">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.packaging}}" SortMemberPath="Scenario.PackagingType">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:Scenario">
+                        <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <Panel>
                                 <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Packed}}"
+                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Packed}}"
                                          ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.packed}}">
                                     <lucideAvalonia:Lucide Icon="Package"
                                                            StrokeBrush="{DynamicResource TextControlForeground}" />
                                 </Viewbox>
                                 <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Unpacked}}"
+                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Unpacked}}"
                                          ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.unpacked}}">
                                     <lucideAvalonia:Lucide Icon="FolderOpen"
                                                            StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" />

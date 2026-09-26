@@ -1,10 +1,7 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
 
 using AngleSharp.Dom;
-
-using Avalonia.Media.Imaging;
 
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
@@ -14,10 +11,8 @@ using RailworksForge.Core.Types;
 namespace RailworksForge.Core.Models;
 
 [DebuggerDisplay("{Name}")]
-public record Scenario : INotifyPropertyChanged
+public record Scenario
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public required string Id { get; init; }
 
     public required Route Route { get; init; }
@@ -52,39 +47,9 @@ public record Scenario : INotifyPropertyChanged
 
     public ScenarioClass ScenarioClass { get; init; }
 
-    public ScenarioPlayerInfo PlayerInfo
-    {
-        get;
-        set
-        {
-
-            if (ReferenceEquals(field, value))
-            {
-                return;
-            }
-
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayerInfo)));
-        }
-    } = ScenarioPlayerInfo.Empty;
+    public ScenarioPlayerInfo PlayerInfo { get; set; } = ScenarioPlayerInfo.Empty;
 
     public Consist? PlayerConsist => Consists.FirstOrDefault(consist => consist.PlayerDriver);
-
-    public Bitmap? LocomotiveImage
-    {
-        get;
-        set
-        {
-
-            if (ReferenceEquals(field, value))
-            {
-                return;
-            }
-
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LocomotiveImage)));
-        }
-    }
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 

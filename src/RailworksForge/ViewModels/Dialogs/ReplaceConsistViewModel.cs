@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,13 +10,12 @@ using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
 
-using Serilog;
-
 namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel(
     AssetDirectoryTreeService directoryTree,
     PreloadConsistService preloadConsists,
+    ImageService images,
     LauncherService launcher) : DialogViewModel<PreloadConsist>
 {
     public LoadingOperation StockLoading { get; } = new();
@@ -84,26 +81,10 @@ public partial class ReplaceConsistViewModel(
         return StockLoading.RunAsync("Loading replacement consists…", async token =>
         {
             var consists = await preloadConsists.GetPreloadConsists(directory, token);
-            var models = consists.ConvertAll(consist => new PreloadConsistViewModel(consist));
-
-            LoadImages(models);
-
-            return models;
-        }, PreloadConsists.AddRange);
-    }
-
-    private static void LoadImages(IEnumerable<PreloadConsistViewModel> items)
-    {
-        try
-        {
-            foreach (var item in items)
+            return consists.ConvertAll(consist => new PreloadConsistViewModel(consist)
             {
-                item.LoadImage();
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "an error occured while trying to load stock images");
-        }
+                ImageBitmap = images.GetBlueprintImage(consist.ConsistEntries.FirstOrDefault()?.Blueprint),
+            });
+        }, PreloadConsists.AddRange);
     }
 }
