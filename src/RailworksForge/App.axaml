@@ -10,7 +10,6 @@
 
         <ResourceDictionary>
             <converters:IdValueConverter x:Key="IdValueConverter" />
-            <converters:RowHighlightStateConverter x:Key="RowHighlightStateConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://RailworksForge/Styles/Colours.axaml"/>

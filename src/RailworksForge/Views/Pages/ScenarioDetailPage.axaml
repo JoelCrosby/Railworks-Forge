@@ -69,6 +69,7 @@
         <Panel>
             <DataGrid
                 Name="ServicesDataGrid"
+                Classes="consist-highlight"
                 IsEnabled="{Binding Loading.IsIdle}"
                 ItemsSource="{Binding Services}"
                 SelectionMode="Extended"

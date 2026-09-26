@@ -66,6 +66,7 @@ public class App : Application
         services.AddSingleton<ConsistEditService>();
         services.AddSingleton<RouteAssetCheckService>();
         services.AddSingleton<SerzFileService>();
+        services.AddSingleton<SettingsService>();
         services.AddTransient<Packager>();
 
         services.AddSingleton<NavigationService>();

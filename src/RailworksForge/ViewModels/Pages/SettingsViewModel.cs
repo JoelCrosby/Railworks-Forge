@@ -58,19 +58,22 @@ public partial class SettingsViewModel : ViewModelBase
     private readonly LauncherService _launcher;
     private readonly StoragePickerService _picker;
     private readonly AppLifetimeService _lifetime;
+    private readonly SettingsService _settings;
 
     public SettingsViewModel(
         ThemeService themes,
         LauncherService launcher,
         StoragePickerService picker,
-        AppLifetimeService lifetime)
+        AppLifetimeService lifetime,
+        SettingsService settings)
     {
         _themeService = themes;
         _launcher = launcher;
         _picker = picker;
         _lifetime = lifetime;
+        _settings = settings;
 
-        var config = Configuration.Get();
+        var config = settings.Current;
 
         GameDirectoryPath = Paths.GetGameDirectory();
         UseInternalSerz = config.UseInternalSerz;
@@ -107,9 +110,7 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void ResetTableSorting()
     {
-        var current = Configuration.Get();
-        current.DataGrids.Clear();
-        Configuration.Set(current);
+        _settings.Update(config => config with { DataGrids = [] });
         IsTableSortingReset = true;
     }
 
@@ -133,7 +134,7 @@ public partial class SettingsViewModel : ViewModelBase
 
     partial void OnSelectedThemeChanged(SettingsOption? value)
     {
-        var isNewTheme = value is not null && value.Key != Configuration.Get().Theme;
+        var isNewTheme = value is not null && value.Key != _settings.Current.Theme;
 
         if (!isNewTheme)
         {
@@ -141,12 +142,12 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         _themeService.Apply(value!.Key);
-        Configuration.Set(Configuration.Get() with { Theme = value.Key });
+        _settings.Update(config => config with { Theme = value.Key });
     }
 
     partial void OnSelectedLanguageChanged(SettingsOption? value)
     {
-        var isNewLanguage = value is not null && value.Key != Configuration.Get().Language;
+        var isNewLanguage = value is not null && value.Key != _settings.Current.Language;
 
         if (!isNewLanguage)
         {
@@ -154,22 +155,15 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(value!.Key));
-        Configuration.Set(Configuration.Get() with { Language = value.Key });
+        _settings.Update(config => config with { Language = value.Key });
 
         // The theme names come from translations, so rebuild them in the new language.
-        BuildThemes(Configuration.Get().Theme);
+        BuildThemes(_settings.Current.Theme);
     }
 
     partial void OnUseInternalSerzChanged(bool value)
     {
-        var config = Configuration.Get();
-
-        if (value == config.UseInternalSerz)
-        {
-            return;
-        }
-
-        Configuration.Set(config with { UseInternalSerz = value });
+        _settings.Update(config => config with { UseInternalSerz = value });
     }
 
     private void SetGameDirectory(string path)
@@ -181,7 +175,7 @@ public partial class SettingsViewModel : ViewModelBase
             return;
         }
 
-        Configuration.Set(Configuration.Get() with { GameDirectoryPath = path });
+        _settings.Update(config => config with { GameDirectoryPath = path });
 
         var runningDirectory = Paths.GetGameDirectory();
         var isRunningDirectorySet = !string.IsNullOrWhiteSpace(runningDirectory);

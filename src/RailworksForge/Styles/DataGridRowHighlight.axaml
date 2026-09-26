@@ -1,8 +1,21 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core">
+        xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:util="using:RailworksForge.Util">
 
-        <Style Selector="DataGrid DataGridRow">
-                <Setter Property="Background" Value="{Binding DataType=models:Consist, Converter={StaticResource RowHighlightStateConverter}}" />
-        </Style>
+    <Style Selector="DataGrid.consist-highlight DataGridRow" x:DataType="vm:ConsistViewModel">
+        <Setter Property="util:DataGridRowHighlight.State" Value="{Binding Highlight}" />
+    </Style>
+
+    <Style Selector="DataGridRow[(util|DataGridRowHighlight.State)=Missing]">
+        <Setter Property="Background" Value="{DynamicResource ErrorBrush}" />
+    </Style>
+
+    <Style Selector="DataGridRow[(util|DataGridRowHighlight.State)=Partial]">
+        <Setter Property="Background" Value="{DynamicResource PartialBrush}" />
+    </Style>
+
+    <Style Selector="DataGridRow[(util|DataGridRowHighlight.State)=Player]">
+        <Setter Property="Background" Value="{DynamicResource IsPlayerBrush}" />
+    </Style>
 </Styles>
