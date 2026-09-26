@@ -18,6 +18,15 @@
                          VerticalContentAlignment="Center"
                          CornerRadius="6"
                          PlaceholderText="{echoes:Translate {x:Static translations:Strings.search}}">
+                    <!-- The theme's solid text box fill (black in dark mode) stands out against the page, so use translucent tints that sit just off it. -->
+                    <TextBox.Resources>
+                        <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.05" />
+                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.08" />
+                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemAltHighColor}" Opacity="0.3" />
+                        <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.12" />
+                        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseHighColor}" Opacity="0.2" />
+                    </TextBox.Resources>
+
                     <TextBox.InnerLeftContent>
                         <Viewbox Width="14" Height="14" Margin="10,0,0,0" VerticalAlignment="Center">
                             <lucideAvalonia:Lucide Icon="Search"

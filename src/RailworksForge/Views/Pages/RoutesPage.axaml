@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucide="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              x:CompileBindings="True"
@@ -16,17 +17,11 @@
                 BorderBrush="{DynamicResource DataGridGridLinesBrush}"
                 BorderThickness="0,0,0,1">
             <Grid ColumnDefinitions="*, auto">
-                <TextBox Grid.Column="0"
-                         Text="{Binding SearchTerm}"
-                         VerticalContentAlignment="Center"
-                         Padding="16,4"
-                         Classes="search"
-                         PlaceholderText="{echoes:Translate {x:Static translations:Strings.search}}"
-                         FontSize="{StaticResource BodyFontSize}"
-                         HorizontalAlignment="Stretch"
-                         Background="Transparent"
-
-                />
+                <controls:TableSearchBox Grid.Column="0"
+                                         Width="360"
+                                         Margin="16,8"
+                                         HorizontalAlignment="Left"
+                                         SearchTerm="{Binding SearchTerm}" />
 
                 <Border Grid.Column="1" Padding="8" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
                         BorderThickness="0,0,1,0">

@@ -52,7 +52,6 @@
 
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
 
-        <StyleInclude Source="avares://RailworksForge/Styles/TextBoxStyles.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Styles/DataGridRowHighlight.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Styles/DataGridStyles.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableHeader.axaml"/>
