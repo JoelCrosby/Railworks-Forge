@@ -7,7 +7,25 @@ namespace RailworksForge.Core;
 
 public class RouteService
 {
-    public static List<Route> GetRoutes()
+    private readonly Lock _routesLock = new();
+    private Task<List<Route>>? _routes;
+
+    public Task<List<Route>> GetRoutes()
+    {
+        lock (_routesLock)
+        {
+            var needsLoad = _routes is null || _routes.IsFaulted || _routes.IsCanceled;
+
+            if (needsLoad)
+            {
+                _routes = Task.Run(ReadRoutes);
+            }
+
+            return _routes!;
+        }
+    }
+
+    private static List<Route> ReadRoutes()
     {
         var baseDir = Paths.GetRoutesDirectory();
         var routeFiles = Directory

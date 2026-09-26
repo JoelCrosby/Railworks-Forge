@@ -1,9 +1,14 @@
 ﻿using System.IO.Compression;
 
+using AngleSharp.Xml;
+
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core;
+
+public record ScenarioConsists(Scenario Scenario, List<Consist> Consists);
 
 public class ScenarioService
 {
@@ -36,6 +41,72 @@ public class ScenarioService
         AddPackedScenarios(route, scenarios, cancellationToken);
 
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
+    }
+
+    public async Task<ScenarioConsists> LoadConsists(Scenario scenario, CancellationToken cancellationToken)
+    {
+        ClearAssetCaches();
+
+        var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
+        using var document = await updated.GetXmlDocument(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+        Cache.ConsistAcquisitionStates.Clear();
+
+        var consists = document
+            .QuerySelectorAll("cConsist")
+            .Select(Consist.ParseScenarioConsist)
+            .OfType<Consist>()
+            .ToList();
+
+        return new ScenarioConsists(updated, consists);
+    }
+
+    public async Task<List<ConsistRailVehicle>> GetConsistVehicles(
+        Scenario scenario,
+        Consist consist,
+        CancellationToken cancellationToken)
+    {
+        ClearAssetCaches();
+
+        if (string.IsNullOrWhiteSpace(consist.BlueprintId))
+        {
+            return [];
+        }
+
+        var vehicles = await scenario.GetServiceConsistVehicles(consist);
+
+        // Acquisition state is computed lazily from disk; resolve it here so the grid doesn't do it on the UI thread.
+        foreach (var vehicle in vehicles)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _ = vehicle.AcquisitionState;
+        }
+
+        return vehicles;
+    }
+
+    public async Task<string> GetConsistRailVehiclesXml(Scenario scenario, Consist consist)
+    {
+        using var document = await scenario.GetXmlDocument();
+
+        var vehicles = document
+            .QuerySelectorAll("cConsist")
+            .QueryByTextContent("ServiceName Key", consist.ServiceId)?
+            .QuerySelector("RailVehicles");
+
+        if (vehicles is null)
+        {
+            throw new Exception("could not find consist in scenario bin");
+        }
+
+        return vehicles.ToXml();
+    }
+
+    private static void ClearAssetCaches()
+    {
+        Cache.BlueprintAcquisitionStates.Clear();
+        Cache.ArchiveCache.Clear();
     }
 
     private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)

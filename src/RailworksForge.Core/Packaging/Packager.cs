@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Reactive.Subjects;
 using System.Text;
 
 using Serilog;
@@ -8,7 +7,7 @@ namespace RailworksForge.Core.Packaging;
 
 public class Packager
 {
-    public Subject<InstallProgress> PackageInstallProgressSubject { get; } = new();
+    private IProgress<InstallProgress>? _progress;
 
     private string _currentTask = string.Empty;
 
@@ -20,8 +19,10 @@ public class Packager
         ".cost",
     ];
 
-    public async Task InstallPackage(string filename)
+    public async Task InstallPackage(string filename, IProgress<InstallProgress> progress)
     {
+        _progress = progress;
+
         var packageName = Path.GetFileNameWithoutExtension(filename);
 
         RaisePackageInstallProgress($"Installing {packageName}");
@@ -54,7 +55,7 @@ public class Packager
             IsLoading = true,
         };
 
-        PackageInstallProgressSubject.OnNext(args);
+        _progress?.Report(args);
     }
 
     private void RaisePackageInstallProgress(string currentTask, bool isLoading = true)
@@ -69,7 +70,7 @@ public class Packager
             IsLoading = isLoading,
         };
 
-        PackageInstallProgressSubject.OnNext(args);
+        _progress?.Report(args);
     }
 
     private async Task ProcessPackage(string filename)

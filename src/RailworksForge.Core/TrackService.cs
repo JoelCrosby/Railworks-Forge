@@ -9,7 +9,7 @@ namespace RailworksForge.Core;
 
 public class TrackService
 {
-    public static async Task ReplaceTracks(Route route, ReplaceTracksRequest request)
+    public async Task ReplaceTracks(Route route, ReplaceTracksRequest request)
     {
         var document = await route.GetTrackDocument();
         var propertiesDocument = await route.GetRoutePropertiesDocument();
@@ -117,5 +117,113 @@ public class TrackService
         var documentDestination = Path.Join(route.DirectoryPath, "RouteProperties.xml");
 
         File.Copy(destination, documentDestination, true);
+    }
+
+    public List<DirectoryInfo> GetProviders()
+    {
+        return Paths.GetAssetProviders();
+    }
+
+    public List<DirectoryInfo> GetProducts(string provider)
+    {
+        return Paths.GetAssetProviderProducts(provider);
+    }
+
+    public async Task<List<Track>> GetTracks(
+        string providerName,
+        DirectoryInfo product,
+        CancellationToken cancellationToken)
+    {
+        var looseBlueprints = GetLooseTrackBlueprints(providerName, product);
+        var archivedBlueprints = GetArchivedTrackBlueprints(providerName, product);
+        var blueprints = looseBlueprints.Concat(archivedBlueprints).ToList();
+
+        var tracks = new List<Track>();
+
+        foreach (var blueprint in blueprints)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var document = await blueprint.GetXmlDocument();
+            var displayName = document.SelectLocalisedStringContent("cTrackSectionBlueprint DisplayName");
+            var name = document.SelectTextContent("Name");
+
+            var track = new Track
+            {
+                Blueprint = blueprint,
+                Name = string.IsNullOrEmpty(displayName) ? name : displayName,
+            };
+
+            tracks.Add(track);
+        }
+
+        return tracks.OrderBy(track => track.Name).ToList();
+    }
+
+    private static HashSet<Blueprint> GetLooseTrackBlueprints(string providerName, DirectoryInfo product)
+    {
+        var networkBinaries = GetTrackBinaryPaths(Path.Join(product.FullName, "RailNetwork"));
+        var trackBinaries = GetTrackBinaryPaths(Path.Join(product.FullName, "Track"));
+
+        return networkBinaries
+            .Concat(trackBinaries)
+            .Select(path =>
+            {
+                var blueprintId = path
+                    .Replace(product.FullName, string.Empty)
+                    .TrimStart('/')
+                    .Replace('/', '\\')
+                    .Replace(".bin", ".xml");
+
+                return new Blueprint
+                {
+                    BlueprintId = blueprintId,
+                    BlueprintSetIdProduct = product.Name,
+                    BlueprintSetIdProvider = providerName,
+                };
+            })
+            .ToHashSet();
+    }
+
+    private static List<Blueprint> GetArchivedTrackBlueprints(string providerName, DirectoryInfo product)
+    {
+        var archives = Directory.EnumerateFiles(product.FullName, "*.ap", SearchOption.TopDirectoryOnly);
+        var blueprints = new List<Blueprint>();
+
+        foreach (var archive in archives)
+        {
+            var networkFiles = Archives.ListFilesInPath(archive, "RailNetwork", ".bin");
+            var trackFiles = Archives.ListFilesInPath(archive, "Track", ".bin");
+
+            var archiveBlueprints = networkFiles.Concat(trackFiles).Select(file => new Blueprint
+            {
+                BlueprintId = file.Replace(".XSec", ".xml"),
+                BlueprintSetIdProduct = product.Name,
+                BlueprintSetIdProvider = providerName,
+            });
+
+            blueprints.AddRange(archiveBlueprints);
+        }
+
+        return blueprints;
+    }
+
+    private static List<string> GetTrackBinaryPaths(string path)
+    {
+        if (Paths.Exists(path) is false)
+        {
+            return [];
+        }
+
+        var xsecs = Directory.EnumerateFiles(path, "*.XSec", SearchOption.AllDirectories);
+
+        var directories = xsecs
+            .Select(Path.GetDirectoryName)
+            .Where(x => string.IsNullOrEmpty(x) is false)!
+            .ToHashSet<string>();
+
+        return directories
+            .SelectMany(d => Directory.EnumerateFiles(d, "*.bin", SearchOption.TopDirectoryOnly))
+            .ToList();
     }
 }
