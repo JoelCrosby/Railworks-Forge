@@ -100,12 +100,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
                                 <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,12,0">
-                                    <Border Classes="thumbnail" Width="92" Height="52" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
-                                        <Panel>
-                                            <lucideAvalonia:Lucide Icon="TrainFront" StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" StrokeThickness="1.5" Width="20" Height="20" />
-                                            <Image Stretch="UniformToFill" Source="{Binding ImageBitmap}" />
-                                        </Panel>
-                                    </Border>
+                                    <controls:VehicleThumbnail Width="92" Height="52" Margin="12,6,0,6" Source="{Binding ImageBitmap}" />
                                     <TextBlock VerticalAlignment="Center" Text="{Binding Consist.LocomotiveName}" />
                                 </StackPanel>
                             </DataTemplate>

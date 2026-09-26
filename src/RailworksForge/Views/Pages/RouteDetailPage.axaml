@@ -91,7 +91,17 @@
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" Binding="{Binding Locomotive}" />
+                <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive intact. -->
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Locomotive">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:Scenario">
+                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,6">
+                                <controls:VehicleThumbnail Width="64" Height="36" Source="{Binding LocomotiveImage}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Locomotive}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="ScenarioClass">
                     <DataGridTemplateColumn.CellTemplate>

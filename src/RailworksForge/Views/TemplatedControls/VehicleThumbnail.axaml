@@ -1,0 +1,27 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls">
+    <Design.PreviewWith>
+        <controls:VehicleThumbnail Margin="16" Width="92" Height="52" />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|VehicleThumbnail">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- The train icon shows through until an image loads, and stays when a vehicle has none. -->
+                <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{TemplateBinding Background}" ClipToBounds="True">
+                    <Panel>
+                        <Viewbox Width="20" Height="20" MaxWidth="{TemplateBinding Height}" MaxHeight="{TemplateBinding Height}" Margin="4">
+                            <lucideAvalonia:Lucide Icon="TrainFront" Width="24" Height="24" StrokeThickness="1.75" StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" />
+                        </Viewbox>
+                        <Image Stretch="UniformToFill" Source="{TemplateBinding Source}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

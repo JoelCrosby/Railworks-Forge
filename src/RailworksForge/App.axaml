@@ -60,6 +60,7 @@
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/LoadingSpinner.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/AcquisitionStateIcon.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/BlueprintSummary.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/VehicleThumbnail.axaml"/>
 
         <Style Selector="DataGrid:focus DataGridCell /template/ Grid#FocusVisual">
             <Setter Property="IsVisible" Value="False" />

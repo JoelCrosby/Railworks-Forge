@@ -4,6 +4,8 @@ using System.IO.Compression;
 
 using AngleSharp.Dom;
 
+using Avalonia.Media.Imaging;
+
 using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.External;
@@ -65,6 +67,24 @@ public record Scenario : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayerInfo)));
         }
     } = ScenarioPlayerInfo.Empty;
+
+    public Consist? PlayerConsist => Consists.FirstOrDefault(consist => consist.PlayerDriver);
+
+    public Bitmap? LocomotiveImage
+    {
+        get;
+        set
+        {
+
+            if (ReferenceEquals(field, value))
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LocomotiveImage)));
+        }
+    }
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 

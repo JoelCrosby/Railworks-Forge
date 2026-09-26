@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +19,8 @@ using RailworksForge.Core.Models;
 using RailworksForge.Util;
 
 using ReactiveUI;
+
+using Serilog;
 
 namespace RailworksForge.ViewModels;
 
@@ -30,6 +34,8 @@ public partial class RouteDetailViewModel : ViewModelBase
     public ObservableCollection<Scenario> Scenarios { get; }
 
     private List<Scenario>? _cachedScenarios;
+
+    private CancellationTokenSource? _imageLoading;
 
     public ReactiveCommand<Unit, Unit> CopyClickedCommand { get; }
     public ReactiveCommand<Unit, Unit> DetailsClickedCommand { get; }
@@ -99,6 +105,7 @@ public partial class RouteDetailViewModel : ViewModelBase
                 _cachedScenarios = items;
                 RefreshPlayerInfo();
                 FilterScenarios();
+                LoadLocomotiveImages(items);
             });
         }
         else
@@ -129,7 +136,70 @@ public partial class RouteDetailViewModel : ViewModelBase
     {
         base.CancelLoading();
 
+        _imageLoading?.Cancel();
         _scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
+    }
+
+    // Images come from disk or inside .ap archives, so they load after the list is shown and fill in as they are found.
+    private void LoadLocomotiveImages(List<Scenario> scenarios)
+    {
+        _imageLoading?.Cancel();
+        var cancellation = new CancellationTokenSource();
+        _imageLoading = cancellation;
+        var token = cancellation.Token;
+
+        _ = Task.Run(() =>
+        {
+            // Many scenarios share a locomotive, and a failed lookup searches archives, so remember misses too.
+            var imagesByBlueprint = new Dictionary<string, Bitmap?>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var scenario in scenarios)
+            {
+
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var hasPlayerBlueprint = scenario.PlayerConsist is { BlueprintId.Length: > 0 };
+
+                if (!hasPlayerBlueprint)
+                {
+                    continue;
+                }
+
+                var image = GetLocomotiveImage(scenario.PlayerConsist!, imagesByBlueprint);
+
+                if (image is not null)
+                {
+                    Dispatcher.UIThread.Post(() => scenario.LocomotiveImage = image);
+                }
+            }
+        }, token);
+    }
+
+    private static Bitmap? GetLocomotiveImage(Consist consist, Dictionary<string, Bitmap?> imagesByBlueprint)
+    {
+
+        if (imagesByBlueprint.TryGetValue(consist.BinaryPath, out var cached))
+        {
+            return cached;
+        }
+
+        try
+        {
+            var image = BitmapUtils.GetImageBitmap(consist);
+            imagesByBlueprint[consist.BinaryPath] = image;
+
+            return image;
+        }
+        catch (Exception e)
+        {
+            Log.Debug(e, "failed to load locomotive image for {BlueprintId}", consist.BlueprintId);
+            imagesByBlueprint[consist.BinaryPath] = null;
+
+            return null;
+        }
     }
 
     private void OnPlayerInfoUpdated()
