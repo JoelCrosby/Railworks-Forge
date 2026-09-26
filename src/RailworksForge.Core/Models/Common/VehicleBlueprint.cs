@@ -6,13 +6,16 @@ public class VehicleBlueprint
 {
     public BlueprintType BlueprintType { get; private init; }
 
-    public Blueprint Blueprint { get; private init; }
+    public required Blueprint Blueprint { get; init; }
 
-    public IElement Element { get; private init; }
+    public required IElement Element { get; init; }
 
     public static VehicleBlueprint Parse(IElement el)
     {
-        var blueprint = Blueprint.Parse(el.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID"));
+        var blueprintElement = el.QuerySelector("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID")
+            ?? throw new InvalidDataException("Rail vehicle is missing its blueprint ID.");
+
+        var blueprint = Blueprint.Parse(blueprintElement);
         var blueprintType = Utilities.ParseBlueprintType(el.QuerySelector("Component")?.FirstElementChild?.NodeName);
 
         return new VehicleBlueprint

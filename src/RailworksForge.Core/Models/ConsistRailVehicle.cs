@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
@@ -17,4 +19,8 @@ public class ConsistRailVehicle : Blueprint
     public required string EntityID { get; init; }
 
     public required string SearchIndex { get; init; }
+
+    public override bool Equals(object? other) => ReferenceEquals(this, other);
+
+    public override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
 }
