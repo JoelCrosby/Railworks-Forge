@@ -2,6 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+        xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls"
         x:DataType="vm:RouteDetailViewModel">
     <Design.PreviewWith>
         <DataGrid ItemsSource="{Binding Scenarios}">
@@ -103,6 +105,40 @@
         <Setter Property="CornerRadius" Value="4" />
         <Setter Property="ClipToBounds" Value="True" />
         <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- Lucide icons draw at their 24px design size, so cell icons are scaled down inside a Viewbox. -->
+    <Style Selector="DataGridCell Viewbox.cell-icon">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Margin" Value="16,0" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="DataGridCell Viewbox.cell-icon > lucideAvalonia|Lucide">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="StrokeThickness" Value="2.5" />
+    </Style>
+
+    <Style Selector="DataGridCell controls|AcquisitionStateIcon.cell">
+        <Setter Property="Margin" Value="16,0" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- A small icon beside a cell's text, e.g. a season or scenario type. -->
+    <Style Selector="DataGridCell Viewbox.inline-icon">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="DataGridCell Viewbox.inline-icon > lucideAvalonia|Lucide">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="StrokeThickness" Value="3" />
+        <Setter Property="StrokeBrush" Value="{DynamicResource TextControlPlaceholderForeground}" />
     </Style>
 
 </Styles>

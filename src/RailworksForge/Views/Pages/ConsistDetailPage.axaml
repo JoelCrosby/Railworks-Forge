@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -30,14 +31,43 @@
                     DoubleTapped="ConsistVehiclesDataGrid_OnDoubleTapped"
                 >
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.index}}" Binding="{Binding Index}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" Binding="{Binding AcquisitionState}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive_name}}" Binding="{Binding LocomotiveName}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.unique_number}}" Binding="{Binding UniqueNumber}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.is_flipped}}" Binding="{Binding Flipped}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.product}}" Binding="{Binding BlueprintSetIdProduct}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.provider}}" Binding="{Binding BlueprintSetIdProvider}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding BlueprintId}" />
+                        <DataGridTextColumn Header="#" Binding="{Binding Index}" />
+
+                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="AcquisitionState">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <controls:AcquisitionStateIcon Classes="cell" State="{Binding AcquisitionState}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.vehicle}}" Binding="{Binding LocomotiveName}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.number}}" Binding="{Binding UniqueNumber}" />
+
+                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.flipped}}" SortMemberPath="Flipped">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <Viewbox Classes="cell-icon"
+                                             IsVisible="{Binding Flipped}"
+                                             ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_flipped}}">
+                                        <lucideAvalonia:Lucide Icon="ArrowLeftRight"
+                                                               StrokeBrush="{DynamicResource TextControlForeground}" />
+                                    </Viewbox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
+                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="BlueprintSetIdProvider">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <controls:BlueprintSummary Margin="12,0"
+                                                               Provider="{Binding BlueprintSetIdProvider}"
+                                                               Product="{Binding BlueprintSetIdProduct}"
+                                                               BlueprintId="{Binding BlueprintId}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
 
                     <DataGrid.ContextMenu>

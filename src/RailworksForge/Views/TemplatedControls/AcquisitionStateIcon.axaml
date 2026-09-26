@@ -1,0 +1,50 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+        xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="16">
+            <controls:AcquisitionStateIcon State="Found" />
+            <controls:AcquisitionStateIcon State="Partial" />
+            <controls:AcquisitionStateIcon State="Missing" />
+            <controls:AcquisitionStateIcon State="Unknown" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="controls|AcquisitionStateIcon">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- Lucide draws at its 24px design size, so scale the icons to the control's size. -->
+                <Viewbox>
+                    <Panel Width="24" Height="24">
+                        <lucideAvalonia:Lucide Icon="CircleCheck"
+                                               StrokeBrush="{DynamicResource SuccessBrush}"
+                                               StrokeThickness="2.5"
+                                               IsVisible="{TemplateBinding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Found}}"
+                                               ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_found}}" />
+                        <lucideAvalonia:Lucide Icon="TriangleAlert"
+                                               StrokeBrush="{DynamicResource WarningTextBrush}"
+                                               StrokeThickness="2.5"
+                                               IsVisible="{TemplateBinding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Partial}}"
+                                               ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_partial}}" />
+                        <lucideAvalonia:Lucide Icon="CircleX"
+                                               StrokeBrush="{DynamicResource SystemErrorTextColor}"
+                                               StrokeThickness="2.5"
+                                               IsVisible="{TemplateBinding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Missing}}"
+                                               ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_missing}}" />
+                        <lucideAvalonia:Lucide Icon="CircleQuestionMark"
+                                               StrokeBrush="{DynamicResource TextControlPlaceholderForeground}"
+                                               StrokeThickness="2.5"
+                                               IsVisible="{TemplateBinding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Unknown}}"
+                                               ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_unknown}}" />
+                    </Panel>
+                </Viewbox>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

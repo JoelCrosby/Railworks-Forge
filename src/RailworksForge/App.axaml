@@ -59,6 +59,8 @@
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableSearchBox.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/NameValueDisplay.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/LoadingSpinner.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/AcquisitionStateIcon.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/BlueprintSummary.axaml"/>
 
         <Style Selector="DataGrid:focus DataGridCell /template/ Grid#FocusVisual">
             <Setter Property="IsVisible" Value="False" />

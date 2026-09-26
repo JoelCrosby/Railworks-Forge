@@ -77,11 +77,12 @@
                     <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.player}}" SortMemberPath="Consist.PlayerDriver">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
-                                <lucideAvalonia:Lucide Classes="cell-icon"
-                                                       Icon="UserRound"
-                                                       StrokeBrush="{DynamicResource SystemAccentColor}"
-                                                       IsVisible="{Binding Consist.PlayerDriver}"
-                                                       ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.player_driven}}" />
+                                <Viewbox Classes="cell-icon"
+                                         IsVisible="{Binding Consist.PlayerDriver}"
+                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.player_driven}}">
+                                    <lucideAvalonia:Lucide Icon="UserRound"
+                                                           StrokeBrush="{DynamicResource SystemAccentColor}" />
+                                </Viewbox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -89,28 +90,7 @@
                     <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="Consist.ConsistAcquisitionState">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
-                                <Panel>
-                                    <lucideAvalonia:Lucide Classes="cell-icon"
-                                                           Icon="CircleCheck"
-                                                           StrokeBrush="{DynamicResource SuccessBrush}"
-                                                           IsVisible="{Binding Consist.ConsistAcquisitionState, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Found}}"
-                                                           ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_found}}" />
-                                    <lucideAvalonia:Lucide Classes="cell-icon"
-                                                           Icon="TriangleAlert"
-                                                           StrokeBrush="{DynamicResource WarningTextBrush}"
-                                                           IsVisible="{Binding Consist.ConsistAcquisitionState, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Partial}}"
-                                                           ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_partial}}" />
-                                    <lucideAvalonia:Lucide Classes="cell-icon"
-                                                           Icon="CircleX"
-                                                           StrokeBrush="{DynamicResource SystemErrorTextColor}"
-                                                           IsVisible="{Binding Consist.ConsistAcquisitionState, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Missing}}"
-                                                           ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_missing}}" />
-                                    <lucideAvalonia:Lucide Classes="cell-icon"
-                                                           Icon="CircleQuestionMark"
-                                                           StrokeBrush="{DynamicResource TextControlPlaceholderForeground}"
-                                                           IsVisible="{Binding Consist.ConsistAcquisitionState, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AcquisitionState.Unknown}}"
-                                                           ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.assets_unknown}}" />
-                                </Panel>
+                                <controls:AcquisitionStateIcon Classes="cell" State="{Binding Consist.ConsistAcquisitionState}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -138,7 +118,9 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
                                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.consist_length}}">
-                                    <lucideAvalonia:Lucide Icon="TrainFront" StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" StrokeThickness="2" Width="14" Height="14" VerticalAlignment="Center" />
+                                    <Viewbox Classes="inline-icon">
+                                        <lucideAvalonia:Lucide Icon="TrainFront" />
+                                    </Viewbox>
                                     <TextBlock VerticalAlignment="Center" Text="{Binding Consist.Length}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -146,21 +128,13 @@
                     </DataGridTemplateColumn>
 
                     <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" SortMemberPath="Consist.BlueprintSetIdProvider">
+                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="Consist.BlueprintSetIdProvider">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:ConsistViewModel">
-                                <StackPanel VerticalAlignment="Center" Margin="12,0" Spacing="2">
-                                    <TextBlock>
-                                        <Run Text="{Binding Consist.BlueprintSetIdProvider}" />
-                                        <Run Text=" · " Foreground="{DynamicResource TextControlPlaceholderForeground}" />
-                                        <Run Text="{Binding Consist.BlueprintSetIdProduct}" />
-                                    </TextBlock>
-                                    <TextBlock FontSize="{StaticResource CaptionFontSize}"
-                                               Foreground="{DynamicResource TextControlPlaceholderForeground}"
-                                               TextTrimming="CharacterEllipsis"
-                                               Text="{Binding Consist.BlueprintId}"
-                                               ToolTip.Tip="{Binding Consist.BlueprintId}" />
-                                </StackPanel>
+                                <controls:BlueprintSummary Margin="12,0"
+                                                           Provider="{Binding Consist.BlueprintSetIdProvider}"
+                                                           Product="{Binding Consist.BlueprintSetIdProduct}"
+                                                           BlueprintId="{Binding Consist.BlueprintId}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -177,15 +151,6 @@
                 <DataGrid.Styles>
                     <Style Selector="DataGridRow">
                         <Setter Property="MinHeight" Value="64" />
-                    </Style>
-
-                    <Style Selector="lucideAvalonia|Lucide.cell-icon">
-                        <Setter Property="Width" Value="18" />
-                        <Setter Property="Height" Value="18" />
-                        <Setter Property="StrokeThickness" Value="2" />
-                        <Setter Property="Margin" Value="16,0" />
-                        <Setter Property="HorizontalAlignment" Value="Left" />
-                        <Setter Property="VerticalAlignment" Value="Center" />
                     </Style>
                 </DataGrid.Styles>
             </DataGrid>

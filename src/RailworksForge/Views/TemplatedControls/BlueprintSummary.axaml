@@ -1,0 +1,27 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RailworksForge.Views.TemplatedControls">
+    <Design.PreviewWith>
+        <controls:BlueprintSummary Margin="16" Provider="Kuju" Product="RailSimulator" BlueprintId="railvehicles\diesel\class166\fgw\dmocl\class166_dmocl_fgw.xml" />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|BlueprintSummary">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Spacing="2">
+                    <TextBlock TextTrimming="CharacterEllipsis">
+                        <Run Text="{TemplateBinding Provider}" />
+                        <Run Text=" · " Foreground="{DynamicResource TextControlPlaceholderForeground}" />
+                        <Run Text="{TemplateBinding Product}" />
+                    </TextBlock>
+                    <TextBlock FontSize="{StaticResource CaptionFontSize}"
+                               Foreground="{DynamicResource TextControlPlaceholderForeground}"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{TemplateBinding BlueprintId}"
+                               ToolTip.Tip="{TemplateBinding BlueprintId}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>
