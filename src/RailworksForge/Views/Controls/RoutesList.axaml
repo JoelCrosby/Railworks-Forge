@@ -1,23 +1,27 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
+             xmlns:bh="using:RailworksForge.Behaviours"
              xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesList"
-             x:DataType="vm:RoutesBaseViewModel">
+             x:DataType="vm:RoutesViewModel">
 
     <DockPanel>
     <Panel>
-        <DataGrid IsEnabled="{Binding Loading.IsIdle}" ItemsSource="{Binding ListItems}"
+        <DataGrid IsEnabled="{Binding Loading.IsIdle}" ItemsSource="{Binding Routes}"
                   IsReadOnly="True"
-                  DoubleTapped="DataGrid_OnDoubleTapped"
                   SelectionMode="Single"
                   RowHeight="64"
-                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                  SelectedItem="{Binding SelectedRoute, Mode=TwoWay}"
         >
+            <i:Interaction.Behaviors>
+                <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenRouteCommand}" />
+            </i:Interaction.Behaviors>
+
 
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Image" Width="128">
@@ -49,8 +53,8 @@
 
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Details" Command="{Binding DetailsClickedCommand}" />
-                    <MenuItem Header="Copy" Command="{Binding CopyClickedCommand}" />
+                    <MenuItem Header="Details" Command="{Binding OpenRouteCommand}" />
+                    <MenuItem Header="Copy" Command="{Binding CopyRouteNameCommand}" />
                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
                 </ContextMenu>
             </DataGrid.ContextMenu>

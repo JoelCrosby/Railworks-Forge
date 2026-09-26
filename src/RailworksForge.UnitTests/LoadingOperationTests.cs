@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Reactive.Linq;
 
 using RailworksForge.ViewModels;
 
@@ -28,7 +27,7 @@ public class LoadingOperationTests
         Assert.Equal("Unavailable", operation.ErrorMessage);
         Assert.True(operation.CanRetry);
 
-        await operation.RetryCommand.Execute();
+        await operation.RetryCommand.ExecuteAsync(null);
 
         Assert.True(applied);
         Assert.False(operation.IsLoading);

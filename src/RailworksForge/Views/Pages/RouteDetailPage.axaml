@@ -1,5 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
+             xmlns:bh="using:RailworksForge.Behaviours"
+             xmlns:design="using:RailworksForge.DesignData"
              xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,13 +13,12 @@
              xmlns:converters="clr-namespace:RailworksForge.Converters"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.RouteDetailPage"
              x:DataType="vm:RouteDetailViewModel">
 
     <Design.DataContext>
-        <vm:DesignRouteDetailViewModel />
+        <x:Static Member="design:DesignViewModels.RouteDetail" />
     </Design.DataContext>
 
     <DockPanel>
@@ -72,10 +74,13 @@
                 Name="ScenariosDataGrid"
                 IsEnabled="{Binding Loading.IsIdle}"
                 ItemsSource="{Binding Scenarios}"
-                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
                 SelectionMode="Single"
-                DoubleTapped="ScenariosDataGrid_OnDoubleTapped"
             >
+                <i:Interaction.Behaviors>
+                    <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenScenarioCommand}" />
+                </i:Interaction.Behaviors>
+
                 <DataGrid.Columns>
                 <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completed}}" SortMemberPath="PlayerInfo.Completion">
                     <DataGridTemplateColumn.CellTemplate>
@@ -215,8 +220,8 @@
 
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding DetailsClickedCommand}" />
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyClickedCommand}" />
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding OpenScenarioCommand}" />
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyScenarioNameCommand}" />
                         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
                     </ContextMenu>
                 </DataGrid.ContextMenu>

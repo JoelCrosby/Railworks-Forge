@@ -1,12 +1,8 @@
 ﻿using Avalonia;
-using ReactiveUI.Avalonia;
 using System;
 using System.Threading.Tasks;
 
 using RailworksForge.Core;
-using RailworksForge.Util;
-
-using ReactiveUI;
 
 using Serilog;
 
@@ -44,7 +40,6 @@ internal sealed class Program
             .WithInterFont()
             .With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan] })
             .LogToTrace()
-            .UseReactiveUI(rxui => rxui.WithExceptionHandler(new ExceptionObserver()))
             .UsePlatformDetect()
             .UseWaylandWithFallback();
 

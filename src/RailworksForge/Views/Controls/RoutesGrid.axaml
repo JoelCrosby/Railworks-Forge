@@ -1,14 +1,15 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
+             xmlns:bh="using:RailworksForge.Behaviours"
              xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
-             x:DataType="vm:RoutesBaseViewModel">
+             x:DataType="vm:RoutesViewModel">
 
     <UserControl.Styles>
         <Style Selector="ListBox.route-cards ListBoxItem">
@@ -46,10 +47,13 @@
                     <ListBox
                         Classes="route-cards"
                         VerticalAlignment="Top"
-                        ItemsSource="{Binding ListItems}"
+                        ItemsSource="{Binding Routes}"
                         Background="Transparent"
-                        DoubleTapped="DataGrid_OnDoubleTapped"
-                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                        SelectedItem="{Binding SelectedRoute, Mode=TwoWay}">
+                        <i:Interaction.Behaviors>
+                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenRouteCommand}" />
+                        </i:Interaction.Behaviors>
+
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel />

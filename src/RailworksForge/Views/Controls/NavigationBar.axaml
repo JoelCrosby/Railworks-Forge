@@ -1,18 +1,18 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:design="using:RailworksForge.DesignData"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.NavigationBar"
              x:DataType="vm:NavigationBarViewModel">
 
     <Design.DataContext>
-        <vm:DesignNavigationBarViewModel />
+        <x:Static Member="design:DesignViewModels.NavigationBar" />
     </Design.DataContext>
 
     <UserControl.Styles>
@@ -38,8 +38,8 @@
 
     <DockPanel Margin="8" HorizontalSpacing="12">
         <Button DockPanel.Dock="Right"
-                Classes.active="{Binding IsSettingsActive}"
-                Command="{Binding SettingsClickedCommand}"
+                Classes.active="{Binding Navigation.IsSettingsActive}"
+                Command="{Binding ShowSettingsCommand}"
                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <lucideAvalonia:Lucide Icon="Settings" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" />
@@ -51,31 +51,31 @@
         <DockPanel LastChildFill="False" HorizontalSpacing="12" ClipToBounds="True">
             <Image DockPanel.Dock="Left" Source="avares://RailworksForge/Assets/railworks-forge-icon.png" Height="32" />
 
-            <Button DockPanel.Dock="Left" Command="{Binding RoutesClickedCommand}">
+            <Button DockPanel.Dock="Left" Command="{Binding ShowRoutesCommand}">
                 <Grid ColumnDefinitions="Auto,*">
                     <lucideAvalonia:Lucide Grid.Column="0" Icon="Route" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
                     <TextBlock Grid.Column="1" Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
                 </Grid>
             </Button>
 
-            <Button DockPanel.Dock="Left" Command="{Binding RouteClickedCommand}" IsVisible="{Binding Route, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Route.Route.Name}">
+            <Button DockPanel.Dock="Left" Command="{Binding ShowRouteCommand}" IsVisible="{Binding Navigation.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Navigation.CurrentRoute.Name}">
                 <Grid ColumnDefinitions="Auto,*">
                     <lucideAvalonia:Lucide Grid.Column="0" Icon="Milestone" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
-                    <TextBlock Grid.Column="1" Text="{Binding Route.Route.Name}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Navigation.CurrentRoute.Name}" />
                 </Grid>
             </Button>
 
-            <Button DockPanel.Dock="Left" Command="{Binding ScenarioClickedCommand}" IsVisible="{Binding Scenario, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Scenario.Scenario.Name}">
+            <Button DockPanel.Dock="Left" Command="{Binding ShowScenarioCommand}" IsVisible="{Binding Navigation.CurrentScenario, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Navigation.CurrentScenario.Name}">
                 <Grid ColumnDefinitions="Auto,*">
                     <lucideAvalonia:Lucide Grid.Column="0" Icon="ListEnd" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
-                    <TextBlock Grid.Column="1" Text="{Binding Scenario.Scenario.Name}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Navigation.CurrentScenario.Name}" />
                 </Grid>
             </Button>
 
-            <Button DockPanel.Dock="Left" Command="{Binding ConsistClickedCommand}" IsVisible="{Binding Consist, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Consist.ServiceName}">
+            <Button DockPanel.Dock="Left" Command="{Binding ShowConsistCommand}" IsVisible="{Binding Navigation.CurrentConsist, Converter={x:Static ObjectConverters.IsNotNull}}" ToolTip.Tip="{Binding Navigation.CurrentConsist.ServiceName}">
                 <Grid ColumnDefinitions="Auto,*">
                     <lucideAvalonia:Lucide Grid.Column="0" Icon="TrainFront" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
-                    <TextBlock Grid.Column="1" Text="{Binding Consist.ServiceName}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Navigation.CurrentConsist.ServiceName}" />
                 </Grid>
             </Button>
         </DockPanel>

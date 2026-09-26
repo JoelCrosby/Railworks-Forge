@@ -1,19 +1,15 @@
-using System;
 using System.ComponentModel;
 
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using ReactiveUI.Avalonia;
 
 using RailworksForge.Core;
 using RailworksForge.Util;
 using RailworksForge.ViewModels;
 
-using ReactiveUI;
-
 namespace RailworksForge.Views.Dialogs;
 
-public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewModel>
+public partial class ReplaceConsistDialog : Window
 {
     private readonly DataGridSortHandler _preloadConsistsDataGridSortHandler;
 
@@ -21,18 +17,7 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
     {
         InitializeComponent();
 
-        _preloadConsistsDataGridSortHandler  = new (PreloadConsistsDataGrid);
-
-        if (Design.IsDesignMode) return;
-
-        this.WhenActivated(action =>
-        {
-            if (ViewModel is null) return;
-
-            var disposable = ViewModel.ReplaceConsistCommand.Subscribe(Close);
-
-            action(disposable);
-        });
+        _preloadConsistsDataGridSortHandler = new (PreloadConsistsDataGrid);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -42,19 +27,13 @@ public partial class ReplaceConsistDialog : ReactiveWindow<ReplaceConsistViewMod
         _preloadConsistsDataGridSortHandler.SortColumns();
     }
 
-    // ReSharper disable UnusedParameter.Local
-    private void CancelButtonOnClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
     private void ContextMenu_OnOpening(object? sender, CancelEventArgs e)
     {
-        if (ViewModel is not {} model) return;
-
-        if (model.SelectedDirectory?.AssetDirectory is ProviderDirectory)
+        if (DataContext is not ReplaceConsistViewModel { SelectedDirectory.AssetDirectory: ProviderDirectory })
         {
-            e.Cancel = true;
+            return;
         }
+
+        e.Cancel = true;
     }
 }

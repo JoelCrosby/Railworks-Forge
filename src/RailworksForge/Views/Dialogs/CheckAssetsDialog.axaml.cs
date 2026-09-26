@@ -1,25 +1,11 @@
-using Avalonia.Interactivity;
-using ReactiveUI.Avalonia;
-
-using RailworksForge.ViewModels;
+using Avalonia.Controls;
 
 namespace RailworksForge.Views.Dialogs;
 
-public partial class CheckAssetsDialog : ReactiveWindow<CheckAssetsViewModel>
+public partial class CheckAssetsDialog : Window
 {
     public CheckAssetsDialog()
     {
         InitializeComponent();
-    }
-
-    // ReSharper disable UnusedParameter.Local
-    private void CloseButtonOnClick(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is CheckAssetsViewModel model)
-        {
-            model.OnClose();
-        }
-
-        Close();
     }
 }

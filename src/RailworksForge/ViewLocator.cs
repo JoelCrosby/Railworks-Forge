@@ -10,25 +10,31 @@ namespace RailworksForge;
 
 public class ViewLocator : IDataTemplate
 {
-    public bool Match(object? data) => data is ViewModelBase;
-
     private static readonly Dictionary<Type, Func<Control>> Registration = new ();
 
     public static void Register<TViewModel, TView>()
+        where TViewModel : ViewModelBase
         where TView : Control, new()
     {
         Registration.Add(typeof(TViewModel), () => new TView());
     }
 
-    public Control Build(object? data)
+    public static Control CreateView(object viewModel)
     {
-        var type = data?.GetType();
+        var type = viewModel.GetType();
 
-        if (type is not null && Registration.TryGetValue(type, out var factory))
+        if (Registration.TryGetValue(type, out var factory))
         {
             return factory();
         }
 
         return new TextBlock { Text = "Not Found: " + type };
+    }
+
+    public bool Match(object? data) => data is ViewModelBase;
+
+    public Control Build(object? data)
+    {
+        return data is null ? new TextBlock { Text = "Not Found" } : CreateView(data);
     }
 }

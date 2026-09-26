@@ -12,4 +12,10 @@ public static class ObservableCollectionExtensions
             collection.Add(item);
         }
     }
+
+    public static void ReplaceWith<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
+    {
+        collection.Clear();
+        collection.AddRange(items);
+    }
 }

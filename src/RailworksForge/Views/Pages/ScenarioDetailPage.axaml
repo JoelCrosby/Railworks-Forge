@@ -1,5 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
+             xmlns:bh="using:RailworksForge.Behaviours"
+             xmlns:design="using:RailworksForge.DesignData"
              xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,13 +12,12 @@
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
              x:DataType="vm:ScenarioDetailViewModel">
 
     <Design.DataContext>
-        <vm:DesignScenarioDetailViewModel />
+        <x:Static Member="design:DesignViewModels.ScenarioDetail" />
     </Design.DataContext>
 
     <DockPanel>
@@ -52,9 +54,9 @@
 
         <StackPanel IsEnabled="{Binding Loading.IsIdle}" DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
             <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
-            <Button Command="{Binding OpenBackupsFolder}" Content="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" />
-            <Button Command="{Binding ExportBinXmlCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" />
-            <Button Command="{Binding ExportXmlBinCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}" />
+            <Button Command="{Binding OpenBackupsFolderCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" />
+            <Button Command="{Binding ExportBinToXmlCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" />
+            <Button Command="{Binding ConvertXmlToBinCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}" />
             <Button Command="{Binding ExtractScenariosCommand}" Content="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" />
         </StackPanel>
 
@@ -70,9 +72,12 @@
                 IsEnabled="{Binding Loading.IsIdle}"
                 ItemsSource="{Binding Services}"
                 SelectionMode="Extended"
-                SelectionChanged="ServicesDataGrid_OnSelectionChanged"
-                DoubleTapped="ServicesDataGrid_OnDoubleTapped"
             >
+                <i:Interaction.Behaviors>
+                    <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedServices}" />
+                    <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenServiceCommand}" />
+                </i:Interaction.Behaviors>
+
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.player}}" SortMemberPath="Consist.PlayerDriver">
                         <DataGridTemplateColumn.CellTemplate>
@@ -137,7 +142,7 @@
 
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding ClickedConsistCommand}" />
+                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding OpenServiceCommand}" />
                         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_with_quick_drive_consist}}" Command="{Binding ReplaceConsistCommand}"  />
                         <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_service}}" Command="{Binding DeleteConsistCommand}" />
                     </ContextMenu>

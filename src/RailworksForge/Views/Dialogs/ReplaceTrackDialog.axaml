@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:design="using:RailworksForge.DesignData"
              xmlns:loading="using:RailworksForge.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,7 +17,7 @@
         Title="RailworksForge - Replace Track">
 
     <Design.DataContext>
-        <vm:DesignReplaceTrackViewModel />
+        <x:Static Member="design:DesignViewModels.ReplaceTrack" />
     </Design.DataContext>
 
 
@@ -133,8 +134,8 @@
 
         <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                <Button Click="CancelButtonOnClick">Cancel</Button>
-                <Button IsEnabled="{Binding CanReplace}" Command="{Binding ReplaceTracksCommand}">
+                <Button Command="{Binding DismissCommand}">Cancel</Button>
+                <Button Command="{Binding ReplaceTracksCommand}">
                     Replace Tracks
                 </Button>
             </StackPanel>

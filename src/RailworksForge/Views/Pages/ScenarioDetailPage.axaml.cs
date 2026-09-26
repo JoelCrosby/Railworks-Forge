@@ -1,13 +1,7 @@
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Subjects;
-
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 
 using RailworksForge.Util;
-using RailworksForge.ViewModels;
 
 namespace RailworksForge.Views.Pages;
 
@@ -27,32 +21,5 @@ public partial class ScenarioDetailPage : UserControl
         base.OnLoaded(e);
 
         _servicesDataGridSortHandler.SortColumns();
-    }
-
-    // ReSharper disable once UnusedParameter.Local
-    private void ServicesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (DataContext is not ScenarioDetailViewModel context)
-        {
-            return;
-        }
-
-        context.SelectedItems = ServicesDataGrid.SelectedItems.Cast<ConsistViewModel>().ToList();
-    }
-
-    // ReSharper disable once UnusedParameter.Local
-    private void ServicesDataGrid_OnDoubleTapped(object? sender, TappedEventArgs e)
-    {
-        if (!e.IsFromDataGridRow())
-        {
-            return;
-        }
-
-        if (DataContext is not ScenarioDetailViewModel context)
-        {
-            return;
-        }
-
-        context.ClickedConsistCommand.Execute().Subscribe(new Subject<Unit>());
     }
 }

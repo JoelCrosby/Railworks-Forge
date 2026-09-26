@@ -5,9 +5,9 @@
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucide="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:views="using:RailworksForge.Views.Controls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
-             x:CompileBindings="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Pages.RoutesPage"
              x:DataType="vm:RoutesViewModel">
@@ -39,7 +39,10 @@
             </Grid>
         </Border>
 
-        <ContentControl Content="{Binding ContentControl}" />
+        <Panel>
+            <views:RoutesGrid IsVisible="{Binding IsGridLayout}" />
+            <views:RoutesList IsVisible="{Binding IsListLayout}" />
+        </Panel>
 
     </DockPanel>
 

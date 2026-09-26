@@ -1,11 +1,9 @@
 using System;
-using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
-
-using ReactiveUI;
+using CommunityToolkit.Mvvm.Input;
 
 using Serilog;
 
@@ -19,16 +17,16 @@ public partial class LoadingOperation : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
     [NotifyPropertyChangedFor(nameof(IsVisible))]
-    private bool _isLoading;
+    public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    private string _message = string.Empty;
+    public partial string Message { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
     [NotifyPropertyChangedFor(nameof(CanRetry))]
     [NotifyPropertyChangedFor(nameof(IsVisible))]
-    private string? _errorMessage;
+    public partial string? ErrorMessage { get; set; }
 
     public bool IsIdle => !IsLoading;
 
@@ -37,13 +35,6 @@ public partial class LoadingOperation : ObservableObject
     public bool IsVisible => IsLoading || HasError;
 
     public bool CanRetry => HasError && _retry is not null;
-
-    public ReactiveCommand<Unit, Unit> RetryCommand { get; }
-
-    public LoadingOperation()
-    {
-        RetryCommand = ReactiveCommand.CreateFromTask(() => _retry?.Invoke() ?? Task.CompletedTask);
-    }
 
     // Start on the UI thread so completion and property notifications return to that context.
     public async Task RunAsync<T>(
@@ -112,5 +103,11 @@ public partial class LoadingOperation : ObservableObject
         _retry = null;
         ErrorMessage = null;
         IsLoading = false;
+    }
+
+    [RelayCommand]
+    private Task Retry()
+    {
+        return _retry?.Invoke() ?? Task.CompletedTask;
     }
 }

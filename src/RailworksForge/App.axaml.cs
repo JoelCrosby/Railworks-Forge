@@ -3,7 +3,6 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 
 using Echoes;
 
@@ -11,9 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Config;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Services;
 using RailworksForge.ViewModels;
 using RailworksForge.Views;
-using RailworksForge.Views.Controls;
 using RailworksForge.Views.Dialogs;
 using RailworksForge.Views.Pages;
 
@@ -29,23 +29,7 @@ public class App : Application
 
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(config.Language));
 
-        ApplyTheme(config.Theme);
-    }
-
-    public static void ApplyTheme(string theme)
-    {
-
-        if (Current is null)
-        {
-            return;
-        }
-
-        Current.RequestedThemeVariant = theme switch
-        {
-            "Light" => ThemeVariant.Light,
-            "Dark" => ThemeVariant.Dark,
-            _ => ThemeVariant.Default,
-        };
+        new ThemeService().Apply(config.Theme);
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -58,61 +42,61 @@ public class App : Application
         RegisterViews();
 
         var provider = services.BuildServiceProvider();
-        var dataContext = provider.GetRequiredService<MainWindowViewModel>();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = dataContext,
+                DataContext = provider.GetRequiredService<MainWindowViewModel>(),
             };
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static void RegisterViews()
+    public static void RegisterServices(IServiceCollection services)
     {
-        ViewLocator.Register<MainWindowViewModel, MainWindow>();
-        ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
-        ViewLocator.Register<NavigationBarViewModel, NavigationBar>();
-        ViewLocator.Register<ToolbarViewModel, Toolbar>();
-        ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
-        ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
-        ViewLocator.Register<CheckAssetsViewModel, CheckAssetsDialog>();
-        ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
-        ViewLocator.Register<RoutesViewModel, RoutesPage>();
-        ViewLocator.Register<RoutesBaseViewModel, RoutesList>();
-        ViewLocator.Register<ConfirmationDialogViewModel, ConfirmationDialog>();
-        ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
-        ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
-        ViewLocator.Register<StatusBarViewModel, StatusBar>();
-        ViewLocator.Register<SettingsViewModel, SettingsPage>();
-    }
-
-    private static void RegisterServices(IServiceCollection services)
-    {
-        services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<ConsistDetailViewModel>();
-        services.AddTransient<ToolbarViewModel>();
-        services.AddTransient<NavigationBarViewModel>();
-        services.AddTransient<ReplaceConsistViewModel>();
-        services.AddTransient<ReplaceTrackViewModel>();
-        services.AddTransient<CheckAssetsViewModel>();
-        services.AddTransient<RouteDetailViewModel>();
-        services.AddTransient<RoutesViewModel>();
-        services.AddTransient<RoutesBaseViewModel>();
-        services.AddTransient<ConfirmationDialogViewModel>();
-        services.AddTransient<SaveConsistViewModel>();
-        services.AddTransient<ScenarioDetailViewModel>();
-        services.AddTransient<StatusBarViewModel>();
-        services.AddTransient<ProgressIndicatorViewModel>();
-        services.AddTransient<SettingsViewModel>();
-
-        services.AddTransient<RouteService>();
-        services.AddTransient<ScenarioService>();
-
         services.AddSingleton<AssetDirectoryTreeService>();
         services.AddSingleton<ScenarioDatabaseService>();
+        services.AddSingleton<ScenarioService>();
+        services.AddSingleton<RouteService>();
+        services.AddSingleton<TrackService>();
+        services.AddSingleton<RollingStockService>();
+        services.AddSingleton<PreloadConsistService>();
+        services.AddSingleton<ConsistEditService>();
+        services.AddSingleton<RouteAssetCheckService>();
+        services.AddSingleton<SerzFileService>();
+        services.AddTransient<Packager>();
+
+        services.AddSingleton<NavigationService>();
+        services.AddSingleton<DialogService>();
+        services.AddSingleton<LauncherService>();
+        services.AddSingleton<ClipboardService>();
+        services.AddSingleton<StoragePickerService>();
+        services.AddSingleton<ThemeService>();
+        services.AddSingleton<AppLifetimeService>();
+        services.AddSingleton<ToolsActivity>();
+
+        services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<ToolbarViewModel>();
+        services.AddSingleton<NavigationBarViewModel>();
+        services.AddSingleton<StatusBarViewModel>();
+        services.AddSingleton<RoutesViewModel>();
+        services.AddTransient<SettingsViewModel>();
+    }
+
+    private static void RegisterViews()
+    {
+        ViewLocator.Register<RoutesViewModel, RoutesPage>();
+        ViewLocator.Register<RouteDetailViewModel, RouteDetailPage>();
+        ViewLocator.Register<ScenarioDetailViewModel, ScenarioDetailPage>();
+        ViewLocator.Register<ConsistDetailViewModel, ConsistDetailPage>();
+        ViewLocator.Register<SettingsViewModel, SettingsPage>();
+
+        ViewLocator.Register<CheckAssetsViewModel, CheckAssetsDialog>();
+        ViewLocator.Register<ConfirmationDialogViewModel, ConfirmationDialog>();
+        ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
+        ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
+        ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
     }
 }

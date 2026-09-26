@@ -7,7 +7,6 @@
         xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
         xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:CompileBindings="True"
         x:Class="RailworksForge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/railworks-forge-icon.png"
@@ -18,7 +17,7 @@
         <controls:NavigationBar Grid.Row="1" DataContext="{Binding NavigationBar}"/>
 
         <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-            <ContentControl Content="{Binding ContentViewModel}" />
+            <ContentControl Content="{Binding Navigation.CurrentPage}" />
         </Border>
 
         <StackPanel Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Spacing="8" ZIndex="1">

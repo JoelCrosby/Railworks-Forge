@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:design="using:RailworksForge.DesignData"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
@@ -9,7 +10,7 @@
              x:DataType="vm:ProgressIndicatorViewModel">
 
     <Design.DataContext>
-        <vm:DesignProgressIndicatorViewModel />
+        <x:Static Member="design:DesignViewModels.ProgressIndicator" />
     </Design.DataContext>
 
 
