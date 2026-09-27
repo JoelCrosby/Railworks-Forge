@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -108,7 +109,9 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
         ShowConsist(_scenarioPage.Scenario, CurrentConsist);
     }
 
-    private TPage Create<TPage>(params object[] arguments) where TPage : ViewModelBase
+    private TPage Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TPage>(
+        params object[] arguments)
+        where TPage : ViewModelBase
     {
         return ActivatorUtilities.CreateInstance<TPage>(services, arguments);
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -12,7 +13,9 @@ namespace RailworksForge.Services;
 
 public class DialogService(IServiceProvider services)
 {
-    public TDialog Create<TDialog>(params object[] arguments) where TDialog : DialogViewModel
+    public TDialog Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TDialog>(
+        params object[] arguments)
+        where TDialog : DialogViewModel
     {
         return ActivatorUtilities.CreateInstance<TDialog>(services, arguments);
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -10,7 +9,6 @@ namespace RailworksForge.Behaviours;
 
 public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
 {
-    [RequiresUnreferencedCode("This functionality is not compatible with trimming.")]
     protected override void OnAttached()
     {
         if (AssociatedObject is not null)
@@ -53,7 +51,7 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
 
     private void DropDownOpening(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        var prop = AssociatedObject?.GetType().GetProperty("TextBox", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        var prop = typeof(AutoCompleteBox).GetProperty("TextBox", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
         var tb = (TextBox?)prop?.GetValue(AssociatedObject);
 
         if (tb is not null && tb.IsReadOnly)
@@ -96,7 +94,7 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
     {
         if (AssociatedObject is null) return;
 
-        var prop = AssociatedObject.GetType().GetProperty("TextBox", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        var prop = typeof(AutoCompleteBox).GetProperty("TextBox", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
         var tb = (TextBox?)prop?.GetValue(AssociatedObject);
 
         if (tb is null || tb.InnerRightContent is Button)

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,8 @@ public static class DesignServices
         return Provider.Value.GetRequiredService<T>();
     }
 
-    public static T Create<T>(params object[] arguments)
+    public static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(
+        params object[] arguments)
     {
         return ActivatorUtilities.CreateInstance<T>(Provider.Value, arguments);
     }
