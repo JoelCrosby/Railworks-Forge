@@ -13,7 +13,7 @@ using RailworksForge.Services;
 
 namespace RailworksForge.ViewModels;
 
-public partial class ToolbarViewModel(
+public partial class ToolsMenuViewModel(
     ToolsActivity tools,
     StoragePickerService picker,
     SerzFileService serz,

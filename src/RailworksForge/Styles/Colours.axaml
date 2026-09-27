@@ -4,10 +4,32 @@
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="SuccessBrush">DarkGreen</SolidColorBrush>
             <SolidColorBrush x:Key="WarningTextBrush">#FF9D5D00</SolidColorBrush>
+
+            <SolidColorBrush x:Key="HeaderTrayBrush">#0A000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderHoverBrush">#0F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderSelectedBrush">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBrush">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleBorderBrush">#1A000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleOnBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF6B6B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderChevronBrush">#FFA6A6A6</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderIconBrush">#FF2A2A2A</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="SuccessBrush">LightGreen</SolidColorBrush>
             <SolidColorBrush x:Key="WarningTextBrush">#FFFCE100</SolidColorBrush>
+
+            <SolidColorBrush x:Key="HeaderTrayBrush">#0AFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderHoverBrush">#0FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderSelectedBrush">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBrush">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleBorderBrush">#1AFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleOnBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF9A9A9A</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderChevronBrush">#FF555555</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderIconBrush">#FFE6E6E6</SolidColorBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

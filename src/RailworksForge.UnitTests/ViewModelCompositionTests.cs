@@ -18,7 +18,6 @@ public class ViewModelCompositionTests
     public void PagesAndDialogs_CanBeCreatedWithRuntimeArguments()
     {
         Assert.NotNull(DesignViewModels.NavigationBar);
-        Assert.NotNull(DesignViewModels.Toolbar);
         Assert.NotNull(DesignViewModels.RouteDetail);
         Assert.NotNull(DesignViewModels.ScenarioDetail);
         Assert.NotNull(DesignViewModels.ReplaceConsist);

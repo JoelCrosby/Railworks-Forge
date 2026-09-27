@@ -23,8 +23,6 @@ public static class DesignViewModels
         }
     }
 
-    public static ToolbarViewModel Toolbar => DesignServices.Get<ToolbarViewModel>();
-
     public static StatusBarViewModel StatusBar => new()
     {
         StatusText = "84 Routes found",

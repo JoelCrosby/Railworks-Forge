@@ -80,7 +80,7 @@ public class App : Application
         services.AddSingleton<ImageService>();
 
         services.AddSingleton<MainWindowViewModel>();
-        services.AddSingleton<ToolbarViewModel>();
+        services.AddSingleton<ToolsMenuViewModel>();
         services.AddSingleton<NavigationBarViewModel>();
         services.AddSingleton<StatusBarViewModel>();
         services.AddSingleton<RoutesViewModel>();

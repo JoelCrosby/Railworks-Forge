@@ -12,22 +12,19 @@
         Icon="/Assets/railworks-forge-icon.png"
         Title="{echoes:Translate {x:Static translations:Strings.railworks_forge}}">
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
-        <controls:Toolbar Grid.Row="0" DataContext="{Binding Toolbar}" />
-        <controls:NavigationBar Grid.Row="1" DataContext="{Binding NavigationBar}"/>
+    <Grid RowDefinitions="Auto, *, Auto, Auto">
+        <controls:NavigationBar Grid.Row="0" DataContext="{Binding NavigationBar}" />
 
-        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-            <ContentControl Content="{Binding Navigation.CurrentPage}" />
-        </Border>
+        <ContentControl Grid.Row="1" Content="{Binding Navigation.CurrentPage}" />
 
-        <StackPanel Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Spacing="8" ZIndex="1">
+        <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Spacing="8" ZIndex="1">
             <controls:LoadingState DataContext="{Binding Loading}" Margin="0" />
             <controls:LoadingState DataContext="{Binding ToolsLoading}" Margin="0" />
         </StackPanel>
 
-        <StackPanel Grid.Row="3">
+        <StackPanel Grid.Row="2">
             <controls:ProgressIndicator DataContext="{Binding ProgressIndicator}" IsVisible="{Binding IsVisible}" />
         </StackPanel>
-        <controls:StatusBar Grid.Row="4" DataContext="{Binding StatusBar}"/>
+        <controls:StatusBar Grid.Row="3" DataContext="{Binding StatusBar}"/>
     </Grid>
 </Window>

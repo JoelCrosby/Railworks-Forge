@@ -7,15 +7,12 @@ namespace RailworksForge.ViewModels;
 
 public class MainWindowViewModel(
     NavigationService navigation,
-    ToolbarViewModel toolbar,
     NavigationBarViewModel navigationBar,
     StatusBarViewModel statusBar,
     ToolsActivity tools,
     ScenarioDatabaseService scenarioDatabase) : ViewModelBase
 {
     public NavigationService Navigation { get; } = navigation;
-
-    public ToolbarViewModel Toolbar { get; } = toolbar;
 
     public NavigationBarViewModel NavigationBar { get; } = navigationBar;
 
