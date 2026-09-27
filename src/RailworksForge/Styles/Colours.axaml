@@ -38,4 +38,10 @@
     <SolidColorBrush x:Key="ErrorBrush">#40E81123</SolidColorBrush>
     <SolidColorBrush x:Key="PartialBrush">#40F7630C</SolidColorBrush>
     <SolidColorBrush x:Key="IsPlayerBrush">#3800B7C3</SolidColorBrush>
+
+    <!-- Breadcrumb level colours sit behind white icons, so they are mid-tones that read on light and dark headers. -->
+    <SolidColorBrush x:Key="CrumbRoutesBrush">#FF3B82F6</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbRouteBrush">#FF10A37F</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbScenarioBrush">#FFD97706</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbConsistBrush">#FF8B5CF6</SolidColorBrush>
 </ResourceDictionary>

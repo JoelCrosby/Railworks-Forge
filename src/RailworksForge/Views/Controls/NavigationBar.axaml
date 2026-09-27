@@ -64,7 +64,7 @@
         <!-- Breadcrumbs: earlier crumbs are muted links, the current crumb is highlighted and inert. -->
         <Style Selector="Button.crumb">
             <Setter Property="Height" Value="26" />
-            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Padding" Value="3,0,8,0" />
             <Setter Property="MaxWidth" Value="200" />
         </Style>
 
@@ -73,18 +73,31 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
-        <Style Selector="Button.crumb lucideAvalonia|Lucide">
-            <Setter Property="StrokeBrush" Value="{DynamicResource HeaderMutedForegroundBrush}" />
-            <Setter Property="Width" Value="15" />
-            <Setter Property="Height" Value="15" />
+        <!-- Each level has its own colour, so the depth of the trail reads at a glance. -->
+        <Style Selector="Border.crumb-tile">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+
+        <Style Selector="Border.crumb-tile lucideAvalonia|Lucide">
+            <Setter Property="StrokeBrush" Value="White" />
+            <Setter Property="Width" Value="13" />
+            <Setter Property="Height" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="Button.crumb:pointerover Border.crumb-tile">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <Style Selector="Button.crumb.current Border.crumb-tile">
+            <Setter Property="Opacity" Value="1" />
         </Style>
 
         <Style Selector="Button.crumb:pointerover TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
-        </Style>
-
-        <Style Selector="Button.crumb:pointerover lucideAvalonia|Lucide">
-            <Setter Property="StrokeBrush" Value="{DynamicResource TextControlForeground}" />
         </Style>
 
         <Style Selector="Button.crumb.current">
@@ -95,10 +108,6 @@
 
         <Style Selector="Button.crumb.current TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
-        </Style>
-
-        <Style Selector="Button.crumb.current lucideAvalonia|Lucide">
-            <Setter Property="StrokeBrush" Value="{DynamicResource TextControlForeground}" />
         </Style>
 
         <Style Selector="lucideAvalonia|Lucide.chevron">
@@ -277,8 +286,10 @@
                             Classes="flat crumb"
                             Classes.current="{Binding IsRoutesCrumbCurrent}"
                             Command="{Binding ShowRoutesCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <controls:LucideIcon Icon="Route" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbRoutesBrush}">
+                                <controls:LucideIcon Icon="Route" />
+                            </Border>
                             <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
                         </StackPanel>
                     </Button>
@@ -294,8 +305,10 @@
                             Command="{Binding ShowRouteCommand}"
                             IsVisible="{Binding Navigation.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}"
                             ToolTip.Tip="{Binding Navigation.CurrentRoute.Name}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <controls:LucideIcon Icon="Milestone" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbRouteBrush}">
+                                <controls:LucideIcon Icon="Milestone" />
+                            </Border>
                             <TextBlock Text="{Binding Navigation.CurrentRoute.Name}" />
                         </StackPanel>
                     </Button>
@@ -311,8 +324,10 @@
                             Command="{Binding ShowScenarioCommand}"
                             IsVisible="{Binding Navigation.CurrentScenario, Converter={x:Static ObjectConverters.IsNotNull}}"
                             ToolTip.Tip="{Binding Navigation.CurrentScenario.Name}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <controls:LucideIcon Icon="ListEnd" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbScenarioBrush}">
+                                <controls:LucideIcon Icon="ListEnd" />
+                            </Border>
                             <TextBlock Text="{Binding Navigation.CurrentScenario.Name}" />
                         </StackPanel>
                     </Button>
@@ -328,8 +343,10 @@
                             Command="{Binding ShowConsistCommand}"
                             IsVisible="{Binding Navigation.CurrentConsist, Converter={x:Static ObjectConverters.IsNotNull}}"
                             ToolTip.Tip="{Binding Navigation.CurrentConsist.ServiceName}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <controls:LucideIcon Icon="TrainFront" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbConsistBrush}">
+                                <controls:LucideIcon Icon="TrainFront" />
+                            </Border>
                             <TextBlock Text="{Binding Navigation.CurrentConsist.ServiceName}" />
                         </StackPanel>
                     </Button>
