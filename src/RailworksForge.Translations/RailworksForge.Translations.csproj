@@ -14,6 +14,8 @@
     <ItemGroup>
         <!-- Include all .toml files as embedded resources (so we can dynamically load them at runtime) -->
         <AdditionalFiles Include="Translations\Strings_de.toml" />
+        <AdditionalFiles Include="Translations\Strings_es.toml" />
+        <AdditionalFiles Include="Translations\Strings_fr.toml" />
         <EmbeddedResource Include="**\*.toml" />
 
         <!-- Specify invariant files that are fed into the generator (Echoes.Generator) -->

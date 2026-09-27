@@ -1,4 +1,7 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
+
+using Echoes;
 
 using RailworksForge.Translations;
 
@@ -7,30 +10,56 @@ namespace RailworksForge.UnitTests;
 public partial class TranslationTests
 {
     private static readonly Dictionary<string, string> English = ReadTranslations("Strings.toml");
-    private static readonly Dictionary<string, string> German = ReadTranslations("Strings_de.toml");
 
-    [Fact]
-    public void GermanTranslations_CoverEveryEnglishKey()
+    public static TheoryData<string> LocaleFiles => ["Strings_de.toml", "Strings_es.toml", "Strings_fr.toml"];
+
+    [Theory]
+    [MemberData(nameof(LocaleFiles))]
+    public void Locale_CoversEveryEnglishKey(string fileName)
     {
+        var locale = ReadTranslations(fileName);
+
         Assert.True(English.Count > 100, $"only read {English.Count} English translations");
 
-        var missingFromGerman = English.Keys.Except(German.Keys).ToList();
-        var missingFromEnglish = German.Keys.Except(English.Keys).ToList();
+        var missingFromLocale = English.Keys.Except(locale.Keys).ToList();
+        var missingFromEnglish = locale.Keys.Except(English.Keys).ToList();
 
-        Assert.Empty(missingFromGerman);
+        Assert.Empty(missingFromLocale);
         Assert.Empty(missingFromEnglish);
     }
 
     // string.Format throws when a translation references a placeholder the caller doesn't supply.
-    [Fact]
-    public void GermanTranslations_UseTheSamePlaceholders()
+    [Theory]
+    [MemberData(nameof(LocaleFiles))]
+    public void Locale_UsesTheSamePlaceholders(string fileName)
     {
+        var locale = ReadTranslations(fileName);
+
         var mismatched = English
-            .Where(entry => German.TryGetValue(entry.Key, out var german) && !HaveSamePlaceholders(entry.Value, german))
+            .Where(entry => locale.TryGetValue(entry.Key, out var translation) && !HaveSamePlaceholders(entry.Value, translation))
             .Select(entry => entry.Key)
             .ToList();
 
         Assert.Empty(mismatched);
+    }
+
+    [Theory]
+    [InlineData("es-ES", "Rutas")]
+    [InlineData("fr-FR", "Itinéraires")]
+    public void SelectedCulture_ResolvesItsLocaleFile(string culture, string expectedRoutes)
+    {
+        var previous = TranslationProvider.Culture;
+
+        try
+        {
+            TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(culture));
+
+            Assert.Equal(expectedRoutes, Strings.routes.CurrentValue);
+        }
+        finally
+        {
+            TranslationProvider.SetCulture(previous);
+        }
     }
 
     private static bool HaveSamePlaceholders(string first, string second)

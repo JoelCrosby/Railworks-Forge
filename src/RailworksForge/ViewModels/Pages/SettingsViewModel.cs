@@ -47,6 +47,8 @@ public partial class SettingsViewModel : ViewModelBase
     [
         new ("en-GB", "English"),
         new ("de-DE", "Deutsch"),
+        new ("es-ES", "Español"),
+        new ("fr-FR", "Français"),
     ];
 
     public bool IsGameDirectorySet => !string.IsNullOrWhiteSpace(GameDirectoryPath);
