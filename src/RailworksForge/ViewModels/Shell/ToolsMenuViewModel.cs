@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using RailworksForge.Core;
 using RailworksForge.Core.Packaging;
 using RailworksForge.Services;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -19,16 +20,16 @@ public partial class ToolsMenuViewModel(
     SerzFileService serz,
     Packager packager) : ObservableObject
 {
-    private static readonly FilePickerFileType BinaryFiles = new("Serz binary") { Patterns = ["*.bin"] };
-    private static readonly FilePickerFileType XmlFiles = new("Serz XML") { Patterns = ["*.xml"] };
-    private static readonly FilePickerFileType PackageFiles = new("Package") { Patterns = ["*.rwp", "*.rpk"] };
+    private static readonly FilePickerFileType BinaryFiles = new(Strings.serz_binary_files.CurrentValue) { Patterns = ["*.bin"] };
+    private static readonly FilePickerFileType XmlFiles = new(Strings.serz_xml_files.CurrentValue) { Patterns = ["*.xml"] };
+    private static readonly FilePickerFileType PackageFiles = new(Strings.packages.CurrentValue) { Patterns = ["*.rwp", "*.rpk"] };
 
     public LoadingOperation Operations => tools.Loading;
 
     [RelayCommand]
     private async Task ConvertBinToXml()
     {
-        var path = await picker.PickFile("Select .bin file", BinaryFiles);
+        var path = await picker.PickFile(Strings.select_bin_file.CurrentValue, BinaryFiles);
         var isBinary = path is not null && Path.GetExtension(path) is ".bin";
 
         if (!isBinary || Operations.IsLoading)
@@ -36,13 +37,13 @@ public partial class ToolsMenuViewModel(
             return;
         }
 
-        await Operations.RunAsync("Converting file…", token => serz.ConvertBinToXml(path!, token));
+        await Operations.RunAsync(Strings.converting_file.CurrentValue, token => serz.ConvertBinToXml(path!, token));
     }
 
     [RelayCommand]
     private async Task ConvertXmlToBin()
     {
-        var path = await picker.PickFile("Select .xml file", XmlFiles);
+        var path = await picker.PickFile(Strings.select_xml_file.CurrentValue, XmlFiles);
         var isXml = path is not null && Path.GetExtension(path) is ".xml";
 
         if (!isXml || Operations.IsLoading)
@@ -50,13 +51,13 @@ public partial class ToolsMenuViewModel(
             return;
         }
 
-        await Operations.RunAsync("Converting file…", token => serz.ConvertXmlToBin(path!, token));
+        await Operations.RunAsync(Strings.converting_file.CurrentValue, token => serz.ConvertXmlToBin(path!, token));
     }
 
     [RelayCommand]
     private async Task InstallPackage()
     {
-        var files = await picker.PickFiles("Select .rwp or .rpk file", PackageFiles);
+        var files = await picker.PickFiles(Strings.select_package_files.CurrentValue, PackageFiles);
 
         if (files.Count is 0)
         {
@@ -67,7 +68,7 @@ public partial class ToolsMenuViewModel(
 
         try
         {
-            await Operations.RunAsync("Installing packages…", async _ =>
+            await Operations.RunAsync(Strings.installing_packages.CurrentValue, async _ =>
             {
                 foreach (var file in files)
                 {

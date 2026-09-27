@@ -1,5 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:RailworksForge.Converters"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
              xmlns:bh="using:RailworksForge.Behaviours"
              xmlns:loading="using:RailworksForge.Views.Controls"
@@ -24,7 +27,7 @@
 
 
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Image" Width="128">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" Width="128">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Classes="thumbnail"><Image Height="52" Stretch="UniformToFill" Source="{Binding ImageBitmap}" /></Border>
@@ -32,7 +35,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Id">
+                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.id}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border BorderThickness="2"
@@ -47,15 +50,15 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Packaging Type" Binding="{Binding PackagingType}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.packaging_type}}" Binding="{Binding PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Details" Command="{Binding OpenRouteCommand}" />
-                    <MenuItem Header="Copy" Command="{Binding CopyRouteNameCommand}" />
-                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding OpenRouteCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyRouteNameCommand}" />
+                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}"  />
                 </ContextMenu>
             </DataGrid.ContextMenu>
 

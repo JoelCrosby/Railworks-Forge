@@ -13,6 +13,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Config;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -85,7 +86,7 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private async Task BrowseGameDirectory()
     {
-        var folder = await _picker.PickFolder(Utils.GetTranslation("game_directory"));
+        var folder = await _picker.PickFolder(Strings.game_directory.CurrentValue);
 
         if (folder is null)
         {
@@ -196,9 +197,9 @@ public partial class SettingsViewModel : ViewModelBase
     {
         Themes =
         [
-            new ("System", Utils.GetTranslation("system")),
-            new ("Light", Utils.GetTranslation("light")),
-            new ("Dark", Utils.GetTranslation("dark")),
+            new ("System", Strings.system.CurrentValue),
+            new ("Light", Strings.light.CurrentValue),
+            new ("Dark", Strings.dark.CurrentValue),
         ];
 
         SelectedTheme = Themes.FirstOrDefault(theme => theme.Key == selectedKey) ?? Themes[0];

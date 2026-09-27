@@ -9,7 +9,8 @@ public class Packager
 {
     private IProgress<InstallProgress>? _progress;
 
-    private string _currentTask = string.Empty;
+    private InstallStage _stage;
+    private string _packageName = string.Empty;
 
     private static readonly HashSet<string> ForbiddenExtensions =
     [
@@ -25,7 +26,8 @@ public class Packager
 
         var packageName = Path.GetFileNameWithoutExtension(filename);
 
-        RaisePackageInstallProgress($"Installing {packageName}");
+        _packageName = packageName;
+        RaisePackageInstallProgress(InstallStage.Installing);
 
         await Task.Delay(200).ConfigureAwait(false);
 
@@ -34,7 +36,7 @@ public class Packager
 
         if (installed)
         {
-            RaisePackageInstallProgress($"Package {packageName} is already installed, aborting.");
+            RaisePackageInstallProgress(InstallStage.AlreadyInstalled);
 
             await Task.Delay(2000).ConfigureAwait(false);
 
@@ -45,28 +47,30 @@ public class Packager
         await ProcessPackage(filename);
     }
 
-    private void RaisePackageInstallProgress(int progress, string? message = null)
+    private void RaisePackageInstallProgress(int progress, int filesProcessed, int fileCount)
     {
         var args = new InstallProgress
         {
+            Stage = _stage,
+            PackageName = _packageName,
             Progress = progress,
-            Message = message ?? string.Empty,
-            CurrentTask = _currentTask,
+            FilesProcessed = filesProcessed,
+            FileCount = fileCount,
             IsLoading = true,
         };
 
         _progress?.Report(args);
     }
 
-    private void RaisePackageInstallProgress(string currentTask, bool isLoading = true)
+    private void RaisePackageInstallProgress(InstallStage stage, bool isLoading = true)
     {
-        _currentTask = currentTask;
+        _stage = stage;
 
         var args = new InstallProgress
         {
+            Stage = _stage,
+            PackageName = _packageName,
             Progress = 0,
-            Message = string.Empty,
-            CurrentTask = _currentTask,
             IsLoading = isLoading,
         };
 
@@ -114,7 +118,7 @@ public class Packager
         using var archive = new ZipArchive(archiveStream);
         var zeroByteErrors = new List<string>();
 
-        RaisePackageInstallProgress("Scanning package files...");
+        RaisePackageInstallProgress(InstallStage.Scanning);
 
         foreach (var entry in archive.Entries)
         {
@@ -131,7 +135,7 @@ public class Packager
             Log.Information("installation for package {Package} encountered files with 0 bytes", filename);
         }
 
-        RaisePackageInstallProgress("Clearing blueprint .pak cache files...");
+        RaisePackageInstallProgress(InstallStage.ClearingCache);
 
         await Task.Delay(200).ConfigureAwait(false);
 
@@ -144,7 +148,7 @@ public class Packager
             var entry = archive.Entries[i];
             var progress = (int) Math.Ceiling((double)(100 * i) / entryCount);
 
-            RaisePackageInstallProgress(progress, $"Processing File {i + 1} of {entryCount}");
+            RaisePackageInstallProgress(progress, i + 1, entryCount);
 
             var entryArchivePath = entry.FullName[entryNameIndex..].Replace('\\', Path.DirectorySeparatorChar);
             var entryFilename = Path.GetFileName(entryArchivePath);
@@ -187,7 +191,7 @@ public class Packager
 
         package.SavePackageInfo();
 
-        RaisePackageInstallProgress($"Successfully Installed package {package.Name}", false);
+        RaisePackageInstallProgress(InstallStage.Installed, false);
 
         await Task.Delay(6000).ConfigureAwait(false);
     }

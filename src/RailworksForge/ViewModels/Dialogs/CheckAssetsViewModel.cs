@@ -8,6 +8,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -31,14 +32,20 @@ public partial class CheckAssetsViewModel(Route route, RouteAssetCheckService as
         var progress = new Progress<AssetCheckProgress>(ShowProgress);
 
         return Loading.RunAsync(
-            "Checking route assets…",
+            Strings.checking_route_assets.CurrentValue,
             token => assetCheck.FindMissingAssets(Route, progress, token),
             Blueprints.ReplaceWith);
     }
 
     private void ShowProgress(AssetCheckProgress progress)
     {
+        var format = progress.Stage switch
+        {
+            AssetCheckStage.ReadingFiles => Strings.processed_files,
+            _ => Strings.checked_blueprints,
+        };
+
         LoadingProgress = progress.Percentage;
-        LoadingMessage = progress.Message;
+        LoadingMessage = string.Format(format.CurrentValue, progress.Completed, progress.Total);
     }
 }

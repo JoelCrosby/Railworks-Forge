@@ -258,13 +258,13 @@
                                     <Button Classes="flat toggle"
                                             Classes.on="{Binding IsListLayout}"
                                             Command="{Binding ShowListCommand}"
-                                            ToolTip.Tip="List">
+                                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.list_view}}">
                                         <controls:LucideIcon Icon="List" />
                                     </Button>
                                     <Button Classes="flat toggle"
                                             Classes.on="{Binding IsGridLayout}"
                                             Command="{Binding ShowGridCommand}"
-                                            ToolTip.Tip="Grid">
+                                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.grid_view}}">
                                         <controls:LucideIcon Icon="LayoutGrid" />
                                     </Button>
                                 </StackPanel>

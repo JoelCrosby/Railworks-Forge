@@ -1,5 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         xmlns:design="using:RailworksForge.DesignData"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +12,7 @@
         CanResize="False"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
-        Title="RailworksForge - Save Consist">
+        Title="{echoes:Translate {x:Static translations:Strings.save_consist_title}}">
 
         <Design.DataContext>
                 <x:Static Member="design:DesignViewModels.SaveConsist" />
@@ -21,21 +23,21 @@
                         <StackPanel DockPanel.Dock="Top">
                                 <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8">
                                         <StackPanel Spacing="4">
-                                                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}">Selected Consist</TextBlock>
+                                                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}" Text="{echoes:Translate {x:Static translations:Strings.selected_consist}}" />
                                                 <TextBlock Text="{Binding LocomotiveName}" />
                                         </StackPanel>
                                 </Border>
 
                                 <StackPanel HorizontalAlignment="Stretch" Margin="0,16,0,8" Spacing="8">
-                                        <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}">Name</TextBlock>
-                                        <TextBox Text="{Binding Name}" PlaceholderText="Consist Name" />
+                                        <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}" Text="{echoes:Translate {x:Static translations:Strings.name}}" />
+                                        <TextBox Text="{Binding Name}" PlaceholderText="{echoes:Translate {x:Static translations:Strings.consist_name}}" />
                                 </StackPanel>
                         </StackPanel>
 
 
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                <Button Command="{Binding DismissCommand}">Cancel</Button>
-                                <Button Command="{Binding SaveCommand}">Save Consist</Button>
+                                <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
+                                <Button Command="{Binding SaveCommand}" Content="{echoes:Translate {x:Static translations:Strings.save_consist}}" />
                         </StackPanel>
                 </DockPanel>
         </Border>

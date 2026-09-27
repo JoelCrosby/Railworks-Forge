@@ -1,5 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:loading="using:RailworksForge.Views.Controls"
              xmlns:controls="using:RailworksForge.Views.TemplatedControls"
@@ -46,7 +48,7 @@
                 <TextBlock Text="{Binding Message}" VerticalAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
             <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" IsVisible="{Binding HasError}" />
-            <Button Content="Retry" Command="{Binding RetryCommand}" IsVisible="{Binding CanRetry}"
+            <Button Content="{echoes:Translate {x:Static translations:Strings.retry}}" Command="{Binding RetryCommand}" IsVisible="{Binding CanRetry}"
                     HorizontalAlignment="Center" />
         </StackPanel>
     </Border>

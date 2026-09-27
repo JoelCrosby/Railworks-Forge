@@ -1,5 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:RailworksForge.Converters"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         xmlns:design="using:RailworksForge.DesignData"
              xmlns:loading="using:RailworksForge.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,7 +15,7 @@
         Width="1280"
         Height="720"
         WindowStartupLocation="CenterOwner"
-        Title="RailworksForge - Check Route Assets">
+        Title="{echoes:Translate {x:Static translations:Strings.check_route_assets_title}}">
 
     <Design.DataContext>
         <x:Static Member="design:DesignViewModels.CheckAssets" />
@@ -22,7 +25,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}">Check Route Asset Availability</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}" Text="{echoes:Translate {x:Static translations:Strings.check_route_asset_availability}}" />
             </StackPanel>
         </Border>
 
@@ -49,10 +52,10 @@
                           CanUserSortColumns="True"
                 >
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Availablity State" Binding="{Binding AcquisitionState}" />
-                        <DataGridTextColumn Header="Provider" Binding="{Binding BlueprintSetIdProvider}" />
-                        <DataGridTextColumn Header="Product" Binding="{Binding BlueprintSetIdProduct}" />
-                        <DataGridTextColumn Header="Blueprint ID" Binding="{Binding BlueprintId}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.availability_state}}" Binding="{Binding AcquisitionState, Converter={x:Static converters:ValueConverters.AcquisitionStateConverter}}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.provider}}" Binding="{Binding BlueprintSetIdProvider}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.product}}" Binding="{Binding BlueprintSetIdProduct}" />
+                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding BlueprintId}" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <loading:LoadingState DataContext="{Binding Loading}" />
@@ -61,7 +64,7 @@
 
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                <Button Command="{Binding DismissCommand}">Close</Button>
+                <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.close}}" />
             </StackPanel>
         </Border>
     </Grid>

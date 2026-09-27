@@ -50,7 +50,7 @@
 
                     <StackPanel>
                         <TextBlock FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.packaging_type}}" />
-                        <TextBlock Text="{Binding Route.PackagingType}" />
+                        <TextBlock Text="{Binding Route.PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -134,7 +134,7 @@
                                         <lucideAvalonia:Lucide Icon="LayoutTemplate" />
                                     </Viewbox>
                                 </Panel>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -188,7 +188,7 @@
                                         <lucideAvalonia:Lucide Icon="Snowflake" />
                                     </Viewbox>
                                 </Panel>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonConverter}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

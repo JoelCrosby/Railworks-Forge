@@ -9,6 +9,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -39,7 +40,7 @@ public partial class ReplaceConsistViewModel(
 
     protected override Task OnActivated()
     {
-        return Loading.RunAsync("Loading asset providers…", async _ =>
+        return Loading.RunAsync(Strings.loading_asset_providers.CurrentValue, async _ =>
         {
             await directoryTree.LoadDirectoryTree();
 
@@ -78,7 +79,7 @@ public partial class ReplaceConsistViewModel(
 
         PreloadConsists.Clear();
 
-        return StockLoading.RunAsync("Loading replacement consists…", async token =>
+        return StockLoading.RunAsync(Strings.loading_replacement_consists.CurrentValue, async token =>
         {
             var consists = await preloadConsists.GetPreloadConsists(directory, token);
             return consists.ConvertAll(consist => new PreloadConsistViewModel(consist)

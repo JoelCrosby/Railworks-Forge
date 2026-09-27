@@ -8,6 +8,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -45,7 +46,7 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
             return;
         }
 
-        _ = Loading.RunAsync("Loading products…", _ =>
+        _ = Loading.RunAsync(Strings.loading_products.CurrentValue, _ =>
         {
             var products = tracks.GetProducts(value.Name);
             var items = products.ConvertAll(product => new DirectoryItem(product.Name, product));
@@ -68,7 +69,7 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
         }
 
         _ = Loading.RunAsync(
-            "Loading track blueprints…",
+            Strings.loading_track_blueprints.CurrentValue,
             token => tracks.GetTracks(provider.Name, value.Directory, token),
             Tracks.ReplaceWith);
     }

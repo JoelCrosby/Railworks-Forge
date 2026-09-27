@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -41,7 +42,7 @@ public partial class ReplaceTrackViewModel : DialogViewModel<ReplaceTracksReques
 
     protected override Task OnActivated()
     {
-        return Loading.RunAsync("Loading route tracks…", _ => GetRouteTracks(), tracks => RouteTracks = tracks);
+        return Loading.RunAsync(Strings.loading_route_tracks.CurrentValue, _ => GetRouteTracks(), tracks => RouteTracks = tracks);
     }
 
     protected override void OnDeactivated()

@@ -11,7 +11,22 @@ using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core;
 
-public record AssetCheckProgress(int Percentage, string Message);
+public enum AssetCheckStage
+{
+    ReadingFiles,
+    CheckingBlueprints,
+}
+
+public record AssetCheckProgress
+{
+    public required AssetCheckStage Stage { get; init; }
+
+    public required int Percentage { get; init; }
+
+    public required int Completed { get; init; }
+
+    public required int Total { get; init; }
+}
 
 public class RouteAssetCheckService
 {
@@ -101,7 +116,15 @@ public class RouteAssetCheckService
 
                 if (isNewPercentage)
                 {
-                    Report(progress, percentage, $"Processed {count} of {binFiles.Count} files", token);
+                    var fileProgress = new AssetCheckProgress
+                    {
+                        Stage = AssetCheckStage.ReadingFiles,
+                        Percentage = percentage,
+                        Completed = count,
+                        Total = binFiles.Count,
+                    };
+
+                    Report(progress, fileProgress, token);
                 }
             }
             catch (Exception e)
@@ -158,7 +181,15 @@ public class RouteAssetCheckService
             if (percentage != lastPercentage)
             {
                 lastPercentage = percentage;
-                Report(progress, percentage, $"Checked {count} of {blueprints.Count} blueprints", cancellationToken);
+                var blueprintProgress = new AssetCheckProgress
+                {
+                    Stage = AssetCheckStage.CheckingBlueprints,
+                    Percentage = percentage,
+                    Completed = count,
+                    Total = blueprints.Count,
+                };
+
+                Report(progress, blueprintProgress, cancellationToken);
             }
         }
 
@@ -189,8 +220,7 @@ public class RouteAssetCheckService
 
     private static void Report(
         IProgress<AssetCheckProgress> progress,
-        int percentage,
-        string message,
+        AssetCheckProgress update,
         CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
@@ -198,6 +228,6 @@ public class RouteAssetCheckService
             return;
         }
 
-        progress.Report(new AssetCheckProgress(percentage, message));
+        progress.Report(update);
     }
 }

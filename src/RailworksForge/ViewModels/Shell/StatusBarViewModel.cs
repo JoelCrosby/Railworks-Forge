@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using Echoes;
+
 using RailworksForge.Core;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -20,6 +23,13 @@ public partial class StatusBarViewModel : ObservableObject
 
     public StatusBarViewModel()
     {
-        StatusText = $"Railworks Directory - {Paths.GetGameDirectory()}";
+        ShowGameDirectory();
+
+        TranslationProvider.OnCultureChanged += (_, _) => ShowGameDirectory();
+    }
+
+    private void ShowGameDirectory()
+    {
+        StatusText = string.Format(Strings.railworks_directory.CurrentValue, Paths.GetGameDirectory());
     }
 }

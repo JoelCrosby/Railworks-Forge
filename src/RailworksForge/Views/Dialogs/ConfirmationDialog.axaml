@@ -1,5 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         xmlns:design="using:RailworksForge.DesignData"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -28,7 +30,7 @@
 
             <Border Grid.Column="0" Grid.Row="2" Padding="12">
                 <StackPanel HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
-                    <Button Command="{Binding DismissCommand}" Content="Cancel" />
+                    <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
                     <Button Command="{Binding AcceptCommand}" Content="{Binding AcceptLabel}" Background="{DynamicResource ToggleButtonBackgroundChecked}" />
                 </StackPanel>
             </Border>

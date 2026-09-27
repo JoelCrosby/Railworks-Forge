@@ -15,7 +15,7 @@
         Width="1280"
         Height="720"
         WindowStartupLocation="CenterOwner"
-        Title="RailworksForge - Replace Consist">
+        Title="{echoes:Translate {x:Static translations:Strings.replace_consist_title}}">
 
     <Design.DataContext>
         <x:Static Member="design:DesignViewModels.ReplaceConsist" />
@@ -24,14 +24,14 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel Spacing="4">
-                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}">Select Consist</TextBlock>
+                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}" Text="{echoes:Translate {x:Static translations:Strings.select_consist}}" />
             </StackPanel>
         </Border>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,4,3*">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <controls:TableHeader Text="Available Stock" />
+                    <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}" />
                 </StackPanel>
 
                 <Panel>
@@ -47,8 +47,8 @@
 
                         <TreeView.ContextMenu>
                             <ContextMenu Opening="ContextMenu_OnOpening">
-                                <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"  />
-                                <MenuItem Header="Load Consists" Command="{Binding LoadAvailableStockCommand}"  />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}"  />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.load_consists}}" Command="{Binding LoadAvailableStockCommand}"  />
                             </ContextMenu>
                         </TreeView.ContextMenu>
 
@@ -65,7 +65,7 @@
             <Border Grid.Column="2">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
-                        <controls:TableHeader Text="Consist" />
+                        <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
                     </StackPanel>
 
                     <Panel>
@@ -98,10 +98,8 @@
 
         <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                <Button Command="{Binding DismissCommand}">Cancel</Button>
-                <Button Command="{Binding ReplaceConsistCommand}">
-                    Replace Consist
-                </Button>
+                <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
+                <Button Command="{Binding ReplaceConsistCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_consist}}" />
             </StackPanel>
         </Border>
     </Grid>

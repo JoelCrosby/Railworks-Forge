@@ -9,6 +9,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -119,7 +120,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private Task LoadConsist()
     {
-        return Loading.RunAsync("Loading consist vehicles…", async token =>
+        return Loading.RunAsync(Strings.loading_consist_vehicles.CurrentValue, async token =>
         {
             await _directoryTree.LoadDirectoryTree();
             token.ThrowIfCancellationRequested();
@@ -160,7 +161,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         AvailableStock.Clear();
 
         return StockLoading.RunAsync(
-            "Loading available rolling stock…",
+            Strings.loading_available_rolling_stock.CurrentValue,
             token => _rollingStock.GetAvailableStock(directory, token),
             AvailableStock.AddRange);
     }
@@ -182,7 +183,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var vehicle = SelectedVehicle!;
 
-        await Loading.RunAsync("Updating consist…", _ => _consistEdits.AddVehicle(_scenario, vehicle));
+        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.AddVehicle(_scenario, vehicle));
         await ReloadAfterEdit();
     }
 
@@ -192,7 +193,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         var replacement = SelectedVehicle!;
         var targets = SelectedConsistVehicles.ToList();
 
-        await Loading.RunAsync("Updating consist…", _ => _consistEdits.ReplaceVehicles(_scenario, _consist, targets, replacement));
+        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.ReplaceVehicles(_scenario, _consist, targets, replacement));
         await ReloadAfterEdit();
     }
 
@@ -201,7 +202,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var vehicle = SingleSelectedVehicle!;
 
-        await Loading.RunAsync("Updating consist…", _ => _consistEdits.DeleteVehicle(_scenario, _consist, vehicle));
+        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.DeleteVehicle(_scenario, _consist, vehicle));
         await ReloadAfterEdit();
     }
 }

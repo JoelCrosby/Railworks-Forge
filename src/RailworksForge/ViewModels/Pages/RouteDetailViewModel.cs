@@ -12,6 +12,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -47,7 +48,7 @@ public partial class RouteDetailViewModel(
         scenarioService.PlayerInfoUpdated += OnPlayerInfoUpdated;
 
         return Loading.RunAsync(
-            "Loading scenarios…",
+            Strings.loading_scenarios.CurrentValue,
             token => Task.FromResult(scenarioService.GetScenarios(Route.Model, token)),
             ShowScenarios);
     }
@@ -125,7 +126,7 @@ public partial class RouteDetailViewModel(
             return;
         }
 
-        await Loading.RunAsync("Replacing tracks…", _ => trackService.ReplaceTracks(Route.Model, request));
+        await Loading.RunAsync(Strings.replacing_tracks.CurrentValue, _ => trackService.ReplaceTracks(Route.Model, request));
     }
 
     [RelayCommand]

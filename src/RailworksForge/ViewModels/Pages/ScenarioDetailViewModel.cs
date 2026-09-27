@@ -10,6 +10,7 @@ using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -72,7 +73,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         var scenario = Scenario;
 
-        return Loading.RunAsync("Loading scenario services…", async token =>
+        return Loading.RunAsync(Strings.loading_scenario_services.CurrentValue, async token =>
         {
             var loaded = await _scenarioService.LoadConsists(scenario, token);
             var services = loaded.Consists.Select(consist => new ConsistViewModel(consist)).ToList();
@@ -124,7 +125,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand]
     private Task ExportBinToXml()
     {
-        return Loading.RunAsync("Exporting scenario XML…", _ => Scenario.ExportBinToXml(), path =>
+        return Loading.RunAsync(Strings.exporting_scenario_xml.CurrentValue, _ => Scenario.ExportBinToXml(), path =>
         {
             if (Path.GetDirectoryName(path) is {} directory)
             {
@@ -136,13 +137,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand]
     private Task ConvertXmlToBin()
     {
-        return Loading.RunAsync("Converting scenario XML…", _ => Scenario.ConvertXmlToBin());
+        return Loading.RunAsync(Strings.converting_scenario_xml.CurrentValue, _ => Scenario.ConvertXmlToBin());
     }
 
     [RelayCommand]
     private Task ExtractScenarios()
     {
-        return Loading.RunAsync("Extracting scenarios…", _ =>
+        return Loading.RunAsync(Strings.extracting_scenarios.CurrentValue, _ =>
         {
             Scenario.Route.ExtractScenarios();
 
@@ -163,7 +164,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         string? consistElement = null;
 
         await Loading.RunAsync(
-            "Preparing consist…",
+            Strings.preparing_consist.CurrentValue,
             _ => _scenarioService.GetConsistRailVehiclesXml(Scenario, consist),
             xml => consistElement = xml,
             allowRetry: false);
@@ -202,7 +203,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             return;
         }
 
-        await Loading.RunAsync("Updating scenario…", _ => _consistEdits.ReplaceConsists(Scenario, targets, replacement));
+        await Loading.RunAsync(Strings.updating_scenario.CurrentValue, _ => _consistEdits.ReplaceConsists(Scenario, targets, replacement));
         await ReloadAfterEdit();
     }
 
@@ -211,20 +212,17 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         var targets = SelectedServices.Select(service => service.Consist).ToList();
         var isBulkSelection = targets.Count > 1;
-        var consistLabel = isBulkSelection ? "consists" : "consist";
+        var question = isBulkSelection ? Strings.confirm_delete_consists : Strings.confirm_delete_consist;
+        var acceptLabel = isBulkSelection ? Strings.delete_consists : Strings.delete_consist;
         var summary = isBulkSelection
-            ? $"{targets.Count} consists selected."
-            : $"Consist: {targets[0].ServiceName} - {targets[0].LocomotiveName}";
+            ? string.Format(Strings.consists_selected.CurrentValue, targets.Count)
+            : string.Format(Strings.consist_summary.CurrentValue, targets[0].ServiceName, targets[0].LocomotiveName);
 
         var confirmation = new ConfirmationDialogViewModel
         {
-            AcceptLabel = $"Delete {consistLabel}",
-            Title = "Delete Consist",
-            BodyText = $"""
-                        Are you sure you wish to delete the selected {consistLabel}?
-
-                        {summary}
-                        """,
+            AcceptLabel = acceptLabel.CurrentValue,
+            Title = Strings.delete_consist.CurrentValue,
+            BodyText = $"{question.CurrentValue}\n\n{summary}",
         };
 
         var isConfirmed = await _dialogs.Show(confirmation);
@@ -234,7 +232,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             return;
         }
 
-        await Loading.RunAsync("Updating scenario…", _ => _consistEdits.DeleteConsists(Scenario, targets));
+        await Loading.RunAsync(Strings.updating_scenario.CurrentValue, _ => _consistEdits.DeleteConsists(Scenario, targets));
         await ReloadAfterEdit();
     }
 }

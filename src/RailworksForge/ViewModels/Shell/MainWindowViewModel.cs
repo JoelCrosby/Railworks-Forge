@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 
 using RailworksForge.Core;
 using RailworksForge.Services;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -35,7 +36,7 @@ public class MainWindowViewModel(
 
         Navigation.ShowRoutes();
 
-        _ = Loading.RunAsync("Loading scenario information…", async _ =>
+        _ = Loading.RunAsync(Strings.loading_scenario_information.CurrentValue, async _ =>
         {
             await scenarioDatabase.LoadScenarioDatabase();
             scenarioDatabase.WatchForChanges();

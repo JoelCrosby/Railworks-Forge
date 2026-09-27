@@ -9,6 +9,7 @@ using Echoes;
 using RailworksForge.Core;
 using RailworksForge.Services;
 using RailworksForge.Util;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
@@ -64,7 +65,7 @@ public partial class RoutesViewModel : ViewModelBase
 
     public bool IsListLayout => Layout is RoutesLayout.List;
 
-    public string SearchPlaceholder => string.Format(Utils.GetTranslation("search_routes"), RouteCount);
+    public string SearchPlaceholder => string.Format(Strings.search_routes.CurrentValue, RouteCount);
 
     private bool HasSelectedRoute => SelectedRoute is not null;
 
@@ -80,7 +81,7 @@ public partial class RoutesViewModel : ViewModelBase
 
     private Task LoadRoutes()
     {
-        return Loading.RunAsync("Loading routes…", async token =>
+        return Loading.RunAsync(Strings.loading_routes.CurrentValue, async token =>
         {
             var routes = await _routeService.GetRoutes().WaitAsync(token);
             var models = routes.Select(route => new RouteViewModel(route)).ToList();
