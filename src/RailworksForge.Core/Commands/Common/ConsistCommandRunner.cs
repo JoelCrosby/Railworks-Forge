@@ -12,26 +12,36 @@ public class ConsistCommandRunner
     {
         using var scenarioLock = await ScenarioLocks.Acquire(Scenario);
 
-        var scenarioPropertiesDocument = await Scenario.GetPropertiesXmlDocument();
-        var scenarioDocument = await Scenario.GetXmlDocument(false);
-
-        var context = new ConsistCommandContext
-        {
-            Scenario = Scenario,
-            ScenarioDocument = scenarioDocument,
-            ScenarioPropertiesDocument = scenarioPropertiesDocument,
-        };
+        var context = await LoadContext(Scenario, useCache: false);
 
         foreach (var command in Commands)
         {
             await command.Run(context);
         }
 
-        Scenario.CreateBackup();
+        await Write(context);
+    }
 
-        await ScenarioWriter.WriteBinary(context.Scenario, scenarioDocument);
-        await ScenarioWriter.WritePropertiesDocument(context.Scenario, scenarioPropertiesDocument);
+    public static async Task<ConsistCommandContext> LoadContext(Scenario scenario, bool useCache)
+    {
+        var scenarioPropertiesDocument = await scenario.GetPropertiesXmlDocument();
+        var scenarioDocument = await scenario.GetXmlDocument(useCache);
 
-        Cache.ClearScenarioCache(Scenario);
+        return new ConsistCommandContext
+        {
+            Scenario = scenario,
+            ScenarioDocument = scenarioDocument,
+            ScenarioPropertiesDocument = scenarioPropertiesDocument,
+        };
+    }
+
+    public static async Task Write(ConsistCommandContext context)
+    {
+        context.Scenario.CreateBackup();
+
+        await ScenarioWriter.WriteBinary(context.Scenario, context.ScenarioDocument);
+        await ScenarioWriter.WritePropertiesDocument(context.Scenario, context.ScenarioPropertiesDocument);
+
+        Cache.ClearScenarioCache(context.Scenario);
     }
 }

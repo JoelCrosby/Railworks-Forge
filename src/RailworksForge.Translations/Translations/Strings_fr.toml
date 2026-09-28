@@ -177,6 +177,21 @@ type = 'Type'
 unique_number = 'Numéro unique'
 unpacked = 'Non empaqueté'
 updating_consist = 'Mise à jour de la rame…'
+
+consist_pending_changes = 'Modifications non enregistrées'
+
+apply_changes = 'Appliquer les modifications'
+
+discard_changes = 'Annuler les modifications'
+
+applying_consist_changes = 'Enregistrement des modifications de la rame…'
+
+consist_unsaved_changes = 'Modifications de la rame non enregistrées'
+
+consist_unsaved_changes_body = 'Cette rame comporte des modifications qui n’ont pas été appliquées. Quitter la page les annulera.'
+
+consist_changed_on_disk = 'Le scénario a été modifié sur le disque après le début de l’édition, vos modifications n’ont donc pas été enregistrées. Annulez-les et refaites les modifications.'
+
 updating_scenario = 'Mise à jour du scénario…'
 use_internal_serz = 'Utiliser le SERZ interne pour BIN → XML'
 use_internal_serz_description = 'Convertir les fichiers BIN sans l’exécutable du jeu. La conversion XML vers BIN nécessite toujours serz64.exe.'

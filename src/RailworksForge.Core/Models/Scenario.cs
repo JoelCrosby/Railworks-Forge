@@ -58,6 +58,9 @@ public record Scenario
 
     public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
 
+    // Identifies the saved version of the scenario, so buffered edits can tell whether it changed under them.
+    public DateTime? SavedVersion => HasBinary ? File.GetLastWriteTimeUtc(BinaryPath) : null;
+
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
     private bool HasBinary => Paths.Exists(BinaryPath);
 
@@ -305,10 +308,8 @@ public record Scenario
         return BinaryPath;
     }
 
-    public async Task<List<ConsistRailVehicle>> GetServiceConsistVehicles(Consist consist)
+    public static List<ConsistRailVehicle> GetServiceConsistVehicles(IDocument doc, Consist consist)
     {
-        var doc = await GetXmlDocument();
-
         if (!string.IsNullOrEmpty(consist.Id))
         {
             return doc

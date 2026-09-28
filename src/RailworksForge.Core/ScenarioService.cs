@@ -65,30 +65,6 @@ public class ScenarioService
         return new ScenarioConsists(updated, consists);
     }
 
-    public async Task<List<ConsistRailVehicle>> GetConsistVehicles(
-        Scenario scenario,
-        Consist consist,
-        CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(consist.BlueprintId))
-        {
-            return [];
-        }
-
-        using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
-
-        var vehicles = await scenario.GetServiceConsistVehicles(consist);
-
-        // Acquisition state is computed lazily from disk; resolve it here so the grid doesn't do it on the UI thread.
-        foreach (var vehicle in vehicles)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            _ = vehicle.AcquisitionState;
-        }
-
-        return vehicles;
-    }
-
     public async Task<string> GetConsistRailVehiclesXml(Scenario scenario, Consist consist)
     {
         using var document = await scenario.GetXmlDocument();

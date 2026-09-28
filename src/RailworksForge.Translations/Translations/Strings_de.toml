@@ -177,6 +177,21 @@ type = 'Typ'
 unique_number = 'Eindeutige Nummer'
 unpacked = 'Entpackt'
 updating_consist = 'Verband wird aktualisiert…'
+
+consist_pending_changes = 'Ungespeicherte Änderungen'
+
+apply_changes = 'Änderungen übernehmen'
+
+discard_changes = 'Änderungen verwerfen'
+
+applying_consist_changes = 'Änderungen am Verband werden gespeichert…'
+
+consist_unsaved_changes = 'Ungespeicherte Änderungen am Verband'
+
+consist_unsaved_changes_body = 'Dieser Verband hat Änderungen, die noch nicht übernommen wurden. Wenn Sie die Seite verlassen, werden sie verworfen.'
+
+consist_changed_on_disk = 'Das Szenario wurde nach Beginn der Bearbeitung auf der Festplatte geändert, daher wurden Ihre Änderungen nicht gespeichert. Verwerfen Sie sie und nehmen Sie die Änderungen erneut vor.'
+
 updating_scenario = 'Szenario wird aktualisiert…'
 use_internal_serz = 'Internes SERZ für BIN → XML verwenden'
 use_internal_serz_description = 'BIN-Dateien ohne das Spielprogramm konvertieren. XML zu BIN benötigt weiterhin serz64.exe.'

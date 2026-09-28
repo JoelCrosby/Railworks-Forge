@@ -182,6 +182,21 @@ type = 'Type'
 unique_number = 'UniqueNumber'
 unpacked = 'Unpacked'
 updating_consist = 'Updating consist…'
+
+consist_pending_changes = 'Unsaved changes'
+
+apply_changes = 'Apply changes'
+
+discard_changes = 'Discard changes'
+
+applying_consist_changes = 'Saving consist changes…'
+
+consist_unsaved_changes = 'Unsaved consist changes'
+
+consist_unsaved_changes_body = 'This consist has changes that have not been applied. Leaving the page will discard them.'
+
+consist_changed_on_disk = 'The scenario was changed on disk after you started editing, so your changes were not saved. Discard them and make the edits again.'
+
 updating_scenario = 'Updating scenario…'
 use_internal_serz = 'Use internal SERZ for BIN → XML'
 use_internal_serz_description = 'Convert BIN files without the game executable. XML to BIN still requires serz64.exe.'

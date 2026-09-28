@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -42,32 +45,42 @@ public partial class NavigationBarViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowRoutes()
+    private Task ShowRoutes()
     {
-        Navigation.ShowRoutes();
+        return LeaveCurrentPage(Navigation.ShowRoutes);
     }
 
     [RelayCommand]
-    private void ShowRoute()
+    private Task ShowRoute()
     {
-        Navigation.ShowCurrentRoute();
+        return LeaveCurrentPage(Navigation.ShowCurrentRoute);
     }
 
     [RelayCommand]
-    private void ShowScenario()
+    private Task ShowScenario()
     {
-        Navigation.ShowCurrentScenario();
+        return LeaveCurrentPage(Navigation.ShowCurrentScenario);
     }
 
     [RelayCommand]
-    private void ShowConsist()
+    private Task ShowConsist()
     {
-        Navigation.ShowCurrentConsist();
+        return LeaveCurrentPage(Navigation.ShowCurrentConsist);
     }
 
     [RelayCommand]
-    private void ShowSettings()
+    private Task ShowSettings()
     {
-        Navigation.ShowSettings();
+        return LeaveCurrentPage(Navigation.ShowSettings);
+    }
+
+    private async Task LeaveCurrentPage(Action navigate)
+    {
+        var canLeave = Navigation.CurrentPage is not {} page || await page.CanLeave();
+
+        if (canLeave)
+        {
+            navigate();
+        }
     }
 }

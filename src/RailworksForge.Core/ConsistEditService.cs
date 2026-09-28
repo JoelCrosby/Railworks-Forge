@@ -7,49 +7,9 @@ namespace RailworksForge.Core;
 
 public class ConsistEditService
 {
-    public Task AddVehicle(Scenario scenario, Consist consist, RollingStockEntry vehicle)
+    public Task<ConsistEditSession> BeginSession(Scenario scenario, Consist consist, CancellationToken cancellationToken)
     {
-        var request = new AddConsistVehicleRequest
-        {
-            Consist = consist,
-            VehicleToAdd = vehicle,
-        };
-
-        return Run(scenario, new AddConsistVehicle(request));
-    }
-
-    public Task ReplaceVehicles(
-        Scenario scenario,
-        Consist consist,
-        IEnumerable<ConsistRailVehicle> targets,
-        RollingStockEntry replacement)
-    {
-        var replacements = targets
-            .Select(target => new VehicleReplacement
-            {
-                Replacement = replacement,
-                Target = target,
-            })
-            .ToList();
-
-        var request = new ReplaceVehiclesRequest
-        {
-            Consist = consist,
-            Replacements = replacements,
-        };
-
-        return Run(scenario, new ReplaceConsistVehicles(request));
-    }
-
-    public Task DeleteVehicle(Scenario scenario, Consist consist, ConsistRailVehicle vehicle)
-    {
-        var request = new DeleteConsistVehicleRequest
-        {
-            Consist = consist,
-            VehicleToDelete = vehicle,
-        };
-
-        return Run(scenario, new DeleteConsistVehicle(request));
+        return ConsistEditSession.Begin(scenario, consist, cancellationToken);
     }
 
     public Task ReplaceConsists(Scenario scenario, IEnumerable<Consist> targets, PreloadConsist replacement)

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using RailworksForge.Core;
+using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
@@ -17,7 +20,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
 {
     private readonly Scenario _scenario;
     private readonly Consist _consist;
-    private readonly ScenarioService _scenarioService;
     private readonly VehicleIndexService _vehicleIndexes;
     private readonly ConsistEditService _consistEdits;
     private readonly LauncherService _launcher;
@@ -27,7 +29,14 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private VehicleIndex? _vehicleIndex;
 
+    private ConsistEditSession? _session;
+
     private int _stockLimit = 200;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyChangesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DiscardChangesCommand))]
+    public partial bool HasPendingChanges { get; set; }
 
     public LoadingOperation StockLoading { get; } = new();
 
@@ -82,7 +91,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public ConsistDetailViewModel(
         Scenario scenario,
         Consist consist,
-        ScenarioService scenarioService,
         VehicleIndexService vehicleIndexes,
         ConsistEditService consistEdits,
         LauncherService launcher,
@@ -92,7 +100,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         _scenario = scenario;
         _consist = consist;
-        _scenarioService = scenarioService;
         _vehicleIndexes = vehicleIndexes;
         _consistEdits = consistEdits;
         _launcher = launcher;
@@ -206,12 +213,25 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _ = SearchStock();
     }
 
+    // Loading starts a fresh edit session, so it also discards any buffered changes.
     private Task LoadConsist()
     {
-        return Loading.RunAsync(
-            Strings.loading_consist_vehicles.CurrentValue,
-            token => _scenarioService.GetConsistVehicles(_scenario, _consist, token),
-            RailVehicles.Reset);
+        return Loading.RunAsync(Strings.loading_consist_vehicles.CurrentValue, async token =>
+        {
+            var session = await _consistEdits.BeginSession(_scenario, _consist, token);
+
+            return (Session: session, Vehicles: session.GetVehicles(token));
+        }, result =>
+        {
+            _session = result.Session;
+            ShowVehicles(result.Session, result.Vehicles);
+        });
+    }
+
+    private void ShowVehicles(ConsistEditSession session, List<ConsistRailVehicle> vehicles)
+    {
+        RailVehicles.Reset(vehicles);
+        HasPendingChanges = session.HasChanges;
     }
 
     private Task SearchStock()
@@ -281,14 +301,73 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return SearchStock();
     }
 
-    private async Task ReloadAfterEdit()
+    public override async Task<bool> CanLeave()
     {
-        var shouldReload = !Loading.HasError && IsActive;
-
-        if (shouldReload)
+        if (!HasPendingChanges)
         {
-            await LoadConsist();
+            return true;
         }
+
+        var confirmation = new ConfirmationDialogViewModel
+        {
+            Title = Strings.consist_unsaved_changes.CurrentValue,
+            BodyText = Strings.consist_unsaved_changes_body.CurrentValue,
+            AcceptLabel = Strings.discard_changes.CurrentValue,
+        };
+
+        return await _dialogs.Show(confirmation);
+    }
+
+    // Edits are buffered in the session and only written to the scenario when applied.
+    private Task Edit(Func<ConsistEditSession, Task> edit)
+    {
+        var session = _session;
+
+        if (session is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Loading.RunAsync(Strings.updating_consist.CurrentValue, async token =>
+        {
+            await edit(session);
+
+            return session.GetVehicles(token);
+        }, vehicles => ShowVehicles(session, vehicles), allowRetry: false);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasPendingChanges))]
+    private Task ApplyChanges()
+    {
+        var session = _session!;
+
+        return Loading.RunAsync(Strings.applying_consist_changes.CurrentValue, async _ =>
+        {
+            try
+            {
+                await session.Apply();
+
+                return true;
+            }
+            catch (ScenarioChangedException)
+            {
+                return false;
+            }
+        }, applied =>
+        {
+            HasPendingChanges = session.HasChanges;
+
+            if (!applied)
+            {
+                Loading.ShowError(Strings.consist_changed_on_disk.CurrentValue);
+            }
+        }, allowRetry: false);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasPendingChanges))]
+    private Task DiscardChanges()
+    {
+        return LoadConsist();
     }
 
     private void NotifySelectionCommands()
@@ -305,30 +384,27 @@ public partial class ConsistDetailViewModel : ViewModelBase
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedVehicle))]
-    private async Task AddVehicle()
+    private Task AddVehicle()
     {
         var vehicle = ActiveSelectedVehicle!;
 
-        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.AddVehicle(_scenario, _consist, vehicle));
-        await ReloadAfterEdit();
+        return Edit(session => session.AddVehicle(vehicle));
     }
 
     [RelayCommand(CanExecute = nameof(CanReplaceVehicle))]
-    private async Task ReplaceVehicle()
+    private Task ReplaceVehicle()
     {
         var replacement = ActiveSelectedVehicle!;
         var targets = SelectedConsistVehicles.ToList();
 
-        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.ReplaceVehicles(_scenario, _consist, targets, replacement));
-        await ReloadAfterEdit();
+        return Edit(session => session.ReplaceVehicles(targets, replacement));
     }
 
     [RelayCommand(CanExecute = nameof(HasSingleSelectedVehicle))]
-    private async Task DeleteVehicle()
+    private Task DeleteVehicle()
     {
         var vehicle = SingleSelectedVehicle!;
 
-        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.DeleteVehicle(_scenario, _consist, vehicle));
-        await ReloadAfterEdit();
+        return Edit(session => session.DeleteVehicle(vehicle));
     }
 }
