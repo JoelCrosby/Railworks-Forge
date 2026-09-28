@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,7 +26,7 @@ public partial class RouteDetailViewModel(
     LauncherService launcher,
     ClipboardService clipboard) : ViewModelBase
 {
-    private CancellationTokenSource? _imageLoading;
+    private readonly BackgroundImageLoader _imageLoader = new();
 
     public RouteViewModel Route { get; } = route;
 
@@ -55,7 +55,7 @@ public partial class RouteDetailViewModel(
 
     protected override void OnDeactivated()
     {
-        _imageLoading?.Cancel();
+        _imageLoader.Cancel();
         scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
     }
 
@@ -137,35 +137,15 @@ public partial class RouteDetailViewModel(
         return dialogs.Show(dialog);
     }
 
-    // Images come from disk or inside .ap archives, so they load after the list is shown and fill in as they are found.
     private void LoadLocomotiveImages(List<ScenarioRowViewModel> rows)
     {
-        _imageLoading?.Cancel();
-        var cancellation = new CancellationTokenSource();
-        _imageLoading = cancellation;
-        var token = cancellation.Token;
+        _imageLoader.Load(rows, ReadLocomotiveImage, (row, image) => row.LocomotiveImage = image);
+    }
 
-        _ = Task.Run(() =>
-        {
-            foreach (var row in rows)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
+    private Bitmap? ReadLocomotiveImage(ScenarioRowViewModel row)
+    {
+        var hasPlayerConsist = row.Scenario.PlayerConsist is { BlueprintId.Length: > 0 };
 
-                if (row.Scenario.PlayerConsist is not { BlueprintId.Length: > 0 } playerConsist)
-                {
-                    continue;
-                }
-
-                var image = images.GetBlueprintImage(playerConsist);
-
-                if (image is not null)
-                {
-                    Dispatcher.UIThread.Post(() => row.LocomotiveImage = image);
-                }
-            }
-        }, token);
+        return hasPlayerConsist ? images.GetBlueprintImage(row.Scenario.PlayerConsist) : null;
     }
 }

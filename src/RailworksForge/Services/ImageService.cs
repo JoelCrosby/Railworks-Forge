@@ -18,11 +18,25 @@ public class ImageService
 {
     private const int ThumbnailWidth = 256;
 
-    private readonly ConcurrentDictionary<string, Bitmap?> _images = new(StringComparer.OrdinalIgnoreCase);
+    // Lazy so concurrent callers for the same image (e.g. a background row fill and a page load) decode it once.
+    private readonly ConcurrentDictionary<string, Lazy<Bitmap?>> _images = new(StringComparer.OrdinalIgnoreCase);
+
+    public void ClearMisses()
+    {
+        var missingKeys = _images
+            .Where(pair => pair.Value is { IsValueCreated: true, Value: null })
+            .Select(pair => pair.Key)
+            .ToList();
+
+        foreach (var key in missingKeys)
+        {
+            _images.TryRemove(key, out _);
+        }
+    }
 
     public Bitmap? GetRouteImage(Route route)
     {
-        return _images.GetOrAdd($"route:{route.DirectoryPath}", key => ReadSafely(key, () => ReadRouteImage(route)));
+        return GetOrRead($"route:{route.DirectoryPath}", () => ReadRouteImage(route));
     }
 
     public Bitmap? GetBlueprintImage(Blueprint? blueprint)
@@ -32,7 +46,7 @@ public class ImageService
             return null;
         }
 
-        return _images.GetOrAdd($"blueprint:{blueprint.BinaryPath}", key => ReadSafely(key, () => ReadBlueprintImage(blueprint)));
+        return GetOrRead($"blueprint:{blueprint.BinaryPath}", () => ReadBlueprintImage(blueprint));
     }
 
     public Bitmap? GetConsistImage(Consist consist)
@@ -41,6 +55,13 @@ public class ImageService
         var lastVehicle = consist.Vehicles.LastOrDefault()?.Blueprint;
 
         return leadVehicleImage ?? GetBlueprintImage(lastVehicle);
+    }
+
+    private Bitmap? GetOrRead(string key, Func<Bitmap?> read)
+    {
+        var image = _images.GetOrAdd(key, _ => new Lazy<Bitmap?>(() => ReadSafely(key, read)));
+
+        return image.Value;
     }
 
     private static Bitmap? ReadSafely(string key, Func<Bitmap?> read)

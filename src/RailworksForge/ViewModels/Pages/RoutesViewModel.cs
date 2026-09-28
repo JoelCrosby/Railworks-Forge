@@ -15,13 +15,13 @@ namespace RailworksForge.ViewModels;
 
 public partial class RoutesViewModel : ViewModelBase
 {
-    private const int MaxParallelImageLoads = 4;
-
     private readonly RouteService _routeService;
     private readonly NavigationService _navigation;
     private readonly ImageService _images;
     private readonly LauncherService _launcher;
     private readonly ClipboardService _clipboard;
+
+    private readonly BackgroundImageLoader _imageLoader = new();
 
     private bool _hasLoadedRoutes;
 
@@ -84,21 +84,14 @@ public partial class RoutesViewModel : ViewModelBase
         return Loading.RunAsync(Strings.loading_routes.CurrentValue, async token =>
         {
             var routes = await _routeService.GetRoutes().WaitAsync(token);
-            var models = routes.Select(route => new RouteViewModel(route)).ToList();
-            var options = new ParallelOptions
-            {
-                CancellationToken = token,
-                MaxDegreeOfParallelism = MaxParallelImageLoads,
-            };
 
-            Parallel.ForEach(models, options, route => route.ImageBitmap = _images.GetRouteImage(route.Model));
-
-            return models;
+            return routes.Select(route => new RouteViewModel(route)).ToList();
         }, models =>
         {
             Routes.Reset(models);
             RouteCount = models.Count;
             _hasLoadedRoutes = true;
+            _imageLoader.Load(models, route => _images.GetRouteImage(route.Model), (route, image) => route.ImageBitmap = image);
         });
     }
 

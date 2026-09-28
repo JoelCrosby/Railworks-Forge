@@ -22,6 +22,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private readonly DialogService _dialogs;
     private readonly LauncherService _launcher;
     private readonly ImageService _images;
+    private readonly BackgroundImageLoader _imageLoader = new();
 
     [ObservableProperty]
     public partial Scenario Scenario { get; set; }
@@ -64,6 +65,11 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         return LoadServices();
     }
 
+    protected override void OnDeactivated()
+    {
+        _imageLoader.Cancel();
+    }
+
     partial void OnSearchTermChanged(string? value)
     {
         Services.Filter(value);
@@ -78,17 +84,15 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             var loaded = await _scenarioService.LoadConsists(scenario, token);
             var services = loaded.Consists.Select(consist => new ConsistViewModel(consist)).ToList();
 
-            foreach (var service in services)
-            {
-                token.ThrowIfCancellationRequested();
-                service.ImageBitmap = _images.GetConsistImage(service.Consist);
-            }
-
             return (loaded.Scenario, Services: services);
         }, result =>
         {
             Scenario = result.Scenario;
             Services.Reset(result.Services);
+            _imageLoader.Load(
+                result.Services,
+                service => _images.GetConsistImage(service.Consist),
+                (service, image) => service.ImageBitmap = image);
         });
     }
 

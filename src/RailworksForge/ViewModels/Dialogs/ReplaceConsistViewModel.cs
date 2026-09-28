@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Avalonia.Media.Imaging;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -19,6 +21,8 @@ public partial class ReplaceConsistViewModel(
     ImageService images,
     LauncherService launcher) : DialogViewModel<PreloadConsist>
 {
+    private readonly BackgroundImageLoader _imageLoader = new();
+
     public LoadingOperation StockLoading { get; } = new();
 
     public RangeObservableCollection<BrowserDirectory> DirectoryTree { get; } = [];
@@ -51,11 +55,13 @@ public partial class ReplaceConsistViewModel(
     protected override void OnDeactivated()
     {
         StockLoading.Cancel();
+        _imageLoader.Cancel();
     }
 
     partial void OnSelectedDirectoryChanged(BrowserDirectory? value)
     {
         StockLoading.Cancel();
+        _imageLoader.Cancel();
         PreloadConsists.Clear();
         SelectedConsist = null;
     }
@@ -82,10 +88,19 @@ public partial class ReplaceConsistViewModel(
         return StockLoading.RunAsync(Strings.loading_replacement_consists.CurrentValue, async token =>
         {
             var consists = await preloadConsists.GetPreloadConsists(directory, token);
-            return consists.ConvertAll(consist => new PreloadConsistViewModel(consist)
-            {
-                ImageBitmap = images.GetBlueprintImage(consist.ConsistEntries.FirstOrDefault()?.Blueprint),
-            });
-        }, PreloadConsists.AddRange);
+
+            return consists.ConvertAll(consist => new PreloadConsistViewModel(consist));
+        }, rows =>
+        {
+            PreloadConsists.AddRange(rows);
+            _imageLoader.Load(rows, ReadConsistImage, (row, image) => row.ImageBitmap = image);
+        });
+    }
+
+    private Bitmap? ReadConsistImage(PreloadConsistViewModel row)
+    {
+        var leadBlueprint = row.Consist.ConsistEntries.FirstOrDefault()?.Blueprint;
+
+        return images.GetBlueprintImage(leadBlueprint);
     }
 }
