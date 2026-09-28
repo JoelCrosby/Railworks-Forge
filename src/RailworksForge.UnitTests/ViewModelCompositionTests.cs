@@ -36,6 +36,6 @@ public class ViewModelCompositionTests
             BlueprintId = @"RailVehicles\Class390.xml",
         };
 
-        Assert.NotNull(DesignServices.Create<ConsistDetailViewModel>(DesignData.DesignData.Scenario, consist));
+        Assert.NotNull(DesignServices.Create<ConsistDetailViewModel>(new ScenarioEditor(DesignData.DesignData.Scenario), consist));
     }
 }

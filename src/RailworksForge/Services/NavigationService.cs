@@ -60,11 +60,13 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
         Show(_scenarioPage);
     }
 
-    public void ShowConsist(Scenario scenario, Consist consist)
+    public ScenarioEditor? CurrentEditor => CurrentScenario is null ? null : _scenarioPage?.Editor;
+
+    public void ShowConsist(ScenarioEditor editor, Consist consist)
     {
         CurrentConsist = consist;
 
-        Show(Create<ConsistDetailViewModel>(scenario, consist));
+        Show(Create<ConsistDetailViewModel>(editor, consist));
     }
 
     public void ShowSettings()
@@ -106,7 +108,7 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
             return;
         }
 
-        ShowConsist(_scenarioPage.Scenario, CurrentConsist);
+        ShowConsist(_scenarioPage.Editor, CurrentConsist);
     }
 
     private TPage Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TPage>(
@@ -116,7 +118,6 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
         return ActivatorUtilities.CreateInstance<TPage>(services, arguments);
     }
 
-    // Showing the current page again reloads it, which is how the breadcrumbs refresh a page.
     private void Show(ViewModelBase page)
     {
         var isNewPage = !ReferenceEquals(CurrentPage, page);

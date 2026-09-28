@@ -9,8 +9,6 @@ using RailworksForge.Core.Types;
 
 namespace RailworksForge.Core;
 
-public record ScenarioConsists(Scenario Scenario, List<Consist> Consists);
-
 public class ScenarioService
 {
     private readonly ScenarioDatabaseService _scenarioDatabaseService;
@@ -42,41 +40,6 @@ public class ScenarioService
         AddPackedScenarios(route, scenarios, cancellationToken);
 
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
-    }
-
-    public async Task<ScenarioConsists> LoadConsists(Scenario scenario, CancellationToken cancellationToken)
-    {
-        using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
-
-        // Content may have been added or removed since the scenario was last shown.
-        Cache.ClearAcquisitionStates();
-
-        var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
-        using var document = await updated.GetXmlDocument(false);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var consists = document
-            .QuerySelectorAll("cConsist")
-            .Select(Consist.ParseScenarioConsist)
-            .OfType<Consist>()
-            .ToList();
-
-        return new ScenarioConsists(updated, consists);
-    }
-
-    public async Task<string> GetConsistRailVehiclesXml(Scenario scenario, Consist consist)
-    {
-        using var document = await scenario.GetXmlDocument();
-
-        var vehicles = Consist.GetServiceConsist(document, consist)?.QuerySelector("RailVehicles");
-
-        if (vehicles is null)
-        {
-            throw new Exception("could not find consist in scenario bin");
-        }
-
-        return vehicles.ToXml();
     }
 
     private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)

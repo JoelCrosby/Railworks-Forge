@@ -79,7 +79,6 @@ public class App : Application
         services.AddSingleton<RollingStockService>();
         services.AddSingleton<VehicleIndexService>();
         services.AddSingleton<PreloadConsistService>();
-        services.AddSingleton<ConsistEditService>();
         services.AddSingleton<RouteAssetCheckService>();
         services.AddSingleton<SerzFileService>();
         services.AddSingleton<SettingsService>();

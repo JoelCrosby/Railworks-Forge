@@ -32,11 +32,11 @@
                         <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
                     </controls:TableHeader>
 
-                    <Border DockPanel.Dock="Bottom" IsVisible="{Binding HasPendingChanges}" Padding="16,8"
+                    <Border DockPanel.Dock="Bottom" IsVisible="{Binding Editor.HasPendingChanges}" Padding="16,8"
                             BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock VerticalAlignment="Center" FontWeight="SemiBold"
-                                       Text="{echoes:Translate {x:Static translations:Strings.consist_pending_changes}}" />
+                                       Text="{echoes:Translate {x:Static translations:Strings.pending_changes}}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                 <Button Content="{echoes:Translate {x:Static translations:Strings.discard_changes}}"
                                         Command="{Binding DiscardChangesCommand}" />

@@ -67,6 +67,21 @@
             </controls:TableHeader>
         </StackPanel>
 
+        <Border DockPanel.Dock="Bottom" IsVisible="{Binding Editor.HasPendingChanges}" IsEnabled="{Binding Loading.IsIdle}"
+                Padding="16,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold"
+                           Text="{echoes:Translate {x:Static translations:Strings.pending_changes}}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Content="{echoes:Translate {x:Static translations:Strings.discard_changes}}"
+                            Command="{Binding DiscardChangesCommand}" />
+                    <Button Content="{echoes:Translate {x:Static translations:Strings.apply_changes}}"
+                            Command="{Binding ApplyChangesCommand}"
+                            Background="{DynamicResource ToggleButtonBackgroundChecked}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <Panel>
             <DataGrid
                 Name="ServicesDataGrid"

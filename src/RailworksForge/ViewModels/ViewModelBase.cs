@@ -29,11 +29,6 @@ public abstract class ViewModelBase : ObservableObject
         OnDeactivated();
     }
 
-    public virtual Task<bool> CanLeave()
-    {
-        return Task.FromResult(true);
-    }
-
     protected virtual Task OnActivated()
     {
         return Task.CompletedTask;

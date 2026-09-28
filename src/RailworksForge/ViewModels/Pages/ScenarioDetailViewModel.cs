@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,8 +19,6 @@ namespace RailworksForge.ViewModels;
 
 public partial class ScenarioDetailViewModel : ViewModelBase
 {
-    private readonly ScenarioService _scenarioService;
-    private readonly ConsistEditService _consistEdits;
     private readonly NavigationService _navigation;
     private readonly DialogService _dialogs;
     private readonly LauncherService _launcher;
@@ -34,24 +35,25 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public ObservableCollection<ConsistViewModel> SelectedServices { get; } = [];
 
+    public ScenarioEditor Editor { get; }
+
     public ScenarioDetailViewModel(
         Scenario scenario,
-        ScenarioService scenarioService,
-        ConsistEditService consistEdits,
         NavigationService navigation,
         DialogService dialogs,
         LauncherService launcher,
         ImageService images)
     {
         Scenario = scenario;
-        _scenarioService = scenarioService;
-        _consistEdits = consistEdits;
         _navigation = navigation;
         _dialogs = dialogs;
         _launcher = launcher;
         _images = images;
 
+        Editor = new ScenarioEditor(scenario);
+
         SelectedServices.CollectionChanged += (_, _) => NotifySelectionCommands();
+        Editor.PropertyChanged += (_, _) => NotifyEditCommands();
     }
 
     private ConsistViewModel? SingleSelectedService => SelectedServices.Count is 1 ? SelectedServices[0] : null;
@@ -77,33 +79,71 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     private Task LoadServices()
     {
-        var scenario = Scenario;
-
         return Loading.RunAsync(Strings.loading_scenario_services.CurrentValue, async token =>
         {
-            var loaded = await _scenarioService.LoadConsists(scenario, token);
-            var services = loaded.Consists.Select(consist => new ConsistViewModel(consist)).ToList();
+            var session = await Editor.GetSession(token);
 
-            return (loaded.Scenario, Services: services);
-        }, result =>
-        {
-            Scenario = result.Scenario;
-            Services.Reset(result.Services);
-            _imageLoader.Load(
-                result.Services,
-                service => _images.GetConsistImage(service.Consist),
-                (service, image) => service.ImageBitmap = image);
-        });
+            return GetServices(session, token);
+        }, ShowServices);
     }
 
-    private async Task ReloadAfterEdit()
+    // Edits are buffered in the editor's session and only written to the scenario when applied.
+    private Task Edit(Func<ScenarioEditSession, Task> edit)
     {
-        var shouldReload = !Loading.HasError && IsActive;
-
-        if (shouldReload)
+        return Loading.RunAsync(Strings.updating_scenario.CurrentValue, async token =>
         {
-            await LoadServices();
-        }
+            var session = await Editor.GetSession(token);
+            await edit(session);
+
+            return GetServices(session, token);
+        }, ShowServices, allowRetry: false);
+    }
+
+    private static List<ConsistViewModel> GetServices(ScenarioEditSession session, CancellationToken token)
+    {
+        return session.GetConsists(token).Select(consist => new ConsistViewModel(consist)).ToList();
+    }
+
+    private void ShowServices(List<ConsistViewModel> services)
+    {
+        Editor.Update();
+        Scenario = Editor.Scenario;
+        Services.Reset(services);
+        _imageLoader.Load(
+            services,
+            service => _images.GetConsistImage(service.Consist),
+            (service, image) => service.ImageBitmap = image);
+    }
+
+    private bool HasPendingChanges => Editor.HasPendingChanges;
+
+    [RelayCommand(CanExecute = nameof(HasPendingChanges))]
+    private Task ApplyChanges()
+    {
+        return Loading.RunAsync(Strings.applying_changes.CurrentValue, Editor.Apply, applied =>
+        {
+            Editor.Update();
+            Scenario = Editor.Scenario;
+
+            if (!applied)
+            {
+                Loading.ShowError(Strings.scenario_changed_on_disk.CurrentValue);
+            }
+        }, allowRetry: false);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasPendingChanges))]
+    private Task DiscardChanges()
+    {
+        Editor.Discard();
+
+        return LoadServices();
+    }
+
+    private void NotifyEditCommands()
+    {
+        ApplyChangesCommand.NotifyCanExecuteChanged();
+        DiscardChangesCommand.NotifyCanExecuteChanged();
     }
 
     private void NotifySelectionCommands()
@@ -158,7 +198,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(HasSingleSelectedService))]
     private void OpenService()
     {
-        _navigation.ShowConsist(Scenario, SingleSelectedService!.Consist);
+        _navigation.ShowConsist(Editor, SingleSelectedService!.Consist);
     }
 
     [RelayCommand(CanExecute = nameof(HasSingleSelectedService))]
@@ -169,7 +209,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
         await Loading.RunAsync(
             Strings.preparing_consist.CurrentValue,
-            _ => _scenarioService.GetConsistRailVehiclesXml(Scenario, consist),
+            async token => (await Editor.GetSession(token)).GetConsistRailVehiclesXml(consist),
             xml => consistElement = xml,
             allowRetry: false);
 
@@ -207,8 +247,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             return;
         }
 
-        await Loading.RunAsync(Strings.updating_scenario.CurrentValue, _ => _consistEdits.ReplaceConsists(Scenario, targets, replacement));
-        await ReloadAfterEdit();
+        await Edit(session => session.ReplaceConsists(targets, replacement));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedServices))]
@@ -236,7 +275,6 @@ public partial class ScenarioDetailViewModel : ViewModelBase
             return;
         }
 
-        await Loading.RunAsync(Strings.updating_scenario.CurrentValue, _ => _consistEdits.DeleteConsists(Scenario, targets));
-        await ReloadAfterEdit();
+        await Edit(session => session.DeleteConsists(targets));
     }
 }

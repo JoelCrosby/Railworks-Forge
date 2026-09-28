@@ -5,15 +5,19 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using RailworksForge.Services;
+using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
 public partial class NavigationBarViewModel : ObservableObject
 {
-    public NavigationBarViewModel(NavigationService navigation, ToolsMenuViewModel tools)
+    private readonly DialogService _dialogs;
+
+    public NavigationBarViewModel(NavigationService navigation, ToolsMenuViewModel tools, DialogService dialogs)
     {
         Navigation = navigation;
         Tools = tools;
+        _dialogs = dialogs;
 
         navigation.PropertyChanged += (_, _) => OnNavigationChanged();
     }
@@ -47,40 +51,64 @@ public partial class NavigationBarViewModel : ObservableObject
     [RelayCommand]
     private Task ShowRoutes()
     {
-        return LeaveCurrentPage(Navigation.ShowRoutes);
+        return DiscardEditsThen(Navigation.ShowRoutes);
     }
 
     [RelayCommand]
     private Task ShowRoute()
     {
-        return LeaveCurrentPage(Navigation.ShowCurrentRoute);
+        return DiscardEditsThen(Navigation.ShowCurrentRoute);
     }
 
+    // Showing the current page again reloads it from disk, so only that discards pending edits.
     [RelayCommand]
     private Task ShowScenario()
     {
-        return LeaveCurrentPage(Navigation.ShowCurrentScenario);
+        return Navigation.CurrentPage is ScenarioDetailViewModel
+            ? DiscardEditsThen(Navigation.ShowCurrentScenario)
+            : Show(Navigation.ShowCurrentScenario);
     }
 
     [RelayCommand]
     private Task ShowConsist()
     {
-        return LeaveCurrentPage(Navigation.ShowCurrentConsist);
+        return Navigation.CurrentPage is ConsistDetailViewModel
+            ? DiscardEditsThen(Navigation.ShowCurrentConsist)
+            : Show(Navigation.ShowCurrentConsist);
     }
 
     [RelayCommand]
-    private Task ShowSettings()
+    private void ShowSettings()
     {
-        return LeaveCurrentPage(Navigation.ShowSettings);
+        Navigation.ShowSettings();
     }
 
-    private async Task LeaveCurrentPage(Action navigate)
+    private static Task Show(Action navigate)
     {
-        var canLeave = Navigation.CurrentPage is not {} page || await page.CanLeave();
+        navigate();
 
-        if (canLeave)
+        return Task.CompletedTask;
+    }
+
+    private async Task DiscardEditsThen(Action navigate)
+    {
+        if (Navigation.CurrentEditor is { HasPendingChanges: true } editor)
         {
-            navigate();
+            var confirmation = new ConfirmationDialogViewModel
+            {
+                Title = Strings.scenario_unsaved_changes.CurrentValue,
+                BodyText = Strings.scenario_unsaved_changes_body.CurrentValue,
+                AcceptLabel = Strings.discard_changes.CurrentValue,
+            };
+
+            if (!await _dialogs.Show(confirmation))
+            {
+                return;
+            }
+
+            editor.Discard();
         }
+
+        navigate();
     }
 }

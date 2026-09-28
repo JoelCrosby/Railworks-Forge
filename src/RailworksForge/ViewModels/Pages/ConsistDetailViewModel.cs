@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,7 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using RailworksForge.Core;
-using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Models;
 using RailworksForge.Services;
 using RailworksForge.Util;
@@ -18,10 +18,8 @@ namespace RailworksForge.ViewModels;
 
 public partial class ConsistDetailViewModel : ViewModelBase
 {
-    private readonly Scenario _scenario;
     private readonly Consist _consist;
     private readonly VehicleIndexService _vehicleIndexes;
-    private readonly ConsistEditService _consistEdits;
     private readonly LauncherService _launcher;
     private readonly AssetDirectoryTreeService _directoryTree;
     private readonly RollingStockService _rollingStock;
@@ -29,14 +27,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private VehicleIndex? _vehicleIndex;
 
-    private ConsistEditSession? _session;
-
     private int _stockLimit = 200;
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyChangesCommand))]
-    [NotifyCanExecuteChangedFor(nameof(DiscardChangesCommand))]
-    public partial bool HasPendingChanges { get; set; }
+    public ScenarioEditor Editor { get; }
 
     public LoadingOperation StockLoading { get; } = new();
 
@@ -89,19 +82,17 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public partial string? SearchTerm { get; set; }
 
     public ConsistDetailViewModel(
-        Scenario scenario,
+        ScenarioEditor editor,
         Consist consist,
         VehicleIndexService vehicleIndexes,
-        ConsistEditService consistEdits,
         LauncherService launcher,
         AssetDirectoryTreeService directoryTree,
         RollingStockService rollingStock,
         DialogService dialogs)
     {
-        _scenario = scenario;
+        Editor = editor;
         _consist = consist;
         _vehicleIndexes = vehicleIndexes;
-        _consistEdits = consistEdits;
         _launcher = launcher;
         _directoryTree = directoryTree;
         _rollingStock = rollingStock;
@@ -122,6 +113,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     protected override async Task OnActivated()
     {
+        Editor.PropertyChanged -= OnEditorChanged;
+        Editor.PropertyChanged += OnEditorChanged;
         _vehicleIndex = _vehicleIndexes.GetCurrentIndex();
         await Task.WhenAll(LoadConsist(), SearchStock(), LoadDirectoryTree());
     }
@@ -200,6 +193,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         StockLoading.Cancel();
         ExplorerLoading.Cancel();
         DirectoryLoading.Cancel();
+        Editor.PropertyChanged -= OnEditorChanged;
     }
 
     partial void OnSearchTermChanged(string? value)
@@ -213,25 +207,20 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _ = SearchStock();
     }
 
-    // Loading starts a fresh edit session, so it also discards any buffered changes.
     private Task LoadConsist()
     {
         return Loading.RunAsync(Strings.loading_consist_vehicles.CurrentValue, async token =>
         {
-            var session = await _consistEdits.BeginSession(_scenario, _consist, token);
+            var session = await Editor.GetSession(token);
 
-            return (Session: session, Vehicles: session.GetVehicles(token));
-        }, result =>
-        {
-            _session = result.Session;
-            ShowVehicles(result.Session, result.Vehicles);
-        });
+            return session.GetVehicles(_consist, token);
+        }, ShowVehicles);
     }
 
-    private void ShowVehicles(ConsistEditSession session, List<ConsistRailVehicle> vehicles)
+    private void ShowVehicles(List<ConsistRailVehicle> vehicles)
     {
+        Editor.Update();
         RailVehicles.Reset(vehicles);
-        HasPendingChanges = session.HasChanges;
     }
 
     private Task SearchStock()
@@ -301,65 +290,30 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return SearchStock();
     }
 
-    public override async Task<bool> CanLeave()
+    // Edits are buffered in the editor's session and only written to the scenario when applied.
+    private Task Edit(Func<ScenarioEditSession, Task> edit)
     {
-        if (!HasPendingChanges)
-        {
-            return true;
-        }
-
-        var confirmation = new ConfirmationDialogViewModel
-        {
-            Title = Strings.consist_unsaved_changes.CurrentValue,
-            BodyText = Strings.consist_unsaved_changes_body.CurrentValue,
-            AcceptLabel = Strings.discard_changes.CurrentValue,
-        };
-
-        return await _dialogs.Show(confirmation);
-    }
-
-    // Edits are buffered in the session and only written to the scenario when applied.
-    private Task Edit(Func<ConsistEditSession, Task> edit)
-    {
-        var session = _session;
-
-        if (session is null)
-        {
-            return Task.CompletedTask;
-        }
-
         return Loading.RunAsync(Strings.updating_consist.CurrentValue, async token =>
         {
+            var session = await Editor.GetSession(token);
             await edit(session);
 
-            return session.GetVehicles(token);
-        }, vehicles => ShowVehicles(session, vehicles), allowRetry: false);
+            return session.GetVehicles(_consist, token);
+        }, ShowVehicles, allowRetry: false);
     }
+
+    private bool HasPendingChanges => Editor.HasPendingChanges;
 
     [RelayCommand(CanExecute = nameof(HasPendingChanges))]
     private Task ApplyChanges()
     {
-        var session = _session!;
-
-        return Loading.RunAsync(Strings.applying_consist_changes.CurrentValue, async _ =>
+        return Loading.RunAsync(Strings.applying_changes.CurrentValue, Editor.Apply, applied =>
         {
-            try
-            {
-                await session.Apply();
-
-                return true;
-            }
-            catch (ScenarioChangedException)
-            {
-                return false;
-            }
-        }, applied =>
-        {
-            HasPendingChanges = session.HasChanges;
+            Editor.Update();
 
             if (!applied)
             {
-                Loading.ShowError(Strings.consist_changed_on_disk.CurrentValue);
+                Loading.ShowError(Strings.scenario_changed_on_disk.CurrentValue);
             }
         }, allowRetry: false);
     }
@@ -367,7 +321,15 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(HasPendingChanges))]
     private Task DiscardChanges()
     {
+        Editor.Discard();
+
         return LoadConsist();
+    }
+
+    private void OnEditorChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        ApplyChangesCommand.NotifyCanExecuteChanged();
+        DiscardChangesCommand.NotifyCanExecuteChanged();
     }
 
     private void NotifySelectionCommands()
@@ -388,7 +350,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var vehicle = ActiveSelectedVehicle!;
 
-        return Edit(session => session.AddVehicle(vehicle));
+        return Edit(session => session.AddVehicle(_consist, vehicle));
     }
 
     [RelayCommand(CanExecute = nameof(CanReplaceVehicle))]
@@ -397,7 +359,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         var replacement = ActiveSelectedVehicle!;
         var targets = SelectedConsistVehicles.ToList();
 
-        return Edit(session => session.ReplaceVehicles(targets, replacement));
+        return Edit(session => session.ReplaceVehicles(_consist, targets, replacement));
     }
 
     [RelayCommand(CanExecute = nameof(HasSingleSelectedVehicle))]
@@ -405,6 +367,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var vehicle = SingleSelectedVehicle!;
 
-        return Edit(session => session.DeleteVehicle(vehicle));
+        return Edit(session => session.DeleteVehicle(_consist, vehicle));
     }
 }

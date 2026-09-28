@@ -178,19 +178,19 @@ unique_number = 'Número único'
 unpacked = 'Desempaquetado'
 updating_consist = 'Actualizando composición…'
 
-consist_pending_changes = 'Cambios sin guardar'
-
 apply_changes = 'Aplicar cambios'
 
 discard_changes = 'Descartar cambios'
 
-applying_consist_changes = 'Guardando cambios de la composición…'
+pending_changes = 'Cambios sin guardar'
 
-consist_unsaved_changes = 'Cambios de la composición sin guardar'
+applying_changes = 'Guardando cambios…'
 
-consist_unsaved_changes_body = 'Esta composición tiene cambios que no se han aplicado. Si sales de la página, se descartarán.'
+scenario_unsaved_changes = 'Cambios del escenario sin guardar'
 
-consist_changed_on_disk = 'El escenario se modificó en el disco después de empezar a editar, así que tus cambios no se guardaron. Descártalos y vuelve a hacer las modificaciones.'
+scenario_unsaved_changes_body = 'Este escenario tiene cambios que no se han aplicado. Si sales de él, se descartarán.'
+
+scenario_changed_on_disk = 'El escenario se modificó en el disco después de empezar a editar, así que tus cambios no se guardaron. Descártalos y vuelve a hacer las modificaciones.'
 
 updating_scenario = 'Actualizando escenario…'
 use_internal_serz = 'Usar SERZ interno para BIN → XML'
