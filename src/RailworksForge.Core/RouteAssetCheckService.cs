@@ -49,21 +49,37 @@ public class RouteAssetCheckService
         CancellationToken cancellationToken)
     {
         var cachePath = Paths.GetRouteAssetsCachePath(route);
+        var looseSceneryFiles = GetLooseBinFiles(route, "Scenery", true);
+        var looseNetworkFiles = GetLooseBinFiles(route, "Networks", false);
+        var looseFiles = looseSceneryFiles.Concat(looseNetworkFiles).ToList();
 
-        if (Paths.Exists(cachePath))
+        if (IsCacheCurrent(cachePath, route, looseFiles))
         {
             return ReadCachedBlueprints(cachePath);
         }
 
-        var sceneryBinFiles = GetBinFiles(route, "Scenery", true);
-        var networkBinFiles = GetBinFiles(route, "Networks", false);
-        var binFiles = sceneryBinFiles.Concat(networkBinFiles).ToList();
+        var archivedFiles = GetArchivedBinFiles(route, looseFiles);
+        var binFiles = looseFiles.Concat(archivedFiles).ToList();
 
         var blueprints = await ReadBlueprintsFromBinaries(binFiles, progress, cancellationToken);
 
-        await WriteCachedBlueprints(cachePath, blueprints);
+        WriteCachedBlueprints(cachePath, blueprints);
 
         return blueprints;
+    }
+
+    private static bool IsCacheCurrent(string cachePath, Route route, List<string> looseFiles)
+    {
+        if (!File.Exists(cachePath))
+        {
+            return false;
+        }
+
+        var cachedAt = File.GetLastWriteTimeUtc(cachePath);
+        var sourcePaths = looseFiles.Append(route.MainContentArchivePath).Where(File.Exists);
+        var hasNewerSource = sourcePaths.Any(path => File.GetLastWriteTimeUtc(path) > cachedAt);
+
+        return !hasNewerSource;
     }
 
     private static List<Blueprint> ReadCachedBlueprints(string path)
@@ -73,7 +89,7 @@ public class RouteAssetCheckService
         return reader.GetRecords<Blueprint>().ToList();
     }
 
-    private static async Task WriteCachedBlueprints(string path, IEnumerable<Blueprint> blueprints)
+    private static void WriteCachedBlueprints(string path, IEnumerable<Blueprint> blueprints)
     {
         var directory = Directory.GetParent(path)?.FullName;
 
@@ -82,9 +98,21 @@ public class RouteAssetCheckService
             Directory.CreateDirectory(directory);
         }
 
-        await using var writer = Sep.Writer().ToFile(path);
+        var stagingPath = $"{path}.{Guid.NewGuid():N}.tmp";
 
-        writer.WriteRecords(blueprints);
+        try
+        {
+            using (var writer = Sep.Writer().ToFile(stagingPath))
+            {
+                writer.WriteRecords(blueprints);
+            }
+
+            File.Move(stagingPath, path, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(stagingPath);
+        }
     }
 
     private static async Task<List<Blueprint>> ReadBlueprintsFromBinaries(
@@ -127,7 +155,7 @@ public class RouteAssetCheckService
                     Report(progress, fileProgress, token);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 throw new IOException($"Unable to check {path}", e);
             }
@@ -144,13 +172,17 @@ public class RouteAssetCheckService
         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
         using var document = XmlParser.ParseDocument(xml);
 
+        // Scenery tiles reference blueprints from dynamic entities; track, road and loft networks from section properties.
+        const string blueprintSelector =
+            "cDynamicEntity iBlueprintLibrary-cAbsoluteBlueprintID, Network-cSectionGenericProperties iBlueprintLibrary-cAbsoluteBlueprintID";
+
         return document
-            .QuerySelectorAll("cDynamicEntity BlueprintID")
+            .QuerySelectorAll(blueprintSelector)
             .Select(el => new Blueprint
             {
-                BlueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Provider"),
-                BlueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID Product"),
-                BlueprintId = el.SelectTextContent("iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID"),
+                BlueprintSetIdProvider = el.SelectTextContent("Provider"),
+                BlueprintSetIdProduct = el.SelectTextContent("Product"),
+                BlueprintId = el.SelectTextContent("BlueprintID"),
             })
             .Where(blueprint => !string.IsNullOrWhiteSpace(blueprint.BlueprintId))
             .ToList();
@@ -196,26 +228,44 @@ public class RouteAssetCheckService
         return notFound.OrderBy(blueprint => blueprint.BlueprintSetIdProvider).ToList();
     }
 
-    private static List<string> GetBinFiles(Route route, string directory, bool allDirectories)
+    private static List<string> GetLooseBinFiles(Route route, string directory, bool allDirectories)
     {
-        var absolutePath = Path.Join(route.DirectoryPath, directory);
+        var absolutePath = Paths.GetActualPathFromInsensitive(Path.Join(route.DirectoryPath, directory));
         var searchOption = allDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
-        if (Paths.Exists(absolutePath))
+        if (absolutePath is null)
         {
-            return Directory.EnumerateFiles(absolutePath, "*.bin", searchOption).ToList();
+            return [];
         }
-
-        var archivePath = route.MainContentArchivePath;
-
-        if (Paths.Exists(archivePath) is false)
-        {
-            throw new Exception($"Could not find archive at {archivePath}");
-        }
-
-        Archives.ExtractDirectory(archivePath, directory);
 
         return Directory.EnumerateFiles(absolutePath, "*.bin", searchOption).ToList();
+    }
+
+    // Loose files take precedence in game, so only archived files without a loose copy are extracted.
+    private static List<string> GetArchivedBinFiles(Route route, List<string> looseFiles)
+    {
+        var archivePath = route.MainContentArchivePath;
+
+        if (!File.Exists(archivePath))
+        {
+            return [];
+        }
+
+        var looseRelativePaths = looseFiles
+            .Select(path => Path.GetRelativePath(route.DirectoryPath, path).Replace('\\', '/'))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return Archives.ExtractEntriesToCache(archivePath, entryPath =>
+        {
+            var normalisedPath = entryPath.Replace('\\', '/');
+            var isBinary = normalisedPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase);
+            var isScenery = normalisedPath.StartsWith("Scenery/", StringComparison.OrdinalIgnoreCase);
+            var isNetwork = normalisedPath.StartsWith("Networks/", StringComparison.OrdinalIgnoreCase)
+                && normalisedPath.Count(c => c == '/') is 1;
+            var hasLooseCopy = looseRelativePaths.Contains(normalisedPath);
+
+            return isBinary && (isScenery || isNetwork) && !hasLooseCopy;
+        });
     }
 
     private static void Report(
