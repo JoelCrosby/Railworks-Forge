@@ -136,7 +136,7 @@ public class TrackService
     {
         var looseBlueprints = GetLooseTrackBlueprints(providerName, product);
         var archivedBlueprints = GetArchivedTrackBlueprints(providerName, product);
-        var blueprints = looseBlueprints.Concat(archivedBlueprints).ToList();
+        var blueprints = looseBlueprints.Union(archivedBlueprints).ToList();
 
         var tracks = new List<Track>();
 
@@ -185,24 +185,42 @@ public class TrackService
             .ToHashSet();
     }
 
-    private static List<Blueprint> GetArchivedTrackBlueprints(string providerName, DirectoryInfo product)
+    private static HashSet<Blueprint> GetArchivedTrackBlueprints(string providerName, DirectoryInfo product)
     {
         var archives = Directory.EnumerateFiles(product.FullName, "*.ap", SearchOption.TopDirectoryOnly);
-        var blueprints = new List<Blueprint>();
+        var blueprints = new HashSet<Blueprint>();
 
         foreach (var archive in archives)
         {
-            var networkFiles = Archives.ListFilesInPath(archive, "RailNetwork", ".bin");
-            var trackFiles = Archives.ListFilesInPath(archive, "Track", ".bin");
+            var networkFiles = Archives.ListFilesInPath(archive, "RailNetwork/", string.Empty);
+            var trackFiles = Archives.ListFilesInPath(archive, "Track/", string.Empty);
+            var files = networkFiles.Concat(trackFiles).ToList();
 
-            var archiveBlueprints = networkFiles.Concat(trackFiles).Select(file => new Blueprint
+            // Matches the loose lookup: only binaries that sit in a directory with a track cross-section.
+            var trackDirectories = files
+                .Where(file => file.EndsWith(".XSec", StringComparison.OrdinalIgnoreCase))
+                .Select(file => Path.GetDirectoryName(file) ?? string.Empty)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var trackBinaries = files.Where(file =>
             {
-                BlueprintId = file.Replace(".XSec", ".xml"),
-                BlueprintSetIdProduct = product.Name,
-                BlueprintSetIdProvider = providerName,
+                var isBinary = file.EndsWith(".bin", StringComparison.OrdinalIgnoreCase);
+                var isInTrackDirectory = trackDirectories.Contains(Path.GetDirectoryName(file) ?? string.Empty);
+
+                return isBinary && isInTrackDirectory;
             });
 
-            blueprints.AddRange(archiveBlueprints);
+            foreach (var file in trackBinaries)
+            {
+                var blueprintId = Path.ChangeExtension(file, ".xml").Replace('/', '\\');
+
+                blueprints.Add(new Blueprint
+                {
+                    BlueprintId = blueprintId,
+                    BlueprintSetIdProduct = product.Name,
+                    BlueprintSetIdProvider = providerName,
+                });
+            }
         }
 
         return blueprints;
