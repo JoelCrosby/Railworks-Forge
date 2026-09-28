@@ -194,7 +194,7 @@ public class ScenarioDatabaseService : IDisposable
 
     private static string GetDatabasePath()
     {
-        return Path.Join(Paths.GetGameDirectory(), "Content", "SDBCache.bin");
+        return Path.Join(Paths.GetContentDirectory(), "SDBCache.bin");
     }
 
     private static string GetCachePath()

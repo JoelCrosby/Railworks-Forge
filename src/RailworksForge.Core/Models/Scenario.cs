@@ -53,15 +53,20 @@ public record Scenario
 
     public string CachedDocumentPath => Paths.GetAssetCachePath(BinaryPath, true);
 
+    // A packed scenario only has its own folder once it has been edited or extracted.
+    public string BrowsableDirectoryPath => Directory.Exists(DirectoryPath) ? DirectoryPath : Route.DirectoryPath;
+
     public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "scenarios", Id);
 
     private string BinaryPath => Path.Join(DirectoryPath, "Scenario.bin");
     private bool HasBinary => Paths.Exists(BinaryPath);
-    private bool HasMainContentArchive => Paths.Exists(Route.MainContentArchivePath);
 
-    public static Scenario? New(Route route, AssetPath path)
+    // readArchivedDocument lets a caller that already has the archive open parse the entry without reopening it.
+    public static Scenario? New(Route route, AssetPath assetPath, Func<IDocument>? readArchivedDocument = null)
     {
-        var doc = GetPropertiesDocument(path);
+        var path = PreferLooseProperties(assetPath);
+        var canUseArchivedReader = path.IsArchivePath && readArchivedDocument is not null;
+        var doc = canUseArchivedReader ? readArchivedDocument!() : GetPropertiesDocument(path);
 
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         if (doc.DocumentElement?.FirstElementChild is null) return null;
@@ -71,7 +76,7 @@ public record Scenario
         var description = doc.SelectLocalisedStringContent("Description");
         var briefing = doc.SelectLocalisedStringContent("Briefing");
         var startLocation = doc.SelectLocalisedStringContent("StartLocation");
-        var directoryPath = Path.GetDirectoryName(path.Path) ?? string.Empty;
+        var directoryPath = GetScenarioDirectory(path);
         var scenarioClass = doc.SelectTextContent("ScenarioClass");
         var season = ParseSeason(doc.SelectTextContent("Season"));
         var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.ParseConsist).ToList();
@@ -108,6 +113,11 @@ public record Scenario
 
     public void CreateBackup()
     {
+        if (!Directory.Exists(DirectoryPath))
+        {
+            return;
+        }
+
         Directory.CreateDirectory(BackupDirectory);
 
         var backupPath = Path.Join(BackupDirectory, Utilities.GetBackupArchiveName());
@@ -115,11 +125,47 @@ public record Scenario
         ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
     }
 
+    // Edits to a packed scenario are written as loose files beside the archive, and the game prefers loose files.
+    private static AssetPath PreferLooseProperties(AssetPath path)
+    {
+        if (!path.IsArchivePath)
+        {
+            return path;
+        }
+
+        var loosePath = Path.Join(GetScenarioDirectory(path), "ScenarioProperties.xml");
+        var actualLoosePath = Paths.GetActualPathFromInsensitive(loosePath);
+
+        if (actualLoosePath is null)
+        {
+            return path;
+        }
+
+        return new AssetPath { Path = actualLoosePath };
+    }
+
+    private static string GetScenarioDirectory(AssetPath path)
+    {
+        var containingDirectory = Path.GetDirectoryName(path.Path) ?? string.Empty;
+
+        if (!path.IsArchivePath)
+        {
+            return containingDirectory;
+        }
+
+        var archiveDirectory = Path.GetDirectoryName(path.ArchivePath) ?? string.Empty;
+        var scenarioDirectory = Path.Join(containingDirectory, archiveDirectory);
+
+        // The archive's spelling may differ in case from a folder already on disk; reuse that folder rather than
+        // creating a sibling.
+        return Paths.GetActualPathFromInsensitive(scenarioDirectory, containingDirectory) ?? scenarioDirectory;
+    }
+
     private static IDocument GetPropertiesDocument(AssetPath path)
     {
         if (Paths.Exists(path.Path) && path.Path.EndsWith(".xml"))
         {
-            var file = File.OpenRead(path.Path);
+            using var file = File.OpenRead(path.Path);
             return XmlParser.ParseDocument(file);
         }
 
@@ -141,14 +187,15 @@ public record Scenario
             throw new Exception("could not file scenario properties entry in archive");
         }
 
-        var content = entry.Open();
+        using var content = entry.Open();
+
         return XmlParser.ParseDocument(content);
     }
 
     public async Task<IDocument> GetXmlDocument(bool useCache = true)
     {
         var path = await ConvertBinToXml(useCache);
-        var file = File.OpenRead(path);
+        await using var file = File.OpenRead(path);
         var document = await XmlParser.ParseDocumentAsync(file);
 
         XmlException.ThrowIfNotExists(document, path);
@@ -171,7 +218,7 @@ public record Scenario
 
     public async Task<string> ConvertBinToXml(bool useCache = true)
     {
-        var inputPath = HasBinary ? BinaryPath : ExtractXml();
+        var inputPath = HasBinary ? BinaryPath : ExtractBinary();
         var result = await Serz.Convert(inputPath, force: !useCache);
 
         return result.OutputPath;
@@ -179,31 +226,35 @@ public record Scenario
 
     public async Task<string> ExportBinToXml()
     {
-        var inputPath = HasBinary ? BinaryPath : ExtractXml();
+        var inputPath = HasBinary ? BinaryPath : ExtractBinary();
         var result = await Serz.Convert(inputPath, force: true);
 
         var filename = Path.GetFileName(result.OutputPath);
         var destination = Path.Join(DirectoryPath, filename);
 
-        File.Copy(result.OutputPath, destination);
+        File.Copy(result.OutputPath, destination, overwrite: true);
 
         return destination;
     }
 
-    private string ExtractXml()
+    private string ExtractBinary()
     {
-        if (!HasMainContentArchive)
-        {
-            throw new NotImplementedException("scenario does not contain a MainContent.ap");
-        }
-
-        var propertiesPath = Path.Join("Scenarios", Id, "Scenario.bin");
-        var destination = Path.Join(Route.DirectoryPath, "Scenarios", Id, "Scenario.bin");
         var archivePath = PackagingType is PackagingType.Packed ? AssetPath.Path : Route.MainContentArchivePath;
 
-        Archives.ExtractFileContentFromPath(archivePath, propertiesPath, destination);
+        if (!Paths.Exists(archivePath))
+        {
+            throw new FileNotFoundException($"could not find a Scenario.bin or archive for scenario {Name}");
+        }
 
-        return destination;
+        var entryPath = $"Scenarios/{Id}/Scenario.bin";
+        var extracted = Archives.ExtractFileContentFromPath(archivePath, entryPath, BinaryPath);
+
+        if (!extracted)
+        {
+            throw new FileNotFoundException($"could not find {entryPath} in {archivePath}");
+        }
+
+        return BinaryPath;
     }
 
     private string? GetPropertiesText()
@@ -218,6 +269,12 @@ public record Scenario
 
     private string GetCompressedPropertiesText()
     {
+        if (AssetPath is { IsArchivePath: true, ArchivePath: { } archivePath })
+        {
+            return Archives.TryGetTextFileContentFromPath(AssetPath.Path, archivePath)
+                ?? throw new Exception("could not find compressed scenario properties file");
+        }
+
         var productArchives = Directory.EnumerateFiles(DirectoryPath, "*.ap", SearchOption.TopDirectoryOnly);
 
         foreach (var productArchive in productArchives)
@@ -241,15 +298,9 @@ public record Scenario
         var path = Path.Join(DirectoryPath, "Scenario.bin.xml");
         var result = await Serz.Convert(path, force: true);
 
-        var filename = Path.GetFileName(result.OutputPath);
-        var destination = Path.Join(DirectoryPath, filename);
+        File.Move(result.OutputPath, BinaryPath, overwrite: true);
 
-        if (Paths.Exists(destination))
-        {
-            File.Delete(destination);
-        }
-
-        File.Copy(result.OutputPath, destination);
+        await Paths.CreateMd5HashFile(BinaryPath);
 
         return BinaryPath;
     }
@@ -321,7 +372,7 @@ public record Scenario
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode();
+        return StringComparer.OrdinalIgnoreCase.GetHashCode(Id);
     }
 
     public void SetPlayerInfo(ScenarioPlayerInfo playerInfo)

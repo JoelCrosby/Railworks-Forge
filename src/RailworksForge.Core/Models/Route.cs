@@ -50,13 +50,29 @@ public record Route
         }
     }
 
+    // Only the files a track replacement rewrites; anything not loose is still intact inside the route archives.
     public void CreateBackup()
     {
+        var routePropertiesPath = Path.Join(DirectoryPath, "RouteProperties.xml");
+        var loosePaths = new[] { TracksBinaryPath, routePropertiesPath }.Where(File.Exists).ToList();
+
+        if (loosePaths.Count is 0)
+        {
+            return;
+        }
+
         Directory.CreateDirectory(BackupDirectory);
 
         var backupPath = Path.Join(BackupDirectory, Utilities.GetBackupArchiveName());
 
-        ZipFile.CreateFromDirectory(DirectoryPath, backupPath);
+        using var archive = ZipFile.Open(backupPath, ZipArchiveMode.Create);
+
+        foreach (var path in loosePaths)
+        {
+            var entryName = Path.GetRelativePath(DirectoryPath, path).Replace('\\', '/');
+
+            archive.CreateEntryFromFile(path, entryName);
+        }
     }
 
     public async Task<List<TrackBlueprint>> GetTrackBlueprints()
@@ -111,9 +127,8 @@ public record Route
         if (Paths.Exists(path))
         {
             var output = await Serz.Convert(path, force: true);
-            var file = File.OpenRead(output.OutputPath);
 
-            return await XmlParser.ParseDocumentAsync(file);
+            return await ParseXmlFile(output.OutputPath);
         }
 
         var archivePath = MainContentArchivePath;
@@ -125,22 +140,35 @@ public record Route
 
         if (Paths.Exists(compressedOutput.OutputPath))
         {
-            var file = File.OpenRead(compressedOutput.OutputPath);
-            return await XmlParser.ParseDocumentAsync(file);
+            return await ParseXmlFile(compressedOutput.OutputPath);
         }
 
         return null;
     }
 
+    private static async Task<IDocument> ParseXmlFile(string path)
+    {
+        await using var file = File.OpenRead(path);
+
+        return await XmlParser.ParseDocumentAsync(file);
+    }
+
     public async Task<IDocument?> GetRoutePropertiesDocument()
     {
+        // Track replacement writes a loose RouteProperties.xml beside a packed route's archive, and the game prefers it.
+        var loosePropertiesPath = Paths.GetActualPathFromInsensitive(Path.Join(DirectoryPath, "RouteProperties.xml"));
+
+        if (loosePropertiesPath is not null)
+        {
+            return await ParseXmlFile(loosePropertiesPath);
+        }
+
         if (PackagingType is PackagingType.Packed)
         {
             return await GetArchivedPropertiesDocument();
         }
 
-        var file = File.OpenRead(RoutePropertiesPath);
-        return await XmlParser.ParseDocumentAsync(file);
+        return await ParseXmlFile(RoutePropertiesPath);
     }
 
     private Task<IDocument> GetArchivedPropertiesDocument()
@@ -155,8 +183,7 @@ public record Route
             throw new Exception("could not file scenario properties entry in archive");
         }
 
-        var content = entry.Open();
-
+        using var content = entry.Open();
         using var reader = new StreamReader(content);
 
         var file = reader.ReadToEnd();

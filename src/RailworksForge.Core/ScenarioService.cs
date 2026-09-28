@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 
+using AngleSharp.Dom;
 using AngleSharp.Xml;
 
 using RailworksForge.Core.Extensions;
@@ -45,13 +46,15 @@ public class ScenarioService
 
     public async Task<ScenarioConsists> LoadConsists(Scenario scenario, CancellationToken cancellationToken)
     {
-        ClearAssetCaches();
+        using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
+
+        // Content may have been added or removed since the scenario was last shown.
+        Cache.ClearAcquisitionStates();
 
         var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
         using var document = await updated.GetXmlDocument(false);
 
         cancellationToken.ThrowIfCancellationRequested();
-        Cache.ConsistAcquisitionStates.Clear();
 
         var consists = document
             .QuerySelectorAll("cConsist")
@@ -67,12 +70,12 @@ public class ScenarioService
         Consist consist,
         CancellationToken cancellationToken)
     {
-        ClearAssetCaches();
-
         if (string.IsNullOrWhiteSpace(consist.BlueprintId))
         {
             return [];
         }
+
+        using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
 
         var vehicles = await scenario.GetServiceConsistVehicles(consist);
 
@@ -90,10 +93,7 @@ public class ScenarioService
     {
         using var document = await scenario.GetXmlDocument();
 
-        var vehicles = document
-            .QuerySelectorAll("cConsist")
-            .QueryByTextContent("ServiceName Key", consist.ServiceId)?
-            .QuerySelector("RailVehicles");
+        var vehicles = Consist.GetServiceConsist(document, consist)?.QuerySelector("RailVehicles");
 
         if (vehicles is null)
         {
@@ -103,27 +103,43 @@ public class ScenarioService
         return vehicles.ToXml();
     }
 
-    private static void ClearAssetCaches()
-    {
-        Cache.BlueprintAcquisitionStates.Clear();
-        Cache.ArchiveCache.Clear();
-    }
-
     private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
     {
         foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
         {
-            foreach (var path in ReadCompressedScenarios(package))
+            using var archive = ZipFile.OpenRead(package);
+
+            var propertiesEntries = archive.Entries.Where(entry => entry.Name == "ScenarioProperties.xml");
+
+            foreach (var entry in propertiesEntries)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var scenario = Scenario.New(route, path);
 
-                if (scenario is null) continue;
+                var path = new AssetPath
+                {
+                    Path = package,
+                    IsArchivePath = true,
+                    ArchivePath = entry.FullName,
+                };
+
+                var scenario = Scenario.New(route, path, () => ParseEntry(entry));
+
+                if (scenario is null)
+                {
+                    continue;
+                }
 
                 scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
                 scenarios.Add(scenario);
             }
         }
+    }
+
+    private static IDocument ParseEntry(ZipArchiveEntry entry)
+    {
+        using var content = entry.Open();
+
+        return XmlParser.ParseDocument(content);
     }
 
     private void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
@@ -165,19 +181,5 @@ public class ScenarioService
             var dirname = Path.GetFileName(path);
             return string.Equals(dirname, "Scenarios", StringComparison.OrdinalIgnoreCase);
         });
-    }
-
-    private static IEnumerable<AssetPath> ReadCompressedScenarios(string path)
-    {
-        using var archive = ZipFile.Open(path, ZipArchiveMode.Read);
-
-        var entries = archive.Entries.Where(entry => entry.Name == "ScenarioProperties.xml");
-
-        return entries.Select(e => new AssetPath
-        {
-            Path = path,
-            IsArchivePath = true,
-            ArchivePath = e.FullName,
-        }).ToList();
     }
 }
