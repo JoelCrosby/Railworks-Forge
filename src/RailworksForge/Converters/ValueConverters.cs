@@ -2,6 +2,8 @@ using System;
 
 using Avalonia.Data.Converters;
 
+using LucideAvalonia.Enum;
+
 using RailworksForge.Core.Models;
 using RailworksForge.Translations;
 
@@ -90,5 +92,56 @@ public static class ValueConverters
         };
 
         return label?.CurrentValue ?? value ?? string.Empty;
+    });
+
+    // One icon per cell, switched by value: each Lucide control builds its own copy of the icon dictionary, so
+    // stacking a hidden icon per possible value multiplied that cost for every row.
+    public static FuncValueConverter<ScenarioClass, LucideIconNames> ScenarioClassIconConverter { get; } = new (value =>
+    {
+        return value switch
+        {
+            ScenarioClass.Standard => LucideIconNames.Flag,
+            ScenarioClass.FreeRoam => LucideIconNames.MapPinned,
+            ScenarioClass.Career => LucideIconNames.Trophy,
+            ScenarioClass.Timetable => LucideIconNames.CalendarClock,
+            ScenarioClass.Template => LucideIconNames.LayoutTemplate,
+            _ => LucideIconNames.CircleQuestionMark,
+        };
+    });
+
+    public static FuncValueConverter<string?, LucideIconNames> SeasonIconConverter { get; } = new (value =>
+    {
+        return value switch
+        {
+            "Spring" => LucideIconNames.Flower2,
+            "Summer" => LucideIconNames.SunMedium,
+            "Autumn" => LucideIconNames.Leaf,
+            "Winter" => LucideIconNames.Snowflake,
+            _ => LucideIconNames.CircleQuestionMark,
+        };
+    });
+
+    public static FuncValueConverter<AcquisitionState, LucideIconNames> AcquisitionStateIconConverter { get; } = new (value =>
+    {
+        return value switch
+        {
+            AcquisitionState.Found => LucideIconNames.CircleCheck,
+            AcquisitionState.Partial => LucideIconNames.TriangleAlert,
+            AcquisitionState.Missing => LucideIconNames.CircleX,
+            _ => LucideIconNames.CircleQuestionMark,
+        };
+    });
+
+    public static FuncValueConverter<AcquisitionState, string> AcquisitionStateTooltipConverter { get; } = new (value =>
+    {
+        var label = value switch
+        {
+            AcquisitionState.Found => Strings.assets_found,
+            AcquisitionState.Partial => Strings.assets_partial,
+            AcquisitionState.Missing => Strings.assets_missing,
+            _ => Strings.assets_unknown,
+        };
+
+        return label.CurrentValue;
     });
 }

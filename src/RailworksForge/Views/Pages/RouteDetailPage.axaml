@@ -112,28 +112,11 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
-                                <Panel VerticalAlignment="Center">
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Standard}}">
-                                        <lucideAvalonia:Lucide Icon="Flag" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.FreeRoam}}">
-                                        <lucideAvalonia:Lucide Icon="MapPinned" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Career}}">
-                                        <lucideAvalonia:Lucide Icon="Trophy" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Timetable}}">
-                                        <lucideAvalonia:Lucide Icon="CalendarClock" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:ScenarioClass.Template}}">
-                                        <lucideAvalonia:Lucide Icon="LayoutTemplate" />
-                                    </Viewbox>
-                                </Panel>
+                                <Viewbox Classes="inline-icon"
+                                         VerticalAlignment="Center"
+                                         IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:ScenarioClass.Unknown}}">
+                                    <lucideAvalonia:Lucide Icon="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassIconConverter}}" />
+                                </Viewbox>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
                             </StackPanel>
                         </DataTemplate>
@@ -170,24 +153,11 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
-                                <Panel VerticalAlignment="Center">
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Spring}">
-                                        <lucideAvalonia:Lucide Icon="Flower2" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Summer}">
-                                        <lucideAvalonia:Lucide Icon="SunMedium" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Autumn}">
-                                        <lucideAvalonia:Lucide Icon="Leaf" />
-                                    </Viewbox>
-                                    <Viewbox Classes="inline-icon"
-                                             IsVisible="{Binding Scenario.Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Winter}">
-                                        <lucideAvalonia:Lucide Icon="Snowflake" />
-                                    </Viewbox>
-                                </Panel>
+                                <Viewbox Classes="inline-icon"
+                                         VerticalAlignment="Center"
+                                         IsVisible="{Binding Scenario.Season, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                    <lucideAvalonia:Lucide Icon="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonIconConverter}}" />
+                                </Viewbox>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonConverter}}" />
                             </StackPanel>
                         </DataTemplate>
