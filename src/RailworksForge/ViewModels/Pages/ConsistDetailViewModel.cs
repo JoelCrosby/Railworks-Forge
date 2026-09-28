@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -118,22 +119,35 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return directoryMatches || subfolderMatches;
     }
 
+    // The tree is only loaded once: resetting it after each edit would clear the selected folder and its stock.
     private Task LoadConsist()
     {
+        var hasDirectoryTree = DirectoryTree.Source.Count > 0;
+
         return Loading.RunAsync(Strings.loading_consist_vehicles.CurrentValue, async token =>
         {
-            await _directoryTree.LoadDirectoryTree();
+            var directories = hasDirectoryTree ? null : await LoadDirectoryTree();
             token.ThrowIfCancellationRequested();
 
-            var directories = _directoryTree.GetDirectoryTree().ToList();
             var vehicles = await _scenarioService.GetConsistVehicles(_scenario, _consist, token);
 
             return (Directories: directories, Vehicles: vehicles);
         }, result =>
         {
-            DirectoryTree.Reset(result.Directories);
+            if (result.Directories is not null)
+            {
+                DirectoryTree.Reset(result.Directories);
+            }
+
             RailVehicles.Reset(result.Vehicles);
         });
+    }
+
+    private async Task<List<BrowserDirectory>> LoadDirectoryTree()
+    {
+        await _directoryTree.LoadDirectoryTree();
+
+        return _directoryTree.GetDirectoryTree().ToList();
     }
 
     private async Task ReloadAfterEdit()
