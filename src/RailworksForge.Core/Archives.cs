@@ -25,8 +25,7 @@ public static class Archives
             ArchiveException.ThrowFileNotFound(archivePath, filePath);
         }
 
-        var content = entry.Open();
-
+        using var content = entry.Open();
         using var reader = new StreamReader(content);
 
         return reader.ReadToEnd();
@@ -44,8 +43,7 @@ public static class Archives
             return null;
         }
 
-        var content = entry.Open();
-
+        using var content = entry.Open();
         using var reader = new StreamReader(content);
 
         return reader.ReadToEnd();
@@ -59,7 +57,7 @@ public static class Archives
             var unixFilePath = filePath.Replace('\\', '/');
             var archiveEntryFilepath = unixFilePath.TrimStart('/');
             var normalisedEntryFilepath = archiveEntryFilepath.NormalisePath();
-            var isKnownMissing = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath) is {} cachedArchive
+            var isKnownMissing = GetCachedEntries(archivePath, normalisedArchivePath) is {} cachedArchive
                 && !cachedArchive.Contains(normalisedEntryFilepath);
 
             if (isKnownMissing)
@@ -95,7 +93,8 @@ public static class Archives
     {
         using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
 
-        var entry = archive.Entries.FirstOrDefault(entry => entry.FullName == filePath);
+        var entryPath = filePath.Replace('\\', '/').TrimStart('/');
+        var entry = archive.Entries.FirstOrDefault(entry => string.Equals(entry.FullName, entryPath, StringComparison.OrdinalIgnoreCase));
 
         if (entry is null)
         {
@@ -114,25 +113,40 @@ public static class Archives
 
     public static List<string> ExtractFilesOfType(string archivePath, string extension)
     {
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Read);
+        return ExtractEntriesToCache(archivePath, entryPath => entryPath.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+    }
 
-        var entries = archive.Entries.Where(entry => entry.Name.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+    // Extracts into the app's cache rather than beside the archive, so the game's own folders are left untouched.
+    // ExtractToFile stamps the entry's modified time on the file, so a matching size and time means it is current.
+    public static List<string> ExtractEntriesToCache(string archivePath, Func<string, bool> includeEntry)
+    {
+        using var archive = ZipFile.OpenRead(archivePath);
+
         var destinationDir = Paths.GetArchiveCachePath(archivePath);
-
-        Directory.CreateDirectory(destinationDir);
-        DirectoryException.ThrowIfNotExists(destinationDir);
-
         var output = new List<string>();
 
-        foreach (var entry in entries)
+        Directory.CreateDirectory(destinationDir);
+
+        foreach (var entry in archive.Entries)
         {
-            var destinationFile = Path.Combine(destinationDir, entry.FullName);
-            var destinationFileDir = Path.GetDirectoryName(destinationFile);
+            var isFile = !entry.FullName.EndsWith('/');
 
-            DirectoryException.ThrowIfNotExists(destinationFileDir);
-            Directory.CreateDirectory(destinationFileDir);
+            if (!isFile || !includeEntry(entry.FullName))
+            {
+                continue;
+            }
 
-            entry.ExtractToFile(destinationFile, true);
+            var destinationFile = Paths.ResolveWithin(destinationDir, entry.FullName);
+            var existing = new FileInfo(destinationFile);
+            var isAlreadyExtracted = existing.Exists
+                && existing.Length == entry.Length
+                && existing.LastWriteTime == entry.LastWriteTime.DateTime;
+
+            if (!isAlreadyExtracted)
+            {
+                Directory.CreateDirectory(existing.DirectoryName!);
+                entry.ExtractToFile(destinationFile, true);
+            }
 
             output.Add(destinationFile);
         }
@@ -145,7 +159,14 @@ public static class Archives
         using var archive = ZipFile.OpenRead(archivePath);
 
         var containingDirectory = Path.GetDirectoryName(archivePath);
-        var entries = archive.Entries.Where(entry => !entry.FullName.EndsWith('/') && entry.FullName.StartsWith(directoryPath));
+        var directoryPrefix = directoryPath.Replace('\\', '/').TrimEnd('/') + "/";
+        var entries = archive.Entries.Where(entry =>
+        {
+            var isFile = !entry.FullName.EndsWith('/');
+            var isInDirectory = entry.FullName.StartsWith(directoryPrefix, StringComparison.OrdinalIgnoreCase);
+
+            return isFile && isInDirectory;
+        });
 
         if (containingDirectory is null)
         {
@@ -154,7 +175,7 @@ public static class Archives
 
         foreach (var entry in entries)
         {
-            var destination = Path.Join(containingDirectory, entry.FullName);
+            var destination = Paths.ResolveWithin(containingDirectory, entry.FullName);
             var destinationDir = Path.GetDirectoryName(destination);
 
             DirectoryException.ThrowIfNotExists(destinationDir);
@@ -167,12 +188,17 @@ public static class Archives
     public static bool TopLevelDirectoryExists(string archivePath, string directoryName)
     {
         var entries = GetEntries(archivePath);
-        var normalisedDirectoryName = directoryName.NormalisePath();
+        var directoryPrefix = directoryName.NormalisePath().TrimEnd('/') + "/";
 
-        return entries.Any(e => e.StartsWith(normalisedDirectoryName));
+        return entries.Any(e => e.StartsWith(directoryPrefix, StringComparison.Ordinal));
     }
 
-    private static readonly HashSet<string> CorruptArchivePaths = ["Assets/DTG/Academy/AcademyAssetsTest.ap"];
+    private static readonly HashSet<string> CorruptArchivePaths = ["assets/dtg/academy/academyassetstest.ap"];
+
+    private static bool IsCorruptArchive(string normalisedArchivePath)
+    {
+        return CorruptArchivePaths.Any(normalisedArchivePath.Contains);
+    }
 
     public static bool EntryExists(string archivePath, string agnosticBlueprintIdPath)
     {
@@ -180,7 +206,7 @@ public static class Archives
         {
             var normalisedArchivePath = archivePath.NormalisePath();
             var normalisedBlueprintPath = agnosticBlueprintIdPath.NormalisePath();
-            var cachedArchiveFiles = Cache.ArchiveCache.GetValueOrDefault(normalisedArchivePath);
+            var cachedArchiveFiles = GetCachedEntries(archivePath, normalisedArchivePath);
 
             if (cachedArchiveFiles is not null)
             {
@@ -196,7 +222,7 @@ public static class Archives
                 return false;
             }
 
-            if (CorruptArchivePaths.Any(a => normalisedArchivePath.Contains(a)))
+            if (IsCorruptArchive(normalisedArchivePath))
             {
                 return false;
             }
@@ -213,7 +239,13 @@ public static class Archives
         using var archive = ZipFile.OpenRead(archivePath);
 
         return archive.Entries
-            .Where(entry => entry.FullName.StartsWith(directoryPath) && entry.FullName.EndsWith(extension))
+            .Where(entry =>
+            {
+                var isInDirectory = entry.FullName.StartsWith(directoryPath, StringComparison.OrdinalIgnoreCase);
+                var hasExtension = entry.FullName.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+
+                return isInDirectory && hasExtension;
+            })
             .Select(entry => entry.FullName)
             .ToList();
     }
@@ -222,12 +254,14 @@ public static class Archives
     {
         lock (EntryExistsSyncObj)
         {
-            if (CorruptArchivePaths.Any(archivePath.Contains))
+            if (IsCorruptArchive(archivePath.NormalisePath()))
             {
                 return [];
             }
 
-            if (Cache.ArchiveCache.GetValueOrDefault(archivePath.NormalisePath()) is {} cachedArchive)
+            var normalisedArchivePath = archivePath.NormalisePath();
+
+            if (GetCachedEntries(archivePath, normalisedArchivePath) is {} cachedArchive)
             {
                 return cachedArchive;
             }
@@ -237,9 +271,21 @@ public static class Archives
             using var archive = ZipFile.OpenRead(archivePath);
             var entries = archive.Entries.Select(e => e.FullName.NormalisePath()).ToHashSet();
 
-            Cache.ArchiveCache.TryAdd(archivePath.NormalisePath(), entries);
+            Cache.ArchiveCache[normalisedArchivePath] = new ArchiveIndex(File.GetLastWriteTimeUtc(archivePath), entries);
 
             return entries;
         }
+    }
+
+    private static HashSet<string>? GetCachedEntries(string archivePath, string normalisedArchivePath)
+    {
+        if (!Cache.ArchiveCache.TryGetValue(normalisedArchivePath, out var index))
+        {
+            return null;
+        }
+
+        var isCurrent = index.LastWriteTimeUtc == File.GetLastWriteTimeUtc(archivePath);
+
+        return isCurrent ? index.Entries : null;
     }
 }

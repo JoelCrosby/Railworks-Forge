@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 using RailworksForge.Core.Models;
 
@@ -7,13 +6,30 @@ using Serilog;
 
 namespace RailworksForge.Core;
 
+public sealed record ArchiveIndex(DateTime LastWriteTimeUtc, HashSet<string> Entries);
+
 public class Cache
 {
     public static readonly ConcurrentDictionary<string, AcquisitionState?> ConsistAcquisitionStates = new ();
 
     public static readonly ConcurrentDictionary<string, AcquisitionState?> BlueprintAcquisitionStates = new ();
 
-    public static readonly ConcurrentDictionary<string, HashSet<string>> ArchiveCache = new();
+    public static readonly ConcurrentDictionary<string, ArchiveIndex> ArchiveCache = new();
+
+    public static readonly ConcurrentDictionary<string, List<string>> ProductArchives = new(StringComparer.OrdinalIgnoreCase);
+
+    public static void ClearAcquisitionStates()
+    {
+        BlueprintAcquisitionStates.Clear();
+        ConsistAcquisitionStates.Clear();
+        ProductArchives.Clear();
+    }
+
+    public static void ClearAssetCaches()
+    {
+        ClearAcquisitionStates();
+        ArchiveCache.Clear();
+    }
 
     public static void ClearScenarioCache(Scenario scenario)
     {
@@ -26,7 +42,7 @@ public class Cache
             Log.Error(ex, "failed to delete cached scenario document");
         }
 
-        var directory = Paths.GetRoutesDirectory();
+        var directory = Paths.GetContentDirectory();
 
         var files = new []
         {
@@ -55,7 +71,7 @@ public class Cache
             }
             catch (Exception e)
             {
-                Debug.WriteLine("failed to delete file at path {path}", e.Message);
+                Log.Warning(e, "Failed to delete game cache file {Path}", path);
             }
         }
     }

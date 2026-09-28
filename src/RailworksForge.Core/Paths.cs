@@ -146,13 +146,34 @@ public static class Paths
         return _assetsDirectory;
     }
 
+    // Guards against archive entries such as "..\..\.bashrc" writing outside the directory being extracted into.
+    public static string ResolveWithin(string rootDirectory, string relativePath)
+    {
+        var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(rootDirectory));
+        var normalisedRelativePath = relativePath.Replace('\\', '/').TrimStart('/');
+        var fullPath = Path.GetFullPath(Path.Join(root, normalisedRelativePath));
+        var isInsideRoot = fullPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal);
+
+        if (!isInsideRoot)
+        {
+            throw new InvalidDataException($"path '{relativePath}' resolves outside '{rootDirectory}'");
+        }
+
+        return fullPath;
+    }
+
+    public static string GetContentDirectory()
+    {
+        return Path.Join(GetGameDirectory(), "Content");
+    }
+
     private static string? _routesDirectory;
 
     public static string GetRoutesDirectory()
     {
         if (string.IsNullOrEmpty(_routesDirectory))
         {
-            _routesDirectory = Path.Join(GetGameDirectory(), "Content", "Routes");
+            _routesDirectory = Path.Join(GetContentDirectory(), "Routes");
         }
 
         return _routesDirectory;
@@ -180,24 +201,39 @@ public static class Paths
             return normalisedPath;
         }
 
-        var relative = rootPath is not null ? normalisedPath.Replace(rootPath, string.Empty) : normalisedPath;
-        var parts = relative.Split(Path.DirectorySeparatorChar).Where(r => !string.IsNullOrEmpty(r));
-        var partsQueue = new Queue<string>(parts);
-        var basePath = rootPath ?? "/";
+        var root = rootPath is null ? null : Path.TrimEndingDirectorySeparator(rootPath);
+        var isUnderRoot = root is not null
+            && normalisedPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+        var basePath = isUnderRoot ? root! : Path.GetPathRoot(normalisedPath) ?? string.Empty;
+        var relative = normalisedPath[basePath.Length..];
+        var parts = relative.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
-        while (partsQueue.TryDequeue(out var part))
+        foreach (var part in parts)
         {
-            var entries = Directory.EnumerateFileSystemEntries(basePath, "*");
-            var partPath = Path.Join(basePath, part);
+            // Most components already have the right case, so only list the directory when the exact name is missing.
+            var exactPath = Path.Join(basePath, part);
 
-            if (entries.FirstOrDefault(e => string.Equals(e, partPath, StringComparison.OrdinalIgnoreCase)) is {} entry)
+            if (Path.Exists(exactPath))
             {
-                basePath = entry;
+                basePath = exactPath;
+                continue;
             }
-            else
+
+            if (!Directory.Exists(basePath))
             {
                 return null;
             }
+
+            var match = Directory
+                .EnumerateFileSystemEntries(basePath)
+                .FirstOrDefault(entry => string.Equals(Path.GetFileName(entry), part, StringComparison.OrdinalIgnoreCase));
+
+            if (match is null)
+            {
+                return null;
+            }
+
+            basePath = match;
         }
 
         return basePath;
