@@ -13,19 +13,37 @@ public class Configuration
         TypeInfoResolver = SourceGenerationContext.Default,
     };
 
+    private static readonly Lock SettingsLock = new();
+    private static ConfigurationOptions? _settings;
+
+    // Kept in memory: settings are read on hot paths such as every Serz conversion, and only this app writes them.
     public static ConfigurationOptions Get()
     {
-        if (GetConfigFromPath("settings", new ConfigurationOptions()) is not {} options)
+        lock (SettingsLock)
         {
-            throw new Exception("Failed to read configuration settings.");
-        }
+            if (_settings is not null)
+            {
+                return _settings;
+            }
 
-        return options;
+            if (GetConfigFromPath("settings", new ConfigurationOptions()) is not {} options)
+            {
+                throw new Exception("Failed to read configuration settings.");
+            }
+
+            _settings = options;
+
+            return options;
+        }
     }
 
     public static void Set(ConfigurationOptions options)
     {
-        SaveConfig("settings", options);
+        lock (SettingsLock)
+        {
+            SaveConfig("settings", options);
+            _settings = options;
+        }
     }
 
     public static TConfig GetConfigFromPath<TConfig>(string filename, TConfig defaultValue)
@@ -73,11 +91,26 @@ public class Configuration
             }
 
             Directory.CreateDirectory(directory);
-            File.WriteAllText(path, json);
+            WriteAtomically(path, json);
         }
         catch (Exception ex)
         {
-            throw new Exception($"unable to read config for file {filename}", ex);
+            throw new Exception($"unable to save config for file {filename}", ex);
+        }
+    }
+
+    private static void WriteAtomically(string path, string content)
+    {
+        var stagingPath = $"{path}.{Guid.NewGuid():N}.tmp";
+
+        try
+        {
+            File.WriteAllText(stagingPath, content);
+            File.Move(stagingPath, path, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(stagingPath);
         }
     }
 }

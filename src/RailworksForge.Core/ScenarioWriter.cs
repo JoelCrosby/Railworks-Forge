@@ -8,46 +8,43 @@ namespace RailworksForge.Core;
 
 public static class ScenarioWriter
 {
+    // A distinct name so a Scenario.bin.xml the user exported next to the scenario isn't overwritten.
+    private const string StagingXmlFilename = "Scenario.forge-staging.bin.xml";
+
     public static async Task WriteBinary(Scenario scenario, IDocument document)
     {
-        const string filename = "Scenario.bin.xml";
-        const string binFilename = "Scenario.bin";
+        Directory.CreateDirectory(scenario.DirectoryPath);
 
-        var destination = GetScenarioPathForFilename(scenario, filename);
-        var binDestination = GetScenarioPathForFilename(scenario, binFilename);
+        var binDestination = Path.Join(scenario.DirectoryPath, "Scenario.bin");
+        var stagingXmlPath = Path.Join(scenario.DirectoryPath, StagingXmlFilename);
 
-        File.Delete(destination);
+        try
+        {
+            await document.ToXmlAsync(stagingXmlPath);
 
-        await document.ToXmlAsync(destination);
+            var converted = await Serz.Convert(stagingXmlPath, force: true);
 
-        File.Delete(binDestination);
-
-        var converted = await Serz.Convert(destination, force: true);
-
-        File.Copy(converted.OutputPath, binDestination);
-
-        File.Delete(converted.OutputPath);
-        File.Delete(destination);
+            File.Move(converted.OutputPath, binDestination, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(stagingXmlPath);
+        }
 
         await Paths.CreateMd5HashFile(binDestination);
     }
 
     public static async Task WritePropertiesDocument(Scenario scenario, IDocument document)
     {
-        const string filename = "ScenarioProperties.xml";
+        Directory.CreateDirectory(scenario.DirectoryPath);
 
-        var destination = GetScenarioPathForFilename(scenario, filename);
+        var destination = Path.Join(scenario.DirectoryPath, "ScenarioProperties.xml");
+        var stagingPath = $"{destination}.forge-staging";
 
-        File.Delete(destination);
+        await document.ToXmlAsync(stagingPath);
 
-        await document.ToXmlAsync(destination);
+        File.Move(stagingPath, destination, overwrite: true);
+
         await Paths.CreateMd5HashFile(destination);
-    }
-
-    private static string GetScenarioPathForFilename(Scenario scenario, string filename)
-    {
-        return scenario.PackagingType is PackagingType.Unpacked
-            ? Path.Join(scenario.DirectoryPath, filename)
-            : Path.Join(scenario.DirectoryPath, "Scenarios", scenario.Id, filename);
     }
 }

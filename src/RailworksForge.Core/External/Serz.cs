@@ -25,38 +25,54 @@ public class Serz
         var isBin = Path.GetExtension(inputPath) == ".bin";
         var outputPath = Paths.GetAssetCachePath(inputPath, isBin);
 
-        if (force is false && File.Exists(outputPath))
+        var hasCachedOutput = File.Exists(outputPath);
+        var isCacheCurrent = hasCachedOutput && File.GetLastWriteTimeUtc(outputPath) >= File.GetLastWriteTimeUtc(inputPath);
+
+        if (force is false && isCacheCurrent)
         {
             return new ConvertedSerzFile(outputPath);
         }
 
+        // Converted into a unique temporary file and moved into place, so a cancelled, failed or concurrent
+        // conversion never leaves a partial file that a later call would trust as a cache hit.
+        var outputDirectory = Path.GetDirectoryName(outputPath)!;
+        var temporaryFilename = $"{Path.GetFileNameWithoutExtension(outputPath)}.{Guid.NewGuid():N}{Path.GetExtension(outputPath)}";
+        var temporaryOutputPath = Path.Join(outputDirectory, temporaryFilename);
+
         var inputArg = inputPath.ToWindowsPath();
         var outputType = isBin ? "xml" : "bin";
-        var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
+        var outputArg = @$"\{outputType}: {temporaryOutputPath.ToWindowsPath()}";
 
         var sw = Stopwatch.StartNew();
 
         var useInternalSerz = isBin && Configuration.Get().UseInternalSerz;
 
-        if (useInternalSerz)
+        try
         {
-            await Task.Run(() => SerzInternal.Convert(inputPath, outputPath, token), token);
+            if (useInternalSerz)
+            {
+                await Task.Run(() => SerzInternal.Convert(inputPath, temporaryOutputPath, token), token);
+            }
+            else
+            {
+                await RunSerz(inputArg, outputArg, token);
+            }
+
+            if (!File.Exists(temporaryOutputPath))
+            {
+                throw new Exception("Serz execution failed");
+            }
+
+            File.Move(temporaryOutputPath, outputPath, overwrite: true);
         }
-        else
+        finally
         {
-            await RunSerz(inputArg, outputArg, token);
+            File.Delete(temporaryOutputPath);
         }
 
         Log.Debug("converted file {Input} to {Format} in {Ms}ms", inputArg.ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
 
         sw.Stop();
-
-        var isSuccess = Paths.Exists(outputPath);
-
-        if (!isSuccess)
-        {
-            throw new Exception("Serz execution failed");
-        }
 
         return new ConvertedSerzFile(outputPath);
     }
