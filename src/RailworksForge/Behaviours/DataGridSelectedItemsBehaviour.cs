@@ -45,11 +45,35 @@ public class DataGridSelectedItemsBehaviour : StyledElementBehavior<DataGrid>
             return;
         }
 
-        SelectedItems.Clear();
-
-        foreach (var item in AssociatedObject.SelectedItems)
+        // Applying just the change keeps a single click from re-adding every selected row, each of which notifies.
+        foreach (var item in e.RemovedItems)
         {
-            SelectedItems.Add(item);
+            SelectedItems.Remove(item);
+        }
+
+        foreach (var item in e.AddedItems)
+        {
+            if (!SelectedItems.Contains(item))
+            {
+                SelectedItems.Add(item);
+            }
+        }
+
+        var isInSync = SelectedItems.Count == AssociatedObject.SelectedItems.Count;
+
+        if (!isInSync)
+        {
+            RebuildSelectedItems(AssociatedObject, SelectedItems);
+        }
+    }
+
+    private static void RebuildSelectedItems(DataGrid dataGrid, IList selectedItems)
+    {
+        selectedItems.Clear();
+
+        foreach (var item in dataGrid.SelectedItems)
+        {
+            selectedItems.Add(item);
         }
     }
 }

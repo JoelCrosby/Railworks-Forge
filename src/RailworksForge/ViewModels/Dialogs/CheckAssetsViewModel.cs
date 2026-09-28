@@ -16,7 +16,7 @@ public partial class CheckAssetsViewModel(Route route, RouteAssetCheckService as
 {
     public Route Route { get; } = route;
 
-    public ObservableCollection<Blueprint> Blueprints { get; } = [];
+    public RangeObservableCollection<Blueprint> Blueprints { get; } = [];
 
     [ObservableProperty]
     public partial int LoadingProgress { get; set; }

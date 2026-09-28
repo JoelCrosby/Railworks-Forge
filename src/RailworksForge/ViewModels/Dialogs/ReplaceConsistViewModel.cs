@@ -21,9 +21,9 @@ public partial class ReplaceConsistViewModel(
 {
     public LoadingOperation StockLoading { get; } = new();
 
-    public ObservableCollection<BrowserDirectory> DirectoryTree { get; } = [];
+    public RangeObservableCollection<BrowserDirectory> DirectoryTree { get; } = [];
 
-    public ObservableCollection<PreloadConsistViewModel> PreloadConsists { get; } = [];
+    public RangeObservableCollection<PreloadConsistViewModel> PreloadConsists { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(OpenInExplorerCommand))]

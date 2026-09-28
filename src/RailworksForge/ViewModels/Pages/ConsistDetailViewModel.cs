@@ -31,7 +31,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public SearchableCollection<BrowserDirectory> DirectoryTree { get; } = new(MatchesDirectory);
 
-    public ObservableCollection<RollingStockEntry> AvailableStock { get; } = [];
+    public RangeObservableCollection<RollingStockEntry> AvailableStock { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(OpenInExplorerCommand))]

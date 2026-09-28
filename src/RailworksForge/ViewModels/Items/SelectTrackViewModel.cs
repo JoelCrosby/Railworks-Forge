@@ -16,9 +16,9 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
 {
     public List<DirectoryItem> Providers { get; init; } = [];
 
-    public ObservableCollection<DirectoryItem> Products { get; } = [];
+    public RangeObservableCollection<DirectoryItem> Products { get; } = [];
 
-    public ObservableCollection<Track> Tracks { get; } = [];
+    public RangeObservableCollection<Track> Tracks { get; } = [];
 
     [ObservableProperty]
     public partial DirectoryItem? SelectedProvider { get; set; }
