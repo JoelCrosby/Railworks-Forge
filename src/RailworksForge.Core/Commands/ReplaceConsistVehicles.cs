@@ -2,8 +2,6 @@ using RailworksForge.Core.Commands.Common;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
-using Serilog;
-
 namespace RailworksForge.Core.Commands;
 
 public class ReplaceConsistVehicles : IConsistCommand
@@ -16,13 +14,6 @@ public class ReplaceConsistVehicles : IConsistCommand
     }
 
     public async Task Run(ConsistCommandContext context)
-    {
-        await GetUpdatedScenario(context);
-
-        GetUpdatedScenarioProperties(context);
-    }
-
-    private async Task GetUpdatedScenario(ConsistCommandContext context)
     {
         var document = context.ScenarioDocument;
 
@@ -46,28 +37,35 @@ public class ReplaceConsistVehicles : IConsistCommand
 
             var blueprint = replacement.Replacement.Blueprint;
             var flipped = replacement.Target.Flipped;
+            var isLeadVehicle = railVehicle.ParentElement?.FirstElementChild == railVehicle;
+            var previousNumber = railVehicle.SelectTextContent("UniqueNumber");
 
             var vehicleDocument = await blueprint.GetXmlDocument();
-
             var scenarioConsist = ScenarioConsist.ParseConsist(vehicleDocument, blueprint);
-            var replacementEl = await VehicleGenerator.GenerateVehicle(document, railVehicle, scenarioConsist, blueprint, flipped);
+            var generated = await VehicleGenerator.GenerateVehicle(
+                document,
+                railVehicle,
+                scenarioConsist,
+                blueprint,
+                flipped,
+                previousNumber);
 
-            railVehicle.Replace(replacementEl.Element);
-        }
-    }
+            railVehicle.Replace(generated.Element);
 
-    private void GetUpdatedScenarioProperties(ConsistCommandContext context)
-    {
-        var document = context.ScenarioPropertiesDocument;
-        var consist = _request.Consist;
+            var numberChanged = !string.IsNullOrEmpty(previousNumber) && previousNumber != generated.Number;
 
-        var serviceElement = document
-            .QuerySelectorAll("sDriverFrontEndDetails")
-            .QueryByTextContent("ServiceName Key", _request.Consist.ServiceId);
+            if (numberChanged)
+            {
+                ServiceVehicleUpdates.RenameInitialVehicleNumber(serviceConsist, previousNumber, generated.Number);
+                ServiceVehicleUpdates.RenameInstructionTargets(document, previousNumber, generated.Number);
+            }
 
-        if (serviceElement is null)
-        {
-            Log.Warning("Could not find service {Service} in scenario properties file", consist.ServiceName);
+            ServiceVehicleUpdates.AddRequiredBlueprintSet(context.ScenarioPropertiesDocument, blueprint);
+
+            if (isLeadVehicle)
+            {
+                ServiceVehicleUpdates.UpdateLeadVehicle(context.ScenarioPropertiesDocument, _request.Consist, replacement.Replacement);
+            }
         }
     }
 }

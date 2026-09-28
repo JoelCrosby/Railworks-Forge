@@ -7,10 +7,11 @@ namespace RailworksForge.Core;
 
 public class ConsistEditService
 {
-    public Task AddVehicle(Scenario scenario, RollingStockEntry vehicle)
+    public Task AddVehicle(Scenario scenario, Consist consist, RollingStockEntry vehicle)
     {
         var request = new AddConsistVehicleRequest
         {
+            Consist = consist,
             VehicleToAdd = vehicle,
         };
 

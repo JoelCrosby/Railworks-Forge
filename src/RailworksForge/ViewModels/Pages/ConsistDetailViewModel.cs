@@ -183,7 +183,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         var vehicle = SelectedVehicle!;
 
-        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.AddVehicle(_scenario, vehicle));
+        await Loading.RunAsync(Strings.updating_consist.CurrentValue, _ => _consistEdits.AddVehicle(_scenario, _consist, vehicle));
         await ReloadAfterEdit();
     }
 

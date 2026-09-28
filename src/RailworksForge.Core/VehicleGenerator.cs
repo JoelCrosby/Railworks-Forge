@@ -4,16 +4,23 @@ using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
 
+using Serilog;
+
 namespace RailworksForge.Core;
 
 public record GeneratedVehicle(IElement Element, string Number);
 
 public class VehicleGenerator
 {
-    public static async Task<GeneratedVehicle> GenerateVehicle(IDocument document, IElement prevElem, ScenarioConsist vehicle, Blueprint blueprint, bool flipped)
+    public static async Task<GeneratedVehicle> GenerateVehicle(
+        IDocument document,
+        IElement prevElem,
+        ScenarioConsist vehicle,
+        Blueprint blueprint,
+        bool flipped,
+        string? fallbackNumber = null)
     {
-        var vehicleType = await GetConsistEntryVehicleType(blueprint);
-        var xml = VehicleTemplates.GetXml(vehicleType);
+        var xml = VehicleTemplates.GetXml(vehicle.BlueprintType);
         var doc = await XmlParser.ParseDocumentAsync(xml);
         var cOwnedEntity = doc.DocumentElement;
 
@@ -53,38 +60,12 @@ public class VehicleGenerator
 
         cOwnedEntity.UpdateTextElement("Name", vehicle.Name!);
 
-        var originalNumber = cOwnedEntity.SelectTextContent("UniqueNumber");
-        var number = vehicle.Number ?? GetAvailableNumber(vehicle, blueprint);
+        var templateNumber = cOwnedEntity.SelectTextContent("UniqueNumber");
+        var number = vehicle.Number ?? GetAvailableNumber(vehicle, blueprint) ?? fallbackNumber ?? templateNumber;
 
         cOwnedEntity.UpdateTextElement("UniqueNumber", number);
 
-        UpdateOperationNumbers(doc, number, originalNumber);
-
         return new GeneratedVehicle(cOwnedEntity, number);
-    }
-
-    private static async Task<BlueprintType> GetConsistEntryVehicleType(Blueprint blueprint)
-    {
-        var document = await blueprint.GetXmlDocument();
-        var elementName = document.QuerySelector("Blueprint")?.FirstElementChild?.NodeName;
-
-        return Utilities.ParseBlueprintType(elementName);
-    }
-
-    private static void UpdateOperationNumbers(IDocument doc, string number, string originalNumber)
-    {
-        var cConsistOperations = doc.QuerySelector("cConsistOperations");
-
-        if (cConsistOperations is null) return;
-
-        var operationTargetNumbers = cConsistOperations
-            .QuerySelectorAll("DeltaTarget cDriverInstructionTarget RailVehicleNumber e")
-            .Where(item => item.Text() == originalNumber);
-
-        foreach (var targetNumber in operationTargetNumbers)
-        {
-            targetNumber.SetTextContent(number);
-        }
     }
 
     private static void UpdateMass(IElement cOwnedEntity, ScenarioConsist consist)
@@ -95,11 +76,14 @@ public class VehicleGenerator
         }
     }
 
-    private static string GetAvailableNumber(ScenarioConsist vehicle, Blueprint blueprint)
+    private static string? GetAvailableNumber(ScenarioConsist vehicle, Blueprint blueprint)
     {
         var path = vehicle.NumberingListPath;
 
-        if (path is null) throw new Exception("could not find path for numbers csv");
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
 
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar) + ".dcsv";
         var filepath = Path.Join(Paths.GetAssetsDirectory(), normalisedPath);
@@ -109,13 +93,23 @@ public class VehicleGenerator
 
         if (text is null)
         {
-            throw new Exception($"could not find part of path '{path}'");
+            Log.Warning("Could not find numbering list {Path}", path);
+            return null;
         }
 
         var document = XmlParser.ParseDocument(text);
-        var element = document.QuerySelector("cCSVItem Name");
+        var numbers = document
+            .QuerySelectorAll("cCSVItem Name")
+            .Select(element => element.TextContent)
+            .Where(number => !string.IsNullOrWhiteSpace(number))
+            .ToList();
 
-        return element?.TextContent ?? throw new Exception($"could not read number from csv in path '{filepath}'");
+        if (numbers.Count is 0)
+        {
+            return null;
+        }
+
+        return numbers[Random.Shared.Next(numbers.Count)];
 
         string? GetCompressedText()
         {

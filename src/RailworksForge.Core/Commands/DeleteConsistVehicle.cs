@@ -1,11 +1,7 @@
-using AngleSharp.Dom;
-
 using RailworksForge.Core.Commands.Common;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 using RailworksForge.Core.Models.Common;
-
-using Serilog;
 
 namespace RailworksForge.Core.Commands;
 
@@ -20,11 +16,6 @@ public class DeleteConsistVehicle : IConsistCommand
 
     public async Task Run(ConsistCommandContext context)
     {
-        await UpdatedScenario(context);
-    }
-
-    private async Task UpdatedScenario(ConsistCommandContext context)
-    {
         var document = context.ScenarioDocument;
 
         var serviceConsist = Consist.GetServiceConsist(document, _request.Consist);
@@ -34,77 +25,50 @@ public class DeleteConsistVehicle : IConsistCommand
             throw new Exception("unable to find scenario consist");
         }
 
-        var railVehicle = serviceConsist.QuerySelector($"RailVehicles cOwnedEntity[id='{_request.VehicleToDelete.Id}']");
+        var railVehicle = serviceConsist
+            .QuerySelectorAll("RailVehicles cOwnedEntity")
+            .FirstOrDefault(el => el.GetAttribute("d:id") == _request.VehicleToDelete.Id);
 
         if (railVehicle is null)
         {
             throw new Exception("unable to find rail vehicle in scenario document");
         }
 
+        var wasLeadVehicle = railVehicle.ParentElement?.FirstElementChild == railVehicle;
+        var number = railVehicle.SelectTextContent("UniqueNumber");
+
         railVehicle.Remove();
 
-        if (railVehicle.Index() is 0)
+        if (!string.IsNullOrEmpty(number))
         {
-            var entry = serviceConsist.QuerySelector("RailVehicles")?.FirstElementChild;
-
-            if (entry is null) return;
-
-            var blueprint = new Blueprint
-            {
-                BlueprintSetIdProvider = entry.SelectTextContent("Provider"),
-                BlueprintSetIdProduct = entry.SelectTextContent("Product"),
-                BlueprintId = entry.SelectTextContent("BlueprintID"),
-            };
-
-            var vehicleDocument = await blueprint.GetXmlDocument();
-            var vehicleElement = vehicleDocument.DocumentElement;
-            var consistVehicle = RollingStockEntry.Parse(vehicleElement, blueprint);
-
-            UpdateScenarioProperties(context, consistVehicle);
-        }
-    }
-
-    private void UpdateScenarioProperties(ConsistCommandContext context, RollingStockEntry vehicle)
-    {
-        var document = context.ScenarioPropertiesDocument;
-        var consist = _request.Consist;
-
-        var serviceElement = document
-            .QuerySelectorAll("sDriverFrontEndDetails")
-            .QueryByTextContent("ServiceName Key", _request.Consist.ServiceId);
-
-        if (serviceElement is null)
-        {
-            Log.Warning("Could not find service {Service} in scenario properties file", consist.ServiceName);
-            return;
+            ServiceVehicleUpdates.RemoveInitialVehicleNumber(serviceConsist, number);
         }
 
-        UpdateBlueprint(serviceElement, vehicle);
-        UpdateFilePath(serviceElement, vehicle);
-    }
-
-    private static void UpdateBlueprint(IElement serviceElement, RollingStockEntry vehicle)
-    {
-        serviceElement.UpdateTextElement("LocoName Key", Guid.NewGuid().ToString());
-        serviceElement.UpdateTextElement("LocoName English", vehicle.LocomotiveName);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID", vehicle.Blueprint.BlueprintId);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Provider", vehicle.Blueprint.BlueprintSetIdProvider);
-        serviceElement.UpdateTextElement("LocoBP iBlueprintLibrary-cAbsoluteBlueprintID BlueprintSetID iBlueprintLibrary-cBlueprintSetID Product", vehicle.Blueprint.BlueprintSetIdProduct);
-        serviceElement.UpdateTextElement("LocoAuthor", vehicle.Blueprint.BlueprintSetIdProvider);
-    }
-
-    private static void UpdateFilePath(IElement serviceElement, RollingStockEntry vehicle)
-    {
-        if (serviceElement.QuerySelector("FilePath") is not { } filePath)
+        if (!wasLeadVehicle)
         {
             return;
         }
 
-        var parts = vehicle.Blueprint.BlueprintId.Split('\\');
-        var partsWithoutFilename = parts[..^1];
-        var blueprintDirectory = string.Join('\\', partsWithoutFilename);
-        var packagedPath = $@"{vehicle.Blueprint.BlueprintSetIdProvider}\{vehicle.Blueprint.BlueprintSetIdProduct}\{blueprintDirectory}";
+        var entry = serviceConsist.QuerySelector("RailVehicles")?.FirstElementChild;
 
-        filePath.SetTextContent(packagedPath);
+        if (entry is null)
+        {
+            return;
+        }
+
+        const string absoluteBlueprintId = "BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID";
+
+        var blueprint = new Blueprint
+        {
+            BlueprintSetIdProvider = entry.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Provider"),
+            BlueprintSetIdProduct = entry.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Product"),
+            BlueprintId = entry.SelectTextContent($"{absoluteBlueprintId} BlueprintID"),
+        };
+
+        var vehicleDocument = await blueprint.GetXmlDocument();
+        var vehicleElement = vehicleDocument.DocumentElement;
+        var leadVehicle = RollingStockEntry.Parse(vehicleElement, blueprint);
+
+        ServiceVehicleUpdates.UpdateLeadVehicle(context.ScenarioPropertiesDocument, _request.Consist, leadVehicle);
     }
 }

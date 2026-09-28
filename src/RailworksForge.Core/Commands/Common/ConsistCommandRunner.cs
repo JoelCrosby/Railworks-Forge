@@ -10,6 +10,8 @@ public class ConsistCommandRunner
 
     public async Task Run()
     {
+        using var scenarioLock = await ScenarioLocks.Acquire(Scenario);
+
         var scenarioPropertiesDocument = await Scenario.GetPropertiesXmlDocument();
         var scenarioDocument = await Scenario.GetXmlDocument(false);
 

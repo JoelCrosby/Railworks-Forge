@@ -19,11 +19,23 @@ public class ReplaceConsist : IConsistCommand
         _request = request;
     }
 
+    private const int MaxParallelConversions = 4;
+
     public async Task Run(ConsistCommandContext context)
     {
+        await WarmBlueprintDocuments();
         await GetUpdatedScenario(context);
 
         GetUpdatedScenarioProperties(context);
+    }
+
+    // Each distinct blueprint is converted once up front; the per-vehicle lookups afterwards hit the Serz cache.
+    private async Task WarmBlueprintDocuments()
+    {
+        var distinctEntries = _request.PreloadConsist.ConsistEntries.DistinctBy(entry => entry.Blueprint).ToList();
+        var options = new ParallelOptions { MaxDegreeOfParallelism = MaxParallelConversions };
+
+        await Parallel.ForEachAsync(distinctEntries, options, async (entry, _) => await entry.GetXmlDocument());
     }
 
     private async Task GetUpdatedScenario(ConsistCommandContext context)
@@ -57,8 +69,6 @@ public class ReplaceConsist : IConsistCommand
                 throw new Exception("unable to clone first blueprint");
             }
 
-            await Parallel.ForEachAsync(preload.ConsistEntries, async (entry, _) => await entry.GetXmlDocument());
-
             var selectedConsistLength = preload.ConsistEntries.Count;
 
             foreach (var node in blueprintNodes)
@@ -73,7 +83,7 @@ public class ReplaceConsist : IConsistCommand
 
             if (initialRv is not null)
             {
-                foreach (var child in initialRv.Children)
+                foreach (var child in initialRv.Children.ToList())
                 {
                     child.RemoveFromParent();
                 }
