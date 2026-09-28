@@ -71,60 +71,53 @@ public partial class Blueprint
     [SepColumnIgnore]
     public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
 
-    private static readonly Dictionary<string, Blueprint> BlueprintCache = new ();
-
     public async Task<IDocument> GetXmlDocument(bool force = false)
     {
         if (Paths.Exists(BlueprintBinaryPath))
         {
             var converted = await Serz.Convert(BlueprintBinaryPath, force: force);
-            var file = File.OpenRead(converted.OutputPath);
 
-            return await XmlParser.ParseDocumentAsync(file);
+            return await ParseXmlFile(converted.OutputPath);
         }
 
         var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
 
         foreach (var archive in archives)
         {
-            var destination = Path.Join(Paths.CacheOutputPath, RelativeBinaryPath);
-            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, destination);
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, ArchivedBinaryCachePath);
 
             if (extracted)
             {
-                var result = await Serz.Convert(destination);
-                var file = File.OpenRead(result.OutputPath);
+                var result = await Serz.Convert(ArchivedBinaryCachePath);
 
-                return await XmlParser.ParseDocumentAsync(file);
+                return await ParseXmlFile(result.OutputPath);
             }
         }
 
         throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
     }
 
-    public IDocument GetBlueprintXmlInternal()
+    private static async Task<IDocument> ParseXmlFile(string path)
     {
-        if (Paths.Exists(BlueprintBinaryPath))
-        {
-            var data = File.ReadAllBytes(BlueprintBinaryPath);
-            return new SerzInternal(ref data).ToXml();
-        }
+        await using var file = File.OpenRead(path);
 
-        var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
-
-        foreach (var archive in archives)
-        {
-            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, BlueprintBinaryPath);
-
-            if (extracted)
-            {
-                var data = File.ReadAllBytes(BlueprintBinaryPath);
-                return new SerzInternal(ref data).ToXml();
-            }
-        }
-
-        throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
+        return await XmlParser.ParseDocumentAsync(file);
     }
+
+    // Keyed by provider and product as well, since different products commonly ship the same relative path.
+    [SepColumnIgnore]
+    private string ArchivedBinaryCachePath => Path.Join(
+        Paths.CacheOutputPath,
+        "archived-blueprints",
+        BlueprintSetIdProvider,
+        BlueprintSetIdProduct,
+        RelativeBinaryPath
+    );
+
+    [SepColumnIgnore]
+    private string AcquisitionCacheKey => Path
+        .Join(BlueprintSetIdProvider, BlueprintSetIdProduct, RelativeBinaryPath)
+        .NormalisePath();
 
     [SepColumnIgnore]
     private string ProductDirectory => Path.Join(
@@ -144,14 +137,14 @@ public partial class Blueprint
 
     private AcquisitionState GetAcquisitionState()
     {
-        if (Cache.BlueprintAcquisitionStates.GetValueOrDefault(RelativeBinaryPath) is {} cached)
+        if (Cache.BlueprintAcquisitionStates.GetValueOrDefault(AcquisitionCacheKey) is {} cached)
         {
             return cached;
         }
 
         var state = LoadAcquisitionState();
 
-        Cache.BlueprintAcquisitionStates.TryAdd(RelativeBinaryPath, state);
+        Cache.BlueprintAcquisitionStates.TryAdd(AcquisitionCacheKey, state);
 
         return state;
     }
@@ -184,7 +177,9 @@ public partial class Blueprint
         {
             if (Paths.GetActualPathFromInsensitive(ProductDirectory) is {} actualProductDirectory)
             {
-                var archives = Directory.EnumerateFiles(actualProductDirectory, "*.ap", SearchOption.AllDirectories).ToList();
+                var archives = Cache.ProductArchives.GetOrAdd(
+                    actualProductDirectory,
+                    directory => Directory.EnumerateFiles(directory, "*.ap", SearchOption.AllDirectories).ToList());
 
                 Log.Debug("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
 
@@ -201,25 +196,15 @@ public partial class Blueprint
     public static Blueprint Parse(IElement el)
     {
         var blueprintId = el.SelectTextContent("BlueprintID");
-
-        if (BlueprintCache.GetValueOrDefault(blueprintId) is {} cached)
-        {
-            return cached;
-        }
-
         var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
         var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
 
-        var result = new Blueprint
+        return new Blueprint
         {
             BlueprintId = blueprintId,
             BlueprintSetIdProduct = blueprintSetIdProduct,
             BlueprintSetIdProvider = blueprintSetIdProvider,
         };
-
-        BlueprintCache.Add(blueprintId, result);
-
-        return result;
     }
 
     public static Blueprint FromPath(string path)

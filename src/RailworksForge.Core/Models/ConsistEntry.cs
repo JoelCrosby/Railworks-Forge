@@ -1,7 +1,6 @@
 using AngleSharp.Dom;
 
 using RailworksForge.Core.Exceptions;
-using RailworksForge.Core.External;
 using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Models;
@@ -29,50 +28,22 @@ public class ConsistEntry
             return _xmlDocument;
         }
 
-        var path = await ConvertBinToXml();
-        var sensitivePath = Paths.GetActualPathFromInsensitive(path);
+        var looseXmlPath = Paths.GetActualPathFromInsensitive(BinaryXmlPath);
 
-        if (sensitivePath is null)
-        {
-            throw new Exception($"failed to find part of path {path}");
-        }
+        _xmlDocument = looseXmlPath is not null
+            ? await ParseXmlFile(looseXmlPath)
+            : await Blueprint.GetXmlDocument();
 
-        var file = File.OpenRead(sensitivePath);
+        return _xmlDocument;
+    }
+
+    private static async Task<IDocument> ParseXmlFile(string path)
+    {
+        await using var file = File.OpenRead(path);
         var document = await XmlParser.ParseDocumentAsync(file);
 
         XmlException.ThrowIfNotExists(document, path);
 
-        _xmlDocument = document;
-
         return document;
     }
-
-    private async Task<string> ConvertBinToXml()
-    {
-        if (Paths.Exists(BinaryXmlPath))
-        {
-            return BinaryXmlPath;
-        }
-
-        var inputPath = HasBinary ? BinaryPath : ExtractBinary();
-        var result = await Serz.Convert(inputPath);
-
-        return result.OutputPath;
-    }
-
-    private string ExtractBinary()
-    {
-        var destination = Path.Join(ProductPath, BlueprintIdPath);
-        var archives = Directory.EnumerateFiles(ProductPath, "*.ap");
-        var archivePath = BlueprintIdPath.StartsWith('/') ? BlueprintIdPath.Remove(1) : BlueprintIdPath;
-
-        foreach (var archive in archives)
-        {
-            Archives.ExtractFileContentFromPath(archive, archivePath, destination);
-        }
-
-        return destination;
-    }
-
-    private bool HasBinary => Paths.Exists(BinaryPath);
 }
