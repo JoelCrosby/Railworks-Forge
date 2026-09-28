@@ -10,7 +10,8 @@
         x:Class="RailworksForge.Views.Dialogs.ConfirmationDialog"
         x:DataType="vm:ConfirmationDialogViewModel"
         Width="460"
-        Height="186"
+        SizeToContent="Height"
+        MinHeight="186"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}">
@@ -25,7 +26,7 @@
             </Border>
 
             <Border Grid.Column="0" Grid.Row="1" Padding="12">
-                <TextBlock Text="{Binding BodyText}" />
+                <TextBlock Text="{Binding BodyText}" TextWrapping="Wrap" />
             </Border>
 
             <Border Grid.Column="0" Grid.Row="2" Padding="12">

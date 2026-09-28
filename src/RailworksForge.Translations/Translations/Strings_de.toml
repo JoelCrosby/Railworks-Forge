@@ -183,3 +183,45 @@ use_internal_serz_description = 'BIN-Dateien ohne das Spielprogramm konvertieren
 vehicle = 'Fahrzeug'
 vehicle_flipped = 'Fahrzeug ist gedreht'
 view = 'Ansicht'
+
+vehicle_searching = 'Fahrzeuge werden gesucht…'
+
+vehicle_indexing = 'Installierte Fahrzeuge werden indiziert…'
+
+vehicle_search_hint = 'Name, Anbieter, Produkt oder Blueprint suchen…'
+
+vehicle_refresh = 'Fahrzeugindex aktualisieren'
+
+vehicle_load_more = 'Weitere Fahrzeuge anzeigen'
+
+vehicle_matches = 'Gefundene Fahrzeuge'
+
+vehicle_index_cancelled = 'Indizierung abgebrochen. Vorheriger Index bleibt erhalten.'
+
+vehicle_index_progress = 'Geprüfte Quellen: {0} · Fahrzeuge: {1} · Übersprungen: {2}'
+
+vehicle_no_matches = 'Keine passenden Fahrzeuge. Suche ändern oder den Index über die Schaltfläche erstellen oder aktualisieren.'
+
+vehicle_index = 'Fahrzeugindex'
+
+vehicle_type_engine = 'Lok'
+
+vehicle_type_wagon = 'Wagen'
+
+vehicle_type_tender = 'Tender'
+
+vehicle_loading_directories = 'Asset-Verzeichnisse werden geladen…'
+
+vehicle_start_indexing = 'Indizierung starten'
+
+vehicle_index_confirmation = 'Die Indizierung durchsucht alle installierten Assets und kann bei einer großen Sammlung lange dauern. Sie können den Scan abbrechen und den bisherigen Index behalten. Jetzt starten?'
+
+vehicle_index_discovering = 'Asset-Dateien werden gezählt…'
+
+vehicle_index_saving = 'Fahrzeugindex wird gespeichert…'
+
+vehicle_index_complete = 'Indizierung abgeschlossen'
+
+vehicle_index_files = 'Gescannte Dateien: {0} von {1} (.bin und .ap)'
+
+vehicle_index_duration = 'Das Scannen einer großen Sammlung kann lange dauern. Beim Abbrechen bleibt der bisherige Index erhalten.'

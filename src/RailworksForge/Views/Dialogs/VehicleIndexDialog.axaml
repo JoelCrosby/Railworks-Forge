@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+        x:Class="RailworksForge.Views.Dialogs.VehicleIndexDialog"
+        x:DataType="vm:VehicleIndexDialogViewModel"
+        Width="560" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="{echoes:Translate {x:Static translations:Strings.vehicle_indexing}}">
+    <StackPanel Margin="24" Spacing="16">
+        <TextBlock Text="{Binding Status}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+        <TextBlock Text="{echoes:Translate {x:Static translations:Strings.vehicle_index_duration}}" TextWrapping="Wrap" />
+        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}"
+                     IsIndeterminate="{Binding IsDiscovering}" Height="20" ShowProgressText="True" />
+        <TextBlock Text="{Binding FileProgress}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding Loading.ErrorMessage}" IsVisible="{Binding Loading.HasError}" TextWrapping="Wrap" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="{echoes:Translate {x:Static translations:Strings.cancel}}"
+                    Command="{Binding CancelIndexingCommand}" IsVisible="{Binding Loading.IsLoading}" />
+            <Button Content="{echoes:Translate {x:Static translations:Strings.close}}"
+                    Command="{Binding DismissCommand}" IsVisible="{Binding Loading.IsIdle}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

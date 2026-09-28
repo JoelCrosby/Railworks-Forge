@@ -188,3 +188,45 @@ use_internal_serz_description = 'Convert BIN files without the game executable. 
 vehicle = 'Vehicle'
 vehicle_flipped = 'Vehicle is flipped'
 view = 'View'
+
+vehicle_searching = 'Searching vehicles…'
+
+vehicle_indexing = 'Indexing installed vehicles…'
+
+vehicle_search_hint = 'Search name, provider, product or blueprint…'
+
+vehicle_refresh = 'Refresh vehicle index'
+
+vehicle_load_more = 'Show more vehicles'
+
+vehicle_matches = 'Matching vehicles'
+
+vehicle_index_cancelled = 'Indexing cancelled. Previous index retained.'
+
+vehicle_index_progress = 'Sources checked: {0} · Vehicles: {1} · Skipped: {2}'
+
+vehicle_no_matches = 'No matching vehicles. Try another search or use the indexing button to build or update the index.'
+
+vehicle_index = 'Vehicle index'
+
+vehicle_type_engine = 'Engine'
+
+vehicle_type_wagon = 'Wagon'
+
+vehicle_type_tender = 'Tender'
+
+vehicle_loading_directories = 'Loading asset directories…'
+
+vehicle_start_indexing = 'Start indexing'
+
+vehicle_index_confirmation = 'Indexing scans all installed assets and can take a long time, especially with a large library. You can cancel the scan and keep the previous index. Start indexing now?'
+
+vehicle_index_discovering = 'Counting asset files…'
+
+vehicle_index_saving = 'Saving vehicle index…'
+
+vehicle_index_complete = 'Indexing complete'
+
+vehicle_index_files = 'Files scanned: {0} of {1} (.bin and .ap)'
+
+vehicle_index_duration = 'Scanning a large asset library can take a long time. Cancelling keeps the previous completed index.'

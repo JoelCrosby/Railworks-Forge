@@ -77,6 +77,7 @@ public class App : Application
         services.AddSingleton<RouteService>();
         services.AddSingleton<TrackService>();
         services.AddSingleton<RollingStockService>();
+        services.AddSingleton<VehicleIndexService>();
         services.AddSingleton<PreloadConsistService>();
         services.AddSingleton<ConsistEditService>();
         services.AddSingleton<RouteAssetCheckService>();
@@ -112,6 +113,7 @@ public class App : Application
 
         ViewLocator.Register<CheckAssetsViewModel, CheckAssetsDialog>();
         ViewLocator.Register<ConfirmationDialogViewModel, ConfirmationDialog>();
+        ViewLocator.Register<VehicleIndexDialogViewModel, VehicleIndexDialog>();
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();

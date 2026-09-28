@@ -18,6 +18,14 @@ public class Cache
 
     public static readonly ConcurrentDictionary<string, List<string>> ProductArchives = new(StringComparer.OrdinalIgnoreCase);
 
+    public static readonly IReadOnlyList<string> RebuildableGameCacheFiles =
+    [
+        "RVDBCache.bin",
+        "RVDBCache.bin.MD5",
+        "TMCache.dat",
+        "TMCache.dat.MD5",
+    ];
+
     public static void ClearAcquisitionStates()
     {
         BlueprintAcquisitionStates.Clear();
@@ -44,17 +52,7 @@ public class Cache
 
         var directory = Paths.GetContentDirectory();
 
-        var files = new []
-        {
-            "RVDBCache.bin",
-            "RVDBCache.bin.MD5",
-            "SDBCache.bin",
-            "SDBCache.bin.MD5",
-            "TMCache.dat",
-            "TMCache.dat.MD5",
-        };
-
-        foreach (var file in files)
+        foreach (var file in RebuildableGameCacheFiles)
         {
             TryDeleteFile(directory, file);
         }

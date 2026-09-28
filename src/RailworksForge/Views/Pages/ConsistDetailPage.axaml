@@ -11,145 +11,211 @@
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+             xmlns:converters="using:RailworksForge.Converters"
              mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="620"
              x:Class="RailworksForge.Views.Pages.ConsistDetailPage"
              x:DataType="vm:ConsistDetailViewModel">
 
 
-    <Grid ColumnDefinitions="2*, 4, *">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="240" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="300" MinHeight="140" />
+        </Grid.RowDefinitions>
 
-        <Panel Grid.Column="0">
-            <DockPanel IsEnabled="{Binding Loading.IsIdle}">
-                <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}">
-                    <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
+        <Grid ColumnDefinitions="2*, 4, *">
+
+            <Panel Grid.Column="0">
+                <DockPanel IsEnabled="{Binding Loading.IsIdle}">
+                    <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}">
+                        <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
+                    </controls:TableHeader>
+
+                    <DataGrid
+                        Name="ConsistVehiclesDataGrid"
+                        ItemsSource="{Binding RailVehicles}"
+                        SelectionMode="Extended"
+                    >
+                        <i:Interaction.Behaviors>
+                            <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedConsistVehicles}" />
+                        </i:Interaction.Behaviors>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding Index}" />
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="AcquisitionState">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                        <controls:AcquisitionStateIcon Classes="cell" State="{Binding AcquisitionState}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.vehicle}}" Binding="{Binding LocomotiveName}" />
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.number}}" Binding="{Binding UniqueNumber}" />
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.flipped}}" SortMemberPath="Flipped">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                        <Viewbox Classes="cell-icon"
+                                                 IsVisible="{Binding Flipped}"
+                                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_flipped}}">
+                                            <lucideAvalonia:Lucide Icon="ArrowLeftRight"
+                                                                   StrokeBrush="{DynamicResource TextControlForeground}" />
+                                        </Viewbox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="BlueprintSetIdProvider">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                        <controls:BlueprintSummary Margin="12,0"
+                                                                   Provider="{Binding BlueprintSetIdProvider}"
+                                                                   Product="{Binding BlueprintSetIdProduct}"
+                                                                   BlueprintId="{Binding BlueprintId}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_vehicle_with_selected}}" Command="{Binding ReplaceVehicleCommand}"  />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_vehicle}}" Command="{Binding DeleteVehicleCommand}"  />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+
+                </DockPanel>
+
+                <loading:LoadingState DataContext="{Binding Loading}" />
+            </Panel>
+
+            <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Columns"/>
+
+            <Border IsEnabled="{Binding Loading.IsIdle}" Grid.Column="2" BorderThickness="0,1,1,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+                <Grid RowDefinitions="*,4,*">
+                    <Panel>
+                        <DockPanel IsEnabled="{Binding DirectoryLoading.IsIdle}">
+                            <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.available_stock}}">
+                                <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}" Width="180" />
+                            </controls:TableHeader>
+                            <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory, Mode=TwoWay}">
+                                <TreeView.ItemTemplate>
+                                    <TreeDataTemplate ItemsSource="{Binding Subfolders}">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </TreeDataTemplate>
+                                </TreeView.ItemTemplate>
+                                <TreeView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
+                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.load_consists}}" Command="{Binding LoadAvailableStockCommand}" />
+                                    </ContextMenu>
+                                </TreeView.ContextMenu>
+                            </TreeView>
+                        </DockPanel>
+                        <loading:LoadingState DataContext="{Binding DirectoryLoading}" />
+                    </Panel>
+                    <GridSplitter Grid.Row="1" ResizeDirection="Rows" Background="{DynamicResource SystemChromeDisabledHighColor}" />
+                    <DockPanel Grid.Row="2">
+                        <Button DockPanel.Dock="Top" Margin="8" Content="{echoes:Translate {x:Static translations:Strings.load_consists}}"
+                                Command="{Binding LoadAvailableStockCommand}" />
+                        <Panel>
+                            <DataGrid Name="ExplorerStockDataGrid" ItemsSource="{Binding ExplorerStock}"
+                                      SelectedItem="{Binding SelectedExplorerVehicle, Mode=TwoWay}" SelectionMode="Single"
+                                      IsEnabled="{Binding ExplorerLoading.IsIdle}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
+                                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="BlueprintType">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate DataType="models:RollingStockEntry">
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                                                    <Viewbox Classes="inline-icon">
+                                                        <lucideAvalonia:Lucide Icon="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeIconConverter}}" />
+                                                    </Viewbox>
+                                                    <TextBlock VerticalAlignment="Center" Text="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeConverter}}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Blueprint.BlueprintId}" />
+                                </DataGrid.Columns>
+                                <DataGrid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}" />
+                                    </ContextMenu>
+                                </DataGrid.ContextMenu>
+                            </DataGrid>
+                            <loading:LoadingState DataContext="{Binding ExplorerLoading}" />
+                        </Panel>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Row="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Rows"/>
+
+        <Border Grid.Row="2" IsEnabled="{Binding Loading.IsIdle}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            <DockPanel>
+                <controls:TableHeader DockPanel.Dock="Top" Text="{echoes:Translate {x:Static translations:Strings.vehicle_index}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.vehicle_matches}}"
+                                   Foreground="{DynamicResource HeaderMutedForegroundBrush}" />
+                        <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" Text="{Binding MatchingVehicles}" />
+                        <Button Content="{echoes:Translate {x:Static translations:Strings.vehicle_refresh}}"
+                                Command="{Binding RefreshVehicleIndexCommand}" />
+                        <controls:TableSearchBox SearchTerm="{Binding VehicleSearchTerm}" Width="240"
+                                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_search_hint}}" />
+                    </StackPanel>
                 </controls:TableHeader>
-
-                <DataGrid
-                    Name="ConsistVehiclesDataGrid"
-                    ItemsSource="{Binding RailVehicles}"
-                    SelectionMode="Extended"
-                >
-                    <i:Interaction.Behaviors>
-                        <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedConsistVehicles}" />
-                    </i:Interaction.Behaviors>
-
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="#" Binding="{Binding Index}" />
-
-                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="AcquisitionState">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="models:ConsistRailVehicle">
-                                    <controls:AcquisitionStateIcon Classes="cell" State="{Binding AcquisitionState}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.vehicle}}" Binding="{Binding LocomotiveName}" />
-                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.number}}" Binding="{Binding UniqueNumber}" />
-
-                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.flipped}}" SortMemberPath="Flipped">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="models:ConsistRailVehicle">
-                                    <Viewbox Classes="cell-icon"
-                                             IsVisible="{Binding Flipped}"
-                                             ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_flipped}}">
-                                        <lucideAvalonia:Lucide Icon="ArrowLeftRight"
-                                                               StrokeBrush="{DynamicResource TextControlForeground}" />
-                                    </Viewbox>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
-                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="BlueprintSetIdProvider">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="models:ConsistRailVehicle">
-                                    <controls:BlueprintSummary Margin="12,0"
-                                                               Provider="{Binding BlueprintSetIdProvider}"
-                                                               Product="{Binding BlueprintSetIdProduct}"
-                                                               BlueprintId="{Binding BlueprintId}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}"  />
-                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_vehicle_with_selected}}" Command="{Binding ReplaceVehicleCommand}"  />
-                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_vehicle}}" Command="{Binding DeleteVehicleCommand}"  />
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
-                </DataGrid>
-
+                <Button DockPanel.Dock="Bottom" Margin="8" IsVisible="{Binding HasMoreVehicles}"
+                        Content="{echoes:Translate {x:Static translations:Strings.vehicle_load_more}}"
+                        Command="{Binding LoadMoreVehiclesCommand}" />
+                <Panel>
+                    <DataGrid Name="AvailableStockDataGrid" ItemsSource="{Binding AvailableStock}"
+                              SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}" SelectionMode="Single"
+                              IsEnabled="{Binding StockLoading.IsIdle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="BlueprintType">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="models:RollingStockEntry">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                                            <Viewbox Classes="inline-icon">
+                                                <lucideAvalonia:Lucide Icon="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeIconConverter}}" />
+                                            </Viewbox>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="models:RollingStockEntry">
+                                        <controls:BlueprintSummary Margin="12,0"
+                                                                   Provider="{Binding Blueprint.BlueprintSetIdProvider}"
+                                                                   Product="{Binding Blueprint.BlueprintSetIdProduct}"
+                                                                   BlueprintId="{Binding Blueprint.BlueprintId}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                    <TextBlock IsVisible="{Binding HasNoVehicles}" Margin="16" TextWrapping="Wrap"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="{echoes:Translate {x:Static translations:Strings.vehicle_no_matches}}" />
+                    <loading:LoadingState DataContext="{Binding StockLoading}" />
+                </Panel>
             </DockPanel>
-
-            <loading:LoadingState DataContext="{Binding Loading}" />
-        </Panel>
-
-        <GridSplitter Grid.Column="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Columns"/>
-
-        <Border IsEnabled="{Binding Loading.IsIdle}" Grid.Column="2" BorderThickness="0,1,1,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-           <Grid RowDefinitions="*,4,*">
-               <DockPanel>
-                   <StackPanel DockPanel.Dock="Top">
-                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}">
-                           <controls:TableSearchBox SearchTerm="{Binding DirectoryTreeSearchTerm}" Width="200" />
-                       </controls:TableHeader>
-                   </StackPanel>
-
-                   <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory}">
-                       <TreeView.ItemTemplate>
-                           <TreeDataTemplate ItemsSource="{Binding Subfolders}">
-                               <StackPanel Orientation="Horizontal" Spacing="8">
-                                   <lucideAvalonia:Lucide Icon="Folder" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="1.5" Width="18" Height="18" />
-                                   <TextBlock VerticalAlignment="Center" Text="{Binding Name}"/>
-                               </StackPanel>
-                           </TreeDataTemplate>
-                       </TreeView.ItemTemplate>
-
-                       <TreeView.ContextMenu>
-                           <ContextMenu>
-                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}"  />
-                               <MenuItem Header="{echoes:Translate {x:Static translations:Strings.load_consists}}" Command="{Binding LoadAvailableStockCommand}"  />
-                           </ContextMenu>
-                       </TreeView.ContextMenu>
-
-                   </TreeView>
-               </DockPanel>
-
-               <GridSplitter Grid.Row="1" Background="{DynamicResource SystemChromeDisabledHighColor}" ResizeDirection="Rows"/>
-
-               <DockPanel Grid.Row="2">
-                   <StackPanel DockPanel.Dock="Top">
-                       <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
-                   </StackPanel>
-
-                   <Panel>
-                       <DataGrid
-                           Name="AvailableStockDataGrid"
-                           IsEnabled="{Binding StockLoading.IsIdle}"
-                           ItemsSource="{Binding AvailableStock}"
-                           SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
-                           SelectionMode="Single"
-                       >
-                           <DataGrid.Columns>
-                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
-                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" Binding="{Binding BlueprintType}" />
-                               <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint_id}}" Binding="{Binding Blueprint.BlueprintId}" />
-                           </DataGrid.Columns>
-
-                           <DataGrid.ContextMenu>
-                               <ContextMenu>
-                                   <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}"  />
-                               </ContextMenu>
-                           </DataGrid.ContextMenu>
-                       </DataGrid>
-                       <loading:LoadingState DataContext="{Binding StockLoading}" />
-                   </Panel>
-
-               </DockPanel>
-           </Grid>
         </Border>
     </Grid>
 </UserControl>

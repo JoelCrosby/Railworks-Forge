@@ -183,3 +183,45 @@ use_internal_serz_description = 'Convertir archivos BIN sin el ejecutable del ju
 vehicle = 'Vehículo'
 vehicle_flipped = 'El vehículo está invertido'
 view = 'Vista'
+
+vehicle_searching = 'Buscando vehículos…'
+
+vehicle_indexing = 'Indexando vehículos instalados…'
+
+vehicle_search_hint = 'Buscar nombre, proveedor, producto o blueprint…'
+
+vehicle_refresh = 'Actualizar índice de vehículos'
+
+vehicle_load_more = 'Mostrar más vehículos'
+
+vehicle_matches = 'Vehículos encontrados'
+
+vehicle_index_cancelled = 'Indexación cancelada. Se conserva el índice anterior.'
+
+vehicle_index_progress = 'Fuentes comprobadas: {0} · Vehículos: {1} · Omitidos: {2}'
+
+vehicle_no_matches = 'No hay vehículos coincidentes. Cambia la búsqueda o usa el botón para crear o actualizar el índice.'
+
+vehicle_index = 'Índice de vehículos'
+
+vehicle_type_engine = 'Locomotora'
+
+vehicle_type_wagon = 'Vagón'
+
+vehicle_type_tender = 'Ténder'
+
+vehicle_loading_directories = 'Cargando directorios de recursos…'
+
+vehicle_start_indexing = 'Iniciar indexación'
+
+vehicle_index_confirmation = 'La indexación examina todos los recursos instalados y puede tardar mucho tiempo, especialmente con una biblioteca grande. Puedes cancelar y conservar el índice anterior. ¿Iniciar ahora?'
+
+vehicle_index_discovering = 'Contando archivos de recursos…'
+
+vehicle_index_saving = 'Guardando índice de vehículos…'
+
+vehicle_index_complete = 'Indexación completada'
+
+vehicle_index_files = 'Archivos examinados: {0} de {1} (.bin y .ap)'
+
+vehicle_index_duration = 'Examinar una biblioteca grande puede tardar mucho tiempo. Al cancelar se conserva el índice anterior.'

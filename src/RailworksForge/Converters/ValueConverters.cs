@@ -4,6 +4,7 @@ using Avalonia.Data.Converters;
 
 using LucideAvalonia.Enum;
 
+using RailworksForge.Core;
 using RailworksForge.Core.Models;
 using RailworksForge.Translations;
 
@@ -128,6 +129,30 @@ public static class ValueConverters
             AcquisitionState.Found => LucideIconNames.CircleCheck,
             AcquisitionState.Partial => LucideIconNames.TriangleAlert,
             AcquisitionState.Missing => LucideIconNames.CircleX,
+            _ => LucideIconNames.CircleQuestionMark,
+        };
+    });
+
+    public static FuncValueConverter<BlueprintType, string> VehicleTypeConverter { get; } = new (value =>
+    {
+        var label = value switch
+        {
+            BlueprintType.Engine => Strings.vehicle_type_engine.CurrentValue,
+            BlueprintType.Wagon => Strings.vehicle_type_wagon.CurrentValue,
+            BlueprintType.Tender => Strings.vehicle_type_tender.CurrentValue,
+            _ => value.ToString(),
+        };
+
+        return label;
+    });
+
+    public static FuncValueConverter<BlueprintType, LucideIconNames> VehicleTypeIconConverter { get; } = new (value =>
+    {
+        return value switch
+        {
+            BlueprintType.Engine => LucideIconNames.TrainFront,
+            BlueprintType.Wagon => LucideIconNames.Boxes,
+            BlueprintType.Tender => LucideIconNames.Fuel,
             _ => LucideIconNames.CircleQuestionMark,
         };
     });

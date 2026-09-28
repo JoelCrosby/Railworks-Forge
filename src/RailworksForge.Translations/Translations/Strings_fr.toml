@@ -183,3 +183,45 @@ use_internal_serz_description = 'Convertir les fichiers BIN sans l’exécutable
 vehicle = 'Véhicule'
 vehicle_flipped = 'Le véhicule est retourné'
 view = 'Affichage'
+
+vehicle_searching = 'Recherche de véhicules…'
+
+vehicle_indexing = 'Indexation des véhicules installés…'
+
+vehicle_search_hint = 'Rechercher nom, fournisseur, produit ou blueprint…'
+
+vehicle_refresh = 'Actualiser les véhicules'
+
+vehicle_load_more = 'Afficher plus de véhicules'
+
+vehicle_matches = 'Véhicules trouvés'
+
+vehicle_index_cancelled = 'Indexation annulée. Index précédent conservé.'
+
+vehicle_index_progress = 'Sources vérifiées : {0} · Véhicules : {1} · Ignorés : {2}'
+
+vehicle_no_matches = 'Aucun véhicule trouvé. Modifiez la recherche ou utilisez le bouton pour créer ou actualiser l’index.'
+
+vehicle_index = 'Index des véhicules'
+
+vehicle_type_engine = 'Locomotive'
+
+vehicle_type_wagon = 'Wagon'
+
+vehicle_type_tender = 'Tender'
+
+vehicle_loading_directories = 'Chargement des dossiers de ressources…'
+
+vehicle_start_indexing = 'Démarrer l’indexation'
+
+vehicle_index_confirmation = 'L’indexation analyse toutes les ressources installées et peut prendre beaucoup de temps, surtout avec une grande bibliothèque. Vous pouvez annuler et conserver l’index précédent. Démarrer maintenant?'
+
+vehicle_index_discovering = 'Comptage des fichiers de ressources…'
+
+vehicle_index_saving = 'Enregistrement de l’index…'
+
+vehicle_index_complete = 'Indexation terminée'
+
+vehicle_index_files = 'Fichiers analysés : {0} sur {1} (.bin et .ap)'
+
+vehicle_index_duration = 'L’analyse d’une grande bibliothèque peut prendre beaucoup de temps. L’annulation conserve l’index précédent.'
