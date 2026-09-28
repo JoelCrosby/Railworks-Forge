@@ -9,6 +9,8 @@ namespace RailworksForge.Behaviours;
 
 public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
 {
+    private AutoCompleteFilterMode? _filterModeBeforeShowAll;
+
     protected override void OnAttached()
     {
         if (AssociatedObject is not null)
@@ -17,6 +19,7 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
             AssociatedObject.DropDownOpening += DropDownOpening;
             AssociatedObject.GotFocus += OnGotFocus;
             AssociatedObject.PointerReleased += PointerReleased;
+            AssociatedObject.DropDownClosed += DropDownClosed;
 
             Task.Delay(500).ContinueWith(_ => Avalonia.Threading.Dispatcher.UIThread.Invoke(CreateDropdownButton));
         }
@@ -32,6 +35,7 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
             AssociatedObject.DropDownOpening -= DropDownOpening;
             AssociatedObject.GotFocus -= OnGotFocus;
             AssociatedObject.PointerReleased -= PointerReleased;
+            AssociatedObject.DropDownClosed -= DropDownClosed;
         }
 
         base.OnDetaching();
@@ -109,13 +113,45 @@ public class AutoCompleteBehaviour : Behavior<AutoCompleteBox>
             ClickMode = ClickMode.Press,
         };
 
-        btn.Click += (_, _) =>
-        {
-            AssociatedObject.Text = string.Empty;
-            ShowDropdown();
-        };
+        btn.Click += (_, _) => ShowAllItems();
 
         tb.InnerRightContent = btn;
+    }
+
+    // Clearing the text to show every item would also clear the bound SelectedItem, so filtering is switched
+    // off while the dropdown is open instead.
+    private void ShowAllItems()
+    {
+        if (AssociatedObject is null)
+        {
+            return;
+        }
+
+        _filterModeBeforeShowAll ??= AssociatedObject.FilterMode;
+        AssociatedObject.FilterMode = AutoCompleteFilterMode.None;
+
+        ShowDropdown();
+
+        if (!AssociatedObject.IsDropDownOpen)
+        {
+            RestoreFilterMode();
+        }
+    }
+
+    private void DropDownClosed(object? sender, EventArgs e)
+    {
+        RestoreFilterMode();
+    }
+
+    private void RestoreFilterMode()
+    {
+        if (AssociatedObject is null || _filterModeBeforeShowAll is not { } filterMode)
+        {
+            return;
+        }
+
+        AssociatedObject.FilterMode = filterMode;
+        _filterModeBeforeShowAll = null;
     }
 
     private void OnGotFocus(object? sender, RoutedEventArgs e)

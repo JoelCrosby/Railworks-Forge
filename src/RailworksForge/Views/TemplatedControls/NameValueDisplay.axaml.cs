@@ -6,7 +6,7 @@ namespace RailworksForge.Views.TemplatedControls;
 public class NameValueDisplay : TemplatedControl
 {
     public static readonly StyledProperty<string> HeadingProperty =
-        AvaloniaProperty.Register<TableHeader, string>(nameof(Heading));
+        AvaloniaProperty.Register<NameValueDisplay, string>(nameof(Heading));
 
     public string Heading
     {
@@ -15,7 +15,7 @@ public class NameValueDisplay : TemplatedControl
     }
 
     public static readonly StyledProperty<string?> ValueProperty =
-        AvaloniaProperty.Register<TableHeader, string?>(nameof(Value));
+        AvaloniaProperty.Register<NameValueDisplay, string?>(nameof(Value));
 
     public string? Value
     {

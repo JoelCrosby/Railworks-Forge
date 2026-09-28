@@ -71,15 +71,6 @@
 
                                         <Grid ColumnDefinitions="*,8,*,8,2*" Grid.Column="2"  HorizontalAlignment="Stretch">
                                             <loading:LoadingState Classes="compact" Grid.ColumnSpan="5" DataContext="{Binding Loading}" />
-                                            <ComboBox
-                                                Grid.Column="0"
-                                                HorizontalAlignment="Stretch"
-                                                ItemsSource="{Binding Providers}"
-                                                SelectedItem="{Binding SelectedProvider}"
-                                                DisplayMemberBinding="{Binding Name}"
-                                                PlaceholderText="{echoes:Translate {x:Static translations:Strings.provider}}"
-                                            />
-
                                             <AutoCompleteBox
                                                 Grid.Column="0"
                                                 Height="32"

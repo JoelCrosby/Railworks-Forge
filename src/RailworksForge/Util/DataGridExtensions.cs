@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 
 namespace RailworksForge.Util;
 
@@ -20,8 +19,8 @@ public static class DataGridExtensions
 
         return boundColumn.Binding switch
         {
-            Binding binding => binding.Path,
-            CompiledBindingExtension compiledBinding => compiledBinding.Path?.ToString(),
+            ReflectionBinding binding => binding.Path,
+            CompiledBinding compiledBinding => compiledBinding.Path?.ToString(),
             _ => null,
         };
     }

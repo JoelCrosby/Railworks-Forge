@@ -11,7 +11,7 @@ public class IdValueConverter : IValueConverter
     {
         if (value is string text && !string.IsNullOrWhiteSpace(text))
         {
-            return text[..6];
+            return text.Length > 6 ? text[..6] : text;
         }
 
         return string.Empty;
