@@ -113,7 +113,7 @@ public class SerzInternal
 
                         if (reader.IsFloat)
                         {
-                            var bits = new byte[8];
+                            Span<byte> bits = stackalloc byte[8];
                             BinaryPrimitives.WriteDoubleLittleEndian(bits, reader.FloatValue);
                             Attribute(writer, "alt_encoding", System.Convert.ToHexString(bits));
                             Attribute(writer, "precision", "string");
