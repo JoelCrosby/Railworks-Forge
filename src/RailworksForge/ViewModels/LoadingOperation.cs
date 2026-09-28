@@ -14,9 +14,19 @@ public partial class LoadingOperation : ObservableObject
     private CancellationTokenSource? _cancellation;
     private Func<Task>? _retry;
 
+    // Raised for failures with nowhere else to be shown, such as work (as opposed to a load) that fails after its
+    // page was left, so they aren't silently lost.
+    public static event Action<string>? UnobservedFailure;
+
+    public static void ReportUnobservedFailure(string message)
+    {
+        UnobservedFailure?.Invoke(message);
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
     [NotifyPropertyChangedFor(nameof(IsVisible))]
+    [NotifyPropertyChangedFor(nameof(CanDismiss))]
     public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
@@ -26,6 +36,7 @@ public partial class LoadingOperation : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasError))]
     [NotifyPropertyChangedFor(nameof(CanRetry))]
     [NotifyPropertyChangedFor(nameof(IsVisible))]
+    [NotifyPropertyChangedFor(nameof(CanDismiss))]
     public partial string? ErrorMessage { get; set; }
 
     public bool IsIdle => !IsLoading;
@@ -36,12 +47,15 @@ public partial class LoadingOperation : ObservableObject
 
     public bool CanRetry => HasError && _retry is not null;
 
+    public bool CanDismiss => HasError && !IsLoading;
+
     // Start on the UI thread so completion and property notifications return to that context.
     public async Task RunAsync<T>(
         string message,
         Func<CancellationToken, Task<T>> load,
         Action<T> apply,
-        bool allowRetry = true)
+        bool allowRetry = true,
+        bool reportDetachedFailure = false)
     {
         Cancel();
         using var cancellation = new CancellationTokenSource();
@@ -73,6 +87,10 @@ public partial class LoadingOperation : ObservableObject
             {
                 ErrorMessage = exception.Message;
             }
+            else if (reportDetachedFailure)
+            {
+                ReportUnobservedFailure($"{message}: {exception.Message}");
+            }
         }
         finally
         {
@@ -92,7 +110,7 @@ public partial class LoadingOperation : ObservableObject
             await work(token);
 
             return true;
-        }, _ => { }, allowRetry: false);
+        }, _ => { }, allowRetry: false, reportDetachedFailure: true);
     }
 
     public void Cancel()
@@ -103,6 +121,19 @@ public partial class LoadingOperation : ObservableObject
         _retry = null;
         ErrorMessage = null;
         IsLoading = false;
+    }
+
+    // Shows an error from outside this operation, so Retry must not re-run whatever this operation last ran.
+    public void ShowError(string message)
+    {
+        _retry = null;
+        ErrorMessage = message;
+    }
+
+    [RelayCommand]
+    private void Dismiss()
+    {
+        ErrorMessage = null;
     }
 
     [RelayCommand]

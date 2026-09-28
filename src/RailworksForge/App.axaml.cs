@@ -3,6 +3,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 
 using Echoes;
 
@@ -16,6 +17,8 @@ using RailworksForge.ViewModels;
 using RailworksForge.Views;
 using RailworksForge.Views.Dialogs;
 using RailworksForge.Views.Pages;
+
+using Serilog;
 
 namespace RailworksForge;
 
@@ -43,6 +46,8 @@ public class App : Application
 
         var provider = services.BuildServiceProvider();
 
+        Dispatcher.UIThread.UnhandledException += OnUnhandledUiException;
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
@@ -52,6 +57,16 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    // Commands rethrow their exceptions on the UI thread; without this a failed clipboard write or save exits the app.
+    private static void OnUnhandledUiException(object? sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        Log.Error(e.Exception, "Unhandled exception on the UI thread");
+
+        e.Handled = true;
+
+        LoadingOperation.ReportUnobservedFailure(e.Exception.Message);
     }
 
     public static void RegisterServices(IServiceCollection services)

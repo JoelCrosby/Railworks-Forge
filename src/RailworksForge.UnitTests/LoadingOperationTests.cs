@@ -36,6 +36,41 @@ public class LoadingOperationTests
     }
 
     [Fact]
+    public async Task WorkFailingAfterCancel_IsReportedAsUnobservedFailure()
+    {
+        var operation = new LoadingOperation();
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var failures = new List<string>();
+        Action<string> onFailure = failures.Add;
+
+        LoadingOperation.UnobservedFailure += onFailure;
+
+        try
+        {
+            var work = operation.RunAsync("Saving", async _ =>
+            {
+                entered.SetResult();
+                await release.Task;
+
+                throw new IOException("Disk full");
+            });
+
+            await entered.Task;
+            operation.Cancel();
+            release.SetResult();
+            await work;
+        }
+        finally
+        {
+            LoadingOperation.UnobservedFailure -= onFailure;
+        }
+
+        Assert.Equal(["Saving: Disk full"], failures);
+        Assert.False(operation.HasError);
+    }
+
+    [Fact]
     public async Task SupersededLoad_CannotPublishOrStopCurrentSpinner()
     {
         var operation = new LoadingOperation();

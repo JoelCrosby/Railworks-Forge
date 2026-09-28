@@ -25,6 +25,13 @@ public class MainWindowViewModel(
 
     public void Start()
     {
+        LoadingOperation.UnobservedFailure += Loading.ShowError;
+
+        StartNavigation();
+    }
+
+    private void StartNavigation()
+    {
         var hasValidGameDirectory = Paths.IsValidGameDirectory(Paths.GetGameDirectory());
 
         if (!hasValidGameDirectory)
