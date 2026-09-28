@@ -22,7 +22,14 @@ public class SerzInternal
     {
         var input = File.ReadAllBytes(inputPath);
 
-        return new SerzInternal(ref input).ToXml();
+        try
+        {
+            return new SerzInternal(ref input).ToXml();
+        }
+        catch (InvalidDataException exception)
+        {
+            throw new InvalidDataException($"Failed to convert SERZ file '{inputPath}': {exception.Message}", exception);
+        }
     }
 
     public static void Convert(string inputPath, string outputPath, CancellationToken cancellationToken = default)
@@ -41,6 +48,10 @@ public class SerzInternal
 
             cancellationToken.ThrowIfCancellationRequested();
             File.Move(temporaryPath, outputPath, true);
+        }
+        catch (InvalidDataException exception)
+        {
+            throw new InvalidDataException($"Failed to convert SERZ file '{inputPath}': {exception.Message}", exception);
         }
         finally
         {
@@ -104,7 +115,10 @@ public class SerzInternal
 
                         if (!closesCurrentParent)
                         {
-                            throw reader.InvalidData("Mismatched closing element");
+                            var expected = parentName ?? "<no open element>";
+                            var message = $"Mismatched closing element '{reader.Name}' (expected '{expected}')";
+
+                            throw reader.InvalidData(message);
                         }
 
                         writer.WriteEndElement();

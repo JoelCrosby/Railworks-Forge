@@ -24,6 +24,13 @@ public class RollingStockService
 
         await Parallel.ForEachAsync(binFiles, options, async (binFile, token) =>
         {
+            token.ThrowIfCancellationRequested();
+
+            if (!IsRollingStockBlueprint(binFile))
+            {
+                return;
+            }
+
             var exported = await Serz.Convert(binFile, token);
             var entries = await ReadStockEntries(exported.OutputPath, token);
 
@@ -34,6 +41,44 @@ public class RollingStockService
         });
 
         return results.OrderBy(entry => entry.DisplayName).ToList();
+    }
+
+    private static bool IsRollingStockBlueprint(string path)
+    {
+        var data = File.ReadAllBytes(path);
+        var reader = new SerzReader(data);
+
+        try
+        {
+            var hasLoader = reader.Read() && reader.Kind == SerzNodeKind.Open && reader.Name == "cBlueprintLoader";
+
+            if (!hasLoader)
+            {
+                return false;
+            }
+
+            var hasBlueprint = reader.Read() && reader.Kind == SerzNodeKind.Open && reader.Name == "Blueprint";
+
+            if (!hasBlueprint)
+            {
+                return false;
+            }
+
+            var hasType = reader.Read() && reader.Kind == SerzNodeKind.Open;
+
+            if (!hasType)
+            {
+                return false;
+            }
+
+            return reader.Name is "cEngine" or "cEngineBlueprint"
+                or "cWagon" or "cWagonBlueprint"
+                or "cTender" or "cTenderBlueprint";
+        }
+        catch (InvalidDataException exception)
+        {
+            throw new InvalidDataException($"Failed to read blueprint type from '{path}': {exception.Message}", exception);
+        }
     }
 
     private static List<string> GetStockBinFiles(ProductDirectory directory, CancellationToken cancellationToken)
@@ -59,7 +104,7 @@ public class RollingStockService
         var blueprint = Blueprint.FromPath(path);
 
         return document
-            .QuerySelectorAll("Blueprint")
+            .QuerySelectorAll("cBlueprintLoader > Blueprint")
             .Select(el => RollingStockEntry.Parse(el, blueprint))
             .Where(entry => entry.BlueprintType is BlueprintType.Engine or BlueprintType.Tender or BlueprintType.Wagon)
             .ToList();

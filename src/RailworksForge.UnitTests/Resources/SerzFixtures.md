@@ -19,3 +19,10 @@ originally used to create them.
 Other tests compare parsed XML, allowing serialization whitespace and empty-element
 syntax to differ while requiring element names, attributes, and values to match.
 They require neither a game installation nor Wine.
+
+`SerzDuplicateClose.bin` is a synthetic malformed blueprint with two consecutive
+closing records for `AutomaticJunctionEntity`. It reproduces the structural
+error in A_PK10/Pack_Commun's `Levier2_Levier3 D.bin` without including game data.
+The native converter emits invalid XML for that structure, so there is no golden
+XML fixture. Tests require a diagnostic containing the filename and element names
+and verify that rolling-stock discovery skips the unrelated track-rules blueprint.

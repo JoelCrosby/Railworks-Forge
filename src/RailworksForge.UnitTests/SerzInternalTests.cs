@@ -170,6 +170,46 @@ public class SerzInternalTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Conversion_DuplicateClosingElementReportsFileAndElementNames(bool writeFile)
+    {
+        var directory = Directory.CreateTempSubdirectory("railworks-serz-");
+
+        try
+        {
+            var inputPath = Path.Join(directory.FullName, "TrackRules.bin");
+            var outputPath = Path.Join(directory.FullName, "TrackRules.xml");
+            File.WriteAllBytes(inputPath, GetResourceBytes("SerzDuplicateClose.bin"));
+            File.WriteAllText(outputPath, "previous output");
+            var exception = Assert.Throws<InvalidDataException>(() =>
+            {
+
+                if (writeFile)
+                {
+                    SerzInternal.Convert(inputPath, outputPath);
+                }
+                else
+                {
+                    using var document = SerzInternal.Convert(inputPath);
+                }
+            });
+
+            Assert.Contains(inputPath, exception.Message);
+            Assert.Contains("AutomaticJunctionEntity", exception.Message);
+            Assert.Contains("expected 'cTrackRulesBlueprint'", exception.Message);
+            Assert.Contains("SERZ byte offset", exception.Message);
+            Assert.IsType<InvalidDataException>(exception.InnerException);
+            Assert.Equal("previous output", File.ReadAllText(outputPath));
+            Assert.Equal(2, Directory.GetFiles(directory.FullName).Length);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static List<(string Name, string Text)> GetLeafValues(byte[] xml)
     {
         using var stream = new MemoryStream(xml);
