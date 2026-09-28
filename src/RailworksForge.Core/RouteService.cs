@@ -3,12 +3,26 @@
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Models;
 
+using Serilog;
+
 namespace RailworksForge.Core;
 
 public class RouteService
 {
     private readonly Lock _routesLock = new();
     private Task<List<Route>>? _routes;
+
+    public event Action? RoutesInvalidated;
+
+    public void InvalidateRoutes()
+    {
+        lock (_routesLock)
+        {
+            _routes = null;
+        }
+
+        RoutesInvalidated?.Invoke();
+    }
 
     public Task<List<Route>> GetRoutes()
     {
@@ -75,14 +89,21 @@ public class RouteService
 
         foreach (var path in routeFiles)
         {
-            var route = Path.GetExtension(path) switch
+            try
             {
-                ".xml" => ReadRouteFile(path),
-                ".ap" => ReadCompressedRouteFile(path),
-                _ => throw new Exception("unrecognised route extension"),
-            };
+                var route = Path.GetExtension(path) switch
+                {
+                    ".xml" => ReadRouteFile(path),
+                    ".ap" => ReadCompressedRouteFile(path),
+                    _ => throw new Exception("unrecognised route extension"),
+                };
 
-            results.Add(route);
+                results.Add(route);
+            }
+            catch (Exception e)
+            {
+                Log.Warning(e, "Skipping route that could not be read at {Path}", path);
+            }
         }
 
         return results.OrderBy(route => route.Name).ToList();

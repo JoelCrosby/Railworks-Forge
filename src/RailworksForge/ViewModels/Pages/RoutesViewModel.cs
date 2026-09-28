@@ -39,6 +39,17 @@ public partial class RoutesViewModel : ViewModelBase
         _clipboard = clipboard;
 
         TranslationProvider.OnCultureChanged += (_, _) => OnPropertyChanged(nameof(SearchPlaceholder));
+        _routeService.RoutesInvalidated += OnRoutesInvalidated;
+    }
+
+    private void OnRoutesInvalidated()
+    {
+        _hasLoadedRoutes = false;
+
+        if (IsActive)
+        {
+            _ = LoadRoutes();
+        }
     }
 
     public SearchableCollection<RouteViewModel> Routes { get; } = new(route => route.SearchIndex);

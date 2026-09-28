@@ -18,11 +18,14 @@ public partial class ToolsMenuViewModel(
     ToolsActivity tools,
     StoragePickerService picker,
     SerzFileService serz,
-    Packager packager) : ObservableObject
+    Packager packager,
+    RouteService routes,
+    AssetDirectoryTreeService directoryTree,
+    ImageService images) : ObservableObject
 {
-    private static readonly FilePickerFileType BinaryFiles = new(Strings.serz_binary_files.CurrentValue) { Patterns = ["*.bin"] };
-    private static readonly FilePickerFileType XmlFiles = new(Strings.serz_xml_files.CurrentValue) { Patterns = ["*.xml"] };
-    private static readonly FilePickerFileType PackageFiles = new(Strings.packages.CurrentValue) { Patterns = ["*.rwp", "*.rpk"] };
+    private static FilePickerFileType BinaryFiles => new(Strings.serz_binary_files.CurrentValue) { Patterns = ["*.bin"] };
+    private static FilePickerFileType XmlFiles => new(Strings.serz_xml_files.CurrentValue) { Patterns = ["*.xml"] };
+    private static FilePickerFileType PackageFiles => new(Strings.packages.CurrentValue) { Patterns = ["*.rwp", "*.rpk"] };
 
     public LoadingOperation Operations => tools.Loading;
 
@@ -79,6 +82,11 @@ public partial class ToolsMenuViewModel(
         finally
         {
             tools.Progress.ClearProgress();
+
+            Cache.ClearAssetCaches();
+            directoryTree.Invalidate();
+            images.ClearMisses();
+            routes.InvalidateRoutes();
         }
     }
 }

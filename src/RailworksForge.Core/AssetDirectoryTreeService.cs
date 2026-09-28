@@ -15,11 +15,18 @@ public class AssetDirectoryTreeService
         return _directoryTree;
     }
 
+    public void Invalidate()
+    {
+        lock (_lock)
+        {
+            _loadTask = null;
+        }
+    }
+
     public Task LoadDirectoryTree()
     {
         lock (_lock)
         {
-
             if (_loadTask is null || _loadTask.IsFaulted || _loadTask.IsCanceled)
             {
                 _loadTask = Task.Run(() =>
