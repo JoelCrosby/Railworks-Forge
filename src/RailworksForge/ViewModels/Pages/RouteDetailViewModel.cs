@@ -106,7 +106,7 @@ public partial class RouteDetailViewModel(
     [RelayCommand(CanExecute = nameof(HasSelectedScenario))]
     private void OpenScenarioInExplorer()
     {
-        launcher.OpenDirectory(SelectedScenario!.Scenario.DirectoryPath);
+        launcher.OpenDirectory(SelectedScenario!.Scenario.BrowsableDirectoryPath);
     }
 
     [RelayCommand]

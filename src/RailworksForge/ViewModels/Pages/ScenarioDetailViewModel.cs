@@ -117,13 +117,13 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand]
     private void OpenInExplorer()
     {
-        _launcher.OpenDirectory(Scenario.DirectoryPath);
+        _launcher.OpenDirectory(Scenario.BrowsableDirectoryPath);
     }
 
     [RelayCommand]
     private void OpenBackupsFolder()
     {
-        _launcher.OpenDirectory(Scenario.BackupDirectory);
+        _launcher.OpenOrCreateDirectory(Scenario.BackupDirectory);
     }
 
     [RelayCommand]
