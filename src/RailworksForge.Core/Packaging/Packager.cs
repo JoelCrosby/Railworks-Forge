@@ -95,7 +95,7 @@ public class Packager
         if (extension == ".rwp")
         {
             var authorBytes = new byte[filestream.ReadByte()];
-            _ = await filestream.ReadAsync(authorBytes);
+            await filestream.ReadExactlyAsync(authorBytes);
             eProtection = (Protection) filestream.ReadByte();
             author = Encoding.UTF8.GetString(authorBytes);
         }
@@ -112,25 +112,14 @@ public class Packager
             Assets = [],
         };
 
-        using var archiveStream = new MemoryStream();
-        await filestream.CopyToAsync(archiveStream);
-
-        using var archive = new ZipArchive(archiveStream);
-        var zeroByteErrors = new List<string>();
+        await using var archiveStream = new OffsetReadStream(filestream, filestream.Position);
+        using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read);
 
         RaisePackageInstallProgress(InstallStage.Scanning);
 
-        foreach (var entry in archive.Entries)
-        {
-            var key = entry.Name[entryNameIndex..];
+        var zeroByteEntryCount = archive.Entries.Count(entry => entry.Length == 0L);
 
-            if (entry.Length == 0L)
-            {
-                zeroByteErrors.Add(key);
-            }
-        }
-
-        if (zeroByteErrors.Count > 0)
+        if (zeroByteEntryCount > 0)
         {
             Log.Information("installation for package {Package} encountered files with 0 bytes", filename);
         }
@@ -141,51 +130,43 @@ public class Packager
 
         DeleteAllBlueprintsPak();
 
+        var gameDirectory = Paths.GetGameDirectory();
         var entryCount = archive.Entries.Count;
+        var reportedProgress = -1;
 
         for (var i = 0; i < entryCount; i++)
         {
             var entry = archive.Entries[i];
             var progress = (int) Math.Ceiling((double)(100 * i) / entryCount);
 
-            RaisePackageInstallProgress(progress, i + 1, entryCount);
-
-            var entryArchivePath = entry.FullName[entryNameIndex..].Replace('\\', Path.DirectorySeparatorChar);
-            var entryFilename = Path.GetFileName(entryArchivePath);
+            if (progress != reportedProgress)
+            {
+                reportedProgress = progress;
+                RaisePackageInstallProgress(progress, i + 1, entryCount);
+            }
 
             if (entry.Length is 0)
             {
                 continue;
             }
 
-            foreach (var key in await GetAssetKeys())
+            var entryRelativePath = entry.FullName[entryNameIndex..].Replace('\\', '/').TrimStart('/');
+            var entryFilename = Path.GetFileName(entryRelativePath);
+            var entryGamePath = Paths.ResolveWithin(gameDirectory, entryRelativePath);
+
+            var writtenPaths = entryFilename switch
             {
-                package.Assets.Add(key);
-            }
+                "Scenarios.bin" => [],
+                "Route.xml" => await ExtractRouteDotXml(entry, entryGamePath),
+                "ScenarioInfo.xml" => await ExtractScenarioInfoDotXml(entry, entryGamePath),
+                _ => ExtractRpkEntry(entry, entryGamePath),
+            };
 
-            continue;
-
-            async Task<List<string>> GetAssetKeys()
+            foreach (var writtenPath in writtenPaths)
             {
-                switch (entryFilename)
-                {
-                    case "Scenarios.bin":
-                        return [];
-                    case "Route.xml":
-                        return await ExtractRouteDotXml(entry, entryNameIndex);
-                }
+                var assetKey = Path.GetRelativePath(gameDirectory, writtenPath).Replace('/', '\\');
 
-                if (Path.GetFileName(entryArchivePath) == "ScenarioInfo.xml")
-                {
-                    return await ExtractScenarioInfoDotXml(entry, entryNameIndex);
-                }
-
-                if (ForbiddenExtensions.Contains(Path.GetExtension(entryArchivePath)) == false)
-                {
-                    ExtractRpkEntry(entry, entryArchivePath);
-                }
-
-                return  [entryArchivePath];
+                package.Assets.Add(assetKey);
             }
         }
 
@@ -196,112 +177,61 @@ public class Packager
         await Task.Delay(6000).ConfigureAwait(false);
     }
 
-    private static async Task<List<string>> ExtractRouteDotXml(ZipArchiveEntry rpkEntry, int pathOffset)
+    private static async Task<byte[]> ReadEntryBytes(ZipArchiveEntry entry)
     {
-        var numArray = new byte[rpkEntry.Length];
-        _ = await rpkEntry.Open().ReadAsync(numArray);
-        var index = 37 * numArray[0] + 2;
+        var bytes = new byte[entry.Length];
 
-        var routeXmlText = Encoding.UTF8.GetString(numArray, index, (int)rpkEntry.Length - index);
-        var directoryPath = Path.GetDirectoryName(rpkEntry.Name[pathOffset..]);
-        var gameDirectoryPath = Path.Join(Paths.GetGameDirectory(), directoryPath);
+        await using var stream = entry.Open();
+        await stream.ReadExactlyAsync(bytes);
 
-        if (gameDirectoryPath is null)
-        {
-            throw new Exception($"failed to get directory path for {rpkEntry.Name}");
-        }
-
-        var directoryInfo = new DirectoryInfo(gameDirectoryPath);
-
-        return SplitRouteXml(routeXmlText, directoryInfo);
+        return bytes;
     }
 
-    private static List<string> SplitRouteXml(string routeXmlText, DirectoryInfo intoRoutesDI)
+    private static string GetPackedXmlText(byte[] bytes)
     {
-        var separator = new[]
-        {
-            "\t\t</cRouteProperties>",
-        };
+        var index = 37 * bytes[0] + 2;
 
-        var strArray = routeXmlText.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-        var result = new List<string>();
-
-        foreach (var str in strArray)
-        {
-            if (str.Trim().Length == 0) continue;
-
-            var xmlStr = str.Replace(
-                "<cRouteProperties d:id=",
-                "<cRouteProperties xmlns:d=\"http://www.kuju.com/TnT/2003/Delta\" d:version=\"1.0\" d:id="
-            );
-
-            var guid = ExtractGuid(xmlStr);
-            var fileName = Path.Join(intoRoutesDI.FullName, guid, "RouteProperties.xml");
-            var fileInfo = new FileInfo(fileName);
-
-            var dirName = Path.GetDirectoryName(fileInfo.FullName);
-
-            if (dirName is null)
-            {
-                throw new Exception($"failed to get directory path for {fileInfo.FullName}");
-            }
-
-            Directory.CreateDirectory(dirName);
-
-            if (fileInfo.Exists)
-            {
-                fileInfo.Attributes = FileAttributes.Normal;
-            }
-
-            using (TextWriter text = fileInfo.CreateText())
-            {
-                text.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-                text.Write(xmlStr);
-                text.WriteLine(separator[0]);
-                text.Close();
-            }
-
-            if (fileName[0] == '\\')
-            {
-                fileName = fileName[1..];
-            }
-
-            result.Add(fileName);
-        }
-
-        return result;
+        return Encoding.UTF8.GetString(bytes, index, bytes.Length - index);
     }
 
-    private static async Task<List<string>> ExtractScenarioInfoDotXml(ZipArchiveEntry rpkEntry, int pathOffset)
+    private static async Task<List<string>> ExtractRouteDotXml(ZipArchiveEntry entry, string entryGamePath)
     {
-        var numArray = new byte[rpkEntry.Length];
-        _ = await rpkEntry.Open().ReadAsync(numArray);
-        var index = 37 * numArray[0] + 2;
+        var bytes = await ReadEntryBytes(entry);
+        var routeXmlText = GetPackedXmlText(bytes);
+        var routesDirectory = Path.GetDirectoryName(entryGamePath)
+            ?? throw new Exception($"failed to get directory path for {entry.FullName}");
 
-        var routeXmlText = Encoding.UTF8.GetString(numArray, index, (int)rpkEntry.Length - index);
-        var directoryPath = Path.GetDirectoryName(rpkEntry.Name[pathOffset..]);
-        var gameDirectoryPath = Path.Join(Paths.GetGameDirectory(), directoryPath);
-
-        if (directoryPath is null)
-        {
-            throw new Exception($"failed to get directory path for {rpkEntry.Name}");
-        }
-
-        var directoryInfo = new DirectoryInfo(gameDirectoryPath);
-
-        return SplitScenariosXml(routeXmlText, directoryInfo);
+        return SplitPropertiesXml(
+            routeXmlText,
+            "cRouteProperties",
+            guid => Path.Join(guid, "RouteProperties.xml"),
+            routesDirectory);
     }
 
-    private static List<string> SplitScenariosXml(string scenarioXml, DirectoryInfo intoRouteDi)
+    private static async Task<List<string>> ExtractScenarioInfoDotXml(ZipArchiveEntry entry, string entryGamePath)
+    {
+        var bytes = await ReadEntryBytes(entry);
+        var scenarioXmlText = GetPackedXmlText(bytes);
+        var routeDirectory = Path.GetDirectoryName(entryGamePath)
+            ?? throw new Exception($"failed to get directory path for {entry.FullName}");
+
+        return SplitPropertiesXml(
+            scenarioXmlText,
+            "cScenarioProperties",
+            guid => Path.Join("Scenarios", guid, "ScenarioProperties.xml"),
+            routeDirectory);
+    }
+
+    private static List<string> SplitPropertiesXml(
+        string xmlText,
+        string elementName,
+        Func<string, string> getRelativeOutputPath,
+        string outputDirectory)
     {
         var results = new List<string>();
+        var separator = $"\t\t</{elementName}>";
 
-        var separator = new[]
-        {
-            "\t\t</cScenarioProperties>",
-        };
-
-        foreach (var str in scenarioXml.Split(separator, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var str in xmlText.Split(separator, StringSplitOptions.RemoveEmptyEntries))
         {
             if (str.Trim().Length == 0)
             {
@@ -309,39 +239,26 @@ public class Packager
             }
 
             var xmlStr = str.Replace(
-                "<cScenarioProperties d:id=",
-                "<cScenarioProperties xmlns:d=\"http://www.kuju.com/TnT/2003/Delta\" d:version=\"1.0\" d:id="
+                $"<{elementName} d:id=",
+                $"<{elementName} xmlns:d=\"http://www.kuju.com/TnT/2003/Delta\" d:version=\"1.0\" d:id="
             );
 
             var guid = ExtractGuid(xmlStr);
-            var fileName = Path.Join(intoRouteDi.FullName, "Scenarios", guid, "ScenarioProperties.xml");
+            var fileName = Paths.ResolveWithin(outputDirectory, getRelativeOutputPath(guid));
             var fileInfo = new FileInfo(fileName);
 
-            var dirName = Path.GetDirectoryName(fileInfo.FullName);
-
-            if (dirName is null)
-            {
-                throw new Exception($"failed to get directory path for {fileInfo.FullName}");
-            }
-
-            Directory.CreateDirectory(dirName);
+            Directory.CreateDirectory(fileInfo.DirectoryName!);
 
             if (fileInfo.Exists)
             {
                 fileInfo.Attributes = FileAttributes.Normal;
             }
 
-            using (TextWriter text = fileInfo.CreateText())
+            using (var text = fileInfo.CreateText())
             {
                 text.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                 text.Write(xmlStr);
-                text.WriteLine(separator[0]);
-                text.Close();
-            }
-
-            if (fileName[0] == '\\')
-            {
-                fileName = fileName[1..];
+                text.WriteLine(separator);
             }
 
             results.Add(fileName);
@@ -350,22 +267,17 @@ public class Packager
         return results;
     }
 
-    private static void ExtractRpkEntry(ZipArchiveEntry entry, string entryPath)
+    private static List<string> ExtractRpkEntry(ZipArchiveEntry entry, string entryGamePath)
     {
-        var directory = Path.GetDirectoryName(entryPath);
-        var filename = Path.GetFileName(entryPath);
+        var isForbidden = ForbiddenExtensions.Contains(Path.GetExtension(entryGamePath));
 
-        if (directory is null)
+        if (!isForbidden)
         {
-            throw new Exception($"failed to get directory path for {entryPath}");
+            Directory.CreateDirectory(Path.GetDirectoryName(entryGamePath)!);
+            entry.ExtractToFile(entryGamePath, true);
         }
 
-        var destination = Path.Join(Paths.GetGameDirectory(), directory);
-        var destinationFilename = Path.Join(destination, filename);
-
-        Directory.CreateDirectory(destination);
-
-        entry.ExtractToFile(destinationFilename, true);
+        return [entryGamePath];
     }
 
     private static string ExtractGuid(string value)
@@ -389,20 +301,20 @@ public class Packager
         {
             foreach (var product in Directory.GetDirectories(provider))
             {
-                var target = Path.Join(product, "Blueprints.pak");
+                var blueprintPaks = Directory
+                    .EnumerateFiles(product, "*.pak", SearchOption.TopDirectoryOnly)
+                    .Where(path => string.Equals(Path.GetFileName(path), "Blueprints.pak", StringComparison.OrdinalIgnoreCase));
 
-                if (Paths.Exists(target) is false)
+                foreach (var target in blueprintPaks)
                 {
-                    continue;
-                }
-
-                try
-                {
-                    File.Delete(target);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Failed to remove file at {Path}", target);
+                    try
+                    {
+                        File.Delete(target);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to remove file at {Path}", target);
+                    }
                 }
             }
         }

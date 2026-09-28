@@ -27,7 +27,7 @@ public record Package
 
         Directory.CreateDirectory(directory);
 
-        using var output = File.OpenWrite(path);
+        using var output = File.Create(path);
         using var writer = new StreamWriter(output);
 
         writer.WriteLine(Assets.Count);
