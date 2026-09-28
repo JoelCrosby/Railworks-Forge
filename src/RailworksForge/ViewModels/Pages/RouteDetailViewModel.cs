@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,6 +8,8 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+using Echoes;
 
 using RailworksForge.Core;
 using RailworksForge.Core.Models;
@@ -41,11 +44,18 @@ public partial class RouteDetailViewModel(
     [ObservableProperty]
     public partial string? SearchTerm { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SearchPlaceholder))]
+    public partial int ScenarioCount { get; set; }
+
+    public string SearchPlaceholder => string.Format(Strings.search_scenarios.CurrentValue, ScenarioCount);
+
     private bool HasSelectedScenario => SelectedScenario is not null;
 
     protected override Task OnActivated()
     {
         scenarioService.PlayerInfoUpdated += OnPlayerInfoUpdated;
+        TranslationProvider.OnCultureChanged += OnCultureChanged;
 
         return Loading.RunAsync(
             Strings.loading_scenarios.CurrentValue,
@@ -57,6 +67,12 @@ public partial class RouteDetailViewModel(
     {
         _imageLoader.Cancel();
         scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
+        TranslationProvider.OnCultureChanged -= OnCultureChanged;
+    }
+
+    private void OnCultureChanged(object? sender, CultureInfo culture)
+    {
+        OnPropertyChanged(nameof(SearchPlaceholder));
     }
 
     partial void OnSearchTermChanged(string? value)
@@ -71,6 +87,7 @@ public partial class RouteDetailViewModel(
         var rows = scenarios.ConvertAll(scenario => new ScenarioRowViewModel(scenario));
 
         Scenarios.Reset(rows);
+        ScenarioCount = rows.Count;
         LoadLocomotiveImages(rows);
     }
 

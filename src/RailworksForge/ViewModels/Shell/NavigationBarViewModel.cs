@@ -19,10 +19,10 @@ public partial class NavigationBarViewModel : ObservableObject
 
     public ToolsMenuViewModel Tools { get; }
 
-    // The routes search and layout toggle live in the header, so it needs the routes page while it is shown.
     public RoutesViewModel? RoutesPage => Navigation.CurrentPage as RoutesViewModel;
 
-    // The deepest crumb is the page being shown, unless Settings has replaced it; then every crumb must stay clickable.
+    public RouteDetailViewModel? RouteDetailPage => Navigation.CurrentPage as RouteDetailViewModel;
+
     public bool IsRoutesCrumbCurrent => Navigation.CurrentRoute is null && !Navigation.IsSettingsActive;
 
     public bool IsRouteCrumbCurrent => Navigation.CurrentScenario is null && !Navigation.IsSettingsActive;
@@ -34,6 +34,7 @@ public partial class NavigationBarViewModel : ObservableObject
     private void OnNavigationChanged()
     {
         OnPropertyChanged(nameof(RoutesPage));
+        OnPropertyChanged(nameof(RouteDetailPage));
         OnPropertyChanged(nameof(IsRoutesCrumbCurrent));
         OnPropertyChanged(nameof(IsRouteCrumbCurrent));
         OnPropertyChanged(nameof(IsScenarioCrumbCurrent));

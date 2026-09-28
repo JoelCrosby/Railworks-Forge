@@ -1,6 +1,6 @@
 _pkgbasename=railworks-forge
 pkgname=railworks-forge-git
-pkgver=r273.4a0ca4a
+pkgver=r292.ce04b92
 pkgrel=1
 pkgdesc="Program for managing Railworks assets, scenarios and locomotives"
 arch=(x86_64)

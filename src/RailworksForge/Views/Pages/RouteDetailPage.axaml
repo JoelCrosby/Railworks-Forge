@@ -63,9 +63,7 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
-            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.scenarios}}">
-                <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
-            </controls:TableHeader>
+            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.scenarios}}" />
         </StackPanel>
 
 

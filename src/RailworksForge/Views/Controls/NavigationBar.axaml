@@ -117,7 +117,7 @@
             <Setter Property="Margin" Value="4,0" />
         </Style>
 
-        <!-- Routes search and layout toggle. -->
+        <!-- Routes and scenarios search, and the routes layout toggle. -->
         <Style Selector="TextBox.header-search">
             <Setter Property="Width" Value="280" />
             <Setter Property="Height" Value="32" />
@@ -237,7 +237,27 @@
                     VerticalAlignment="Center"
                     Background="{DynamicResource SystemChromeDisabledHighColor}" />
 
-            <ContentControl DockPanel.Dock="Right" Content="{Binding RoutesPage}" VerticalAlignment="Center">
+            <ContentControl DockPanel.Dock="Right"
+                            Content="{Binding RouteDetailPage}"
+                            IsVisible="{Binding RouteDetailPage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            VerticalAlignment="Center">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate x:DataType="vm:RouteDetailViewModel">
+                        <TextBox Classes="header-search"
+                                 Text="{Binding SearchTerm}"
+                                 PlaceholderText="{Binding SearchPlaceholder}">
+                            <TextBox.InnerLeftContent>
+                                <controls:LucideIcon Classes="muted" Icon="Search" Width="14" Height="14" Margin="10,0,0,0" />
+                            </TextBox.InnerLeftContent>
+                        </TextBox>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+
+            <ContentControl DockPanel.Dock="Right"
+                            Content="{Binding RoutesPage}"
+                            IsVisible="{Binding RoutesPage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            VerticalAlignment="Center">
                 <ContentControl.ContentTemplate>
                     <DataTemplate x:DataType="vm:RoutesViewModel">
                         <StackPanel Orientation="Horizontal" Spacing="12">
