@@ -73,6 +73,8 @@ public class SerzInternal
             var parents = new Stack<string>();
             var hasRoot = false;
 
+            Span<byte> floatBits = stackalloc byte[8];
+
             while (reader.Read())
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -113,9 +115,8 @@ public class SerzInternal
 
                         if (reader.IsFloat)
                         {
-                            Span<byte> bits = stackalloc byte[8];
-                            BinaryPrimitives.WriteDoubleLittleEndian(bits, reader.FloatValue);
-                            Attribute(writer, "alt_encoding", System.Convert.ToHexString(bits));
+                            BinaryPrimitives.WriteDoubleLittleEndian(floatBits, reader.FloatValue);
+                            Attribute(writer, "alt_encoding", System.Convert.ToHexString(floatBits));
                             Attribute(writer, "precision", "string");
                             writer.WriteString(SerzReader.FormatFloat(reader.FloatValue, "G6"));
                         }
