@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using Echoes;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Common;
 using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;

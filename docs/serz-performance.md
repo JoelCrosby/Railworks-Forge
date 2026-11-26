@@ -59,7 +59,7 @@ From the repository root on Linux:
 DOTNET_TieredCompilation=0 WINEDEBUG=-all \
 SERZ_EXE_PATH=/cache/SteamLibrary/steamapps/common/RailWorks/serz64.exe \
 dotnet run --project tools/SerzBenchmark -c Release -- \
-  src/RailworksForge.UnitTests/Resources/Scenario.bin \
+  tests/RailworksForge.Core.Tests/Resources/Scenario.bin \
   /path/to/Tracks.bin
 ```
 

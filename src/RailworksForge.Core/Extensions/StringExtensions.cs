@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
+using RailworksForge.Core.Common;
+
 namespace RailworksForge.Core.Extensions;
 
 public static partial class StringExtensions

@@ -4,11 +4,10 @@ using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using RailworksForge.Core;
-using RailworksForge.Core.Models;
-using RailworksForge.Core.Models.Common;
-using RailworksForge.Util;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Routes;
 using RailworksForge.Translations;
+using RailworksForge.Util;
 
 namespace RailworksForge.ViewModels;
 

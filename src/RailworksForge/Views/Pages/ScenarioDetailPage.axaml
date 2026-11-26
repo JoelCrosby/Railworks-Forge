@@ -12,7 +12,6 @@
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
-             xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
              x:DataType="vm:ScenarioDetailViewModel">

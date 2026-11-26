@@ -9,14 +9,20 @@ using Echoes;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
 using RailworksForge.Core.Config;
+using RailworksForge.Core.Consists;
 using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Routes;
+using RailworksForge.Core.Scenarios;
+using RailworksForge.Core.Serialization;
+using RailworksForge.Core.Vehicles;
 using RailworksForge.Services;
 using RailworksForge.ViewModels;
-using RailworksForge.Views;
 using RailworksForge.Views.Dialogs;
 using RailworksForge.Views.Pages;
+using RailworksForge.Views;
 
 using Serilog;
 

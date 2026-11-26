@@ -1,25 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Echoes" />
+    <PackageReference Include="Echoes.Generator" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Echoes" />
-      <PackageReference Include="Echoes.Generator" />
-    </ItemGroup>
+  <ItemGroup>
+    <!-- Include all .toml files as embedded resources (so we can dynamically load them at runtime) -->
+    <AdditionalFiles Include="Translations\Strings_de.toml" />
+    <AdditionalFiles Include="Translations\Strings_es.toml" />
+    <AdditionalFiles Include="Translations\Strings_fr.toml" />
+    <EmbeddedResource Include="**\*.toml" />
 
-    <ItemGroup>
-        <!-- Include all .toml files as embedded resources (so we can dynamically load them at runtime) -->
-        <AdditionalFiles Include="Translations\Strings_de.toml" />
-        <AdditionalFiles Include="Translations\Strings_es.toml" />
-        <AdditionalFiles Include="Translations\Strings_fr.toml" />
-        <EmbeddedResource Include="**\*.toml" />
-
-        <!-- Specify invariant files that are fed into the generator (Echoes.Generator) -->
-        <AdditionalFiles Include="Translations\Strings.toml" />
-    </ItemGroup>
+    <!-- Specify invariant files that are fed into the generator (Echoes.Generator) -->
+    <AdditionalFiles Include="Translations\Strings.toml" />
+  </ItemGroup>
 
 </Project>

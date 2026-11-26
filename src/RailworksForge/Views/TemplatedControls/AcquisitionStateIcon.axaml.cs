@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.Primitives;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Assets;
 
 namespace RailworksForge.Views.TemplatedControls;
 

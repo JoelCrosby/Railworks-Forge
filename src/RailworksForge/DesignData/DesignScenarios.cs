@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 
-using RailworksForge.Core.Models;
-using RailworksForge.Core.Types;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Scenarios;
 
 namespace RailworksForge.DesignData;
 

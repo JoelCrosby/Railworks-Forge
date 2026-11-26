@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Consists;
 
 namespace RailworksForge.ViewModels;
 

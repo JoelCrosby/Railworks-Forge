@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
 
+using RailworksForge.Core.Common;
+
 namespace RailworksForge.Core.Packaging;
 
 public record Package

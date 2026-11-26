@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Common;
 
 using Serilog;
 

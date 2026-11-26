@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using RailworksForge.Core;
 using RailworksForge.Core.Exceptions;
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Scenarios;
 
 namespace RailworksForge.ViewModels;
 

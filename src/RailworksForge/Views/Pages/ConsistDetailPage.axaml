@@ -7,7 +7,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
-             xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+             xmlns:consists="clr-namespace:RailworksForge.Core.Consists;assembly=RailworksForge.Core"
+             xmlns:vehicles="clr-namespace:RailworksForge.Core.Vehicles;assembly=RailworksForge.Core"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -61,7 +62,7 @@
 
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="AcquisitionState">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <DataTemplate DataType="consists:ConsistRailVehicle">
                                         <controls:AcquisitionStateIcon Classes="cell" State="{Binding AcquisitionState}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -72,7 +73,7 @@
 
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.flipped}}" SortMemberPath="Flipped">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <DataTemplate DataType="consists:ConsistRailVehicle">
                                         <Viewbox Classes="cell-icon"
                                                  IsVisible="{Binding Flipped}"
                                                  ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_flipped}}">
@@ -86,7 +87,7 @@
                             <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="BlueprintSetIdProvider">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="models:ConsistRailVehicle">
+                                    <DataTemplate DataType="consists:ConsistRailVehicle">
                                         <controls:BlueprintSummary Margin="12,0"
                                                                    Provider="{Binding BlueprintSetIdProvider}"
                                                                    Product="{Binding BlueprintSetIdProduct}"
@@ -147,7 +148,7 @@
                                     <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
                                     <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="BlueprintType">
                                         <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate DataType="models:RollingStockEntry">
+                                            <DataTemplate DataType="vehicles:RollingStockEntry">
                                                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
                                                     <Viewbox Classes="inline-icon">
                                                         <lucideAvalonia:Lucide Icon="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeIconConverter}}" />
@@ -198,7 +199,7 @@
                             <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding DisplayName}" />
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="BlueprintType">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="models:RollingStockEntry">
+                                    <DataTemplate DataType="vehicles:RollingStockEntry">
                                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
                                             <Viewbox Classes="inline-icon">
                                                 <lucideAvalonia:Lucide Icon="{Binding BlueprintType, Converter={x:Static converters:ValueConverters.VehicleTypeIconConverter}}" />
@@ -210,7 +211,7 @@
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="models:RollingStockEntry">
+                                    <DataTemplate DataType="vehicles:RollingStockEntry">
                                         <controls:BlueprintSummary Margin="12,0"
                                                                    Provider="{Binding Blueprint.BlueprintSetIdProvider}"
                                                                    Product="{Binding Blueprint.BlueprintSetIdProduct}"

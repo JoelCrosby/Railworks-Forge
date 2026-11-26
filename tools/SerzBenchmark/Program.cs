@@ -4,7 +4,7 @@ using AngleSharp.Xml;
 
 using CliWrap;
 
-using RailworksForge.Core.External;
+using RailworksForge.Core.Serialization;
 
 if (args.Length == 0)
 {

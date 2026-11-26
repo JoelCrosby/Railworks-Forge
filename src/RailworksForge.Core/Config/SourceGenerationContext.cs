@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Consists;
+using RailworksForge.Core.Scenarios;
 
 namespace RailworksForge.Core.Config;
 

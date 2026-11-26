@@ -5,7 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Consists;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Services;

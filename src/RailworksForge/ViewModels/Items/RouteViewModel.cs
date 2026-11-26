@@ -4,7 +4,8 @@ using Avalonia.Media.Imaging;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Routes;
 
 namespace RailworksForge.ViewModels;
 

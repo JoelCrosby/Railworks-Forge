@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Common;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Services;
 using RailworksForge.Translations;
 

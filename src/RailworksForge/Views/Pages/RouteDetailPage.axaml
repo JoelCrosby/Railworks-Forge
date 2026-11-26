@@ -8,7 +8,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
-             xmlns:models="clr-namespace:RailworksForge.Core.Models;assembly=RailworksForge.Core"
+             xmlns:packaging="clr-namespace:RailworksForge.Core.Packaging;assembly=RailworksForge.Core"
+             xmlns:scenarios="clr-namespace:RailworksForge.Core.Scenarios;assembly=RailworksForge.Core"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:converters="clr-namespace:RailworksForge.Converters"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
@@ -112,7 +113,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
                                 <Viewbox Classes="inline-icon"
                                          VerticalAlignment="Center"
-                                         IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:ScenarioClass.Unknown}}">
+                                         IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static scenarios:ScenarioClass.Unknown}}">
                                     <lucideAvalonia:Lucide Icon="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassIconConverter}}" />
                                 </Viewbox>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
@@ -169,13 +170,13 @@
                         <DataTemplate DataType="vm:ScenarioRowViewModel">
                             <Panel>
                                 <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Packed}}"
+                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static packaging:PackagingType.Packed}}"
                                          ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.packed}}">
                                     <lucideAvalonia:Lucide Icon="Package"
                                                            StrokeBrush="{DynamicResource TextControlForeground}" />
                                 </Viewbox>
                                 <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:PackagingType.Unpacked}}"
+                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static packaging:PackagingType.Unpacked}}"
                                          ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.unpacked}}">
                                     <lucideAvalonia:Lucide Icon="FolderOpen"
                                                            StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" />

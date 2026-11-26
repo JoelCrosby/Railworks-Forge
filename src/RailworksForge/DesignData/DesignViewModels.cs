@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using RailworksForge.Core;
-using RailworksForge.Core.Models.Common;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Routes;
 using RailworksForge.Services;
 using RailworksForge.ViewModels;
 

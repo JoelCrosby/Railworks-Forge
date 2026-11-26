@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using RailworksForge.Core.Common;
+
 namespace RailworksForge.Core.Config;
 
 public class Configuration

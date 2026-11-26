@@ -3,6 +3,8 @@ using System.Text;
 
 using Serilog;
 
+using RailworksForge.Core.Common;
+
 namespace RailworksForge.Core.Packaging;
 
 public class Packager

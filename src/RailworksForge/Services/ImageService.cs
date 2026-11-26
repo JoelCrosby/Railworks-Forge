@@ -5,9 +5,10 @@ using System.Linq;
 
 using Avalonia.Media.Imaging;
 
-using RailworksForge.Core;
-using RailworksForge.Core.Models;
-using RailworksForge.Core.Models.Common;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
+using RailworksForge.Core.Consists;
+using RailworksForge.Core.Routes;
 
 using Serilog;
 

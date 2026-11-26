@@ -1,0 +1,239 @@
+using System.Diagnostics;
+
+using AngleSharp.Dom;
+
+using Dameng.SepEx;
+
+using RailworksForge.Core.Common;
+using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Serialization;
+
+using Serilog;
+
+namespace RailworksForge.Core.Assets;
+
+[GenSepParsable]
+[DebuggerDisplay("{BlueprintSetIdProvider}/{BlueprintSetIdProduct}/{BlueprintId}")]
+public partial class Blueprint
+{
+    [SepColumnName("provider")]
+    public required string BlueprintSetIdProvider { get; init; }
+
+    [SepColumnName("product")]
+    public required string BlueprintSetIdProduct { get; init; }
+
+    [SepColumnName("id")]
+    public required string BlueprintId { get; init; }
+
+    public override bool Equals(object? other) => this.Equals(other as Blueprint);
+
+    private bool Equals(Blueprint? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (this.GetType() != other.GetType())
+        {
+            return false;
+        }
+
+        return BlueprintId == other.BlueprintId &&
+               BlueprintSetIdProvider == other.BlueprintSetIdProvider &&
+               BlueprintSetIdProduct == other.BlueprintSetIdProduct;
+    }
+
+    public override int GetHashCode()
+    {
+        return (BlueprintId, BlueprintSetIdProvider, BlueprintSetIdProduct).GetHashCode();
+    }
+
+    [SepColumnIgnore]
+    public AcquisitionState AcquisitionState => GetAcquisitionState();
+
+    [SepColumnIgnore]
+    public string RelativeBinaryPath => AgnosticBlueprintIdPath.Replace(".xml", ".bin");
+
+    [SepColumnIgnore]
+    public string BinaryPath => Path.Join(ProductPath, BlueprintIdPath);
+
+    [SepColumnIgnore]
+    public string? BinaryDirectoryPath => Path.GetDirectoryName(BinaryPath);
+
+    [SepColumnIgnore]
+    public string ProductPath => Path.Join(Paths.GetAssetsDirectory(), BlueprintSetIdProvider, BlueprintSetIdProduct);
+
+    [SepColumnIgnore]
+    public string BlueprintIdPath => BlueprintId.Replace('\\', '/').Replace(".xml", ".bin");
+
+    public async Task<IDocument> GetXmlDocument(bool force = false)
+    {
+        if (Paths.Exists(BlueprintBinaryPath))
+        {
+            var converted = await Serz.Convert(BlueprintBinaryPath, force: force);
+
+            return await ParseXmlFile(converted.OutputPath);
+        }
+
+        var archives = Directory.EnumerateFiles(ProductDirectory, "*.ap", SearchOption.AllDirectories);
+
+        foreach (var archive in archives)
+        {
+            var extracted = Archives.ExtractFileContentFromPath(archive, RelativeBinaryPath, ArchivedBinaryCachePath);
+
+            if (extracted)
+            {
+                var result = await Serz.Convert(ArchivedBinaryCachePath);
+
+                return await ParseXmlFile(result.OutputPath);
+            }
+        }
+
+        throw new Exception($"unable to get blueprint xml for path {BlueprintBinaryPath}");
+    }
+
+    private static async Task<IDocument> ParseXmlFile(string path)
+    {
+        await using var file = File.OpenRead(path);
+
+        return await XmlParser.ParseDocumentAsync(file);
+    }
+
+    // Keyed by provider and product as well, since different products commonly ship the same relative path.
+    [SepColumnIgnore]
+    private string ArchivedBinaryCachePath => Path.Join(
+        Paths.CacheOutputPath,
+        "archived-blueprints",
+        BlueprintSetIdProvider,
+        BlueprintSetIdProduct,
+        RelativeBinaryPath
+    );
+
+    [SepColumnIgnore]
+    private string AcquisitionCacheKey => Path
+        .Join(BlueprintSetIdProvider, BlueprintSetIdProduct, RelativeBinaryPath)
+        .NormalisePath();
+
+    [SepColumnIgnore]
+    private string ProductDirectory => Path.Join(
+        Paths.GetAssetsDirectory(),
+        BlueprintSetIdProvider,
+        BlueprintSetIdProduct
+    );
+
+    [SepColumnIgnore]
+    private string AgnosticBlueprintIdPath => BlueprintId.Replace('\\', Path.DirectorySeparatorChar);
+
+    [SepColumnIgnore]
+    private string BlueprintBinaryPath => Path.Join(ProductDirectory, RelativeBinaryPath);
+
+    [SepColumnIgnore]
+    private string BlueprintXmlPath => Path.Join(ProductDirectory, AgnosticBlueprintIdPath);
+
+    private AcquisitionState GetAcquisitionState()
+    {
+        if (Cache.BlueprintAcquisitionStates.GetValueOrDefault(AcquisitionCacheKey) is {} cached)
+        {
+            return cached;
+        }
+
+        var state = LoadAcquisitionState();
+
+        Cache.BlueprintAcquisitionStates.TryAdd(AcquisitionCacheKey, state);
+
+        return state;
+    }
+
+    private static readonly Lock ArchiveLock = new ();
+
+    private AcquisitionState LoadAcquisitionState()
+    {
+        if (string.IsNullOrEmpty(BlueprintSetIdProvider))
+        {
+            return AcquisitionState.Missing;
+        }
+
+        if (string.IsNullOrEmpty(BlueprintSetIdProduct))
+        {
+            return AcquisitionState.Missing;
+        }
+
+        if (Paths.Exists(BlueprintBinaryPath, Paths.GetAssetsDirectory()))
+        {
+            return AcquisitionState.Found;
+        }
+
+        if (Paths.Exists(BlueprintXmlPath, Paths.GetAssetsDirectory()))
+        {
+            return AcquisitionState.Found;
+        }
+
+        lock (ArchiveLock)
+        {
+            if (Paths.GetActualPathFromInsensitive(ProductDirectory) is {} actualProductDirectory)
+            {
+                var archives = Cache.ProductArchives.GetOrAdd(
+                    actualProductDirectory,
+                    directory => Directory.EnumerateFiles(directory, "*.ap", SearchOption.AllDirectories).ToList());
+
+                Log.Debug("searching for blueprint {Blueprint} in archives {Archives}", RelativeBinaryPath, archives);
+
+                if (archives.Any(archive => Archives.EntryExists(archive, RelativeBinaryPath)))
+                {
+                    return AcquisitionState.Found;
+                }
+            }
+        }
+
+        return AcquisitionState.Missing;
+    }
+
+    public static Blueprint Parse(IElement el)
+    {
+        var blueprintId = el.SelectTextContent("BlueprintID");
+        var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");
+        var blueprintSetIdProvider = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Provider");
+
+        return new Blueprint
+        {
+            BlueprintId = blueprintId,
+            BlueprintSetIdProduct = blueprintSetIdProduct,
+            BlueprintSetIdProvider = blueprintSetIdProvider,
+        };
+    }
+
+    public static Blueprint FromPath(string path)
+    {
+        var relative = path
+            .Replace(Paths.GetAssetsDirectory(), string.Empty)
+            .Replace(Paths.CacheOutputPath, string.Empty);
+
+        var parts = relative
+            .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Where(p => !p.Contains(Paths.ArchivePathPreserveSuffix))
+            .ToArray();
+
+        if (parts.Length < 3)
+        {
+            throw new Exception($"unable to parse blueprint from path {path}");
+        }
+
+        var provider = parts[1];
+        var product = parts[2];
+
+        var assetPath = string.Join("\\", parts.Skip(3)).Replace(".bin.xml", ".xml");
+
+        return new Blueprint
+        {
+            BlueprintSetIdProduct = product,
+            BlueprintSetIdProvider = provider,
+            BlueprintId = assetPath,
+        };
+    }
+}

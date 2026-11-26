@@ -3,7 +3,7 @@ using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Assets;
 using RailworksForge.Util;
 using RailworksForge.ViewModels;
 

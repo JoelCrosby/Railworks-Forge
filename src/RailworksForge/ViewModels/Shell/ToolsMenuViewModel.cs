@@ -7,8 +7,11 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using RailworksForge.Core;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
 using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Routes;
+using RailworksForge.Core.Serialization;
 using RailworksForge.Services;
 using RailworksForge.Translations;
 

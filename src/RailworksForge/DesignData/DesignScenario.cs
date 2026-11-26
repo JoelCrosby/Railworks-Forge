@@ -1,7 +1,9 @@
 using System;
 
-using RailworksForge.Core.Models;
-using RailworksForge.Core.Types;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Scenarios;
+using RailworksForge.Core.Vehicles;
 
 namespace RailworksForge.DesignData;
 

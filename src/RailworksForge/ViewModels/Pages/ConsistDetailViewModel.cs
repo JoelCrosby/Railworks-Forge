@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using RailworksForge.Core;
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Consists;
+using RailworksForge.Core.Scenarios;
+using RailworksForge.Core.Vehicles;
 using RailworksForge.Services;
-using RailworksForge.Util;
 using RailworksForge.Translations;
+using RailworksForge.Util;
 
 namespace RailworksForge.ViewModels;
 

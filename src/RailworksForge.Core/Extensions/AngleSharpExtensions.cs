@@ -5,8 +5,9 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Xml;
 
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
 using RailworksForge.Core.Exceptions;
-using RailworksForge.Core.Models.Common;
 
 namespace RailworksForge.Core.Extensions;
 

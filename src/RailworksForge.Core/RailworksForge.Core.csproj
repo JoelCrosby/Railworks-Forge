@@ -1,32 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="AngleSharp.Xml" />
+    <PackageReference Include="CliWrap" />
+    <PackageReference Include="Dameng.SepEx" />
+    <PackageReference Include="Gameloop.Vdf" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Polly" />
+    <PackageReference Include="Sep" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="System.Runtime.Caching" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Microsoft.Data.Sqlite" />
-      <PackageReference Include="AngleSharp" />
-      <PackageReference Include="AngleSharp.Xml" />
-      <PackageReference Include="CliWrap" />
-      <PackageReference Include="Dameng.SepEx" />
-      <PackageReference Include="Gameloop.Vdf" />
-      <PackageReference Include="Polly" />
-      <PackageReference Include="Sep" />
-      <PackageReference Include="Serilog" />
-      <PackageReference Include="System.Reactive" />
-      <PackageReference Include="System.Runtime.Caching" />
-    </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RailworksForge.Core.Tests" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <InternalsVisibleTo Include="RailworksForge.UnitTests" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Resources\**" />
-      <EmbeddedResource Include="Resources\**" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\**" />
+    <EmbeddedResource Include="Resources\**" />
+  </ItemGroup>
 
 </Project>

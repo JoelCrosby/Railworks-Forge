@@ -2,7 +2,7 @@ using Avalonia.Media.Imaging;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Consists;
 
 namespace RailworksForge.ViewModels;
 

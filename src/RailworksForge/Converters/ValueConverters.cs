@@ -4,8 +4,9 @@ using Avalonia.Data.Converters;
 
 using LucideAvalonia.Enum;
 
-using RailworksForge.Core;
-using RailworksForge.Core.Models;
+using RailworksForge.Core.Assets;
+using RailworksForge.Core.Packaging;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Translations;
 
 namespace RailworksForge.Converters;
