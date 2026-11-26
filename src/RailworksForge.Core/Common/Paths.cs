@@ -206,7 +206,9 @@ public static class Paths
     // Resolves a path whose components may have the wrong case, returning the casing used on disk.
     public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
-        var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);
+        var normalisedPath = path
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
 
         if (!IsFileSystemCaseInsensitive && Path.Exists(normalisedPath))
         {
