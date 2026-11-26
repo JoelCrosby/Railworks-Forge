@@ -20,6 +20,7 @@ public record ConfigurationOptions
         DataGrids = new();
         Language = CultureInfo.CurrentCulture.Name;
         Theme = "System";
+        UseInternalSerz = true;
     }
 }
 

@@ -7,12 +7,12 @@ namespace RailworksForge.UnitTests;
 public class ConfigurationTests
 {
     [Fact]
-    public void ExistingSettings_DefaultToGameSerz()
+    public void MissingSetting_DefaultsToInternalSerz()
     {
         var options = JsonSerializer.Deserialize<ConfigurationOptions>("{}", Configuration.JsonSerializerOptions);
 
         Assert.NotNull(options);
-        Assert.False(options.UseInternalSerz);
+        Assert.True(options.UseInternalSerz);
     }
 
     [Theory]

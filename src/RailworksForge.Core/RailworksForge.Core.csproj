@@ -21,6 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="RailworksForge.UnitTests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Remove="Resources\**" />
       <EmbeddedResource Include="Resources\**" />
     </ItemGroup>

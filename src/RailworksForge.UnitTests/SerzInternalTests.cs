@@ -1,4 +1,6 @@
+using System.Buffers.Binary;
 using System.Globalization;
+using System.Text;
 using System.Xml.Linq;
 
 using AngleSharp.Xml;
@@ -20,6 +22,8 @@ public class SerzInternalTests
     [InlineData("SerzCache.bin")]
     [InlineData("SerzFeatures.bin")]
     [InlineData("SerzFloats.bin")]
+    [InlineData("SerzNaN.bin")]
+    [InlineData("SerzArrays.bin")]
     public void Conversion_MatchesSerzOutput(string name)
     {
         var data = GetResourceBytes(name);
@@ -208,6 +212,101 @@ public class SerzInternalTests
         {
             directory.Delete(true);
         }
+    }
+
+    [Fact]
+    public void ToXml_WritesEmptyArray()
+    {
+        var emptyArray = ArrayRecord("empty", "sInt32");
+        var data = BuildSerz(OpenRecord("cRoot"), emptyArray, CloseRecord("cRoot"));
+        var document = XDocument.Parse(new SerzInternal(ref data).ToXml().ToXml());
+        var element = Assert.Single(document.Root!.Elements());
+        var numElements = element.Attribute(Delta + "numElements")?.Value;
+
+        Assert.Equal("empty", element.Name.LocalName);
+        Assert.Equal("0", numElements);
+        Assert.Equal(string.Empty, element.Value);
+    }
+
+    // serz64.exe reads string arrays but writes every element as an empty string, so there is no golden XML.
+    [Fact]
+    public void ToXml_KeepsStringArrayValues()
+    {
+        var stringArray = ArrayRecord("strings", "cDeltaString", NewString("alpha"), NewString("b & <c>"), NewString("ünï"));
+        var data = BuildSerz(OpenRecord("cRoot"), stringArray, CloseRecord("cRoot"));
+        var document = XDocument.Parse(new SerzInternal(ref data).ToXml().ToXml());
+        var element = Assert.Single(document.Root!.Elements());
+
+        Assert.Equal("alpha b & <c> ünï", element.Value);
+    }
+
+    [Fact]
+    public void ToXml_RejectsUnsupportedValueType()
+    {
+        var unsupportedValue = ValueRecord("value", "sBogus", [0x01]);
+        var data = BuildSerz(OpenRecord("cRoot"), unsupportedValue, CloseRecord("cRoot"));
+        var exception = Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
+
+        Assert.Contains("Unsupported value type 'sBogus'", exception.Message);
+    }
+
+    [Fact]
+    public void ToXml_RejectsCloseWithoutOpenElement()
+    {
+        var data = BuildSerz(OpenRecord("cRoot"), CloseRecord("cRoot"), CloseRecord("cRoot"));
+        var exception = Assert.Throws<InvalidDataException>(() => new SerzInternal(ref data).ToXml());
+
+        Assert.Contains("Mismatched closing element 'cRoot' (expected '<no open element>')", exception.Message);
+    }
+
+    [Fact]
+    public void ToXml_KeepsSurrogatePairsInTextWithForbiddenCharacters()
+    {
+        const string text = "\U0001F682\0x";
+        var value = ValueRecord("value", "cDeltaString", NewString(text));
+        var data = BuildSerz(OpenRecord("cRoot"), value, CloseRecord("cRoot"));
+        var document = new SerzInternal(ref data).ToXml();
+        var element = Assert.Single(document.QuerySelectorAll("cRoot > *"));
+
+        Assert.Equal(text, element.TextContent);
+    }
+
+    private static readonly XNamespace Delta = "http://www.kuju.com/TnT/2003/Delta";
+
+    private static byte[] BuildSerz(params byte[][] records)
+    {
+        return [.. "SERZ\0\0\x01\0"u8, .. records.SelectMany(record => record)];
+    }
+
+    private static byte[] OpenRecord(string name)
+    {
+        return [0xFF, (byte)'P', .. NewString(name), .. new byte[8]];
+    }
+
+    private static byte[] CloseRecord(string name)
+    {
+        return [0xFF, (byte)'p', .. NewString(name)];
+    }
+
+    private static byte[] ValueRecord(string name, string type, byte[] value)
+    {
+        return [0xFF, (byte)'V', .. NewString(name), .. NewString(type), .. value];
+    }
+
+    private static byte[] ArrayRecord(string name, string type, params byte[][] values)
+    {
+        var elements = values.SelectMany(value => value);
+
+        return [0xFF, (byte)'A', .. NewString(name), .. NewString(type), (byte)values.Length, .. elements];
+    }
+
+    // SERZ prefixes new strings with a 0xFFFF index marker and a length counted in Unicode characters.
+    private static byte[] NewString(string value)
+    {
+        var length = new byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(length, (uint)value.EnumerateRunes().Count());
+
+        return [0xFF, 0xFF, .. length, .. Encoding.UTF8.GetBytes(value)];
     }
 
     private static List<(string Name, string Text)> GetLeafValues(byte[] xml)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cRoot xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0">
+	<bools d:numElements="3" d:elementType="bool" d:precision="string">0 1 1</bools>
+	<i8 d:numElements="4" d:elementType="sInt8" d:precision="string">-128 -1 0 127</i8>
+	<u8 d:numElements="3" d:elementType="sUInt8" d:precision="string">0 1 255</u8>
+	<i16 d:numElements="3" d:elementType="sInt16" d:precision="string">-32768 -1 32767</i16>
+	<u16 d:numElements="2" d:elementType="sUInt16" d:precision="string">0 65535</u16>
+	<i32 d:numElements="3" d:elementType="sInt32" d:precision="string">-2147483648 -1 2147483647</i32>
+	<u32 d:numElements="2" d:elementType="sUInt32" d:precision="string">0 4294967295</u32>
+	<i64 d:numElements="3" d:elementType="sInt64" d:precision="string">-9223372036854775808 -1 9223372036854775807</i64>
+	<u64 d:numElements="2" d:elementType="sUInt64" d:precision="string">0 18446744073709551615</u64>
+	<f32 d:numElements="5" d:elementType="sFloat32" d:precision="string">-inf inf -0.0000000 1.5000000 -123456.7890625</f32>
+	<f64 d:numElements="4" d:elementType="sFloat64" d:precision="string">-inf inf 0.0000000 -2.5000000</f64>
+	<neginf32 d:type="sFloat32" d:alt_encoding="000000000000F0FF" d:precision="string">-inf</neginf32>
+	<neginf64 d:type="sFloat64" d:alt_encoding="000000000000F0FF" d:precision="string">-inf</neginf64>
+</cRoot>

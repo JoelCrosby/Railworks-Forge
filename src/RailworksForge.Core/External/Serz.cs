@@ -13,7 +13,20 @@ public class Serz
 {
     public record ConvertedSerzFile(string OutputPath);
 
-    public static async Task<ConvertedSerzFile> Convert(string inputPath, CancellationToken token = default, bool force = false)
+    internal delegate Task NativeConverter(string inputPath, string outputPath, CancellationToken token);
+
+    internal sealed record SerzConversion
+    {
+        public required string InputPath { get; init; }
+
+        public required string OutputPath { get; init; }
+
+        public bool UseInternalSerz { get; init; }
+
+        public bool Force { get; init; }
+    }
+
+    public static Task<ConvertedSerzFile> Convert(string inputPath, CancellationToken token = default, bool force = false)
     {
         token.ThrowIfCancellationRequested();
 
@@ -22,13 +35,30 @@ public class Serz
             throw new Exception($"serz tried to access file that does not exist: {inputPath}");
         }
 
-        var isBin = Path.GetExtension(inputPath) == ".bin";
-        var outputPath = Paths.GetAssetCachePath(inputPath, isBin);
+        var conversion = new SerzConversion
+        {
+            InputPath = inputPath,
+            OutputPath = Paths.GetAssetCachePath(inputPath, IsBinary(inputPath)),
+            UseInternalSerz = Configuration.Get().UseInternalSerz,
+            Force = force,
+        };
 
+        return Convert(conversion, RunSerz, token);
+    }
+
+    internal static async Task<ConvertedSerzFile> Convert(
+        SerzConversion conversion,
+        NativeConverter runNativeSerz,
+        CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+
+        var inputPath = conversion.InputPath;
+        var outputPath = conversion.OutputPath;
         var hasCachedOutput = File.Exists(outputPath);
         var isCacheCurrent = hasCachedOutput && File.GetLastWriteTimeUtc(outputPath) >= File.GetLastWriteTimeUtc(inputPath);
 
-        if (force is false && isCacheCurrent)
+        if (conversion.Force is false && isCacheCurrent)
         {
             return new ConvertedSerzFile(outputPath);
         }
@@ -39,13 +69,10 @@ public class Serz
         var temporaryFilename = $"{Path.GetFileNameWithoutExtension(outputPath)}.{Guid.NewGuid():N}{Path.GetExtension(outputPath)}";
         var temporaryOutputPath = Path.Join(outputDirectory, temporaryFilename);
 
-        var inputArg = inputPath.ToWindowsPath();
-        var outputType = isBin ? "xml" : "bin";
-        var outputArg = @$"\{outputType}: {temporaryOutputPath.ToWindowsPath()}";
+        var isBin = IsBinary(inputPath);
+        var useInternalSerz = isBin && conversion.UseInternalSerz;
 
         var sw = Stopwatch.StartNew();
-
-        var useInternalSerz = isBin && Configuration.Get().UseInternalSerz;
 
         try
         {
@@ -55,7 +82,7 @@ public class Serz
             }
             else
             {
-                await RunSerz(inputArg, outputArg, token);
+                await runNativeSerz(inputPath, temporaryOutputPath, token);
             }
 
             if (!File.Exists(temporaryOutputPath))
@@ -70,16 +97,25 @@ public class Serz
             File.Delete(temporaryOutputPath);
         }
 
-        Log.Debug("converted file {Input} to {Format} in {Ms}ms", inputArg.ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
+        var outputType = isBin ? "xml" : "bin";
+        Log.Debug("converted file {Input} to {Format} in {Ms}ms", inputPath.ToWindowsPath().ToRelativeGamePath(), outputType, sw.ElapsedMilliseconds);
 
         sw.Stop();
 
         return new ConvertedSerzFile(outputPath);
     }
 
-    private static async Task RunSerz(string inputArg, string outputArg, CancellationToken token)
+    private static bool IsBinary(string path)
+    {
+        return Path.GetExtension(path) == ".bin";
+    }
+
+    private static async Task RunSerz(string inputPath, string outputPath, CancellationToken token)
     {
         var exePath = Path.Join(Paths.GetGameDirectory(), "serz64.exe");
+        var outputType = IsBinary(inputPath) ? "xml" : "bin";
+        var inputArg = inputPath.ToWindowsPath();
+        var outputArg = @$"\{outputType}: {outputPath.ToWindowsPath()}";
 
         if (Paths.GetPlatform() == Paths.Platform.Windows)
         {

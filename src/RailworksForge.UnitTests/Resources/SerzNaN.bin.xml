@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cRoot xmlns:d="http://www.kuju.com/TnT/2003/Delta" d:version="1.0">
+	<f0 d:type="sFloat32" d:alt_encoding="000000000000F8FF" d:precision="string">-nan(ind)</f0>
+	<f1 d:type="sFloat32" d:alt_encoding="000000000000F87F" d:precision="string">nan</f1>
+	<f2 d:type="sFloat32" d:alt_encoding="000000E0FFFFFFFF" d:precision="string">-nan(ind)</f2>
+	<f3 d:type="sFloat32" d:alt_encoding="000000E0FFFFFF7F" d:precision="string">nan</f3>
+	<f4 d:type="sFloat32" d:alt_encoding="000000200000F87F" d:precision="string">nan</f4>
+	<f5 d:type="sFloat32" d:alt_encoding="000000200000F8FF" d:precision="string">-nan(ind)</f5>
+	<f6 d:type="sFloat32" d:alt_encoding="000000200000F8FF" d:precision="string">-nan(ind)</f6>
+	<d0 d:type="sFloat64" d:alt_encoding="000000000000F8FF" d:precision="string">-nan(ind)</d0>
+	<d1 d:type="sFloat64" d:alt_encoding="000000000000F87F" d:precision="string">nan</d1>
+	<d2 d:type="sFloat64" d:alt_encoding="010000000000F8FF" d:precision="string">-nan(ind)</d2>
+	<arr d:numElements="7" d:elementType="sFloat32" d:precision="string">-nan(ind) nan -nan(ind) nan nan -nan(ind) -nan(ind)</arr>
+</cRoot>

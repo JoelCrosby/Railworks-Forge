@@ -92,6 +92,12 @@ public sealed class SerzReader
             return "-inf";
         }
 
+        // serz64.exe prints NaN with the MSVC runtime, which writes any NaN with its sign bit set as -nan(ind).
+        if (double.IsNaN(value))
+        {
+            return double.IsNegative(value) ? "-nan(ind)" : "nan";
+        }
+
         return value.ToString(format, Invariant).ToLowerInvariant();
     }
 

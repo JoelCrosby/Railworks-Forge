@@ -12,6 +12,14 @@ originally used to create them.
 - `SerzFeatures`: empty parents, signed IDs/references, nested names, vectors,
   and blob grouping across lines.
 - `SerzFloats`: scientific notation, negative zero, infinity, and NaN.
+- `SerzNaN`: positive and negative, quiet and signalling NaN payloads as 32 and
+  64-bit values and in an array. `serz64.exe` writes every negative NaN as
+  `-nan(ind)` and every positive one as `nan`. Generated on 2026-11-26.
+- `SerzArrays`: arrays of every numeric type and `bool` at their limits,
+  infinities and negative zero in float arrays, and negative infinity as single
+  values. Generated on 2026-11-26. `serz64.exe` crashes on empty arrays and
+  writes string array elements as empty strings, so those cases are tested
+  without golden XML.
 - `SerzControlChars`: strings containing NUL and other characters XML forbids,
   mixed with markup and line breaks. `serz64.exe` writes these as raw bytes, so
   its output is not well-formed XML and is compared using AngleSharp instead.
