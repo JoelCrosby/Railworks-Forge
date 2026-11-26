@@ -261,7 +261,7 @@ public class SerzInternal
         }
     }
 
-    private static string XmlName(string name)
+    internal static string XmlName(string name)
     {
 
         if (name.Length == 0)

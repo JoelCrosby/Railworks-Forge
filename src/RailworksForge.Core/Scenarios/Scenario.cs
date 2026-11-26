@@ -231,6 +231,14 @@ public record Scenario
         return document;
     }
 
+    // Reading the binary directly is much faster than converting it to XML and parsing that.
+    public Task<byte[]> ReadBinary(CancellationToken cancellationToken)
+    {
+        var path = HasBinary ? BinaryPath : ExtractBinary();
+
+        return File.ReadAllBytesAsync(path, cancellationToken);
+    }
+
     public async Task<string> ConvertBinToXml(bool useCache = true)
     {
         var inputPath = HasBinary ? BinaryPath : ExtractBinary();
@@ -320,11 +328,11 @@ public record Scenario
         return BinaryPath;
     }
 
-    public static List<ConsistRailVehicle> GetServiceConsistVehicles(IReadOnlyList<IElement> consistElements, Consist consist)
+    public static List<ConsistRailVehicle> GetServiceConsistVehicles(IReadOnlyList<ScenarioNode> consistNodes, Consist consist)
     {
         var consistElement = string.IsNullOrEmpty(consist.Id)
-            ? consistElements.ElementAtOrDefault(consist.Index ?? 0)
-            : consistElements.FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
+            ? consistNodes.ElementAtOrDefault(consist.Index ?? 0)
+            : consistNodes.FirstOrDefault(node => node.Id == consist.Id);
 
         return consistElement?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
@@ -332,9 +340,9 @@ public record Scenario
             .ToList() ?? [];
     }
 
-    private static ConsistRailVehicle ParseConsist(IElement el, int index)
+    private static ConsistRailVehicle ParseConsist(ScenarioNode el, int index)
     {
-        var consistId = el.GetAttribute("d:id") ?? string.Empty;
+        var consistId = el.Id ?? string.Empty;
         var locomotiveName = el.SelectTextContent("Name");
         var uniqueNumber = el.SelectTextContent("UniqueNumber");
         var blueprintId = el.SelectTextContent("BlueprintID BlueprintID");

@@ -14,7 +14,7 @@ public interface IScenarioEditSession
 
     List<ConsistRailVehicle> GetVehicles(Consist consist, CancellationToken cancellationToken);
 
-    string GetConsistRailVehiclesXml(Consist consist);
+    Task<string> GetConsistRailVehiclesXml(Consist consist);
 
     Task AddVehicle(Consist consist, RollingStockEntry vehicle);
 

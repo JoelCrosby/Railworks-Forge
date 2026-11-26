@@ -5,6 +5,7 @@ using AngleSharp.Dom;
 using RailworksForge.Core.Assets;
 using RailworksForge.Core.Common;
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Core.Vehicles;
 
 namespace RailworksForge.Core.Consists;
@@ -76,14 +77,14 @@ public class Consist : Blueprint
         };
     }
 
-    public static Consist? ParseScenarioConsist(IElement el, int index)
+    public static Consist? ParseScenarioConsist(ScenarioNode el, int index)
     {
         var vehicles = el.QuerySelectorAll("RailVehicles cOwnedEntity").Select(VehicleBlueprint.Parse).ToList();
         var lead = GetLeadVehicle(vehicles);
 
         if (lead is null) return null;
 
-        var consistId = el.GetAttribute("d:id") ?? string.Empty;
+        var consistId = el.Id ?? string.Empty;
         var locomotiveName = lead.Element.SelectTextContent("Name");
         var playerDriver = el.SelectTextContent("Driver PlayerDriver") == "1";
         var blueprintId = lead.Element.SelectTextContent("BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID BlueprintID");
@@ -146,11 +147,7 @@ public class Consist : Blueprint
 
     public static IElement? GetServiceConsist(IDocument document, Consist consist)
     {
-        return GetServiceConsist(document.QuerySelectorAll("cConsist"), consist);
-    }
-
-    public static IElement? GetServiceConsist(IReadOnlyCollection<IElement> consistElements, Consist consist)
-    {
+        var consistElements = document.QuerySelectorAll("cConsist");
         var byId = consistElements.FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
 
         if (byId is not null)
@@ -158,6 +155,6 @@ public class Consist : Blueprint
             return byId;
         }
 
-        return consistElements.FirstOrDefault(el => el.SelectTextContent("ServiceName Key") == consist.ServiceId);
+        return consistElements.QueryByTextContent("ServiceName Key", consist.ServiceId);
     }
 }

@@ -8,63 +8,49 @@ using RailworksForge.Core.Exceptions;
 using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Vehicles;
 
+using Serilog;
+
 namespace RailworksForge.Core.Scenarios;
 
 // Buffers edits against an in-memory copy of the scenario, so nothing reaches disk until Apply. New vehicles get
 // their real ids, so later edits in the same session can target them.
 public sealed class ScenarioEditSession : IScenarioEditSession
 {
-    private ConsistCommandContext _context;
+    // Edits and Apply each start from the result of the one before, so they run one at a time.
+    private readonly SemaphoreSlim _editLock = new(1, 1);
+    private EditState _state;
     private DateTime? _savedVersion;
-    private ConsistElementList? _consistElements;
 
-    private ScenarioEditSession(ConsistCommandContext context)
+    private ScenarioEditSession(EditState state)
     {
-        _context = context;
-        _savedVersion = context.Scenario.SavedVersion;
+        _state = state;
+        _savedVersion = state.Scenario.SavedVersion;
     }
 
-    public Scenario Scenario => _context.Scenario;
+    public Scenario Scenario => _state.Scenario;
 
     public bool HasChanges { get; private set; }
 
-    // Every query walks the whole scenario, so the consists are listed once per document rather than per lookup. The
-    // list records its document, so one built while an edit swapped the document is never reused.
-    private List<IElement> ConsistElements
-    {
-        get
-        {
-            var document = _context.ScenarioDocument;
-            var cached = _consistElements;
-
-            if (cached?.Document == document)
-            {
-                return cached.Elements;
-            }
-
-            var elements = document.QuerySelectorAll("cConsist").ToList();
-            _consistElements = new ConsistElementList(document, elements);
-
-            return elements;
-        }
-    }
-
+    // Consists are listed straight from Scenario.bin, which takes milliseconds. Parsing the full document takes
+    // seconds for a large scenario, so it carries on in the background and only edits wait for it.
     public static async Task<ScenarioEditSession> Begin(Scenario scenario, CancellationToken cancellationToken)
     {
         using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
 
         var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
         var propertiesDocument = await updated.GetPropertiesXmlDocument();
-        var document = await updated.GetXmlDocument();
+        var binary = await updated.ReadBinary(cancellationToken);
+        var consists = ScenarioNode.ReadConsists(binary, cancellationToken);
 
-        var context = new ConsistCommandContext
+        var state = new EditState
         {
             Scenario = updated,
-            ScenarioDocument = document,
+            ScenarioDocument = LoadDocument(updated, updated.SavedVersion),
             ScenarioPropertiesDocument = propertiesDocument,
+            Consists = new Lazy<List<ScenarioNode>>(() => consists),
         };
 
-        return new ScenarioEditSession(context);
+        return new ScenarioEditSession(state);
     }
 
     public List<Consist> GetConsists(CancellationToken cancellationToken)
@@ -72,7 +58,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         // Content may have been added or removed since the scenario was last shown.
         Cache.ClearAcquisitionStates();
 
-        return ConsistElements
+        return _state.Consists.Value
             .Select((element, index) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -90,7 +76,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
             return [];
         }
 
-        var vehicles = Scenario.GetServiceConsistVehicles(ConsistElements, consist);
+        var vehicles = Scenario.GetServiceConsistVehicles(_state.Consists.Value, consist);
 
         // Acquisition state is computed lazily from disk; resolve it here so the grid doesn't do it on the UI thread.
         foreach (var vehicle in vehicles)
@@ -102,16 +88,26 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         return vehicles;
     }
 
-    public string GetConsistRailVehiclesXml(Consist consist)
+    public async Task<string> GetConsistRailVehiclesXml(Consist consist)
     {
-        var vehicles = Consist.GetServiceConsist(ConsistElements, consist)?.QuerySelector("RailVehicles");
+        await _editLock.WaitAsync();
 
-        if (vehicles is null)
+        try
         {
-            throw new Exception("could not find consist in scenario bin");
-        }
+            var document = await GetDocument();
+            var vehicles = Consist.GetServiceConsist(document, consist)?.QuerySelector("RailVehicles");
 
-        return vehicles.ToXml();
+            if (vehicles is null)
+            {
+                throw new Exception("could not find consist in scenario bin");
+            }
+
+            return vehicles.ToXml();
+        }
+        finally
+        {
+            _editLock.Release();
+        }
     }
 
     public Task AddVehicle(Consist consist, RollingStockEntry vehicle)
@@ -173,7 +169,23 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
     public async Task Apply()
     {
-        var scenario = _context.Scenario;
+        await _editLock.WaitAsync();
+
+        try
+        {
+            await ApplyEdits();
+        }
+        finally
+        {
+            _editLock.Release();
+        }
+    }
+
+    private async Task ApplyEdits()
+    {
+        var document = await GetDocument();
+        var state = _state;
+        var scenario = state.Scenario;
 
         using var scenarioLock = await ScenarioLocks.Acquire(scenario);
 
@@ -184,13 +196,13 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
         scenario.CreateBackup();
 
-        await ScenarioWriter.WriteBinary(scenario, _context.ScenarioDocument);
-        await ScenarioWriter.WritePropertiesDocument(scenario, _context.ScenarioPropertiesDocument);
+        await ScenarioWriter.WriteBinary(scenario, document);
+        await ScenarioWriter.WritePropertiesDocument(scenario, state.ScenarioPropertiesDocument);
 
         Cache.ClearScenarioCache(scenario);
 
-        _context = _context with { Scenario = scenario.Refresh() ?? scenario };
-        _savedVersion = _context.Scenario.SavedVersion;
+        _state = state with { Scenario = scenario.Refresh() ?? scenario };
+        _savedVersion = _state.Scenario.SavedVersion;
         HasChanges = false;
     }
 
@@ -198,16 +210,74 @@ public sealed class ScenarioEditSession : IScenarioEditSession
     // that only replaces the buffered documents once the whole command has succeeded.
     private async Task Run(IConsistCommand command)
     {
-        var working = _context with
+        await _editLock.WaitAsync();
+
+        try
         {
-            ScenarioDocument = Copy(_context.ScenarioDocument),
-            ScenarioPropertiesDocument = Copy(_context.ScenarioPropertiesDocument),
-        };
+            var document = await GetDocument();
+            var state = _state;
+            var working = new ConsistCommandContext
+            {
+                Scenario = state.Scenario,
+                ScenarioDocument = Copy(document),
+                ScenarioPropertiesDocument = Copy(state.ScenarioPropertiesDocument),
+            };
 
-        await command.Run(working);
+            await command.Run(working);
 
-        _context = working;
-        HasChanges = true;
+            // Replaced in one assignment, so a reader never pairs the edited document with the consists listed before
+            // it. The consists are only copied out of the document when they are next listed.
+            _state = state with
+            {
+                ScenarioDocument = Task.FromResult(working.ScenarioDocument),
+                ScenarioPropertiesDocument = working.ScenarioPropertiesDocument,
+                Consists = new Lazy<List<ScenarioNode>>(() => ScenarioNode.ReadConsists(working.ScenarioDocument)),
+            };
+            HasChanges = true;
+        }
+        finally
+        {
+            _editLock.Release();
+        }
+    }
+
+    // Called with the edit lock held. A load that failed is started again, so one failure doesn't break every
+    // later edit in the session.
+    private Task<IDocument> GetDocument()
+    {
+        var state = _state;
+        var hasFailed = state.ScenarioDocument.IsFaulted || state.ScenarioDocument.IsCanceled;
+
+        if (hasFailed)
+        {
+            state = state with { ScenarioDocument = LoadDocument(state.Scenario, _savedVersion) };
+            _state = state;
+        }
+
+        return state.ScenarioDocument;
+    }
+
+    // Runs in the background after Begin has released the scenario lock. The consists were listed from the binary
+    // while the lock was held, so a scenario saved in between would no longer match them and is reported as changed.
+    private static Task<IDocument> LoadDocument(Scenario scenario, DateTime? version)
+    {
+        var document = Task.Run(async () =>
+        {
+            var loaded = await scenario.GetXmlDocument();
+
+            if (scenario.SavedVersion != version)
+            {
+                throw new ScenarioChangedException();
+            }
+
+            return loaded;
+        });
+
+        _ = document.ContinueWith(
+            task => Log.Warning(task.Exception, "Failed to load scenario document for {Scenario}", scenario.Name),
+            TaskContinuationOptions.OnlyOnFaulted);
+
+        return document;
     }
 
     private static IDocument Copy(IDocument document)
@@ -215,5 +285,15 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         return (IDocument)document.Clone(true);
     }
 
-    private sealed record ConsistElementList(IDocument Document, List<IElement> Elements);
+    private sealed record EditState
+    {
+        public required Scenario Scenario { get; init; }
+
+        // Still loading in the background until an edit or Apply first needs it.
+        public required Task<IDocument> ScenarioDocument { get; init; }
+
+        public required IDocument ScenarioPropertiesDocument { get; init; }
+
+        public required Lazy<List<ScenarioNode>> Consists { get; init; }
+    }
 }

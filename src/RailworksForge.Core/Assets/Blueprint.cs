@@ -6,6 +6,7 @@ using Dameng.SepEx;
 
 using RailworksForge.Core.Common;
 using RailworksForge.Core.Extensions;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Core.Serialization;
 
 using Serilog;
@@ -194,7 +195,7 @@ public partial class Blueprint
         return AcquisitionState.Missing;
     }
 
-    public static Blueprint Parse(IElement el)
+    public static Blueprint Parse(ScenarioNode el)
     {
         var blueprintId = el.SelectTextContent("BlueprintID");
         var blueprintSetIdProduct = el.SelectTextContent("iBlueprintLibrary-cBlueprintSetID Product");

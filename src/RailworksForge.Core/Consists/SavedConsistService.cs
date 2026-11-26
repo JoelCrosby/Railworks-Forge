@@ -11,7 +11,7 @@ public class SavedConsistService : ISavedConsistService
     public async Task Save(IScenarioEditor editor, Consist consist, string name, CancellationToken cancellationToken)
     {
         var session = await editor.GetSession(cancellationToken);
-        var consistElement = session.GetConsistRailVehiclesXml(consist);
+        var consistElement = await session.GetConsistRailVehiclesXml(consist);
         var savedConsist = new SavedConsist
         {
             Name = name,
