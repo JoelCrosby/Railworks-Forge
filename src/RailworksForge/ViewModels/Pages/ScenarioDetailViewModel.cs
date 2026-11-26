@@ -19,16 +19,16 @@ namespace RailworksForge.ViewModels;
 
 public partial class ScenarioDetailViewModel : ViewModelBase
 {
-    private readonly NavigationService _navigation;
-    private readonly DialogService _dialogs;
-    private readonly LauncherService _launcher;
-    private readonly ImageService _images;
-    private readonly ScenarioService _scenarios;
-    private readonly SavedConsistService _savedConsists;
+    private readonly INavigationService _navigation;
+    private readonly IDialogService _dialogs;
+    private readonly ILauncherService _launcher;
+    private readonly IImageService _images;
+    private readonly IScenarioService _scenarios;
+    private readonly ISavedConsistService _savedConsists;
     private readonly BackgroundImageLoader _imageLoader = new();
 
     [ObservableProperty]
-    public partial Scenario Scenario { get; set; }
+    public partial Scenario Scenario { get; private set; }
 
     [ObservableProperty]
     public partial string? SearchTerm { get; set; }
@@ -37,16 +37,16 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     public ObservableCollection<ConsistViewModel> SelectedServices { get; } = [];
 
-    public ScenarioEditor Editor { get; }
+    public IScenarioEditor Editor { get; }
 
     public ScenarioDetailViewModel(
         Scenario scenario,
-        NavigationService navigation,
-        DialogService dialogs,
-        LauncherService launcher,
-        ImageService images,
-        ScenarioService scenarios,
-        SavedConsistService savedConsists)
+        INavigationService navigation,
+        IDialogService dialogs,
+        ILauncherService launcher,
+        IImageService images,
+        IScenarioService scenarios,
+        ISavedConsistService savedConsists)
     {
         Scenario = scenario;
         _navigation = navigation;
@@ -56,7 +56,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         _scenarios = scenarios;
         _savedConsists = savedConsists;
 
-        Editor = new ScenarioEditor(scenario);
+        Editor = scenarios.CreateEditor(scenario);
 
         SelectedServices.CollectionChanged += (_, _) => NotifySelectionCommands();
         Editor.PropertyChanged += (_, _) => NotifyEditCommands();
@@ -94,7 +94,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     }
 
     // Edits are buffered in the editor's session and only written to the scenario when applied.
-    private Task Edit(Func<ScenarioEditSession, Task> edit)
+    private Task Edit(Func<IScenarioEditSession, Task> edit)
     {
         return Loading.RunAsync(Strings.updating_scenario.CurrentValue, async token =>
         {
@@ -105,7 +105,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         }, ShowServices, allowRetry: false);
     }
 
-    private static List<ConsistViewModel> GetServices(ScenarioEditSession session, CancellationToken token)
+    private static List<ConsistViewModel> GetServices(IScenarioEditSession session, CancellationToken token)
     {
         return session.GetConsists(token).Select(consist => new ConsistViewModel(consist)).ToList();
     }

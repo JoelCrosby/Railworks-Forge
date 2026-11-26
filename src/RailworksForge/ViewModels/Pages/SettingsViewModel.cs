@@ -55,21 +55,21 @@ public partial class SettingsViewModel : ViewModelBase
 
     public bool IsGameDirectoryInvalid => IsGameDirectorySet && !IsGameDirectoryValid;
 
-    private readonly ThemeService _themeService;
-    private readonly LauncherService _launcher;
-    private readonly StoragePickerService _picker;
-    private readonly AppLifetimeService _lifetime;
-    private readonly SettingsService _settings;
-    private readonly GameDirectoryService _gameDirectory;
+    private readonly IThemeService _themeService;
+    private readonly ILauncherService _launcher;
+    private readonly IStoragePickerService _picker;
+    private readonly IAppLifetimeService _lifetime;
+    private readonly ISettingsService _settings;
+    private readonly IGameDirectoryService _gameDirectory;
     private readonly AppDirectories _appDirectories;
 
     public SettingsViewModel(
-        ThemeService themes,
-        LauncherService launcher,
-        StoragePickerService picker,
-        AppLifetimeService lifetime,
-        SettingsService settings,
-        GameDirectoryService gameDirectory,
+        IThemeService themes,
+        ILauncherService launcher,
+        IStoragePickerService picker,
+        IAppLifetimeService lifetime,
+        ISettingsService settings,
+        IGameDirectoryService gameDirectory,
         AppDirectories appDirectories)
     {
         _themeService = themes;
@@ -170,6 +170,13 @@ public partial class SettingsViewModel : ViewModelBase
 
     partial void OnUseInternalSerzChanged(bool value)
     {
+        var isUnchanged = value == _settings.Current.UseInternalSerz;
+
+        if (isUnchanged)
+        {
+            return;
+        }
+
         _settings.Update(config => config with { UseInternalSerz = value });
     }
 

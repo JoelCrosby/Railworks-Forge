@@ -21,13 +21,14 @@ namespace RailworksForge.ViewModels;
 
 public partial class RouteDetailViewModel(
     RouteViewModel route,
-    ScenarioService scenarioService,
-    TrackService trackService,
-    ImageService images,
-    NavigationService navigation,
-    DialogService dialogs,
-    LauncherService launcher,
-    ClipboardService clipboard) : ViewModelBase
+    IScenarioService scenarioService,
+    ITrackService trackService,
+    IImageService images,
+    INavigationService navigation,
+    IDialogService dialogs,
+    ILauncherService launcher,
+    IClipboardService clipboard,
+    IDispatcher dispatcher) : ViewModelBase
 {
     private readonly BackgroundImageLoader _imageLoader = new();
 
@@ -54,7 +55,9 @@ public partial class RouteDetailViewModel(
 
     protected override Task OnActivated()
     {
+        scenarioService.PlayerInfoUpdated -= OnPlayerInfoUpdated;
         scenarioService.PlayerInfoUpdated += OnPlayerInfoUpdated;
+        TranslationProvider.OnCultureChanged -= OnCultureChanged;
         TranslationProvider.OnCultureChanged += OnCultureChanged;
 
         return Loading.RunAsync(
@@ -93,7 +96,7 @@ public partial class RouteDetailViewModel(
 
     private void OnPlayerInfoUpdated()
     {
-        Dispatcher.UIThread.Post(RefreshPlayerInfo);
+        dispatcher.Post(RefreshPlayerInfo);
     }
 
     private void RefreshPlayerInfo()

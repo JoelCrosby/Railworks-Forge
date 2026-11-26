@@ -7,7 +7,7 @@ using RailworksForge.Core.Serialization;
 
 namespace RailworksForge.Core.Routes;
 
-public class TrackService
+public class TrackService : ITrackService
 {
     public async Task ReplaceTracks(Route route, ReplaceTracksRequest request)
     {

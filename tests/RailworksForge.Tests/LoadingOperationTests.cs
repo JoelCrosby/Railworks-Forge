@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
 
+using RailworksForge.Tests.Support;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Tests;
 
+[Collection(GlobalStateCollection.Name)]
 public class LoadingOperationTests
 {
     [Fact]

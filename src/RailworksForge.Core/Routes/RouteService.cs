@@ -9,7 +9,7 @@ using Serilog;
 
 namespace RailworksForge.Core.Routes;
 
-public class RouteService
+public class RouteService : IRouteService
 {
     private readonly Lock _routesLock = new();
     private Task<List<Route>>? _routes;

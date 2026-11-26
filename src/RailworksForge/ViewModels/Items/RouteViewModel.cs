@@ -12,11 +12,11 @@ namespace RailworksForge.ViewModels;
 [DebuggerDisplay("{Name}")]
 public partial class RouteViewModel : ObservableObject
 {
-    public string Id { get; init; }
+    public string Id { get; }
 
-    public string Name { get; init; }
+    public string Name { get; }
 
-    public string SearchIndex { get; init; }
+    public string SearchIndex { get; }
 
     public string RoutePropertiesPath { get; }
 

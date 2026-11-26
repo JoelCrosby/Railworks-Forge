@@ -7,7 +7,7 @@ using RailworksForge.Util;
 
 namespace RailworksForge.Services;
 
-public class ClipboardService
+public class ClipboardService : IClipboardService
 {
     public Task SetText(string text)
     {

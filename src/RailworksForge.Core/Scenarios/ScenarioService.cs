@@ -10,11 +10,11 @@ using RailworksForge.Core.Routes;
 
 namespace RailworksForge.Core.Scenarios;
 
-public class ScenarioService
+public class ScenarioService : IScenarioService
 {
-    private readonly ScenarioDatabaseService _scenarioDatabaseService;
+    private readonly IScenarioDatabaseService _scenarioDatabaseService;
 
-    public ScenarioService(ScenarioDatabaseService  scenarioDatabaseService)
+    public ScenarioService(IScenarioDatabaseService scenarioDatabaseService)
     {
         _scenarioDatabaseService = scenarioDatabaseService;
     }
@@ -48,6 +48,11 @@ public class ScenarioService
     public void ExtractScenarios(Route route)
     {
         route.ExtractScenarios();
+    }
+
+    public IScenarioEditor CreateEditor(Scenario scenario)
+    {
+        return new ScenarioEditor(scenario);
     }
 
     public List<Scenario> GetScenarios(Route route, CancellationToken cancellationToken = default)

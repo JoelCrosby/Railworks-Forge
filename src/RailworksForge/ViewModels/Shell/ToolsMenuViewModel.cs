@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-using Avalonia.Platform.Storage;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -16,13 +14,15 @@ namespace RailworksForge.ViewModels;
 
 public partial class ToolsMenuViewModel(
     ToolsActivity tools,
-    StoragePickerService picker,
-    SerzFileService serz,
-    PackageInstallService packages) : ObservableObject
+    IStoragePickerService picker,
+    ISerzFileService serz,
+    IPackageInstallService packages) : ObservableObject
 {
-    private static FilePickerFileType BinaryFiles => new(Strings.serz_binary_files.CurrentValue) { Patterns = ["*.bin"] };
-    private static FilePickerFileType XmlFiles => new(Strings.serz_xml_files.CurrentValue) { Patterns = ["*.xml"] };
-    private static FilePickerFileType PackageFiles => new(Strings.packages.CurrentValue) { Patterns = ["*.rwp", "*.rpk"] };
+    private static FileTypeFilter BinaryFiles => new(Strings.serz_binary_files.CurrentValue, ["*.bin"]);
+
+    private static FileTypeFilter XmlFiles => new(Strings.serz_xml_files.CurrentValue, ["*.xml"]);
+
+    private static FileTypeFilter PackageFiles => new(Strings.packages.CurrentValue, ["*.rwp", "*.rpk"]);
 
     public LoadingOperation Operations => tools.Loading;
 
@@ -59,7 +59,7 @@ public partial class ToolsMenuViewModel(
     {
         var files = await picker.PickFiles(Strings.select_package_files.CurrentValue, PackageFiles);
 
-        if (files.Count is 0)
+        if (files.Count is 0 || Operations.IsLoading)
         {
             return;
         }

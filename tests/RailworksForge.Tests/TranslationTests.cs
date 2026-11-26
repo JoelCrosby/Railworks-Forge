@@ -3,10 +3,12 @@ using System.Text.RegularExpressions;
 
 using Echoes;
 
+using RailworksForge.Tests.Support;
 using RailworksForge.Translations;
 
 namespace RailworksForge.Tests;
 
+[Collection(GlobalStateCollection.Name)]
 public partial class TranslationTests
 {
     private static readonly Dictionary<string, string> English = ReadTranslations("Strings.toml");

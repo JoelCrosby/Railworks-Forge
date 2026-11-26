@@ -12,7 +12,7 @@ namespace RailworksForge.Core.Scenarios;
 
 // Buffers edits against an in-memory copy of the scenario, so nothing reaches disk until Apply. New vehicles get
 // their real ids, so later edits in the same session can target them.
-public sealed class ScenarioEditSession
+public sealed class ScenarioEditSession : IScenarioEditSession
 {
     private ConsistCommandContext _context;
     private DateTime? _savedVersion;

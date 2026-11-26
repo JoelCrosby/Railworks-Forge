@@ -11,7 +11,7 @@ using RailworksForge.Util;
 
 namespace RailworksForge.ViewModels;
 
-public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
+public partial class SelectTrackViewModel(ITrackService tracks) : ViewModelBase
 {
     public List<string> Providers { get; init; } = [];
 

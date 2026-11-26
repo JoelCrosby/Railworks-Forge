@@ -5,7 +5,7 @@ using RailworksForge.Core.Exceptions;
 namespace RailworksForge.Core.Scenarios;
 
 // Shared by a scenario's page and its consist pages, so edits made on either are applied or discarded together.
-public class ScenarioEditor : INotifyPropertyChanged
+public class ScenarioEditor : IScenarioEditor
 {
     private readonly Lock _sessionLock = new();
     private Task<ScenarioEditSession>? _session;
@@ -34,8 +34,13 @@ public class ScenarioEditor : INotifyPropertyChanged
         }
     }
 
+    public async Task<IScenarioEditSession> GetSession(CancellationToken cancellationToken)
+    {
+        return await GetEditSession(cancellationToken);
+    }
+
     // Started without the caller's token, so a page cancelling its load doesn't leave a cancelled session behind.
-    public Task<ScenarioEditSession> GetSession(CancellationToken cancellationToken)
+    private Task<ScenarioEditSession> GetEditSession(CancellationToken cancellationToken)
     {
         lock (_sessionLock)
         {
@@ -51,7 +56,7 @@ public class ScenarioEditor : INotifyPropertyChanged
     // False when the scenario changed on disk after editing began, so the edits were not saved.
     public async Task<bool> Apply(CancellationToken cancellationToken)
     {
-        var session = await GetSession(cancellationToken);
+        var session = await GetEditSession(cancellationToken);
 
         try
         {

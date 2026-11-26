@@ -17,28 +17,31 @@ namespace RailworksForge.ViewModels;
 
 public partial class RoutesViewModel : ViewModelBase
 {
-    private readonly RouteService _routeService;
-    private readonly NavigationService _navigation;
-    private readonly ImageService _images;
-    private readonly LauncherService _launcher;
-    private readonly ClipboardService _clipboard;
+    private readonly IRouteService _routeService;
+    private readonly INavigationService _navigation;
+    private readonly IImageService _images;
+    private readonly ILauncherService _launcher;
+    private readonly IClipboardService _clipboard;
+    private readonly IDispatcher _dispatcher;
 
     private readonly BackgroundImageLoader _imageLoader = new();
 
     private bool _hasLoadedRoutes;
 
     public RoutesViewModel(
-        RouteService routeService,
-        NavigationService navigation,
-        ImageService images,
-        LauncherService launcher,
-        ClipboardService clipboard)
+        IRouteService routeService,
+        INavigationService navigation,
+        IImageService images,
+        ILauncherService launcher,
+        IClipboardService clipboard,
+        IDispatcher dispatcher)
     {
         _routeService = routeService;
         _navigation = navigation;
         _images = images;
         _launcher = launcher;
         _clipboard = clipboard;
+        _dispatcher = dispatcher;
 
         TranslationProvider.OnCultureChanged += (_, _) => OnPropertyChanged(nameof(SearchPlaceholder));
         _routeService.RoutesInvalidated += OnRoutesInvalidated;
@@ -47,7 +50,7 @@ public partial class RoutesViewModel : ViewModelBase
     // Raised from whichever thread invalidated the routes, e.g. a package install.
     private void OnRoutesInvalidated()
     {
-        Dispatcher.UIThread.Post(ReloadRoutes);
+        _dispatcher.Post(ReloadRoutes);
     }
 
     private void ReloadRoutes()

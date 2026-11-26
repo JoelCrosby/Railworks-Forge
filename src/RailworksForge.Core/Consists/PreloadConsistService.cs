@@ -6,7 +6,7 @@ using RailworksForge.Core.Serialization;
 
 namespace RailworksForge.Core.Consists;
 
-public class PreloadConsistService
+public class PreloadConsistService : IPreloadConsistService
 {
     public async Task<List<PreloadConsist>> GetPreloadConsists(
         BrowserDirectory directory,

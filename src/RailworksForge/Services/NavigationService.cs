@@ -11,7 +11,7 @@ using RailworksForge.ViewModels;
 
 namespace RailworksForge.Services;
 
-public partial class NavigationService(IServiceProvider services) : ObservableObject
+public partial class NavigationService(IServiceProvider services) : ObservableObject, INavigationService
 {
     private RoutesViewModel? _routesPage;
     private ScenarioDetailViewModel? _scenarioPage;
@@ -61,9 +61,9 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
         Show(_scenarioPage);
     }
 
-    public ScenarioEditor? CurrentEditor => CurrentScenario is null ? null : _scenarioPage?.Editor;
+    public IScenarioEditor? CurrentEditor => CurrentScenario is null ? null : _scenarioPage?.Editor;
 
-    public void ShowConsist(ScenarioEditor editor, Consist consist)
+    public void ShowConsist(IScenarioEditor editor, Consist consist)
     {
         CurrentConsist = consist;
 

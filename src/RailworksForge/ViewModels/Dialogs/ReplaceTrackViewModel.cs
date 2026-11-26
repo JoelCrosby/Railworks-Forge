@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,17 +13,17 @@ namespace RailworksForge.ViewModels;
 
 public partial class ReplaceTrackViewModel : DialogViewModel<ReplaceTracksRequest>
 {
-    private readonly TrackService _tracks;
+    private readonly ITrackService _tracks;
 
     [ObservableProperty]
     public partial List<SelectTrackViewModel> RouteTracks { get; set; } = [];
 
-    public ReplaceTrackViewModel(Route route, TrackService tracks)
+    public ReplaceTrackViewModel(Route route, ITrackService tracks)
     {
         Route = route;
         _tracks = tracks;
 
-        Loading.PropertyChanged += (_, _) => ReplaceTracksCommand.NotifyCanExecuteChanged();
+        Loading.PropertyChanged += OnReplaceStateChanged;
     }
 
     public Route Route { get; }
@@ -52,14 +53,26 @@ public partial class ReplaceTrackViewModel : DialogViewModel<ReplaceTracksReques
         }
     }
 
-    partial void OnRouteTracksChanged(List<SelectTrackViewModel> value)
+    partial void OnRouteTracksChanged(List<SelectTrackViewModel> oldValue, List<SelectTrackViewModel> newValue)
     {
-        foreach (var track in value)
+        foreach (var track in oldValue)
         {
-            track.PropertyChanged += (_, _) => ReplaceTracksCommand.NotifyCanExecuteChanged();
-            track.Loading.PropertyChanged += (_, _) => ReplaceTracksCommand.NotifyCanExecuteChanged();
+            track.PropertyChanged -= OnReplaceStateChanged;
+            track.Loading.PropertyChanged -= OnReplaceStateChanged;
+            track.Deactivate();
         }
 
+        foreach (var track in newValue)
+        {
+            track.PropertyChanged += OnReplaceStateChanged;
+            track.Loading.PropertyChanged += OnReplaceStateChanged;
+        }
+
+        ReplaceTracksCommand.NotifyCanExecuteChanged();
+    }
+
+    private void OnReplaceStateChanged(object? sender, PropertyChangedEventArgs e)
+    {
         ReplaceTracksCommand.NotifyCanExecuteChanged();
     }
 

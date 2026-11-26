@@ -64,6 +64,7 @@ public class ArchitectureTests
         using var module = ModuleDefinition.ReadModule(typeof(App).Assembly.Location);
 
         var violations = module.GetTypes()
+            .Where(type => !IsCoverageInstrumentation(type))
             .SelectMany(type => type.Methods)
             .Where(method => method.HasBody)
             .SelectMany(GetViolations)
@@ -130,6 +131,12 @@ public class ArchitectureTests
         }
 
         return outermost;
+    }
+
+    // Coverage runs inject a hit tracker into the UI assembly, and it writes its results with System.IO.File.
+    private static bool IsCoverageInstrumentation(TypeDefinition type)
+    {
+        return type.Namespace.StartsWith("Coverlet.");
     }
 
     private static bool IsExempt(string owner, string referencedType)

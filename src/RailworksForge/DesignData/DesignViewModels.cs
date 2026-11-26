@@ -14,7 +14,7 @@ public static class DesignViewModels
     {
         get
         {
-            var navigation = DesignServices.Get<NavigationService>();
+            var navigation = (NavigationService)DesignServices.Get<INavigationService>();
 
             navigation.CurrentRoute = new RouteViewModel(DesignData.Route);
             navigation.CurrentScenario = DesignData.Scenario;
@@ -30,9 +30,6 @@ public static class DesignViewModels
             var statusBar = DesignServices.Create<StatusBarViewModel>();
 
             statusBar.StatusText = "84 Routes found";
-            statusBar.ShowProgress = true;
-            statusBar.Progress = 0.42f;
-            statusBar.ProgressText = "Extracting scenario .ap file to .xml";
 
             return statusBar;
         }
@@ -85,7 +82,6 @@ public static class DesignViewModels
             var viewModel = DesignServices.Create<CheckAssetsViewModel>(DesignData.Route);
 
             viewModel.LoadingMessage = "Processing 24 of 100 files ( %24 )";
-            viewModel.LoadingStatusMessage = "Processing file: /cache/file/path/binary.bin";
             viewModel.LoadingProgress = 24;
 
             return viewModel;
@@ -96,7 +92,7 @@ public static class DesignViewModels
     {
         get
         {
-            var tracks = DesignServices.Get<TrackService>();
+            var tracks = DesignServices.Get<ITrackService>();
             var viewModel = DesignServices.Create<ReplaceTrackViewModel>(DesignData.Route);
 
             viewModel.RouteTracks = TrackBlueprints

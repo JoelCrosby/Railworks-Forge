@@ -16,22 +16,22 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRailworksForgeCore(this IServiceCollection services)
     {
         services.AddSingleton<AppDirectories>();
-        services.AddSingleton<SettingsService>();
-        services.AddSingleton<GameDirectoryService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IGameDirectoryService, GameDirectoryService>();
 
-        services.AddSingleton<AssetDirectoryTreeService>();
+        services.AddSingleton<IAssetDirectoryTreeService, AssetDirectoryTreeService>();
         services.AddSingleton<AssetImageService>();
-        services.AddSingleton<ScenarioDatabaseService>();
-        services.AddSingleton<ScenarioService>();
-        services.AddSingleton<RouteService>();
-        services.AddSingleton<TrackService>();
-        services.AddSingleton<RouteAssetCheckService>();
-        services.AddSingleton<RollingStockService>();
-        services.AddSingleton<VehicleIndexService>();
-        services.AddSingleton<PreloadConsistService>();
-        services.AddSingleton<SavedConsistService>();
-        services.AddSingleton<SerzFileService>();
-        services.AddSingleton<PackageInstallService>();
+        services.AddSingleton<IScenarioDatabaseService, ScenarioDatabaseService>();
+        services.AddSingleton<IScenarioService, ScenarioService>();
+        services.AddSingleton<IRouteService, RouteService>();
+        services.AddSingleton<ITrackService, TrackService>();
+        services.AddSingleton<IRouteAssetCheckService, RouteAssetCheckService>();
+        services.AddSingleton<IRollingStockService, RollingStockService>();
+        services.AddSingleton<IVehicleIndexService, VehicleIndexService>();
+        services.AddSingleton<IPreloadConsistService, PreloadConsistService>();
+        services.AddSingleton<ISavedConsistService, SavedConsistService>();
+        services.AddSingleton<ISerzFileService, SerzFileService>();
+        services.AddSingleton<IPackageInstallService, PackageInstallService>();
 
         return services;
     }

@@ -44,6 +44,10 @@ public class DialogViewModelTests
 
         Assert.False(dialog.SaveCommand.CanExecute(null));
 
+        dialog.Name = "   ";
+
+        Assert.False(dialog.SaveCommand.CanExecute(null));
+
         dialog.Name = "Pendolino";
 
         Assert.True(dialog.SaveCommand.CanExecute(null));

@@ -15,7 +15,7 @@ using Serilog;
 namespace RailworksForge.Services;
 
 // Misses are cached too: a failed lookup searches every archive in the product, and many rows share a blueprint.
-public class ImageService
+public class ImageService : IImageService
 {
     private const int ThumbnailWidth = 256;
 
@@ -24,7 +24,7 @@ public class ImageService
     // Lazy so concurrent callers for the same image (e.g. a background row fill and a page load) decode it once.
     private readonly ConcurrentDictionary<string, Lazy<Bitmap?>> _images = new(StringComparer.OrdinalIgnoreCase);
 
-    public ImageService(AssetImageService assetImages, PackageInstallService packages)
+    public ImageService(AssetImageService assetImages, IPackageInstallService packages)
     {
         _assetImages = assetImages;
 

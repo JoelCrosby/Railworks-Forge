@@ -11,7 +11,7 @@ using RailworksForge.ViewModels;
 
 namespace RailworksForge.Services;
 
-public class DialogService(IServiceProvider services)
+public class DialogService(IServiceProvider services) : IDialogService
 {
     public TDialog Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TDialog>(
         params object[] arguments)

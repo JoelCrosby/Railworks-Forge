@@ -1,6 +1,6 @@
 namespace RailworksForge.Core.Serialization;
 
-public class SerzFileService
+public class SerzFileService : ISerzFileService
 {
     public async Task<string> ConvertBinToXml(string path, CancellationToken cancellationToken)
     {

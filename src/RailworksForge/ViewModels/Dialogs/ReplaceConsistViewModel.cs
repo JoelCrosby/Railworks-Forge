@@ -16,10 +16,10 @@ using RailworksForge.Util;
 namespace RailworksForge.ViewModels;
 
 public partial class ReplaceConsistViewModel(
-    AssetDirectoryTreeService directoryTree,
-    PreloadConsistService preloadConsists,
-    ImageService images,
-    LauncherService launcher) : DialogViewModel<PreloadConsist>
+    IAssetDirectoryTreeService directoryTree,
+    IPreloadConsistService preloadConsists,
+    IImageService images,
+    ILauncherService launcher) : DialogViewModel<PreloadConsist>
 {
     private readonly BackgroundImageLoader _imageLoader = new();
 
@@ -44,9 +44,9 @@ public partial class ReplaceConsistViewModel(
 
     protected override Task OnActivated()
     {
-        return Loading.RunAsync(Strings.loading_asset_providers.CurrentValue, async _ =>
+        return Loading.RunAsync(Strings.loading_asset_providers.CurrentValue, async token =>
         {
-            await directoryTree.LoadDirectoryTree();
+            await directoryTree.LoadDirectoryTree().WaitAsync(token);
 
             return directoryTree.GetDirectoryTree().ToList();
         }, DirectoryTree.ReplaceWith);
@@ -92,7 +92,7 @@ public partial class ReplaceConsistViewModel(
             return consists.ConvertAll(consist => new PreloadConsistViewModel(consist));
         }, rows =>
         {
-            PreloadConsists.AddRange(rows);
+            PreloadConsists.ReplaceWith(rows);
             _imageLoader.Load(rows, ReadConsistImage, (row, image) => row.ImageBitmap = image);
         });
     }

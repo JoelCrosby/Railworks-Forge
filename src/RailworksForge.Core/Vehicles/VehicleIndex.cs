@@ -33,7 +33,7 @@ public sealed record VehicleIndexProgress
 
 public sealed record VehicleSearchResult(List<RollingStockEntry> Vehicles, int Total);
 
-public sealed class VehicleIndex
+public sealed class VehicleIndex : IVehicleIndex
 {
     private readonly string _assetsPath;
     private readonly VehicleIndexDatabase _database;

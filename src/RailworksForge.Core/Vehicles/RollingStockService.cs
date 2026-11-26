@@ -6,7 +6,7 @@ using RailworksForge.Core.Serialization;
 
 namespace RailworksForge.Core.Vehicles;
 
-public class RollingStockService
+public class RollingStockService : IRollingStockService
 {
     private const int MaxParallelConversions = 4;
 

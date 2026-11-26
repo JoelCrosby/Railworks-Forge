@@ -11,7 +11,7 @@ public enum GameDirectoryChange
 
 // The directory is resolved once at startup and read by services for the rest of the session,
 // so saving a different one only takes effect after a restart.
-public class GameDirectoryService(SettingsService settings)
+public class GameDirectoryService(ISettingsService settings) : IGameDirectoryService
 {
     public string Current => Paths.GetGameDirectory();
 

@@ -2,11 +2,11 @@ using RailworksForge.Core.Common;
 
 namespace RailworksForge.Core.Vehicles;
 
-public sealed class VehicleIndexService
+public sealed class VehicleIndexService : IVehicleIndexService
 {
     private readonly Dictionary<string, VehicleIndex> _indexes = new(StringComparer.Ordinal);
 
-    public VehicleIndex GetCurrentIndex()
+    public IVehicleIndex GetCurrentIndex()
     {
         var assetsPath = Paths.GetAssetsDirectory();
 

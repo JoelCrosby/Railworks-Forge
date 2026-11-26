@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace RailworksForge.Core.Assets;
 
-public class AssetDirectoryTreeService
+public class AssetDirectoryTreeService : IAssetDirectoryTreeService
 {
     private ObservableCollection<BrowserDirectory> _directoryTree = [];
     private readonly Lock _lock = new();

@@ -11,7 +11,7 @@ using Serilog;
 
 namespace RailworksForge.Core.Scenarios;
 
-public class ScenarioDatabaseService : IDisposable
+public class ScenarioDatabaseService : IScenarioDatabaseService, IDisposable
 {
     // The game rewrites the database and its MD5 file in several steps, so wait for writes to settle.
     private static readonly TimeSpan ChangeSettleDelay = TimeSpan.FromSeconds(2);

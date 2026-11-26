@@ -11,9 +11,9 @@ namespace RailworksForge.ViewModels;
 
 public partial class NavigationBarViewModel : ObservableObject
 {
-    private readonly DialogService _dialogs;
+    private readonly IDialogService _dialogs;
 
-    public NavigationBarViewModel(NavigationService navigation, ToolsMenuViewModel tools, DialogService dialogs)
+    public NavigationBarViewModel(INavigationService navigation, ToolsMenuViewModel tools, IDialogService dialogs)
     {
         Navigation = navigation;
         Tools = tools;
@@ -22,7 +22,7 @@ public partial class NavigationBarViewModel : ObservableObject
         navigation.PropertyChanged += (_, _) => OnNavigationChanged();
     }
 
-    public NavigationService Navigation { get; }
+    public INavigationService Navigation { get; }
 
     public ToolsMenuViewModel Tools { get; }
 

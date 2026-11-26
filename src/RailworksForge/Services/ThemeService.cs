@@ -3,7 +3,7 @@ using Avalonia.Styling;
 
 namespace RailworksForge.Services;
 
-public class ThemeService
+public class ThemeService : IThemeService
 {
     public void Apply(string theme)
     {

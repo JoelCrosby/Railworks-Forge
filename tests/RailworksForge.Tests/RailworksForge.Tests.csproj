@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="NSubstitute" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
-public partial class VehicleIndexDialogViewModel(VehicleIndex index) : DialogViewModel
+public partial class VehicleIndexDialogViewModel(IVehicleIndex index) : DialogViewModel
 {
     [ObservableProperty]
     public partial bool IsDiscovering { get; set; } = true;
@@ -30,42 +30,51 @@ public partial class VehicleIndexDialogViewModel(VehicleIndex index) : DialogVie
     {
         var progress = new Progress<VehicleIndexProgress>(value =>
         {
+            var isIndexing = IsActive && Loading.IsLoading;
 
-            if (IsActive && Loading.IsLoading)
+            if (isIndexing)
             {
                 ApplyProgress(value);
             }
         });
+
         await Loading.RunAsync(
             Strings.vehicle_indexing.CurrentValue,
             token => index.RefreshAsync(progress, token),
             ApplyProgress,
             allowRetry: false);
+
         IsDiscovering = false;
     }
 
     private void ApplyProgress(VehicleIndexProgress progress)
     {
+        var isComplete = progress.Stage == VehicleIndexStage.Completed;
+        var hasSources = progress.TotalSources > 0;
+        var sourcePercent = hasSources ? 100.0 * progress.Sources / progress.TotalSources : 0;
+
         IsDiscovering = progress.Stage == VehicleIndexStage.Discovering;
-        ProgressPercent = progress.TotalSources == 0 ? 0 : 100.0 * progress.Sources / progress.TotalSources;
-        Status = progress.Stage switch
-        {
-            VehicleIndexStage.Discovering => Strings.vehicle_index_discovering.CurrentValue,
-            VehicleIndexStage.Saving => Strings.vehicle_index_saving.CurrentValue,
-            VehicleIndexStage.Completed => Strings.vehicle_index_complete.CurrentValue,
-            _ => Strings.vehicle_indexing.CurrentValue,
-        };
+        ProgressPercent = isComplete ? 100 : sourcePercent;
+        Status = GetStatus(progress.Stage);
         FileProgress = string.Format(Strings.vehicle_index_files.CurrentValue, progress.Sources, progress.TotalSources);
         Summary = string.Format(
             Strings.vehicle_index_progress.CurrentValue,
             progress.Sources,
             progress.Vehicles,
             progress.Skipped);
+    }
 
-        if (progress.Stage == VehicleIndexStage.Completed)
+    private static string GetStatus(VehicleIndexStage stage)
+    {
+        var status = stage switch
         {
-            ProgressPercent = 100;
-        }
+            VehicleIndexStage.Discovering => Strings.vehicle_index_discovering,
+            VehicleIndexStage.Saving => Strings.vehicle_index_saving,
+            VehicleIndexStage.Completed => Strings.vehicle_index_complete,
+            _ => Strings.vehicle_indexing,
+        };
+
+        return status.CurrentValue;
     }
 
     [RelayCommand]

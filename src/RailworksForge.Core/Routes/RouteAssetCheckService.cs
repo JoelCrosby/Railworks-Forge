@@ -28,7 +28,7 @@ public record AssetCheckProgress
     public required int Total { get; init; }
 }
 
-public class RouteAssetCheckService
+public class RouteAssetCheckService : IRouteAssetCheckService
 {
     private const int MaxParallelConversions = 4;
 

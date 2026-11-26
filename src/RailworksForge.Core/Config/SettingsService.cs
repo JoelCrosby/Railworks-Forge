@@ -1,6 +1,6 @@
 namespace RailworksForge.Core.Config;
 
-public class SettingsService
+public class SettingsService : ISettingsService
 {
     public ConfigurationOptions Current => Configuration.Get();
 

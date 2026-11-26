@@ -13,6 +13,7 @@ public class ViewModelCompositionTests
     {
         Assert.NotNull(DesignServices.Get<MainWindowViewModel>());
         Assert.NotNull(DesignServices.Get<RoutesViewModel>());
+        Assert.NotNull(DesignServices.Get<SettingsViewModel>());
     }
 
     [Fact]

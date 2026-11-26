@@ -10,7 +10,7 @@ using Serilog;
 
 namespace RailworksForge.Services;
 
-public class LauncherService
+public class LauncherService : ILauncherService
 {
     public void OpenDirectory(string path)
     {

@@ -8,14 +8,14 @@ using RailworksForge.Translations;
 namespace RailworksForge.ViewModels;
 
 public class MainWindowViewModel(
-    NavigationService navigation,
+    INavigationService navigation,
     NavigationBarViewModel navigationBar,
     StatusBarViewModel statusBar,
     ToolsActivity tools,
-    GameDirectoryService gameDirectory,
-    ScenarioDatabaseService scenarioDatabase) : ViewModelBase
+    IGameDirectoryService gameDirectory,
+    IScenarioDatabaseService scenarioDatabase) : ViewModelBase
 {
-    public NavigationService Navigation { get; } = navigation;
+    public INavigationService Navigation { get; } = navigation;
 
     public NavigationBarViewModel NavigationBar { get; } = navigationBar;
 

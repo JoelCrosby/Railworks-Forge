@@ -11,7 +11,7 @@ using RailworksForge.Util;
 
 namespace RailworksForge.ViewModels;
 
-public partial class CheckAssetsViewModel(Route route, RouteAssetCheckService assetCheck) : DialogViewModel
+public partial class CheckAssetsViewModel(Route route, IRouteAssetCheckService assetCheck) : DialogViewModel
 {
     public Route Route { get; } = route;
 
@@ -22,9 +22,6 @@ public partial class CheckAssetsViewModel(Route route, RouteAssetCheckService as
 
     [ObservableProperty]
     public partial string LoadingMessage { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial string LoadingStatusMessage { get; set; } = string.Empty;
 
     protected override Task OnActivated()
     {

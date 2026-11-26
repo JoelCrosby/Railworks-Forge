@@ -8,16 +8,16 @@ using RailworksForge.Util;
 
 namespace RailworksForge.Services;
 
-public class StoragePickerService
+public class StoragePickerService : IStoragePickerService
 {
-    public async Task<string?> PickFile(string title, FilePickerFileType fileType)
+    public async Task<string?> PickFile(string title, FileTypeFilter fileType)
     {
         var files = await PickFiles(title, fileType, false);
 
         return files.FirstOrDefault();
     }
 
-    public Task<List<string>> PickFiles(string title, FilePickerFileType fileType)
+    public Task<List<string>> PickFiles(string title, FileTypeFilter fileType)
     {
         return PickFiles(title, fileType, true);
     }
@@ -35,7 +35,7 @@ public class StoragePickerService
         return folders.FirstOrDefault()?.Path.LocalPath;
     }
 
-    private static async Task<List<string>> PickFiles(string title, FilePickerFileType fileType, bool allowMultiple)
+    private static async Task<List<string>> PickFiles(string title, FileTypeFilter fileType, bool allowMultiple)
     {
         var provider = Utils.GetApplicationWindow().StorageProvider;
 
@@ -43,9 +43,17 @@ public class StoragePickerService
         {
             Title = title,
             AllowMultiple = allowMultiple,
-            FileTypeFilter = [fileType],
+            FileTypeFilter = [ToPickerFileType(fileType)],
         });
 
         return files.Select(file => file.Path.LocalPath).ToList();
+    }
+
+    private static FilePickerFileType ToPickerFileType(FileTypeFilter fileType)
+    {
+        return new FilePickerFileType(fileType.Name)
+        {
+            Patterns = fileType.Patterns,
+        };
     }
 }

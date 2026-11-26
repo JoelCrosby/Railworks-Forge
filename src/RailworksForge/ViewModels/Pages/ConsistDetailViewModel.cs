@@ -20,18 +20,20 @@ namespace RailworksForge.ViewModels;
 
 public partial class ConsistDetailViewModel : ViewModelBase
 {
+    private const int StockPageSize = 200;
+
     private readonly Consist _consist;
-    private readonly VehicleIndexService _vehicleIndexes;
-    private readonly LauncherService _launcher;
-    private readonly AssetDirectoryTreeService _directoryTree;
-    private readonly RollingStockService _rollingStock;
-    private readonly DialogService _dialogs;
+    private readonly IVehicleIndexService _vehicleIndexes;
+    private readonly ILauncherService _launcher;
+    private readonly IAssetDirectoryTreeService _directoryTree;
+    private readonly IRollingStockService _rollingStock;
+    private readonly IDialogService _dialogs;
 
-    private VehicleIndex? _vehicleIndex;
+    private IVehicleIndex? _vehicleIndex;
 
-    private int _stockLimit = 200;
+    private int _stockLimit = StockPageSize;
 
-    public ScenarioEditor Editor { get; }
+    public IScenarioEditor Editor { get; }
 
     public LoadingOperation StockLoading { get; } = new();
 
@@ -73,7 +75,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public bool HasMoreVehicles => AvailableStock.Count < MatchingVehicles;
 
-    public bool HasNoVehicles => MatchingVehicles == 0;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoVehicles))]
+    public partial bool HasSearchedStock { get; private set; }
+
+    public bool HasNoVehicles => HasSearchedStock && MatchingVehicles == 0;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddVehicleCommand))]
@@ -84,13 +90,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public partial string? SearchTerm { get; set; }
 
     public ConsistDetailViewModel(
-        ScenarioEditor editor,
+        IScenarioEditor editor,
         Consist consist,
-        VehicleIndexService vehicleIndexes,
-        LauncherService launcher,
-        AssetDirectoryTreeService directoryTree,
-        RollingStockService rollingStock,
-        DialogService dialogs)
+        IVehicleIndexService vehicleIndexes,
+        ILauncherService launcher,
+        IAssetDirectoryTreeService directoryTree,
+        IRollingStockService rollingStock,
+        IDialogService dialogs)
     {
         Editor = editor;
         _consist = consist;
@@ -205,7 +211,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     partial void OnVehicleSearchTermChanged(string? value)
     {
-        _stockLimit = 200;
+        _stockLimit = StockPageSize;
         _ = SearchStock();
     }
 
@@ -248,6 +254,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
         {
             AvailableStock.ReplaceWith(result.Vehicles);
             MatchingVehicles = result.Total;
+            HasSearchedStock = true;
             OnPropertyChanged(nameof(HasMoreVehicles));
         });
     }
@@ -287,13 +294,13 @@ public partial class ConsistDetailViewModel : ViewModelBase
     [RelayCommand]
     private Task LoadMoreVehicles()
     {
-        _stockLimit += 200;
+        _stockLimit += StockPageSize;
 
         return SearchStock();
     }
 
     // Edits are buffered in the editor's session and only written to the scenario when applied.
-    private Task Edit(Func<ScenarioEditSession, Task> edit)
+    private Task Edit(Func<IScenarioEditSession, Task> edit)
     {
         return Loading.RunAsync(Strings.updating_consist.CurrentValue, async token =>
         {

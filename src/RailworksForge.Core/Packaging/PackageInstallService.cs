@@ -4,7 +4,7 @@ using RailworksForge.Core.Routes;
 
 namespace RailworksForge.Core.Packaging;
 
-public class PackageInstallService(AssetDirectoryTreeService directoryTree, RouteService routes)
+public class PackageInstallService(IAssetDirectoryTreeService directoryTree, IRouteService routes) : IPackageInstallService
 {
     // Raised on the installing thread once installed assets are visible to fresh lookups.
     public event Action? Installed;

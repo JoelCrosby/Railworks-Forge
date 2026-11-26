@@ -7,7 +7,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 
 namespace RailworksForge.Services;
 
-public class AppLifetimeService
+public class AppLifetimeService : IAppLifetimeService
 {
     public void Restart()
     {

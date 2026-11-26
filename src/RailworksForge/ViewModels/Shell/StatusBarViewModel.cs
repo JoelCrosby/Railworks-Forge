@@ -9,21 +9,12 @@ namespace RailworksForge.ViewModels;
 
 public partial class StatusBarViewModel : ObservableObject
 {
-    private readonly GameDirectoryService _gameDirectory;
+    private readonly IGameDirectoryService _gameDirectory;
 
     [ObservableProperty]
     public partial string? StatusText { get; set; }
 
-    [ObservableProperty]
-    public partial float Progress { get; set; }
-
-    [ObservableProperty]
-    public partial string? ProgressText { get; set; }
-
-    [ObservableProperty]
-    public partial bool ShowProgress { get; set; }
-
-    public StatusBarViewModel(GameDirectoryService gameDirectory)
+    public StatusBarViewModel(IGameDirectoryService gameDirectory)
     {
         _gameDirectory = gameDirectory;
 

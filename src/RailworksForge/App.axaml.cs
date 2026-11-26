@@ -43,7 +43,7 @@ public class App : Application
 
         var provider = services.BuildServiceProvider();
 
-        provider.GetRequiredService<GameDirectoryService>().Resolve();
+        provider.GetRequiredService<IGameDirectoryService>().Resolve();
 
         Dispatcher.UIThread.UnhandledException += OnUnhandledUiException;
 
@@ -72,15 +72,16 @@ public class App : Application
     {
         services.AddRailworksForgeCore();
 
-        services.AddSingleton<NavigationService>();
-        services.AddSingleton<DialogService>();
-        services.AddSingleton<LauncherService>();
-        services.AddSingleton<ClipboardService>();
-        services.AddSingleton<StoragePickerService>();
-        services.AddSingleton<ThemeService>();
-        services.AddSingleton<AppLifetimeService>();
+        services.AddSingleton<IDispatcher>(_ => Dispatcher.UIThread);
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<ILauncherService, LauncherService>();
+        services.AddSingleton<IClipboardService, ClipboardService>();
+        services.AddSingleton<IStoragePickerService, StoragePickerService>();
+        services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IAppLifetimeService, AppLifetimeService>();
         services.AddSingleton<ToolsActivity>();
-        services.AddSingleton<ImageService>();
+        services.AddSingleton<IImageService, ImageService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<ToolsMenuViewModel>();
