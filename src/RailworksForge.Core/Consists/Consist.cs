@@ -38,6 +38,9 @@ public class Consist : Blueprint
 
     public VehicleBlueprint? LeadVehicle {  get; init; }
 
+    public IEnumerable<Blueprint> ImageBlueprints =>
+        new[] { LeadVehicle?.Blueprint, Vehicles.LastOrDefault()?.Blueprint }.OfType<Blueprint>();
+
     public int? Index { get; set; }
 
     public static Consist ParseConsist(IElement el)

@@ -2,13 +2,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using Echoes;
 
-using RailworksForge.Core.Common;
+using RailworksForge.Core.Config;
 using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
 public partial class StatusBarViewModel : ObservableObject
 {
+    private readonly GameDirectoryService _gameDirectory;
+
     [ObservableProperty]
     public partial string? StatusText { get; set; }
 
@@ -21,8 +23,10 @@ public partial class StatusBarViewModel : ObservableObject
     [ObservableProperty]
     public partial bool ShowProgress { get; set; }
 
-    public StatusBarViewModel()
+    public StatusBarViewModel(GameDirectoryService gameDirectory)
     {
+        _gameDirectory = gameDirectory;
+
         ShowGameDirectory();
 
         TranslationProvider.OnCultureChanged += (_, _) => ShowGameDirectory();
@@ -30,6 +34,6 @@ public partial class StatusBarViewModel : ObservableObject
 
     private void ShowGameDirectory()
     {
-        StatusText = string.Format(Strings.railworks_directory.CurrentValue, Paths.GetGameDirectory());
+        StatusText = string.Format(Strings.railworks_directory.CurrentValue, _gameDirectory.Current);
     }
 }

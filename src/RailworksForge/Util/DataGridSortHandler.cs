@@ -14,6 +14,7 @@ namespace RailworksForge.Util;
 public class DataGridSortHandler
 {
     private readonly DataGrid _dataGrid;
+    private readonly SettingsService _settings = new();
 
     private string DataGridName => _dataGrid.Name ?? throw new Exception("DataGridSortHandler requires a named data grid");
 
@@ -25,7 +26,7 @@ public class DataGridSortHandler
 
     public void SortColumns()
     {
-        var options = Configuration.Get().DataGrids.GetValueOrDefault(DataGridName);
+        var options = _settings.Current.DataGrids.GetValueOrDefault(DataGridName);
 
         if (options is not { SortingColumn: { } sortingColumn, SortingDirection: { } sortingDirection })
         {
@@ -68,15 +69,16 @@ public class DataGridSortHandler
             return;
         }
 
-        var config = Configuration.Get();
         var isDescending = sortDescription.Direction == ListSortDirection.Descending;
-
-        config.DataGrids[DataGridName] = new DataGridOptions
+        var options = new DataGridOptions
         {
             SortingColumn = sortingColumn,
             SortingDirection = isDescending ? "desc" : "asc",
         };
 
-        Configuration.Set(config);
+        _settings.Update(config => config with
+        {
+            DataGrids = new Dictionary<string, DataGridOptions>(config.DataGrids) { [DataGridName] = options },
+        });
     }
 }

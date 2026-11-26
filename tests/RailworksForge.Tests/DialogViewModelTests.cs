@@ -1,4 +1,3 @@
-using RailworksForge.Core.Consists;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Tests;
@@ -41,7 +40,6 @@ public class DialogViewModelTests
         var dialog = new SaveConsistViewModel
         {
             LocomotiveName = "Class 390",
-            ConsistElement = "<RailVehicles />",
         };
 
         Assert.False(dialog.SaveCommand.CanExecute(null));
@@ -52,21 +50,18 @@ public class DialogViewModelTests
     }
 
     [Fact]
-    public void SaveConsist_ClosesWithTheSavedConsist()
+    public void SaveConsist_ClosesWithTheChosenName()
     {
         var dialog = new SaveConsistViewModel
         {
             Name = "Pendolino",
             LocomotiveName = "Class 390",
-            ConsistElement = "<RailVehicles />",
         };
         object? result = null;
         dialog.CloseRequested += value => result = value;
 
         dialog.SaveCommand.Execute(null);
 
-        var savedConsist = Assert.IsType<SavedConsist>(result);
-        Assert.Equal("Pendolino", savedConsist.Name);
-        Assert.Equal("<RailVehicles />", savedConsist.ConsistElement);
+        Assert.Equal("Pendolino", result);
     }
 }

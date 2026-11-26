@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 
 using Echoes;
 
-using RailworksForge.Core.Common;
 using RailworksForge.Core.Config;
 using RailworksForge.Services;
 using RailworksForge.Translations;
@@ -53,7 +51,7 @@ public partial class SettingsViewModel : ViewModelBase
 
     public bool IsGameDirectorySet => !string.IsNullOrWhiteSpace(GameDirectoryPath);
 
-    public bool IsGameDirectoryValid => Paths.IsValidGameDirectory(GameDirectoryPath);
+    public bool IsGameDirectoryValid => _gameDirectory.IsValid(GameDirectoryPath);
 
     public bool IsGameDirectoryInvalid => IsGameDirectorySet && !IsGameDirectoryValid;
 
@@ -62,23 +60,29 @@ public partial class SettingsViewModel : ViewModelBase
     private readonly StoragePickerService _picker;
     private readonly AppLifetimeService _lifetime;
     private readonly SettingsService _settings;
+    private readonly GameDirectoryService _gameDirectory;
+    private readonly AppDirectories _appDirectories;
 
     public SettingsViewModel(
         ThemeService themes,
         LauncherService launcher,
         StoragePickerService picker,
         AppLifetimeService lifetime,
-        SettingsService settings)
+        SettingsService settings,
+        GameDirectoryService gameDirectory,
+        AppDirectories appDirectories)
     {
         _themeService = themes;
         _launcher = launcher;
         _picker = picker;
         _lifetime = lifetime;
         _settings = settings;
+        _gameDirectory = gameDirectory;
+        _appDirectories = appDirectories;
 
         var config = settings.Current;
 
-        GameDirectoryPath = Paths.GetGameDirectory();
+        GameDirectoryPath = gameDirectory.Current;
         UseInternalSerz = config.UseInternalSerz;
         SelectedLanguage = Languages.FirstOrDefault(language => language.Key == config.Language) ?? Languages[0];
 
@@ -120,19 +124,19 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void OpenSettingsFolder()
     {
-        _launcher.OpenOrCreateDirectory(Paths.GetConfigurationFolder());
+        _launcher.OpenOrCreateDirectory(_appDirectories.Configuration);
     }
 
     [RelayCommand]
     private void OpenLogsFolder()
     {
-        _launcher.OpenOrCreateDirectory(Paths.GetLoggingPath());
+        _launcher.OpenOrCreateDirectory(_appDirectories.Logs);
     }
 
     [RelayCommand]
     private void OpenCacheFolder()
     {
-        _launcher.OpenOrCreateDirectory(Paths.GetCacheFolder());
+        _launcher.OpenOrCreateDirectory(_appDirectories.Cache);
     }
 
     partial void OnSelectedThemeChanged(SettingsOption? value)
@@ -173,26 +177,14 @@ public partial class SettingsViewModel : ViewModelBase
     {
         GameDirectoryPath = path;
 
-        if (!IsGameDirectoryValid)
+        var change = _gameDirectory.Change(path);
+
+        if (change is GameDirectoryChange.Invalid)
         {
             return;
         }
 
-        _settings.Update(config => config with { GameDirectoryPath = path });
-
-        var runningDirectory = Paths.GetGameDirectory();
-        var isRunningDirectorySet = !string.IsNullOrWhiteSpace(runningDirectory);
-        var isRunningDirectory = isRunningDirectorySet && IsSamePath(path, runningDirectory);
-
-        IsRestartRequired = !isRunningDirectory;
-    }
-
-    private static bool IsSamePath(string first, string second)
-    {
-        var normalisedFirst = Path.TrimEndingDirectorySeparator(Path.GetFullPath(first));
-        var normalisedSecond = Path.TrimEndingDirectorySeparator(Path.GetFullPath(second));
-
-        return normalisedFirst == normalisedSecond;
+        IsRestartRequired = change is GameDirectoryChange.RestartRequired;
     }
 
     private void BuildThemes(string selectedKey)

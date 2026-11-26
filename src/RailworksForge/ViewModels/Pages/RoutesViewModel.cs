@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+using Avalonia.Threading;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -42,7 +44,13 @@ public partial class RoutesViewModel : ViewModelBase
         _routeService.RoutesInvalidated += OnRoutesInvalidated;
     }
 
+    // Raised from whichever thread invalidated the routes, e.g. a package install.
     private void OnRoutesInvalidated()
+    {
+        Dispatcher.UIThread.Post(ReloadRoutes);
+    }
+
+    private void ReloadRoutes()
     {
         _hasLoadedRoutes = false;
 

@@ -9,15 +9,8 @@ using Echoes;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using RailworksForge.Core.Assets;
-using RailworksForge.Core.Common;
+using RailworksForge.Core;
 using RailworksForge.Core.Config;
-using RailworksForge.Core.Consists;
-using RailworksForge.Core.Packaging;
-using RailworksForge.Core.Routes;
-using RailworksForge.Core.Scenarios;
-using RailworksForge.Core.Serialization;
-using RailworksForge.Core.Vehicles;
 using RailworksForge.Services;
 using RailworksForge.ViewModels;
 using RailworksForge.Views.Dialogs;
@@ -34,7 +27,7 @@ public class App : Application
     {
         AvaloniaXamlLoader.Load(this);
 
-        var config = Configuration.Get();
+        var config = new SettingsService().Current;
 
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(config.Language));
 
@@ -43,14 +36,14 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        Paths.SetGameDirectory();
-
         var services = new ServiceCollection();
 
         RegisterServices(services);
         RegisterViews();
 
         var provider = services.BuildServiceProvider();
+
+        provider.GetRequiredService<GameDirectoryService>().Resolve();
 
         Dispatcher.UIThread.UnhandledException += OnUnhandledUiException;
 
@@ -77,18 +70,7 @@ public class App : Application
 
     public static void RegisterServices(IServiceCollection services)
     {
-        services.AddSingleton<AssetDirectoryTreeService>();
-        services.AddSingleton<ScenarioDatabaseService>();
-        services.AddSingleton<ScenarioService>();
-        services.AddSingleton<RouteService>();
-        services.AddSingleton<TrackService>();
-        services.AddSingleton<RollingStockService>();
-        services.AddSingleton<VehicleIndexService>();
-        services.AddSingleton<PreloadConsistService>();
-        services.AddSingleton<RouteAssetCheckService>();
-        services.AddSingleton<SerzFileService>();
-        services.AddSingleton<SettingsService>();
-        services.AddTransient<Packager>();
+        services.AddRailworksForgeCore();
 
         services.AddSingleton<NavigationService>();
         services.AddSingleton<DialogService>();

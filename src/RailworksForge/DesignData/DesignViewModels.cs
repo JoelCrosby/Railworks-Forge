@@ -23,13 +23,20 @@ public static class DesignViewModels
         }
     }
 
-    public static StatusBarViewModel StatusBar => new()
+    public static StatusBarViewModel StatusBar
     {
-        StatusText = "84 Routes found",
-        ShowProgress = true,
-        Progress = 0.42f,
-        ProgressText = "Extracting scenario .ap file to .xml",
-    };
+        get
+        {
+            var statusBar = DesignServices.Create<StatusBarViewModel>();
+
+            statusBar.StatusText = "84 Routes found";
+            statusBar.ShowProgress = true;
+            statusBar.Progress = 0.42f;
+            statusBar.ProgressText = "Extracting scenario .ap file to .xml";
+
+            return statusBar;
+        }
+    }
 
     public static ProgressIndicatorViewModel ProgressIndicator => new()
     {
@@ -67,7 +74,6 @@ public static class DesignViewModels
     {
         Name = "Class 390 'Pendolino'",
         LocomotiveName = "Class 390 'Pendolino'",
-        ConsistElement = string.Empty,
     };
 
     public static ReplaceConsistViewModel ReplaceConsist => DesignServices.Create<ReplaceConsistViewModel>();

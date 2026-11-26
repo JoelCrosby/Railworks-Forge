@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-using RailworksForge.Core.Common;
+using RailworksForge.Core.Config;
 using RailworksForge.Core.Scenarios;
 using RailworksForge.Services;
 using RailworksForge.Translations;
@@ -12,6 +12,7 @@ public class MainWindowViewModel(
     NavigationBarViewModel navigationBar,
     StatusBarViewModel statusBar,
     ToolsActivity tools,
+    GameDirectoryService gameDirectory,
     ScenarioDatabaseService scenarioDatabase) : ViewModelBase
 {
     public NavigationService Navigation { get; } = navigation;
@@ -33,9 +34,7 @@ public class MainWindowViewModel(
 
     private void StartNavigation()
     {
-        var hasValidGameDirectory = Paths.IsValidGameDirectory(Paths.GetGameDirectory());
-
-        if (!hasValidGameDirectory)
+        if (!gameDirectory.IsCurrentValid)
         {
             Navigation.ShowSettings();
 
@@ -44,10 +43,9 @@ public class MainWindowViewModel(
 
         Navigation.ShowRoutes();
 
-        _ = Loading.RunAsync(Strings.loading_scenario_information.CurrentValue, async _ =>
+        _ = Loading.RunAsync(Strings.loading_scenario_information.CurrentValue, async token =>
         {
-            await scenarioDatabase.LoadScenarioDatabase();
-            scenarioDatabase.WatchForChanges();
+            await scenarioDatabase.Start(token);
 
             return true;
         }, _ => { });

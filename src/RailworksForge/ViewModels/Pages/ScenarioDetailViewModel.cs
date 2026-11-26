@@ -23,6 +23,8 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private readonly DialogService _dialogs;
     private readonly LauncherService _launcher;
     private readonly ImageService _images;
+    private readonly ScenarioService _scenarios;
+    private readonly SavedConsistService _savedConsists;
     private readonly BackgroundImageLoader _imageLoader = new();
 
     [ObservableProperty]
@@ -42,13 +44,17 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         NavigationService navigation,
         DialogService dialogs,
         LauncherService launcher,
-        ImageService images)
+        ImageService images,
+        ScenarioService scenarios,
+        SavedConsistService savedConsists)
     {
         Scenario = scenario;
         _navigation = navigation;
         _dialogs = dialogs;
         _launcher = launcher;
         _images = images;
+        _scenarios = scenarios;
+        _savedConsists = savedConsists;
 
         Editor = new ScenarioEditor(scenario);
 
@@ -169,7 +175,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand]
     private Task ExportBinToXml()
     {
-        return Loading.RunAsync(Strings.exporting_scenario_xml.CurrentValue, _ => Scenario.ExportBinToXml(), path =>
+        return Loading.RunAsync(Strings.exporting_scenario_xml.CurrentValue, _ => _scenarios.ExportBinToXml(Scenario), path =>
         {
             if (Path.GetDirectoryName(path) is {} directory)
             {
@@ -181,7 +187,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [RelayCommand]
     private Task ConvertXmlToBin()
     {
-        return Loading.RunAsync(Strings.converting_scenario_xml.CurrentValue, _ => Scenario.ConvertXmlToBin());
+        return Loading.RunAsync(Strings.converting_scenario_xml.CurrentValue, _ => _scenarios.ConvertXmlToBin(Scenario));
     }
 
     [RelayCommand]
@@ -189,7 +195,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     {
         return Loading.RunAsync(Strings.extracting_scenarios.CurrentValue, _ =>
         {
-            Scenario.Route.ExtractScenarios();
+            _scenarios.ExtractScenarios(Scenario.Route);
 
             return Task.CompletedTask;
         });
@@ -205,34 +211,22 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private async Task SaveConsist()
     {
         var consist = SingleSelectedService!.Consist;
-        string? consistElement = null;
-
-        await Loading.RunAsync(
-            Strings.preparing_consist.CurrentValue,
-            async token => (await Editor.GetSession(token)).GetConsistRailVehiclesXml(consist),
-            xml => consistElement = xml,
-            allowRetry: false);
-
-        if (consistElement is null)
-        {
-            return;
-        }
-
         var dialog = new SaveConsistViewModel
         {
-            ConsistElement = consistElement,
             Name = consist.LocomotiveName,
             LocomotiveName = consist.LocomotiveName,
         };
 
-        var savedConsist = await _dialogs.Show(dialog);
+        var name = await _dialogs.Show(dialog);
 
-        if (savedConsist is null)
+        if (name is null)
         {
             return;
         }
 
-        PersistenceService.SaveConsist(savedConsist);
+        await Loading.RunAsync(
+            Strings.saving_consist.CurrentValue,
+            token => _savedConsists.Save(Editor, consist, name, token));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedServices))]

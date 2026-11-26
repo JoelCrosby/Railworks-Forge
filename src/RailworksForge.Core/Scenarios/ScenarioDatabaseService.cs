@@ -26,6 +26,13 @@ public class ScenarioDatabaseService : IDisposable
 
     public event Action? Updated;
 
+    public async Task Start(CancellationToken cancellationToken = default)
+    {
+        await LoadScenarioDatabase(cancellationToken);
+
+        WatchForChanges();
+    }
+
     public async Task LoadScenarioDatabase(CancellationToken cancellationToken = default)
     {
         await _loadLock.WaitAsync(cancellationToken);

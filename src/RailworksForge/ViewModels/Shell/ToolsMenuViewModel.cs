@@ -7,10 +7,7 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using RailworksForge.Core.Assets;
-using RailworksForge.Core.Common;
 using RailworksForge.Core.Packaging;
-using RailworksForge.Core.Routes;
 using RailworksForge.Core.Serialization;
 using RailworksForge.Services;
 using RailworksForge.Translations;
@@ -21,10 +18,7 @@ public partial class ToolsMenuViewModel(
     ToolsActivity tools,
     StoragePickerService picker,
     SerzFileService serz,
-    Packager packager,
-    RouteService routes,
-    AssetDirectoryTreeService directoryTree,
-    ImageService images) : ObservableObject
+    PackageInstallService packages) : ObservableObject
 {
     private static FilePickerFileType BinaryFiles => new(Strings.serz_binary_files.CurrentValue) { Patterns = ["*.bin"] };
     private static FilePickerFileType XmlFiles => new(Strings.serz_xml_files.CurrentValue) { Patterns = ["*.xml"] };
@@ -74,22 +68,11 @@ public partial class ToolsMenuViewModel(
 
         try
         {
-            await Operations.RunAsync(Strings.installing_packages.CurrentValue, async _ =>
-            {
-                foreach (var file in files)
-                {
-                    await packager.InstallPackage(file, progress);
-                }
-            });
+            await Operations.RunAsync(Strings.installing_packages.CurrentValue, _ => packages.Install(files, progress));
         }
         finally
         {
             tools.Progress.ClearProgress();
-
-            Cache.ClearAssetCaches();
-            directoryTree.Invalidate();
-            images.ClearMisses();
-            routes.InvalidateRoutes();
         }
     }
 }

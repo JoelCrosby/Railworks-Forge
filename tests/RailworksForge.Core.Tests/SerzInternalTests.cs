@@ -4,7 +4,6 @@ using System.Text;
 using System.Xml.Linq;
 
 using AngleSharp.Xml;
-using AngleSharp.Xml.Parser;
 
 using RailworksForge.Core.Serialization;
 

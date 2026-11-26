@@ -7,6 +7,7 @@
     <PackageReference Include="Dameng.SepEx" />
     <PackageReference Include="Gameloop.Vdf" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Sep" />
     <PackageReference Include="Serilog" />

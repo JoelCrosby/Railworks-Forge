@@ -119,21 +119,24 @@ public class TrackService
         File.Copy(destination, documentDestination, true);
     }
 
-    public List<DirectoryInfo> GetProviders()
+    public Task<List<TrackBlueprint>> GetRouteTrackBlueprints(Route route)
     {
-        return Paths.GetAssetProviders();
+        return route.GetTrackBlueprints();
     }
 
-    public List<DirectoryInfo> GetProducts(string provider)
+    public List<string> GetProviders()
     {
-        return Paths.GetAssetProviderProducts(provider);
+        return Paths.GetAssetProviders().ConvertAll(provider => provider.Name);
     }
 
-    public async Task<List<Track>> GetTracks(
-        string providerName,
-        DirectoryInfo product,
-        CancellationToken cancellationToken)
+    public List<string> GetProducts(string provider)
     {
+        return Paths.GetAssetProviderProducts(provider).ConvertAll(product => product.Name);
+    }
+
+    public async Task<List<Track>> GetTracks(string providerName, string productName, CancellationToken cancellationToken)
+    {
+        var product = new DirectoryInfo(Path.Join(Paths.GetAssetsDirectory(), providerName, productName));
         var looseBlueprints = GetLooseTrackBlueprints(providerName, product);
         var archivedBlueprints = GetArchivedTrackBlueprints(providerName, product);
         var blueprints = looseBlueprints.Union(archivedBlueprints).ToList();

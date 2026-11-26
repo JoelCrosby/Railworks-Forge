@@ -1,4 +1,5 @@
 using RailworksForge.Core.Consists;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.DesignData;
 using RailworksForge.ViewModels;
 

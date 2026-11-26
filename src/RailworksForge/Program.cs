@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-using RailworksForge.Core.Common;
+using RailworksForge.Core.Config;
 
 using Serilog;
 
@@ -17,7 +17,7 @@ internal sealed class Program
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
-                .WriteTo.File($"{Paths.GetLoggingPath()}/railworks-forge-.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File($"{new AppDirectories().Logs}/railworks-forge-.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             TaskScheduler.UnobservedTaskException += HandleUnobservedTaskExceptions;

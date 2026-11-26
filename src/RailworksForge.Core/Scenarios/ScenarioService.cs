@@ -33,6 +33,23 @@ public class ScenarioService
         }
     }
 
+    // Returns the path of the exported XML file.
+    public Task<string> ExportBinToXml(Scenario scenario)
+    {
+        return scenario.ExportBinToXml();
+    }
+
+    public Task<string> ConvertXmlToBin(Scenario scenario)
+    {
+        return scenario.ConvertXmlToBin();
+    }
+
+    // Unpacks the route's archived scenarios so they can be edited as loose files.
+    public void ExtractScenarios(Route route)
+    {
+        route.ExtractScenarios();
+    }
+
     public List<Scenario> GetScenarios(Route route, CancellationToken cancellationToken = default)
     {
         var scenarios = new HashSet<Scenario>();

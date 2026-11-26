@@ -1,15 +1,11 @@
-using System.Threading;
-using System.Threading.Tasks;
-
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.ComponentModel;
 
 using RailworksForge.Core.Exceptions;
-using RailworksForge.Core.Scenarios;
 
-namespace RailworksForge.ViewModels;
+namespace RailworksForge.Core.Scenarios;
 
 // Shared by a scenario's page and its consist pages, so edits made on either are applied or discarded together.
-public partial class ScenarioEditor : ObservableObject
+public class ScenarioEditor : INotifyPropertyChanged
 {
     private readonly Lock _sessionLock = new();
     private Task<ScenarioEditSession>? _session;
@@ -19,10 +15,24 @@ public partial class ScenarioEditor : ObservableObject
         Scenario = scenario;
     }
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public Scenario Scenario { get; private set; }
 
-    [ObservableProperty]
-    public partial bool HasPendingChanges { get; private set; }
+    public bool HasPendingChanges
+    {
+        get;
+        private set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasPendingChanges)));
+        }
+    }
 
     // Started without the caller's token, so a page cancelling its load doesn't leave a cancelled session behind.
     public Task<ScenarioEditSession> GetSession(CancellationToken cancellationToken)
@@ -65,7 +75,7 @@ public partial class ScenarioEditor : ObservableObject
         HasPendingChanges = false;
     }
 
-    // Called on the UI thread after the session is loaded or changed.
+    // Called on the UI thread after the session is loaded or changed, since it raises change notifications.
     public void Update()
     {
         if (_session is not { IsCompletedSuccessfully: true } loaded)

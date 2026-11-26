@@ -80,8 +80,8 @@ public partial class ReplaceTrackViewModel : DialogViewModel<ReplaceTracksReques
 
     private async Task<List<SelectTrackViewModel>> GetRouteTracks()
     {
-        var blueprints = await Route.GetTrackBlueprints();
-        var providers = _tracks.GetProviders().ConvertAll(directory => new DirectoryItem(directory.Name, directory));
+        var blueprints = await _tracks.GetRouteTrackBlueprints(Route);
+        var providers = _tracks.GetProviders();
 
         return blueprints
             .Select(blueprint => new SelectTrackViewModel(_tracks)

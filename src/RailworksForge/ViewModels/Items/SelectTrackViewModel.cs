@@ -13,17 +13,17 @@ namespace RailworksForge.ViewModels;
 
 public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
 {
-    public List<DirectoryItem> Providers { get; init; } = [];
+    public List<string> Providers { get; init; } = [];
 
-    public RangeObservableCollection<DirectoryItem> Products { get; } = [];
+    public RangeObservableCollection<string> Products { get; } = [];
 
     public RangeObservableCollection<Track> Tracks { get; } = [];
 
     [ObservableProperty]
-    public partial DirectoryItem? SelectedProvider { get; set; }
+    public partial string? SelectedProvider { get; set; }
 
     [ObservableProperty]
-    public partial DirectoryItem? SelectedProduct { get; set; }
+    public partial string? SelectedProduct { get; set; }
 
     [ObservableProperty]
     public partial Track? SelectedTrack { get; set; }
@@ -32,7 +32,7 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
 
     public required Blueprint RouteBlueprint { get; init; }
 
-    partial void OnSelectedProviderChanged(DirectoryItem? value)
+    partial void OnSelectedProviderChanged(string? value)
     {
         Loading.Cancel();
         SelectedProduct = null;
@@ -47,14 +47,13 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
 
         _ = Loading.RunAsync(Strings.loading_products.CurrentValue, _ =>
         {
-            var products = tracks.GetProducts(value.Name);
-            var items = products.ConvertAll(product => new DirectoryItem(product.Name, product));
+            var products = tracks.GetProducts(value);
 
-            return Task.FromResult(items);
+            return Task.FromResult(products);
         }, Products.ReplaceWith);
     }
 
-    partial void OnSelectedProductChanged(DirectoryItem? value)
+    partial void OnSelectedProductChanged(string? value)
     {
         Loading.Cancel();
         SelectedTrack = null;
@@ -69,7 +68,7 @@ public partial class SelectTrackViewModel(TrackService tracks) : ViewModelBase
 
         _ = Loading.RunAsync(
             Strings.loading_track_blueprints.CurrentValue,
-            token => tracks.GetTracks(provider.Name, value.Directory, token),
+            token => tracks.GetTracks(provider, value, token),
             Tracks.ReplaceWith);
     }
 }
