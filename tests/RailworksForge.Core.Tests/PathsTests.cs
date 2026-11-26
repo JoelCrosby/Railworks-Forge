@@ -40,6 +40,18 @@ public class PathsTests : IDisposable
         Assert.Null(Paths.GetActualPathFromInsensitive(missing, _root.FullName));
     }
 
+    [Theory]
+    [InlineData("Assets/Kuju/RailSimulator/Blueprint.bin", true)]
+    [InlineData("assets/KUJU/railsimulator/blueprint.BIN", true)]
+    [InlineData(@"Assets\kuju\RailSimulator", true)]
+    [InlineData("assets/kuju/Missing/Blueprint.bin", false)]
+    public void Exists_IgnoresCase(string relativePath, bool expected)
+    {
+        var path = Path.Join(_root.FullName, relativePath);
+
+        Assert.Equal(expected, Paths.Exists(path, _root.FullName));
+    }
+
     [Fact]
     public void GetActualPathFromInsensitive_IgnoresRootThatIsNotAPrefix()
     {

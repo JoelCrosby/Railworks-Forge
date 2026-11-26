@@ -56,10 +56,10 @@ public class Serz
 
         var inputPath = conversion.InputPath;
         var outputPath = conversion.OutputPath;
-        var hasCachedOutput = File.Exists(outputPath);
-        var isCacheCurrent = hasCachedOutput && File.GetLastWriteTimeUtc(outputPath) >= File.GetLastWriteTimeUtc(inputPath);
+        var isBin = IsBinary(inputPath);
+        var inputWrittenAt = File.GetLastWriteTimeUtc(inputPath);
 
-        if (conversion.Force is false && isCacheCurrent)
+        if (conversion.Force is false && IsCacheCurrent(outputPath, inputWrittenAt, isBin))
         {
             return new ConvertedSerzFile(outputPath);
         }
@@ -70,7 +70,6 @@ public class Serz
         var temporaryFilename = $"{Path.GetFileNameWithoutExtension(outputPath)}.{Guid.NewGuid():N}{Path.GetExtension(outputPath)}";
         var temporaryOutputPath = Path.Join(outputDirectory, temporaryFilename);
 
-        var isBin = IsBinary(inputPath);
         var useInternalSerz = isBin && conversion.UseInternalSerz;
 
         var sw = Stopwatch.StartNew();
@@ -91,6 +90,11 @@ public class Serz
                 throw new Exception("Serz execution failed");
             }
 
+            if (isBin)
+            {
+                File.SetLastWriteTimeUtc(temporaryOutputPath, inputWrittenAt);
+            }
+
             File.Move(temporaryOutputPath, outputPath, overwrite: true);
         }
         finally
@@ -104,6 +108,20 @@ public class Serz
         sw.Stop();
 
         return new ConvertedSerzFile(outputPath);
+    }
+
+    // XML converted from a BIN carries that BIN's write time, so it only matches that exact BIN. A newer-than test
+    // would accept it for an older BIN too, such as a restored backup, and an edit would then save the stale XML.
+    private static bool IsCacheCurrent(string outputPath, DateTime inputWrittenAt, bool isBin)
+    {
+        if (!File.Exists(outputPath))
+        {
+            return false;
+        }
+
+        var outputWrittenAt = File.GetLastWriteTimeUtc(outputPath);
+
+        return isBin ? outputWrittenAt == inputWrittenAt : outputWrittenAt >= inputWrittenAt;
     }
 
     private static bool IsBinary(string path)

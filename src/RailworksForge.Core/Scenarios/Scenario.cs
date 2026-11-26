@@ -71,7 +71,8 @@ public record Scenario
     // readArchivedDocument lets a caller that already has the archive open parse the entry without reopening it.
     public static Scenario? New(Route route, AssetPath assetPath, Func<IDocument>? readArchivedDocument = null)
     {
-        var path = PreferLooseProperties(assetPath);
+        var directoryPath = GetScenarioDirectory(assetPath, out var hasDirectory);
+        var path = hasDirectory ? PreferLooseProperties(assetPath, directoryPath) : assetPath;
         var canUseArchivedReader = path.IsArchivePath && readArchivedDocument is not null;
         var doc = canUseArchivedReader ? readArchivedDocument!() : GetPropertiesDocument(path);
 
@@ -83,7 +84,6 @@ public record Scenario
         var description = doc.SelectLocalisedStringContent("Description");
         var briefing = doc.SelectLocalisedStringContent("Briefing");
         var startLocation = doc.SelectLocalisedStringContent("StartLocation");
-        var directoryPath = GetScenarioDirectory(path);
         var scenarioClass = doc.SelectTextContent("ScenarioClass");
         var season = ParseSeason(doc.SelectTextContent("Season"));
         var consists = doc.QuerySelectorAll("sDriverFrontEndDetails").Select(Consist.ParseConsist).ToList();
@@ -133,15 +133,15 @@ public record Scenario
     }
 
     // Edits to a packed scenario are written as loose files beside the archive, and the game prefers loose files.
-    private static AssetPath PreferLooseProperties(AssetPath path)
+    private static AssetPath PreferLooseProperties(AssetPath path, string scenarioDirectory)
     {
         if (!path.IsArchivePath)
         {
             return path;
         }
 
-        var loosePath = Path.Join(GetScenarioDirectory(path), "ScenarioProperties.xml");
-        var actualLoosePath = Paths.GetActualPathFromInsensitive(loosePath);
+        var loosePath = Path.Join(scenarioDirectory, "ScenarioProperties.xml");
+        var actualLoosePath = Paths.GetActualPathFromInsensitive(loosePath, scenarioDirectory);
 
         if (actualLoosePath is null)
         {
@@ -151,9 +151,11 @@ public record Scenario
         return new AssetPath { Path = actualLoosePath };
     }
 
-    private static string GetScenarioDirectory(AssetPath path)
+    // hasDirectory is false for a packed scenario whose folder isn't on disk yet, so it can't have loose files.
+    private static string GetScenarioDirectory(AssetPath path, out bool hasDirectory)
     {
         var containingDirectory = Path.GetDirectoryName(path.Path) ?? string.Empty;
+        hasDirectory = true;
 
         if (!path.IsArchivePath)
         {
@@ -165,14 +167,20 @@ public record Scenario
 
         // The archive's spelling may differ in case from a folder already on disk; reuse that folder rather than
         // creating a sibling.
-        return Paths.GetActualPathFromInsensitive(scenarioDirectory, containingDirectory) ?? scenarioDirectory;
+        var actualScenarioDirectory = Paths.GetActualPathFromInsensitive(scenarioDirectory, containingDirectory);
+        hasDirectory = actualScenarioDirectory is not null;
+
+        return actualScenarioDirectory ?? scenarioDirectory;
     }
 
     private static IDocument GetPropertiesDocument(AssetPath path)
     {
-        if (Paths.Exists(path.Path) && path.Path.EndsWith(".xml"))
+        var isXml = path.Path.EndsWith(".xml");
+
+        // The file may differ in case from the expected name, so it is opened by its casing on disk.
+        if (isXml && Paths.GetActualPathFromInsensitive(path.Path) is {} actualPath)
         {
-            using var file = File.OpenRead(path.Path);
+            using var file = File.OpenRead(actualPath);
             return XmlParser.ParseDocument(file);
         }
 
@@ -312,21 +320,13 @@ public record Scenario
         return BinaryPath;
     }
 
-    public static List<ConsistRailVehicle> GetServiceConsistVehicles(IDocument doc, Consist consist)
+    public static List<ConsistRailVehicle> GetServiceConsistVehicles(IReadOnlyList<IElement> consistElements, Consist consist)
     {
-        if (!string.IsNullOrEmpty(consist.Id))
-        {
-            return doc
-                .QuerySelectorAll("cConsist")
-                .FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id)?
-                .QuerySelectorAll("RailVehicles cOwnedEntity")
-                .Select(ParseConsist)
-                .ToList() ?? [];
-        }
+        var consistElement = string.IsNullOrEmpty(consist.Id)
+            ? consistElements.ElementAtOrDefault(consist.Index ?? 0)
+            : consistElements.FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
 
-        return doc
-            .QuerySelectorAll("cConsist")
-            .ElementAtOrDefault(consist.Index ?? 0)?
+        return consistElement?
             .QuerySelectorAll("RailVehicles cOwnedEntity")
             .Select(ParseConsist)
             .ToList() ?? [];

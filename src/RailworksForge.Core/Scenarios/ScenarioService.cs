@@ -1,7 +1,7 @@
 using System.IO.Compression;
+using System.Runtime.ExceptionServices;
 
 using AngleSharp.Dom;
-using AngleSharp.Xml;
 
 using RailworksForge.Core.Assets;
 using RailworksForge.Core.Common;
@@ -55,25 +55,36 @@ public class ScenarioService : IScenarioService
         return new ScenarioEditor(scenario);
     }
 
+    // Scenarios are parsed in parallel, as parsing their properties is most of the work. Loose scenarios are added
+    // first, so an edited copy wins over the packed original it was extracted from.
     public List<Scenario> GetScenarios(Route route, CancellationToken cancellationToken = default)
     {
         var scenarios = new HashSet<Scenario>();
 
-        AddUnPackedScenarios(route, scenarios, cancellationToken);
-        AddPackedScenarios(route, scenarios, cancellationToken);
+        scenarios.UnionWith(ReadUnpackedScenarios(route, cancellationToken));
+        scenarios.UnionWith(ReadPackedScenarios(route, cancellationToken));
 
         return scenarios.OrderBy(scenario => scenario.Name).ToList();
     }
 
-    private void AddPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
+    private List<Scenario> ReadPackedScenarios(Route route, CancellationToken cancellationToken)
     {
-        foreach (var package in Directory.EnumerateFiles(route.DirectoryPath, "*.ap"))
-        {
-            using var archive = ZipFile.OpenRead(package);
+        var entries = Directory
+            .EnumerateFiles(route.DirectoryPath, "*.ap")
+            .SelectMany(package => ReadPropertiesEntries(package, cancellationToken))
+            .ToList();
 
-            var propertiesEntries = archive.Entries.Where(entry => entry.Name == "ScenarioProperties.xml");
+        return ReadInParallel(entries, entry => Scenario.New(route, entry.Path, () => ParseEntry(entry.Content)), cancellationToken);
+    }
 
-            foreach (var entry in propertiesEntries)
+    // A ZipArchive can't be read from several threads, so the entries are decompressed up front and parsed in parallel.
+    private static List<(AssetPath Path, byte[] Content)> ReadPropertiesEntries(string package, CancellationToken cancellationToken)
+    {
+        using var archive = ZipFile.OpenRead(package);
+
+        return archive.Entries
+            .Where(entry => entry.Name == "ScenarioProperties.xml")
+            .Select(entry =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -84,53 +95,71 @@ public class ScenarioService : IScenarioService
                     ArchivePath = entry.FullName,
                 };
 
-                var scenario = Scenario.New(route, path, () => ParseEntry(entry));
-
-                if (scenario is null)
-                {
-                    continue;
-                }
-
-                scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
-                scenarios.Add(scenario);
-            }
-        }
+                return (path, ReadEntry(entry));
+            })
+            .ToList();
     }
 
-    private static IDocument ParseEntry(ZipArchiveEntry entry)
+    private static byte[] ReadEntry(ZipArchiveEntry entry)
     {
         using var content = entry.Open();
+        using var buffer = new MemoryStream();
 
-        return XmlParser.ParseDocument(content);
+        content.CopyTo(buffer);
+
+        return buffer.ToArray();
     }
 
-    private void AddUnPackedScenarios(Route route, HashSet<Scenario> scenarios, CancellationToken cancellationToken)
+    private static IDocument ParseEntry(byte[] content)
     {
-        if (GetScenarioDirectory(route) is not {} dir) return;
+        using var stream = new MemoryStream(content);
 
-        foreach (var scenario in ReadScenarioFiles(route, dir, cancellationToken))
+        return XmlParser.ParseDocument(stream);
+    }
+
+    private List<Scenario> ReadUnpackedScenarios(Route route, CancellationToken cancellationToken)
+    {
+        if (GetScenarioDirectory(route) is not {} directory) return [];
+
+        var propertiesPaths = Directory
+            .EnumerateDirectories(directory)
+            .Select(scenarioDirectory => Path.Join(scenarioDirectory, "ScenarioProperties.xml"))
+            .ToList();
+
+        return ReadInParallel(propertiesPaths, ReadUnpackedScenario, cancellationToken);
+
+        Scenario? ReadUnpackedScenario(string propertiesPath)
         {
-            scenarios.Add(scenario);
+            if (!Paths.Exists(propertiesPath)) return null;
+
+            return Scenario.New(route, new AssetPath { Path = propertiesPath });
         }
     }
 
-    private List<Scenario> ReadScenarioFiles(Route route, string directory, CancellationToken cancellationToken)
+    private List<Scenario> ReadInParallel<T>(List<T> sources, Func<T, Scenario?> read, CancellationToken cancellationToken)
     {
-        var scenarios = new List<Scenario>();
+        List<Scenario> scenarios;
 
-        foreach (var scenarioDir in Directory.EnumerateDirectories(directory))
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var scenarioPath = Path.Join(scenarioDir, "ScenarioProperties.xml");
+            scenarios = sources
+                .AsParallel()
+                .AsOrdered()
+                .WithCancellation(cancellationToken)
+                .Select(read)
+                .OfType<Scenario>()
+                .ToList();
+        }
+        catch (AggregateException exception) when (exception.InnerExceptions.Count == 1)
+        {
+            // Rethrown unwrapped, so the error shown is the scenario's own rather than "One or more errors occurred".
+            ExceptionDispatchInfo.Throw(exception.InnerExceptions[0]);
+            throw;
+        }
 
-            if (!Paths.Exists(scenarioPath)) continue;
-
-            var scenario = Scenario.New(route, new AssetPath { Path = scenarioPath });
-
-            if (scenario is null) continue;
-
+        foreach (var scenario in scenarios)
+        {
             scenario.SetPlayerInfo(_scenarioDatabaseService.GetScenario(scenario.Id));
-            scenarios.Add(scenario);
         }
 
         return scenarios;

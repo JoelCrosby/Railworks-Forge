@@ -188,12 +188,25 @@ public static class Paths
 
     public static bool Exists(string path, string? rootPath = null)
     {
+        // The file system already ignores case here, and listing each directory to find the real casing is slow.
+        if (IsFileSystemCaseInsensitive)
+        {
+            return Path.Exists(NormaliseSeparators(path));
+        }
+
         rootPath ??= GetGameDirectory();
         return GetActualPathFromInsensitive(path, rootPath) is not null;
     }
 
     // Windows and macOS match file names case-insensitively, so an existing path can still have the wrong case.
     private static readonly bool IsFileSystemCaseInsensitive = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+
+    private static string NormaliseSeparators(string path)
+    {
+        return path
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
+    }
 
     private static readonly EnumerationOptions CaseInsensitiveEntryOptions = new()
     {
@@ -206,16 +219,21 @@ public static class Paths
     // Resolves a path whose components may have the wrong case, returning the casing used on disk.
     public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
-        var normalisedPath = path
-            .Replace('\\', Path.DirectorySeparatorChar)
-            .Replace('/', Path.DirectorySeparatorChar);
+        var normalisedPath = NormaliseSeparators(path);
+        var exists = Path.Exists(normalisedPath);
 
-        if (!IsFileSystemCaseInsensitive && Path.Exists(normalisedPath))
+        if (!IsFileSystemCaseInsensitive && exists)
         {
             return normalisedPath;
         }
 
-        var root = rootPath is null ? null : Path.TrimEndingDirectorySeparator(rootPath);
+        // A case-insensitive file system has already looked for every casing, so a miss needs no directory listings.
+        if (IsFileSystemCaseInsensitive && !exists)
+        {
+            return null;
+        }
+
+        var root = string.IsNullOrEmpty(rootPath) ? null : Path.TrimEndingDirectorySeparator(rootPath);
         var isUnderRoot = root is not null
             && normalisedPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
         var basePath = isUnderRoot ? root! : Path.GetPathRoot(normalisedPath) ?? string.Empty;

@@ -146,13 +146,18 @@ public class Consist : Blueprint
 
     public static IElement? GetServiceConsist(IDocument document, Consist consist)
     {
-        var byId = document.QuerySelectorAll("cConsist").FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
+        return GetServiceConsist(document.QuerySelectorAll("cConsist"), consist);
+    }
+
+    public static IElement? GetServiceConsist(IReadOnlyCollection<IElement> consistElements, Consist consist)
+    {
+        var byId = consistElements.FirstOrDefault(el => el.GetAttribute("d:id") == consist.Id);
 
         if (byId is not null)
         {
             return byId;
         }
 
-        return document.QuerySelectorAll("cConsist").QueryByTextContent("ServiceName Key", consist.ServiceId);
+        return consistElements.FirstOrDefault(el => el.SelectTextContent("ServiceName Key") == consist.ServiceId);
     }
 }

@@ -85,30 +85,35 @@ public class RouteService : IRouteService
         return ReadRouteFiles(routeFiles);
     }
 
+    // Each route is parsed on its own, so they are read in parallel; most of the time is spent parsing.
     private static List<Route> ReadRouteFiles(List<string> routeFiles)
     {
-        var results = new HashSet<Route>();
+        return routeFiles
+            .AsParallel()
+            .Select(TryReadRouteFile)
+            .OfType<Route>()
+            .ToHashSet()
+            .OrderBy(route => route.Name)
+            .ToList();
+    }
 
-        foreach (var path in routeFiles)
+    private static Route? TryReadRouteFile(string path)
+    {
+        try
         {
-            try
+            return Path.GetExtension(path) switch
             {
-                var route = Path.GetExtension(path) switch
-                {
-                    ".xml" => ReadRouteFile(path),
-                    ".ap" => ReadCompressedRouteFile(path),
-                    _ => throw new Exception("unrecognised route extension"),
-                };
-
-                results.Add(route);
-            }
-            catch (Exception e)
-            {
-                Log.Warning(e, "Skipping route that could not be read at {Path}", path);
-            }
+                ".xml" => ReadRouteFile(path),
+                ".ap" => ReadCompressedRouteFile(path),
+                _ => throw new Exception("unrecognised route extension"),
+            };
         }
+        catch (Exception e)
+        {
+            Log.Warning(e, "Skipping route that could not be read at {Path}", path);
 
-        return results.OrderBy(route => route.Name).ToList();
+            return null;
+        }
     }
 
     private static Route ReadRouteFile(string path)

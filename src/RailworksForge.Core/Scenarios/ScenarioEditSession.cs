@@ -16,6 +16,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 {
     private ConsistCommandContext _context;
     private DateTime? _savedVersion;
+    private ConsistElementList? _consistElements;
 
     private ScenarioEditSession(ConsistCommandContext context)
     {
@@ -27,13 +28,34 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
     public bool HasChanges { get; private set; }
 
+    // Every query walks the whole scenario, so the consists are listed once per document rather than per lookup. The
+    // list records its document, so one built while an edit swapped the document is never reused.
+    private List<IElement> ConsistElements
+    {
+        get
+        {
+            var document = _context.ScenarioDocument;
+            var cached = _consistElements;
+
+            if (cached?.Document == document)
+            {
+                return cached.Elements;
+            }
+
+            var elements = document.QuerySelectorAll("cConsist").ToList();
+            _consistElements = new ConsistElementList(document, elements);
+
+            return elements;
+        }
+    }
+
     public static async Task<ScenarioEditSession> Begin(Scenario scenario, CancellationToken cancellationToken)
     {
         using var scenarioLock = await ScenarioLocks.Acquire(scenario, cancellationToken);
 
         var updated = scenario.Refresh() ?? throw new InvalidOperationException("The scenario could not be loaded.");
         var propertiesDocument = await updated.GetPropertiesXmlDocument();
-        var document = await updated.GetXmlDocument(false);
+        var document = await updated.GetXmlDocument();
 
         var context = new ConsistCommandContext
         {
@@ -50,8 +72,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         // Content may have been added or removed since the scenario was last shown.
         Cache.ClearAcquisitionStates();
 
-        return _context.ScenarioDocument
-            .QuerySelectorAll("cConsist")
+        return ConsistElements
             .Select((element, index) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -69,7 +90,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
             return [];
         }
 
-        var vehicles = Scenario.GetServiceConsistVehicles(_context.ScenarioDocument, consist);
+        var vehicles = Scenario.GetServiceConsistVehicles(ConsistElements, consist);
 
         // Acquisition state is computed lazily from disk; resolve it here so the grid doesn't do it on the UI thread.
         foreach (var vehicle in vehicles)
@@ -83,7 +104,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
     public string GetConsistRailVehiclesXml(Consist consist)
     {
-        var vehicles = Consist.GetServiceConsist(_context.ScenarioDocument, consist)?.QuerySelector("RailVehicles");
+        var vehicles = Consist.GetServiceConsist(ConsistElements, consist)?.QuerySelector("RailVehicles");
 
         if (vehicles is null)
         {
@@ -193,4 +214,6 @@ public sealed class ScenarioEditSession : IScenarioEditSession
     {
         return (IDocument)document.Clone(true);
     }
+
+    private sealed record ConsistElementList(IDocument Document, List<IElement> Elements);
 }

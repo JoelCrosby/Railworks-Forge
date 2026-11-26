@@ -85,6 +85,46 @@ public sealed class SerzConvertTests : IDisposable
     }
 
     [Fact]
+    public async Task CacheNewerThanBinary_IsConvertedAgain()
+    {
+        // A backup restored over the BIN is older than XML cached from the BIN it replaced.
+        var conversion = CreateConversion("Scenario.bin", "Scenario.bin.xml", useInternalSerz: false);
+        WriteCachedOutput(conversion, TimeSpan.FromMinutes(1));
+
+        var result = await Serz.Convert(conversion, RecordNativeCall, CancellationToken.None);
+
+        Assert.Single(_nativeCalls);
+        Assert.Equal(NativeOutput, File.ReadAllText(result.OutputPath));
+    }
+
+    [Fact]
+    public async Task BinaryCacheNewerThanXml_IsReturnedWithoutConverting()
+    {
+        var conversion = CreateConversion("Scenario.bin.xml", "Scenario.bin", useInternalSerz: false);
+        WriteCachedOutput(conversion, TimeSpan.FromMinutes(1));
+
+        var result = await Serz.Convert(conversion, RecordNativeCall, CancellationToken.None);
+
+        Assert.Empty(_nativeCalls);
+        Assert.Equal(CachedOutput, File.ReadAllText(result.OutputPath));
+    }
+
+    [Fact]
+    public async Task ConvertedBinary_CarriesTheBinaryWriteTime()
+    {
+        var conversion = CreateConversion("Scenario.bin", "Scenario.bin.xml", useInternalSerz: false);
+        var inputWrittenAt = DateTime.UtcNow.AddDays(-3);
+        File.WriteAllBytes(conversion.InputPath, GetResourceBytes("SerzNodes.bin"));
+        File.SetLastWriteTimeUtc(conversion.InputPath, inputWrittenAt);
+
+        var result = await Serz.Convert(conversion, RecordNativeCall, CancellationToken.None);
+        await Serz.Convert(conversion, RecordNativeCall, CancellationToken.None);
+
+        Assert.Equal(inputWrittenAt, File.GetLastWriteTimeUtc(result.OutputPath));
+        Assert.Single(_nativeCalls);
+    }
+
+    [Fact]
     public async Task Force_ConvertsAgainWhenCacheIsCurrent()
     {
         var conversion = CreateConversion("Scenario.bin", "Scenario.bin.xml", useInternalSerz: false) with { Force = true };
@@ -163,10 +203,17 @@ public sealed class SerzConvertTests : IDisposable
         };
     }
 
+    // XML converted from a BIN is current only when it carries the BIN's write time.
     private static void WriteCachedOutput(Serz.SerzConversion conversion, bool isCacheCurrent)
     {
+        var cacheOffset = isCacheCurrent ? TimeSpan.Zero : TimeSpan.FromMinutes(-1);
+
+        WriteCachedOutput(conversion, cacheOffset);
+    }
+
+    private static void WriteCachedOutput(Serz.SerzConversion conversion, TimeSpan cacheOffset)
+    {
         var inputWrittenAt = DateTime.UtcNow.AddHours(-1);
-        var cacheOffset = isCacheCurrent ? TimeSpan.FromMinutes(1) : TimeSpan.FromMinutes(-1);
         var outputWrittenAt = inputWrittenAt + cacheOffset;
 
         File.WriteAllBytes(conversion.InputPath, GetResourceBytes("SerzNodes.bin"));
