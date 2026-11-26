@@ -17,7 +17,9 @@ public class PackagingTests
 
         var resolved = Paths.ResolveWithin(root, relativePath);
 
-        Assert.Equal(Path.Join(root, expectedRelativePath), resolved);
+        var expected = Path.Join(root, expectedRelativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        Assert.Equal(expected, resolved);
     }
 
     [Theory]

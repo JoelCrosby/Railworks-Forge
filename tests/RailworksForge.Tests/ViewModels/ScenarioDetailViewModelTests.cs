@@ -255,11 +255,12 @@ public class ScenarioDetailViewModelTests
     [Fact]
     public async Task ExportBinToXml_OpensTheExportedFilesFolder()
     {
-        _scenarios.ExportBinToXml(_scenario).Returns("/exports/scenario/Scenario.bin.xml");
+        var exportDirectory = Path.Join(Path.GetTempPath(), "exports", "scenario");
+        _scenarios.ExportBinToXml(_scenario).Returns(Path.Join(exportDirectory, "Scenario.bin.xml"));
 
         await _page.ExportBinToXmlCommand.ExecuteAsync(null);
 
-        _launcher.Received(1).OpenDirectory("/exports/scenario");
+        _launcher.Received(1).OpenDirectory(exportDirectory);
     }
 
     [Fact]

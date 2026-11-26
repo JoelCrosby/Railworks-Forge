@@ -78,6 +78,9 @@ public class SerzInternal
             Encoding = new UTF8Encoding(false),
             Indent = true,
             CheckCharacters = false,
+            // Game text contains bare \r and \r\n. serz64.exe writes these raw and reads &#xD; back as NUL, so keep them untouched.
+            NewLineHandling = NewLineHandling.None,
+            NewLineChars = "\n",
         };
 
         using (var writer = XmlWriter.Create(output, settings))

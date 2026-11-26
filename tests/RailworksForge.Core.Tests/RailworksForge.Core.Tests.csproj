@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <None Remove="Resources\**" />
-    <EmbeddedResource Include="Resources\**" />
+    <!-- Without WithCulture, Windows reads "bin" in Foo.bin.xml as the Edo culture and moves the file into a satellite assembly. -->
+    <EmbeddedResource Include="Resources\**" WithCulture="false" />
   </ItemGroup>
 
 </Project>

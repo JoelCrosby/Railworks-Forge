@@ -270,6 +270,32 @@ public class SerzInternalTests
         Assert.Equal(text, element.TextContent);
     }
 
+    // SDBCache.bin descriptions contain bare \r, \r\n and \r\r\n. serz64.exe writes them raw and decodes &#xD; as NUL.
+    [Fact]
+    public void Convert_WritesCarriageReturnsRawLikeSerz()
+    {
+        const string text = "line\rbreak\r\nend\r\r\n";
+        var value = ValueRecord("value", "cDeltaString", NewString(text));
+        var data = BuildSerz(OpenRecord("cRoot"), value, CloseRecord("cRoot"));
+        var directory = Directory.CreateTempSubdirectory("railworks-serz-");
+
+        try
+        {
+            var inputPath = Path.Join(directory.FullName, "input.bin");
+            var outputPath = Path.Join(directory.FullName, "output.xml");
+            File.WriteAllBytes(inputPath, data);
+            SerzInternal.Convert(inputPath, outputPath);
+            var output = File.ReadAllText(outputPath);
+
+            Assert.Contains($">{text}</value>", output);
+            Assert.DoesNotContain("&#xD;", output);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static readonly XNamespace Delta = "http://www.kuju.com/TnT/2003/Delta";
 
     private static byte[] BuildSerz(params byte[][] records)

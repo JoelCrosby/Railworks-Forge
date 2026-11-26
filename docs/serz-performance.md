@@ -46,10 +46,22 @@ Game sample paths, relative to RailWorks:
 - `Content/Routes/fc8df6e1-dc30-4efc-92a6-2fe065b39826/MixMap/+000031+000014.bin`
 - `Content/Routes/a7037b8a-e8cf-4963-847f-58469a87c0d5/Networks/Tracks.bin`
 
-The local `Content/SDBCache.bin` was excluded: it contains NUL characters that
-the existing internal reader rejects, and `serz64.exe` emits those NULs into
-invalid XML. That pre-existing compatibility issue is separate from this
-performance change.
+## SDBCache.bin compatibility
+
+The local `Content/SDBCache.bin` (22,768,055 bytes) was excluded from the table
+above. Its scenario text contains NUL and other characters XML forbids, and bare
+`\r`, `\r\n` and `\r\r\n` line breaks. `serz64.exe` writes all of these as raw
+bytes, so its output is not well-formed XML.
+
+The internal converter now does the same. On 2026-11-26, the internal output
+matched `serz64.exe` for all 7,252,602 elements and text values, including the
+NULs. Converting that XML back with `serz64.exe` produced a BIN byte-identical to
+`serz64.exe`'s own round trip. Direct file conversion took 770.83 ms.
+
+Line breaks must stay raw: `serz64.exe` reads the `&#xD;` entity back as NUL.
+Neither round trip reproduces the original BIN byte for byte. `serz64.exe`
+rewrites the root name length in the header and re-encodes some floats that
+have a `d:alt_encoding`.
 
 ## Repeating the benchmark
 

@@ -192,11 +192,23 @@ public static class Paths
         return GetActualPathFromInsensitive(path, rootPath) is not null;
     }
 
+    // Windows and macOS match file names case-insensitively, so an existing path can still have the wrong case.
+    private static readonly bool IsFileSystemCaseInsensitive = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+
+    private static readonly EnumerationOptions CaseInsensitiveEntryOptions = new()
+    {
+        MatchCasing = MatchCasing.CaseInsensitive,
+        MatchType = MatchType.Simple,
+        IgnoreInaccessible = true,
+        AttributesToSkip = 0,
+    };
+
+    // Resolves a path whose components may have the wrong case, returning the casing used on disk.
     public static string? GetActualPathFromInsensitive(string path, string? rootPath = null)
     {
         var normalisedPath = path.Replace('\\', Path.DirectorySeparatorChar);
 
-        if (Path.Exists(normalisedPath))
+        if (!IsFileSystemCaseInsensitive && Path.Exists(normalisedPath))
         {
             return normalisedPath;
         }
@@ -210,10 +222,10 @@ public static class Paths
 
         foreach (var part in parts)
         {
-            // Most components already have the right case, so only list the directory when the exact name is missing.
             var exactPath = Path.Join(basePath, part);
 
-            if (Path.Exists(exactPath))
+            // On a case-sensitive file system an exact hit already has the right case, so the directory listing is skipped.
+            if (!IsFileSystemCaseInsensitive && Path.Exists(exactPath))
             {
                 basePath = exactPath;
                 continue;
@@ -224,19 +236,33 @@ public static class Paths
                 return null;
             }
 
-            var match = Directory
-                .EnumerateFileSystemEntries(basePath)
-                .FirstOrDefault(entry => string.Equals(Path.GetFileName(entry), part, StringComparison.OrdinalIgnoreCase));
-
-            if (match is null)
+            if (FindEntryIgnoringCase(basePath, part) is {} match)
             {
-                return null;
+                basePath = match;
+                continue;
             }
 
-            basePath = match;
+            // Windows also resolves 8.3 short names such as RUNNER~1, which no listed entry is called.
+            if (IsFileSystemCaseInsensitive && Path.Exists(exactPath))
+            {
+                basePath = exactPath;
+                continue;
+            }
+
+            return null;
         }
 
         return basePath;
+    }
+
+    private static string? FindEntryIgnoringCase(string directory, string name)
+    {
+        var hasWildcard = name.AsSpan().IndexOfAny('*', '?') >= 0;
+        var entries = hasWildcard
+            ? Directory.EnumerateFileSystemEntries(directory)
+            : Directory.EnumerateFileSystemEntries(directory, name, CaseInsensitiveEntryOptions);
+
+        return entries.FirstOrDefault(entry => string.Equals(Path.GetFileName(entry), name, StringComparison.OrdinalIgnoreCase));
     }
 
     private static byte[] CalculateMd5Hash(string path)
