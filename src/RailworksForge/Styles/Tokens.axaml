@@ -38,6 +38,15 @@
             <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF6B6B6B</SolidColorBrush>
             <SolidColorBrush x:Key="HeaderChevronBrush">#FFA6A6A6</SolidColorBrush>
             <SolidColorBrush x:Key="HeaderIconBrush">#FF2A2A2A</SolidColorBrush>
+
+            <!-- Same tints as the search box, so dropdowns sit just off the page like the other inputs. -->
+            <SolidColorBrush x:Key="ComboBoxBackground">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundFocused">#4DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver">#33000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed">#33000000</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="SurfaceBrush">#FF18181B</SolidColorBrush>
@@ -74,6 +83,14 @@
             <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF9A9A9A</SolidColorBrush>
             <SolidColorBrush x:Key="HeaderChevronBrush">#FF555555</SolidColorBrush>
             <SolidColorBrush x:Key="HeaderIconBrush">#FFE6E6E6</SolidColorBrush>
+
+            <SolidColorBrush x:Key="ComboBoxBackground">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBackgroundFocused">#4D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver">#33FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed">#33FFFFFF</SolidColorBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

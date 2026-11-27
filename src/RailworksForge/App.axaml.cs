@@ -31,7 +31,7 @@ public class App : Application
 
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(config.Language));
 
-        new ThemeService().Apply(config.Theme);
+        new ThemeService().ApplyAtStartup(config.Theme);
     }
 
     public override void OnFrameworkInitializationCompleted()

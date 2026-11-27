@@ -104,6 +104,10 @@
         <Setter Property="Opacity" Value="0.55" />
     </Style>
 
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+    </Style>
+
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}" />
