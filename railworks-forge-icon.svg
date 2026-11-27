@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="url(#tile)"/>
+  <!-- Cross-section of a flat-bottom rail: head, web and foot. -->
+  <path fill="#fff" d="M98 60H158Q168 60 168 70V100Q168 106 160 108L140 114V156Q140 166 150 170L192 182Q198 184 198 190V196H58V190Q58 184 64 182L106 170Q116 166 116 156V114L96 108Q88 106 88 100V70Q88 60 98 60Z"/>
+</svg>
