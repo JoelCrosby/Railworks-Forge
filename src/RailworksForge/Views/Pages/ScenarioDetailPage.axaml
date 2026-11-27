@@ -8,10 +8,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:components="using:RailworksForge.Views.Components"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
-             xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.ScenarioDetailPage"
              x:DataType="vm:ScenarioDetailViewModel">
@@ -20,158 +19,186 @@
         <x:Static Member="design:DesignViewModels.ScenarioDetail" />
     </Design.DataContext>
 
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Enter" Command="{Binding OpenServiceCommand}" />
+        <KeyBinding Gesture="Delete" Command="{Binding DeleteConsistCommand}" />
+        <KeyBinding Gesture="Escape" Command="{Binding ClearSelectionCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding ApplyChangesCommand}" />
+    </UserControl.KeyBindings>
+
     <DockPanel>
-
-        <Grid Margin="12,12,12,0" DockPanel.Dock="Top" ColumnDefinitions="280,*" >
-            <Grid.Styles>
-                <Style Selector="StackPanel">
-                    <Setter Property="Spacing" Value="4" />
-                    <Setter Property="Margin" Value="0, 0, 0, 8" />
-                </Style>
-
-                <Style Selector="TextBlock">
-                    <Setter Property="TextWrapping" Value="1" />
-                    <Setter Property="LineSpacing" Value="1.8" />
-                </Style>
-            </Grid.Styles>
-
-            <Border Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                <StackPanel>
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.locomotive}}" Value="{Binding Scenario.Locomotive}" />
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.start_location}}" Value="{Binding Scenario.StartLocation}" />
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.scenario_type}}" Value="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.packaging_type}}" Value="{Binding Scenario.PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
+        <components:PageHeader DockPanel.Dock="Top"
+                               Image="{Binding HeaderImage}"
+                               Title="{Binding Scenario.Name}"
+                               Description="{Binding Scenario.Description}">
+            <components:PageHeader.Badges>
+                <WrapPanel ItemSpacing="8" LineSpacing="8">
+                    <components:Badge Content="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
+                    <components:Badge Content="{Binding Scenario.Duration, Converter={x:Static converters:ValueConverters.DurationConverter}}" />
+                    <components:Badge Content="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonConverter}}"
+                                      IsVisible="{Binding Scenario.Season, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <components:Badge Content="{Binding Scenario.Locomotive}" />
+                    <components:Badge Content="{Binding Scenario.PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
+                </WrapPanel>
+            </components:PageHeader.Badges>
+            <components:PageHeader.Actions>
+                <StackPanel Orientation="Horizontal" Spacing="8" IsEnabled="{Binding Loading.IsIdle}">
+                    <Button Command="{Binding OpenInExplorerCommand}">
+                        <components:IconLabel Icon="FolderOpen" Text="{echoes:Translate {x:Static translations:Strings.open_folder}}" />
+                    </Button>
+                    <Button>
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" Command="{Binding OpenBackupsFolderCommand}" />
+                                <Separator />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" Command="{Binding ExportBinToXmlCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}" Command="{Binding ConvertXmlToBinCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" Command="{Binding ExtractScenariosCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.more}}" />
+                            <components:LucideIcon Icon="ChevronDown" Width="14" Height="14" StrokeThickness="2" StrokeBrush="{DynamicResource TextMutedBrush}" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-            </Border>
+            </components:PageHeader.Actions>
+        </components:PageHeader>
 
-            <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                <StackPanel>
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.description}}" Value="{Binding Scenario.Description}" />
-                    <controls:NameValueDisplay Heading="{echoes:Translate {x:Static translations:Strings.briefing}}" Value="{Binding Scenario.Briefing}" />
-                </StackPanel>
-            </Border>
-        </Grid>
+        <components:PendingChangesBar DockPanel.Dock="Bottom"
+                                      IsVisible="{Binding PendingChanges.HasChanges}"
+                                      IsEnabled="{Binding Loading.IsIdle}"
+                                      Summary="{Binding PendingChanges.Summary}"
+                                      Details="{Binding PendingChanges.Details}"
+                                      DiscardText="{echoes:Translate {x:Static translations:Strings.discard}}"
+                                      ApplyText="{echoes:Translate {x:Static translations:Strings.save_scenario}}"
+                                      DiscardCommand="{Binding DiscardChangesCommand}"
+                                      ApplyCommand="{Binding ApplyChangesCommand}" />
 
-        <StackPanel IsEnabled="{Binding Loading.IsIdle}" DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
-            <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
-            <Button Command="{Binding OpenBackupsFolderCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_backups_folder}}" />
-            <Button Command="{Binding ExportBinToXmlCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_bin_to_xml}}" />
-            <Button Command="{Binding ConvertXmlToBinCommand}" Content="{echoes:Translate {x:Static translations:Strings.convert_xml_to_bin}}" />
-            <Button Command="{Binding ExtractScenariosCommand}" Content="{echoes:Translate {x:Static translations:Strings.extract_scenarios}}" />
-        </StackPanel>
+        <Border Classes="card" Margin="24,0,24,16">
+            <DockPanel>
+                <components:SectionHeader DockPanel.Dock="Top"
+                                          Title="{echoes:Translate {x:Static translations:Strings.services}}"
+                                          Count="{Binding Services.Count}">
+                    <components:SearchBox IsShortcutTarget="True"
+                                          ShortcutHint="{echoes:Translate {x:Static translations:Strings.search_shortcut}}"
+                                          Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
+                                          Text="{Binding SearchTerm}" />
+                </components:SectionHeader>
 
-        <StackPanel DockPanel.Dock="Top">
-            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.services}}">
-                <controls:TableSearchBox SearchTerm="{Binding SearchTerm}" />
-            </controls:TableHeader>
-        </StackPanel>
+                <components:SelectionToolbar DockPanel.Dock="Top"
+                                             IsEnabled="{Binding Loading.IsIdle}"
+                                             SelectedCount="{Binding SelectedCount}"
+                                             SelectionText="{Binding SelectionText}"
+                                             ClearText="{echoes:Translate {x:Static translations:Strings.clear_selection}}"
+                                             ClearCommand="{Binding ClearSelectionCommand}">
+                    <WrapPanel ItemSpacing="8" LineSpacing="6">
+                        <Button Classes="small" Command="{Binding OpenServiceCommand}">
+                            <components:IconLabel Icon="SquareArrowOutUpRight" Text="{echoes:Translate {x:Static translations:Strings.open_consist}}" />
+                        </Button>
+                        <Button Classes="small primary" Command="{Binding ReplaceConsistCommand}">
+                            <components:IconLabel Icon="Repeat" Text="{echoes:Translate {x:Static translations:Strings.replace_consist_action}}" />
+                        </Button>
+                        <Button Classes="small" Command="{Binding SaveConsistCommand}">
+                            <components:IconLabel Icon="Save" Text="{echoes:Translate {x:Static translations:Strings.save_as_preset}}" />
+                        </Button>
+                        <Button Classes="small danger" Command="{Binding DeleteConsistCommand}">
+                            <components:IconLabel Icon="Trash2" Text="{echoes:Translate {x:Static translations:Strings.delete}}" />
+                        </Button>
+                    </WrapPanel>
+                </components:SelectionToolbar>
 
-        <Border DockPanel.Dock="Bottom" IsVisible="{Binding Editor.HasPendingChanges}" IsEnabled="{Binding Loading.IsIdle}"
-                Padding="16,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold"
-                           Text="{echoes:Translate {x:Static translations:Strings.pending_changes}}" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Content="{echoes:Translate {x:Static translations:Strings.discard_changes}}"
-                            Command="{Binding DiscardChangesCommand}" />
-                    <Button Content="{echoes:Translate {x:Static translations:Strings.apply_changes}}"
-                            Command="{Binding ApplyChangesCommand}"
-                            Background="{DynamicResource ToggleButtonBackgroundChecked}" />
-                </StackPanel>
-            </Grid>
+                <Panel>
+                    <DataGrid
+                        Name="ServicesDataGrid"
+                        Classes="consist-highlight"
+                        IsEnabled="{Binding Loading.IsIdle}"
+                        ItemsSource="{Binding Services}"
+                        SelectionMode="Extended"
+                    >
+                        <i:Interaction.Behaviors>
+                            <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedServices}" />
+                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenServiceCommand}" />
+                        </i:Interaction.Behaviors>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="Consist.ConsistAcquisitionState">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ConsistViewModel">
+                                        <components:AcquisitionStateIcon Classes="cell" State="{Binding Consist.ConsistAcquisitionState}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive name intact. -->
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Consist.LocomotiveName">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ConsistViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,6">
+                                            <components:Thumbnail Width="80" Height="45" Source="{Binding ImageBitmap}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Consist.LocomotiveName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.service_name}}" SortMemberPath="Consist.ServiceName" Width="*" MinWidth="220">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ConsistViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                                            <components:Badge Classes="accent"
+                                                              Content="{echoes:Translate {x:Static translations:Strings.player}}"
+                                                              IsVisible="{Binding Consist.PlayerDriver}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Consist.ServiceName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.length}}" SortMemberPath="Consist.Length">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ConsistViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.consist_length}}">
+                                            <Viewbox Classes="inline-icon">
+                                                <components:LucideIcon Icon="TrainFront" />
+                                            </Viewbox>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Consist.Length}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="Consist.BlueprintSetIdProvider">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ConsistViewModel">
+                                        <components:BlueprintSummary Margin="12,0"
+                                                                     Provider="{Binding Consist.BlueprintSetIdProvider}"
+                                                                     Product="{Binding Consist.BlueprintSetIdProduct}"
+                                                                     BlueprintId="{Binding Consist.BlueprintId}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding OpenServiceCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_with_quick_drive_consist}}" Command="{Binding ReplaceConsistCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.save_as_preset}}" Command="{Binding SaveConsistCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_service}}" Command="{Binding DeleteConsistCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <DataGrid.Styles>
+                            <Style Selector="DataGridRow">
+                                <Setter Property="MinHeight" Value="58" />
+                            </Style>
+                        </DataGrid.Styles>
+                    </DataGrid>
+                    <loading:LoadingState DataContext="{Binding Loading}" />
+                </Panel>
+            </DockPanel>
         </Border>
-
-        <Panel>
-            <DataGrid
-                Name="ServicesDataGrid"
-                Classes="consist-highlight"
-                IsEnabled="{Binding Loading.IsIdle}"
-                ItemsSource="{Binding Services}"
-                SelectionMode="Extended"
-            >
-                <i:Interaction.Behaviors>
-                    <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedServices}" />
-                    <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenServiceCommand}" />
-                </i:Interaction.Behaviors>
-
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.player}}" SortMemberPath="Consist.PlayerDriver">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:ConsistViewModel">
-                                <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding Consist.PlayerDriver}"
-                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.player_driven}}">
-                                    <lucideAvalonia:Lucide Icon="UserRound"
-                                                           StrokeBrush="{DynamicResource SystemAccentColor}" />
-                                </Viewbox>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="Consist.ConsistAcquisitionState">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:ConsistViewModel">
-                                <controls:AcquisitionStateIcon Classes="cell" State="{Binding Consist.ConsistAcquisitionState}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive name intact. -->
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Consist.LocomotiveName">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:ConsistViewModel">
-                                <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,12,0">
-                                    <controls:VehicleThumbnail Width="92" Height="52" Margin="12,6,0,6" Source="{Binding ImageBitmap}" />
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Consist.LocomotiveName}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.service_name}}" Binding="{Binding Consist.ServiceName}" />
-
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.length}}" SortMemberPath="Consist.Length">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:ConsistViewModel">
-                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0" ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.consist_length}}">
-                                    <Viewbox Classes="inline-icon">
-                                        <lucideAvalonia:Lucide Icon="TrainFront" />
-                                    </Viewbox>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Consist.Length}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
-                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="Consist.BlueprintSetIdProvider">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:ConsistViewModel">
-                                <controls:BlueprintSummary Margin="12,0"
-                                                           Provider="{Binding Consist.BlueprintSetIdProvider}"
-                                                           Product="{Binding Consist.BlueprintSetIdProduct}"
-                                                           BlueprintId="{Binding Consist.BlueprintId}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_details}}" Command="{Binding OpenServiceCommand}" />
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_with_quick_drive_consist}}" Command="{Binding ReplaceConsistCommand}"  />
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_service}}" Command="{Binding DeleteConsistCommand}" />
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-
-                <DataGrid.Styles>
-                    <Style Selector="DataGridRow">
-                        <Setter Property="MinHeight" Value="64" />
-                    </Style>
-                </DataGrid.Styles>
-            </DataGrid>
-            <loading:LoadingState DataContext="{Binding Loading}" />
-        </Panel>
-
     </DockPanel>
 </UserControl>

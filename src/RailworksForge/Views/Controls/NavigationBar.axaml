@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:controls="using:RailworksForge.Views.Controls"
+             xmlns:components="using:RailworksForge.Views.Components"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -17,12 +17,19 @@
     </Design.DataContext>
 
     <UserControl.Styles>
-        <Style Selector="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Style Selector="Button.header">
+            <Setter Property="Height" Value="32" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
 
-        <Style Selector="lucideAvalonia|Lucide">
+        <Style Selector="Button.header.active /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        </Style>
+
+        <!-- LucideIcon is styled as a Lucide control, so its styles select the Lucide type. -->
+        <Style Selector="lucideAvalonia|Lucide.header-icon">
             <Setter Property="StrokeBrush" Value="{DynamicResource HeaderIconBrush}" />
             <Setter Property="StrokeThickness" Value="2" />
             <Setter Property="Width" Value="16" />
@@ -30,156 +37,44 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style Selector="lucideAvalonia|Lucide.muted">
-            <Setter Property="StrokeBrush" Value="{DynamicResource HeaderMutedForegroundBrush}" />
-        </Style>
-
-        <!-- Flat header buttons: transparent until hovered, with the hover wash drawn by the template's presenter. -->
-        <Style Selector="Button.flat">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-        </Style>
-
-        <Style Selector="Button.flat:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HeaderHoverBrush}" />
-        </Style>
-
-        <Style Selector="Button.flat:pressed /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HeaderSelectedBrush}" />
-        </Style>
-
-        <Style Selector="Button.flat:flyout-open /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HeaderSelectedBrush}" />
-        </Style>
-
-        <Style Selector="Button.flat.active /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
-        </Style>
-
-        <!-- Breadcrumbs: earlier crumbs are muted links, the current crumb is highlighted and inert. -->
-        <Style Selector="Button.crumb">
-            <Setter Property="Height" Value="26" />
-            <Setter Property="Padding" Value="3,0,8,0" />
-            <Setter Property="MaxWidth" Value="200" />
-        </Style>
-
-        <Style Selector="Button.crumb TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource HeaderMutedForegroundBrush}" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        </Style>
-
-        <!-- Each level has its own colour, so the depth of the trail reads at a glance. -->
-        <Style Selector="Border.crumb-tile">
-            <Setter Property="Width" Value="20" />
-            <Setter Property="Height" Value="20" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="Opacity" Value="0.7" />
-        </Style>
-
-        <Style Selector="Border.crumb-tile lucideAvalonia|Lucide">
-            <Setter Property="StrokeBrush" Value="White" />
-            <Setter Property="Width" Value="13" />
-            <Setter Property="Height" Value="13" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-
-        <Style Selector="Button.crumb:pointerover Border.crumb-tile">
-            <Setter Property="Opacity" Value="1" />
-        </Style>
-
-        <Style Selector="Button.crumb.current Border.crumb-tile">
-            <Setter Property="Opacity" Value="1" />
-        </Style>
-
-        <Style Selector="Button.crumb:pointerover TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
-        </Style>
-
-        <Style Selector="Button.crumb.current">
-            <Setter Property="Background" Value="{DynamicResource HeaderSelectedBrush}" />
-            <Setter Property="MaxWidth" Value="300" />
-            <Setter Property="IsHitTestVisible" Value="False" />
-        </Style>
-
-        <Style Selector="Button.crumb.current TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
-        </Style>
-
-        <Style Selector="lucideAvalonia|Lucide.chevron">
-            <Setter Property="StrokeBrush" Value="{DynamicResource HeaderChevronBrush}" />
-            <Setter Property="Width" Value="14" />
-            <Setter Property="Height" Value="14" />
-            <Setter Property="Margin" Value="4,0" />
-        </Style>
-
-        <!-- Routes and scenarios search, and the routes layout toggle. -->
-        <Style Selector="TextBox.header-search">
-            <Setter Property="Width" Value="280" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="8,0,10,0" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
-            <Setter Property="Background" Value="{DynamicResource HeaderInputBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource HeaderInputBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-        </Style>
-
-        <Style Selector="TextBox.header-search:pointerover /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="{DynamicResource HeaderHoverBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource HeaderInputBorderBrush}" />
-        </Style>
-
-        <Style Selector="TextBox.header-search:focus /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="{DynamicResource HeaderInputBrush}" />
-        </Style>
-
-        <Style Selector="Button.toggle">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="26" />
-        </Style>
-
-        <Style Selector="Button.toggle.on">
-            <Setter Property="Background" Value="{DynamicResource HeaderToggleOnBrush}" />
-        </Style>
-
-        <Style Selector="Button.toggle.on:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HeaderToggleOnBrush}" />
-        </Style>
-
-        <Style Selector="MenuFlyoutPresenter">
-            <Setter Property="MinWidth" Value="240" />
+        <Style Selector="lucideAvalonia|Lucide.menu-icon">
+            <Setter Property="StrokeBrush" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
         </Style>
     </UserControl.Styles>
 
     <Border Height="52"
             Padding="14,0,10,0"
             BorderThickness="0,0,0,1"
-            BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+            BorderBrush="{DynamicResource DividerBrush}">
 
-        <DockPanel HorizontalSpacing="12">
+        <DockPanel HorizontalSpacing="10">
             <Image DockPanel.Dock="Left"
                    Source="avares://RailworksForge/Assets/railworks-forge-icon.png"
                    Width="24"
                    Height="24"
                    VerticalAlignment="Center" />
 
+            <Button DockPanel.Dock="Left"
+                    Classes="ghost header"
+                    Width="32"
+                    Padding="0"
+                    Command="{Binding GoBackCommand}"
+                    ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.back}}">
+                <components:LucideIcon Classes="header-icon" Icon="ChevronLeft" />
+            </Button>
+
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                <Button Classes="flat"
-                        Height="32"
+                <Button Classes="ghost header"
                         Padding="10,0,8,0"
                         IsEnabled="{Binding Tools.Operations.IsIdle}">
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <MenuItem Command="{Binding Tools.InstallPackageCommand}">
                                 <MenuItem.Icon>
-                                    <controls:LucideIcon Icon="Package" Width="16" Height="16" />
+                                    <components:LucideIcon Classes="menu-icon" Icon="Package" />
                                 </MenuItem.Icon>
                                 <MenuItem.Header>
                                     <TextBlock>
@@ -192,7 +87,7 @@
 
                             <MenuItem Command="{Binding Tools.ConvertBinToXmlCommand}">
                                 <MenuItem.Icon>
-                                    <controls:LucideIcon Icon="FileCode" Width="16" Height="16" />
+                                    <components:LucideIcon Classes="menu-icon" Icon="FileCode" />
                                 </MenuItem.Icon>
                                 <MenuItem.Header>
                                     <TextBlock>
@@ -203,7 +98,7 @@
 
                             <MenuItem Command="{Binding Tools.ConvertXmlToBinCommand}">
                                 <MenuItem.Icon>
-                                    <controls:LucideIcon Icon="Binary" Width="16" Height="16" />
+                                    <components:LucideIcon Classes="menu-icon" Icon="Binary" />
                                 </MenuItem.Icon>
                                 <MenuItem.Header>
                                     <TextBlock>
@@ -215,162 +110,75 @@
                     </Button.Flyout>
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <controls:LucideIcon Icon="Wrench" />
-                        <TextBlock Text="{echoes:Translate {x:Static translations:Strings.tools}}" />
-                        <controls:LucideIcon Classes="muted" Icon="ChevronDown" Width="14" Height="14" />
+                        <components:LucideIcon Classes="header-icon" Icon="Wrench" />
+                        <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.tools}}" />
+                        <components:LucideIcon Classes="header-icon" Icon="ChevronDown" Width="14" Height="14" StrokeBrush="{DynamicResource HeaderMutedForegroundBrush}" />
                     </StackPanel>
                 </Button>
 
-                <Button Classes="flat"
-                        Classes.active="{Binding Navigation.IsSettingsActive}"
+                <Button Classes="ghost header"
+                        Classes.active="{Binding IsSettingsActive}"
                         Width="32"
-                        Height="32"
+                        Padding="0"
                         Command="{Binding ShowSettingsCommand}"
                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}">
-                    <controls:LucideIcon Icon="Settings" Width="18" Height="18" />
+                    <components:LucideIcon Classes="header-icon" Icon="Settings" Width="18" Height="18" />
                 </Button>
             </StackPanel>
 
-            <Border DockPanel.Dock="Right"
-                    Width="1"
-                    Height="20"
-                    VerticalAlignment="Center"
-                    Background="{DynamicResource SystemChromeDisabledHighColor}" />
-
-            <ContentControl DockPanel.Dock="Right"
-                            Content="{Binding RouteDetailPage}"
-                            IsVisible="{Binding RouteDetailPage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            VerticalAlignment="Center">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate x:DataType="vm:RouteDetailViewModel">
-                        <TextBox Classes="header-search"
-                                 Text="{Binding SearchTerm}"
-                                 PlaceholderText="{Binding SearchPlaceholder}">
-                            <TextBox.InnerLeftContent>
-                                <controls:LucideIcon Classes="muted" Icon="Search" Width="14" Height="14" Margin="10,0,0,0" />
-                            </TextBox.InnerLeftContent>
-                        </TextBox>
-                    </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-
-            <ContentControl DockPanel.Dock="Right"
-                            Content="{Binding RoutesPage}"
-                            IsVisible="{Binding RoutesPage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            VerticalAlignment="Center">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate x:DataType="vm:RoutesViewModel">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <TextBox Classes="header-search"
-                                     Text="{Binding SearchTerm}"
-                                     PlaceholderText="{Binding SearchPlaceholder}">
-                                <TextBox.InnerLeftContent>
-                                    <controls:LucideIcon Classes="muted" Icon="Search" Width="14" Height="14" Margin="10,0,0,0" />
-                                </TextBox.InnerLeftContent>
-                            </TextBox>
-
-                            <Border Padding="2"
-                                    CornerRadius="6"
-                                    BorderThickness="1"
-                                    Background="{DynamicResource HeaderInputBrush}"
-                                    BorderBrush="{DynamicResource HeaderToggleBorderBrush}">
-                                <StackPanel Orientation="Horizontal" Spacing="2">
-                                    <Button Classes="flat toggle"
-                                            Classes.on="{Binding IsListLayout}"
-                                            Command="{Binding ShowListCommand}"
-                                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.list_view}}">
-                                        <controls:LucideIcon Icon="List" />
-                                    </Button>
-                                    <Button Classes="flat toggle"
-                                            Classes.on="{Binding IsGridLayout}"
-                                            Command="{Binding ShowGridCommand}"
-                                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.grid_view}}">
-                                        <controls:LucideIcon Icon="LayoutGrid" />
-                                    </Button>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-
-            <!-- A StackPanel would give the crumbs unlimited width; DockPanel limits each to the space left, so long names trim instead of covering the tools. -->
+            <!-- DockPanel limits each crumb to the space left, so long names trim instead of covering the tools. -->
             <Border Height="32"
                     Padding="3,0"
-                    CornerRadius="6"
+                    CornerRadius="{StaticResource RadiusMedium}"
                     ClipToBounds="True"
                     VerticalAlignment="Center"
                     Background="{DynamicResource HeaderTrayBrush}">
-                <DockPanel LastChildFill="False">
-                    <Button DockPanel.Dock="Left"
-                            Classes="flat crumb"
-                            Classes.current="{Binding IsRoutesCrumbCurrent}"
-                            Command="{Binding ShowRoutesCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbRoutesBrush}">
-                                <controls:LucideIcon Icon="Route" />
-                            </Border>
-                            <TextBlock Text="{echoes:Translate {x:Static translations:Strings.routes}}" />
-                        </StackPanel>
-                    </Button>
+                <Panel>
+                    <DockPanel LastChildFill="False" IsVisible="{Binding ShowsTrail}">
+                        <components:BreadcrumbItem DockPanel.Dock="Left"
+                                                   HasSeparator="False"
+                                                   Icon="Route"
+                                                   IconBackground="{DynamicResource CrumbRoutesBrush}"
+                                                   Text="{echoes:Translate {x:Static translations:Strings.routes}}"
+                                                   IsCurrent="{Binding IsRoutesCrumbCurrent}"
+                                                   Command="{Binding ShowRoutesCommand}" />
 
-                    <controls:LucideIcon DockPanel.Dock="Left"
-                                           Classes="chevron"
-                                           Icon="ChevronRight"
-                                           IsVisible="{Binding Navigation.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <components:BreadcrumbItem DockPanel.Dock="Left"
+                                                   Icon="Milestone"
+                                                   IconBackground="{DynamicResource CrumbRouteBrush}"
+                                                   Text="{Binding Navigation.CurrentRoute.Name}"
+                                                   IsCurrent="{Binding IsRouteCrumbCurrent}"
+                                                   IsVisible="{Binding HasRoute}"
+                                                   Command="{Binding ShowRouteCommand}" />
 
-                    <Button DockPanel.Dock="Left"
-                            Classes="flat crumb"
-                            Classes.current="{Binding IsRouteCrumbCurrent}"
-                            Command="{Binding ShowRouteCommand}"
-                            IsVisible="{Binding Navigation.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            ToolTip.Tip="{Binding Navigation.CurrentRoute.Name}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbRouteBrush}">
-                                <controls:LucideIcon Icon="Milestone" />
-                            </Border>
-                            <TextBlock Text="{Binding Navigation.CurrentRoute.Name}" />
-                        </StackPanel>
-                    </Button>
+                        <components:BreadcrumbItem DockPanel.Dock="Left"
+                                                   Icon="ListEnd"
+                                                   IconBackground="{DynamicResource CrumbScenarioBrush}"
+                                                   Text="{Binding Navigation.CurrentScenario.Name}"
+                                                   IsCurrent="{Binding IsScenarioCrumbCurrent}"
+                                                   IsDirty="{Binding IsScenarioDirty}"
+                                                   DirtyText="{echoes:Translate {x:Static translations:Strings.unsaved_changes_marker}}"
+                                                   IsVisible="{Binding HasScenario}"
+                                                   Command="{Binding ShowScenarioCommand}" />
 
-                    <controls:LucideIcon DockPanel.Dock="Left"
-                                           Classes="chevron"
-                                           Icon="ChevronRight"
-                                           IsVisible="{Binding Navigation.CurrentScenario, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <components:BreadcrumbItem DockPanel.Dock="Left"
+                                                   Icon="TrainFront"
+                                                   IconBackground="{DynamicResource CrumbConsistBrush}"
+                                                   Text="{Binding Navigation.CurrentConsist.ServiceName}"
+                                                   IsCurrent="{Binding IsConsistCrumbCurrent}"
+                                                   IsVisible="{Binding HasConsist}"
+                                                   Command="{Binding ShowConsistCommand}" />
+                    </DockPanel>
 
-                    <Button DockPanel.Dock="Left"
-                            Classes="flat crumb"
-                            Classes.current="{Binding IsScenarioCrumbCurrent}"
-                            Command="{Binding ShowScenarioCommand}"
-                            IsVisible="{Binding Navigation.CurrentScenario, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            ToolTip.Tip="{Binding Navigation.CurrentScenario.Name}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbScenarioBrush}">
-                                <controls:LucideIcon Icon="ListEnd" />
-                            </Border>
-                            <TextBlock Text="{Binding Navigation.CurrentScenario.Name}" />
-                        </StackPanel>
-                    </Button>
-
-                    <controls:LucideIcon DockPanel.Dock="Left"
-                                           Classes="chevron"
-                                           Icon="ChevronRight"
-                                           IsVisible="{Binding Navigation.CurrentConsist, Converter={x:Static ObjectConverters.IsNotNull}}" />
-
-                    <Button DockPanel.Dock="Left"
-                            Classes="flat crumb"
-                            Classes.current="{Binding IsConsistCrumbCurrent}"
-                            Command="{Binding ShowConsistCommand}"
-                            IsVisible="{Binding Navigation.CurrentConsist, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            ToolTip.Tip="{Binding Navigation.CurrentConsist.ServiceName}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Classes="crumb-tile" Background="{DynamicResource CrumbConsistBrush}">
-                                <controls:LucideIcon Icon="TrainFront" />
-                            </Border>
-                            <TextBlock Text="{Binding Navigation.CurrentConsist.ServiceName}" />
-                        </StackPanel>
-                    </Button>
-                </DockPanel>
+                    <DockPanel LastChildFill="False" IsVisible="{Binding IsSettingsActive}">
+                        <components:BreadcrumbItem DockPanel.Dock="Left"
+                                                   HasSeparator="False"
+                                                   IsCurrent="True"
+                                                   Icon="Settings"
+                                                   IconBackground="{DynamicResource CrumbSettingsBrush}"
+                                                   Text="{echoes:Translate {x:Static translations:Strings.settings}}" />
+                    </DockPanel>
+                </Panel>
             </Border>
         </DockPanel>
     </Border>

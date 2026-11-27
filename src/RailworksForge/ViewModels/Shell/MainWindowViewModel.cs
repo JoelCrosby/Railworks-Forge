@@ -28,6 +28,7 @@ public class MainWindowViewModel(
     public void Start()
     {
         LoadingOperation.UnobservedFailure += Loading.ShowError;
+        StatusBar.BackgroundTask = Loading;
 
         StartNavigation();
     }

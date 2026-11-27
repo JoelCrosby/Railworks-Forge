@@ -34,6 +34,21 @@ public class ScenarioEditor : IScenarioEditor
         }
     }
 
+    public IReadOnlyList<ScenarioChange> PendingChanges
+    {
+        get;
+        private set
+        {
+            if (ReferenceEquals(field, value))
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PendingChanges)));
+        }
+    } = [];
+
     public async Task<IScenarioEditSession> GetSession(CancellationToken cancellationToken)
     {
         return await GetEditSession(cancellationToken);
@@ -77,6 +92,7 @@ public class ScenarioEditor : IScenarioEditor
             _session = null;
         }
 
+        PendingChanges = [];
         HasPendingChanges = false;
     }
 
@@ -89,6 +105,7 @@ public class ScenarioEditor : IScenarioEditor
         }
 
         Scenario = loaded.Result.Scenario;
+        PendingChanges = loaded.Result.Changes;
         HasPendingChanges = loaded.Result.HasChanges;
     }
 }

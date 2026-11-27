@@ -12,6 +12,7 @@ public class SearchableCollection<T> : ObservableCollection<T>
     private readonly Func<T, string, bool> _matches;
     private List<T> _source = [];
     private string? _searchTerm;
+    private Func<T, bool>? _predicate;
 
     public SearchableCollection(Func<T, string> searchIndex)
         : this((item, term) => searchIndex(item).Contains(term))
@@ -37,10 +38,18 @@ public class SearchableCollection<T> : ObservableCollection<T>
         ApplyFilter();
     }
 
+    public void Where(Func<T, bool>? predicate)
+    {
+        _predicate = predicate;
+        ApplyFilter();
+    }
+
     private void ApplyFilter()
     {
         var hasSearchTerm = !string.IsNullOrWhiteSpace(_searchTerm);
-        var visible = hasSearchTerm ? _source.Where(item => _matches(item, _searchTerm!)) : _source;
+        var searched = hasSearchTerm ? _source.Where(item => _matches(item, _searchTerm!)) : _source;
+        var predicate = _predicate;
+        var visible = predicate is null ? searched : searched.Where(predicate);
 
         Items.Clear();
 

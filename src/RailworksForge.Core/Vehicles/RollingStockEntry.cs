@@ -16,6 +16,29 @@ public class RollingStockEntry
 
     public required BlueprintType BlueprintType { get; init; }
 
+    public string Name
+    {
+        get
+        {
+            var hasDisplayName = !string.IsNullOrWhiteSpace(DisplayName);
+            var hasLocomotiveName = !string.IsNullOrWhiteSpace(LocomotiveName);
+
+            if (hasDisplayName)
+            {
+                return DisplayName;
+            }
+
+            if (hasLocomotiveName)
+            {
+                return LocomotiveName;
+            }
+
+            var normalisedPath = Blueprint.BlueprintId.Replace('\\', '/');
+
+            return Path.GetFileNameWithoutExtension(normalisedPath);
+        }
+    }
+
     public static RollingStockEntry Parse(IElement el, Blueprint blueprint)
     {
         var locomotiveName = el.SelectTextContent("Name");

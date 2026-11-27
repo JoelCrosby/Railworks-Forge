@@ -78,7 +78,7 @@ public class ReplaceConsistViewModelTests
         await _dialog.LoadAvailableStockCommand.ExecuteAsync(null);
         _dialog.SelectedConsist = _dialog.PreloadConsists[0];
 
-        _dialog.SelectedDirectory = TestData.ProductDirectory("ECML");
+        _dialog.SelectedDirectory = TestData.ProviderDirectory("LNER");
 
         Assert.Empty(_dialog.PreloadConsists);
         Assert.Null(_dialog.SelectedConsist);
@@ -124,5 +124,32 @@ public class ReplaceConsistViewModelTests
         Assert.True(loadToken.IsCancellationRequested);
         Assert.False(_dialog.StockLoading.IsLoading);
         Assert.Empty(_dialog.PreloadConsists);
+    }
+
+    [Fact]
+    public async Task SelectingAProductDirectory_LoadsItsConsists()
+    {
+        var consist = TestData.PreloadConsist();
+        _preloadConsists.GetPreloadConsists(Arg.Any<BrowserDirectory>(), Arg.Any<CancellationToken>()).Returns([consist]);
+
+        _dialog.SelectedDirectory = TestData.ProductDirectory("WCML");
+        await Wait.Until(() => _dialog.PreloadConsists.Count > 0);
+
+        Assert.Same(consist, Assert.Single(_dialog.PreloadConsists).Consist);
+        Assert.False(_dialog.ShowsFolderPrompt);
+        Assert.False(_dialog.ShowsEmptyFolder);
+    }
+
+    [Fact]
+    public async Task EmptyDirectory_SaysTheFolderHasNoConsists()
+    {
+        _preloadConsists.GetPreloadConsists(Arg.Any<BrowserDirectory>(), Arg.Any<CancellationToken>()).Returns([]);
+
+        Assert.True(_dialog.ShowsFolderPrompt);
+
+        _dialog.SelectedDirectory = TestData.ProductDirectory("WCML");
+        await Wait.Until(() => _dialog.ShowsEmptyFolder);
+
+        Assert.False(_dialog.ShowsFolderPrompt);
     }
 }

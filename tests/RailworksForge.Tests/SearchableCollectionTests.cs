@@ -53,4 +53,32 @@ public class SearchableCollectionTests
 
         Assert.Equal([NotifyCollectionChangedAction.Reset], actions);
     }
+
+    [Fact]
+    public void Where_NarrowsTheItemsAlongsideTheSearchTerm()
+    {
+        var collection = new SearchableCollection<string>(item => item.ToLowerInvariant());
+        collection.Reset(["Class 390", "Class 66", "HST"]);
+
+        collection.Where(item => item != "Class 66");
+        collection.Filter("class");
+
+        Assert.Equal(["Class 390"], collection);
+
+        collection.Where(null);
+
+        Assert.Equal(["Class 390", "Class 66"], collection);
+    }
+
+    [Fact]
+    public void Where_KeepsApplyingAfterAReset()
+    {
+        var collection = new SearchableCollection<string>(item => item.ToLowerInvariant());
+        collection.Where(item => item.StartsWith('C'));
+
+        collection.Reset(["Class 390", "HST"]);
+
+        Assert.Equal(["Class 390"], collection);
+        Assert.Equal(2, collection.Source.Count);
+    }
 }

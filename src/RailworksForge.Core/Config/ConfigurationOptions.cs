@@ -14,6 +14,8 @@ public record ConfigurationOptions
 
     public bool UseInternalSerz { get; set; }
 
+    public List<string> RecentRoutes { get; set; } = [];
+
     public ConfigurationOptions()
     {
         GameDirectoryPath = string.Empty;

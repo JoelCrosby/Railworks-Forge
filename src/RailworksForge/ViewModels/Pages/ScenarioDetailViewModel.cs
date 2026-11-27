@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Media.Imaging;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -33,11 +35,32 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     [ObservableProperty]
     public partial string? SearchTerm { get; set; }
 
+    [ObservableProperty]
+    public partial Bitmap? HeaderImage { get; private set; }
+
     public SearchableCollection<ConsistViewModel> Services { get; } = new(service => service.Consist.SearchIndex);
 
     public ObservableCollection<ConsistViewModel> SelectedServices { get; } = [];
 
     public IScenarioEditor Editor { get; }
+
+    public PendingChangesViewModel PendingChanges { get; }
+
+    public int SelectedCount => SelectedServices.Count;
+
+    public string SelectionText => string.Format(Strings.items_selected.CurrentValue, SelectedCount);
+
+    public override string StatusText
+    {
+        get
+        {
+            var services = string.Format(Strings.service_count.CurrentValue, Services.Count);
+
+            return SelectedCount > 0
+                ? string.Format(Strings.status_items_with_selection.CurrentValue, services, SelectedCount)
+                : services;
+        }
+    }
 
     public ScenarioDetailViewModel(
         Scenario scenario,
@@ -57,8 +80,9 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         _savedConsists = savedConsists;
 
         Editor = scenarios.CreateEditor(scenario);
+        PendingChanges = new PendingChangesViewModel(Editor);
 
-        SelectedServices.CollectionChanged += (_, _) => NotifySelectionCommands();
+        SelectedServices.CollectionChanged += (_, _) => OnSelectionChanged();
         Editor.PropertyChanged += (_, _) => NotifyEditCommands();
     }
 
@@ -70,17 +94,21 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
     protected override Task OnActivated()
     {
+        PendingChanges.Attach();
+
         return LoadServices();
     }
 
     protected override void OnDeactivated()
     {
         _imageLoader.Cancel();
+        PendingChanges.Detach();
     }
 
     partial void OnSearchTermChanged(string? value)
     {
         Services.Filter(value);
+        OnPropertyChanged(nameof(StatusText));
     }
 
     private Task LoadServices()
@@ -115,10 +143,21 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         Editor.Update();
         Scenario = Editor.Scenario;
         Services.Reset(services);
+        OnPropertyChanged(nameof(StatusText));
         _imageLoader.Load(
             services,
             service => _images.GetConsistImage(service.Consist),
-            (service, image) => service.ImageBitmap = image);
+            ShowServiceImage);
+    }
+
+    private void ShowServiceImage(ConsistViewModel service, Bitmap image)
+    {
+        service.ImageBitmap = image;
+
+        if (service.Consist.PlayerDriver)
+        {
+            HeaderImage = image;
+        }
     }
 
     private bool HasPendingChanges => Editor.HasPendingChanges;
@@ -152,12 +191,26 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         DiscardChangesCommand.NotifyCanExecuteChanged();
     }
 
+    private void OnSelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectionText));
+        OnPropertyChanged(nameof(StatusText));
+        NotifySelectionCommands();
+    }
+
     private void NotifySelectionCommands()
     {
         OpenServiceCommand.NotifyCanExecuteChanged();
         SaveConsistCommand.NotifyCanExecuteChanged();
         ReplaceConsistCommand.NotifyCanExecuteChanged();
         DeleteConsistCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        SelectedServices.Clear();
     }
 
     [RelayCommand]

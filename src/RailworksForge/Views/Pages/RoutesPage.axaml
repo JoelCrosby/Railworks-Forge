@@ -4,13 +4,79 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:views="using:RailworksForge.Views.Controls"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:components="using:RailworksForge.Views.Components"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
              x:Class="RailworksForge.Views.Pages.RoutesPage"
              x:DataType="vm:RoutesViewModel">
 
-    <Panel>
-        <views:RoutesGrid IsVisible="{Binding IsGridLayout}" />
-        <views:RoutesList IsVisible="{Binding IsListLayout}" />
-    </Panel>
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Enter" Command="{Binding OpenRouteCommand}" />
+    </UserControl.KeyBindings>
+
+    <UserControl.Styles>
+        <Style Selector="Button.layout">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="Button.layout.on">
+            <Setter Property="Background" Value="{DynamicResource HeaderToggleOnBrush}" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="24,16,24,8" ColumnDefinitions="Auto,*,Auto,Auto">
+            <TextBlock Grid.Column="0" Classes="heading" VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.all_routes}}" />
+
+            <components:SearchBox Grid.Column="1"
+                                  Width="440"
+                                  HorizontalAlignment="Center"
+                                  IsShortcutTarget="True"
+                                  ShortcutHint="{echoes:Translate {x:Static translations:Strings.search_shortcut}}"
+                                  Placeholder="{Binding SearchPlaceholder}"
+                                  Text="{Binding SearchTerm}" />
+
+            <ComboBox Grid.Column="2"
+                      Margin="0,0,8,0"
+                      MinWidth="170"
+                      VerticalAlignment="Center"
+                      SelectedIndex="{Binding SortIndex}">
+                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings.sort_by_name}}" />
+                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings.sort_by_recent}}" />
+            </ComboBox>
+
+            <Border Grid.Column="3"
+                    Padding="2"
+                    VerticalAlignment="Center"
+                    CornerRadius="{StaticResource RadiusMedium}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource HeaderToggleBorderBrush}"
+                    Background="{DynamicResource HeaderInputBrush}">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button Classes="ghost layout"
+                            Classes.on="{Binding IsGridLayout}"
+                            Command="{Binding ShowGridCommand}"
+                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.grid_view}}">
+                        <components:LucideIcon Icon="LayoutGrid" Width="16" Height="16" StrokeThickness="2" StrokeBrush="{DynamicResource HeaderIconBrush}" />
+                    </Button>
+                    <Button Classes="ghost layout"
+                            Classes.on="{Binding IsListLayout}"
+                            Command="{Binding ShowListCommand}"
+                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.list_view}}">
+                        <components:LucideIcon Icon="List" Width="16" Height="16" StrokeThickness="2" StrokeBrush="{DynamicResource HeaderIconBrush}" />
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Panel>
+            <views:RoutesGrid IsVisible="{Binding IsGridLayout}" />
+            <views:RoutesList IsVisible="{Binding IsListLayout}" />
+        </Panel>
+    </DockPanel>
 
 </UserControl>

@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:components="using:RailworksForge.Views.Components"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -16,164 +17,118 @@
     </Design.DataContext>
 
     <UserControl.Styles>
-        <Style Selector="TextBlock.section">
-            <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="4,24,0,8" />
-        </Style>
-
-        <Style Selector="Border.card">
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemChromeDisabledHighColor}" />
-            <Setter Property="CornerRadius" Value="6" />
-        </Style>
-
-        <Style Selector="Border.row">
-            <Setter Property="Padding" Value="16,12" />
-        </Style>
-
-        <Style Selector="Border.row:nth-child(n+2)">
-            <Setter Property="BorderThickness" Value="0,1,0,0" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemChromeDisabledHighColor}" />
-        </Style>
-
-        <Style Selector="TextBlock.description">
-            <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
-            <Setter Property="Opacity" Value="0.7" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
-
         <Style Selector="ComboBox">
             <Setter Property="MinWidth" Value="200" />
+        </Style>
+
+        <Style Selector="lucideAvalonia|Lucide.warning">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="StrokeBrush" Value="{DynamicResource WarningTextBrush}" />
         </Style>
     </UserControl.Styles>
 
     <ScrollViewer>
         <StackPanel Margin="24,0,24,24" MaxWidth="860" HorizontalAlignment="Left">
 
-            <TextBlock Classes="section" Text="{echoes:Translate {x:Static translations:Strings.general}}" />
-            <Border Classes="card">
+            <components:SettingsSection Title="{echoes:Translate {x:Static translations:Strings.general}}">
                 <StackPanel>
-                    <Border Classes="row">
-                        <StackPanel Spacing="12">
-                            <StackPanel Spacing="2">
-                                <TextBlock Classes="title" Text="{echoes:Translate {x:Static translations:Strings.game_directory}}" />
-                                <TextBlock Classes="description" Text="{echoes:Translate {x:Static translations:Strings.game_directory_description}}" />
-                            </StackPanel>
+                    <components:SettingsRow Title="{echoes:Translate {x:Static translations:Strings.game_directory}}"
+                                            Description="{echoes:Translate {x:Static translations:Strings.game_directory_description}}">
+                        <components:SettingsRow.Footer>
+                            <StackPanel Spacing="12">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBox Grid.Column="0"
+                                             IsReadOnly="True"
+                                             Text="{Binding GameDirectoryPath}"
+                                             PlaceholderText="{echoes:Translate {x:Static translations:Strings.game_directory_not_set}}" />
 
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBox Grid.Column="0"
-                                         IsReadOnly="True"
-                                         Text="{Binding GameDirectoryPath}"
-                                         PlaceholderText="{echoes:Translate {x:Static translations:Strings.game_directory_not_set}}" />
-
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
-                                    <Button Command="{Binding BrowseGameDirectoryCommand}" Content="{echoes:Translate {x:Static translations:Strings.browse}}" />
-                                    <Button Command="{Binding OpenGameDirectoryCommand}"
-                                            IsEnabled="{Binding IsGameDirectoryValid}"
-                                            Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
-                                </StackPanel>
-                            </Grid>
-
-                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsGameDirectoryInvalid}">
-                                <lucideAvalonia:Lucide Icon="TriangleAlert" StrokeBrush="{DynamicResource WarningTextBrush}" StrokeThickness="2" Width="16" Height="16" />
-                                <TextBlock Foreground="{DynamicResource WarningTextBrush}" Text="{echoes:Translate {x:Static translations:Strings.game_directory_invalid}}" />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsGameDirectorySet}">
-                                <lucideAvalonia:Lucide Icon="TriangleAlert" StrokeBrush="{DynamicResource WarningTextBrush}" StrokeThickness="2" Width="16" Height="16" />
-                                <TextBlock Foreground="{DynamicResource WarningTextBrush}" Text="{echoes:Translate {x:Static translations:Strings.game_directory_not_set}}" />
-                            </StackPanel>
-
-                            <Border IsVisible="{Binding IsRestartRequired}"
-                                    Padding="12,8"
-                                    CornerRadius="6"
-                                    BorderThickness="1"
-                                    BorderBrush="{DynamicResource SystemAccentColor}"
-                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
-                                <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <lucideAvalonia:Lucide Grid.Column="0" Icon="RotateCw" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="2" Width="16" Height="16" Margin="0,0,8,0" />
-                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Text="{echoes:Translate {x:Static translations:Strings.restart_required}}" />
-                                    <Button Grid.Column="2" Margin="12,0,0,0" Classes="accent" Command="{Binding RestartCommand}" Content="{echoes:Translate {x:Static translations:Strings.restart_now}}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+                                        <Button Command="{Binding BrowseGameDirectoryCommand}" Content="{echoes:Translate {x:Static translations:Strings.browse}}" />
+                                        <Button Command="{Binding OpenGameDirectoryCommand}"
+                                                IsEnabled="{Binding IsGameDirectoryValid}"
+                                                Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
+                                    </StackPanel>
                                 </Grid>
-                            </Border>
+
+                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsGameDirectoryInvalid}">
+                                    <components:LucideIcon Classes="warning" Icon="TriangleAlert" />
+                                    <TextBlock Foreground="{DynamicResource WarningTextBrush}" Text="{echoes:Translate {x:Static translations:Strings.game_directory_invalid}}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsGameDirectorySet}">
+                                    <components:LucideIcon Classes="warning" Icon="TriangleAlert" />
+                                    <TextBlock Foreground="{DynamicResource WarningTextBrush}" Text="{echoes:Translate {x:Static translations:Strings.game_directory_not_set}}" />
+                                </StackPanel>
+
+                                <Border IsVisible="{Binding IsRestartRequired}"
+                                        Padding="12,8"
+                                        CornerRadius="{StaticResource RadiusMedium}"
+                                        BorderThickness="1"
+                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        Background="{DynamicResource AccentSubtleBrush}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <components:LucideIcon Grid.Column="0" Icon="RotateCw" Width="16" Height="16" StrokeThickness="2" Margin="0,0,8,0" StrokeBrush="{DynamicResource AccentSubtleForegroundBrush}" />
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource AccentSubtleForegroundBrush}" Text="{echoes:Translate {x:Static translations:Strings.restart_required}}" />
+                                        <Button Grid.Column="2" Margin="12,0,0,0" Classes="primary" Command="{Binding RestartCommand}" Content="{echoes:Translate {x:Static translations:Strings.restart_now}}" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </components:SettingsRow.Footer>
+                    </components:SettingsRow>
+                </StackPanel>
+            </components:SettingsSection>
+
+            <components:SettingsSection Title="{echoes:Translate {x:Static translations:Strings.appearance}}">
+                <StackPanel>
+                    <components:SettingsRow Title="{echoes:Translate {x:Static translations:Strings.theme}}"
+                                            Description="{echoes:Translate {x:Static translations:Strings.theme_description}}">
+                        <ComboBox ItemsSource="{Binding Themes}"
+                                  SelectedItem="{Binding SelectedTheme}"
+                                  DisplayMemberBinding="{Binding Header, x:DataType=vm:SettingsOption}" />
+                    </components:SettingsRow>
+
+                    <components:SettingsRow Title="{echoes:Translate {x:Static translations:Strings.language}}"
+                                            Description="{echoes:Translate {x:Static translations:Strings.language_description}}">
+                        <ComboBox ItemsSource="{Binding Languages}"
+                                  SelectedItem="{Binding SelectedLanguage}"
+                                  DisplayMemberBinding="{Binding Header, x:DataType=vm:SettingsOption}" />
+                    </components:SettingsRow>
+                </StackPanel>
+            </components:SettingsSection>
+
+            <components:SettingsSection Title="{echoes:Translate {x:Static translations:Strings.file_conversion}}">
+                <StackPanel>
+                    <components:SettingsRow Title="{echoes:Translate {x:Static translations:Strings.use_internal_serz}}"
+                                            Description="{echoes:Translate {x:Static translations:Strings.use_internal_serz_description}}">
+                        <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding UseInternalSerz}" />
+                    </components:SettingsRow>
+                </StackPanel>
+            </components:SettingsSection>
+
+            <components:SettingsSection Title="{echoes:Translate {x:Static translations:Strings.tables}}">
+                <StackPanel>
+                    <components:SettingsRow Title="{echoes:Translate {x:Static translations:Strings.reset_table_sorting}}"
+                                            Description="{echoes:Translate {x:Static translations:Strings.reset_table_sorting_description}}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SuccessBrush}"
+                                       IsVisible="{Binding IsTableSortingReset}"
+                                       Text="{echoes:Translate {x:Static translations:Strings.table_sorting_reset}}" />
+                            <Button Command="{Binding ResetTableSortingCommand}" Content="{echoes:Translate {x:Static translations:Strings.reset_table_sorting}}" />
                         </StackPanel>
-                    </Border>
+                    </components:SettingsRow>
                 </StackPanel>
-            </Border>
+            </components:SettingsSection>
 
-            <TextBlock Classes="section" Text="{echoes:Translate {x:Static translations:Strings.appearance}}" />
-            <Border Classes="card">
-                <StackPanel>
-                    <Border Classes="row">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,16,0">
-                                <TextBlock Classes="title" Text="{echoes:Translate {x:Static translations:Strings.theme}}" />
-                                <TextBlock Classes="description" Text="{echoes:Translate {x:Static translations:Strings.theme_description}}" />
-                            </StackPanel>
-                            <ComboBox Grid.Column="1" VerticalAlignment="Center"
-                                      ItemsSource="{Binding Themes}"
-                                      SelectedItem="{Binding SelectedTheme}"
-                                      DisplayMemberBinding="{Binding Header, x:DataType=vm:SettingsOption}" />
-                        </Grid>
-                    </Border>
-
-                    <Border Classes="row">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,16,0">
-                                <TextBlock Classes="title" Text="{echoes:Translate {x:Static translations:Strings.language}}" />
-                                <TextBlock Classes="description" Text="{echoes:Translate {x:Static translations:Strings.language_description}}" />
-                            </StackPanel>
-                            <ComboBox Grid.Column="1" VerticalAlignment="Center"
-                                      ItemsSource="{Binding Languages}"
-                                      SelectedItem="{Binding SelectedLanguage}"
-                                      DisplayMemberBinding="{Binding Header, x:DataType=vm:SettingsOption}" />
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Classes="section" Text="{echoes:Translate {x:Static translations:Strings.file_conversion}}" />
-            <Border Classes="card">
-                <StackPanel>
-                    <Border Classes="row">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,16,0">
-                                <TextBlock Classes="title" Text="{echoes:Translate {x:Static translations:Strings.use_internal_serz}}" />
-                                <TextBlock Classes="description" Text="{echoes:Translate {x:Static translations:Strings.use_internal_serz_description}}" />
-                            </StackPanel>
-                            <ToggleSwitch Grid.Column="1" VerticalAlignment="Center" OnContent="" OffContent="" IsChecked="{Binding UseInternalSerz}" />
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Classes="section" Text="{echoes:Translate {x:Static translations:Strings.tables}}" />
-            <Border Classes="card">
-                <StackPanel>
-                    <Border Classes="row">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,16,0">
-                                <TextBlock Classes="title" Text="{echoes:Translate {x:Static translations:Strings.reset_table_sorting}}" />
-                                <TextBlock Classes="description" Text="{echoes:Translate {x:Static translations:Strings.reset_table_sorting_description}}" />
-                                <TextBlock Foreground="{DynamicResource SuccessBrush}"
-                                           IsVisible="{Binding IsTableSortingReset}"
-                                           Text="{echoes:Translate {x:Static translations:Strings.table_sorting_reset}}" />
-                            </StackPanel>
-                            <Button Grid.Column="1" VerticalAlignment="Center" Command="{Binding ResetTableSortingCommand}" Content="{echoes:Translate {x:Static translations:Strings.reset_table_sorting}}" />
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Classes="section" Text="{echoes:Translate {x:Static translations:Strings.files_and_folders}}" />
-            <Border Classes="card">
+            <components:SettingsSection Title="{echoes:Translate {x:Static translations:Strings.files_and_folders}}">
                 <WrapPanel Margin="16,12" ItemSpacing="8" LineSpacing="8">
                     <Button Command="{Binding OpenSettingsFolderCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_settings_folder}}" />
                     <Button Command="{Binding OpenLogsFolderCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_logs_folder}}" />
                     <Button Command="{Binding OpenCacheFolderCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_cache_folder}}" />
                 </WrapPanel>
-            </Border>
+            </components:SettingsSection>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

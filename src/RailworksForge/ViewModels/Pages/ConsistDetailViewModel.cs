@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+using Echoes;
 
 using RailworksForge.Core.Assets;
 using RailworksForge.Core.Consists;
@@ -28,12 +31,52 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private readonly IAssetDirectoryTreeService _directoryTree;
     private readonly IRollingStockService _rollingStock;
     private readonly IDialogService _dialogs;
+    private readonly IImageService _images;
+    private readonly BackgroundImageLoader _imageLoader = new();
+    private bool _isSyncingSelection;
+    private bool _hasLoadedExplorerFolder;
 
     private IVehicleIndex? _vehicleIndex;
 
     private int _stockLimit = StockPageSize;
 
     public IScenarioEditor Editor { get; }
+
+    public Consist Consist => _consist;
+
+    public PendingChangesViewModel PendingChanges { get; }
+
+    public RangeObservableCollection<ConsistVehicleViewModel> StripVehicles { get; } = [];
+
+    [ObservableProperty]
+    public partial ConsistVehicleViewModel? SelectedStripVehicle { get; set; }
+
+    public int SelectedCount => SelectedConsistVehicles.Count;
+
+    public string SelectionText
+    {
+        get
+        {
+            var vehicle = SingleSelectedVehicle;
+
+            if (vehicle is null)
+            {
+                return string.Format(Strings.items_selected.CurrentValue, SelectedCount);
+            }
+
+            return $"#{vehicle.Index} {vehicle.LocomotiveName}";
+        }
+    }
+
+    public string VehicleCountText => string.Format(Strings.vehicle_count.CurrentValue, RailVehicles.Source.Count);
+
+    private bool HasNoExplorerStock => ExplorerStock.Count == 0 && ExplorerLoading.IsIdle;
+
+    public bool ShowsStockFolderPrompt => HasNoExplorerStock && !_hasLoadedExplorerFolder;
+
+    public bool ShowsEmptyStockFolder => HasNoExplorerStock && _hasLoadedExplorerFolder;
+
+    public override string StatusText => VehicleCountText;
 
     public LoadingOperation StockLoading { get; } = new();
 
@@ -96,7 +139,8 @@ public partial class ConsistDetailViewModel : ViewModelBase
         ILauncherService launcher,
         IAssetDirectoryTreeService directoryTree,
         IRollingStockService rollingStock,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IImageService images)
     {
         Editor = editor;
         _consist = consist;
@@ -105,8 +149,12 @@ public partial class ConsistDetailViewModel : ViewModelBase
         _directoryTree = directoryTree;
         _rollingStock = rollingStock;
         _dialogs = dialogs;
+        _images = images;
+        PendingChanges = new PendingChangesViewModel(editor);
 
-        SelectedConsistVehicles.CollectionChanged += (_, _) => NotifySelectionCommands();
+        SelectedConsistVehicles.CollectionChanged += (_, _) => OnSelectionChanged();
+        ExplorerStock.CollectionChanged += (_, _) => NotifyExplorerEmptyStates();
+        ExplorerLoading.PropertyChanged += (_, _) => NotifyExplorerEmptyStates();
     }
 
     private ConsistRailVehicle? SingleSelectedVehicle => SelectedConsistVehicles.Count is 1 ? SelectedConsistVehicles[0] : null;
@@ -123,6 +171,9 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         Editor.PropertyChanged -= OnEditorChanged;
         Editor.PropertyChanged += OnEditorChanged;
+        TranslationProvider.OnCultureChanged -= OnCultureChanged;
+        TranslationProvider.OnCultureChanged += OnCultureChanged;
+        PendingChanges.Attach();
         _vehicleIndex = _vehicleIndexes.GetCurrentIndex();
         await Task.WhenAll(LoadConsist(), SearchStock(), LoadDirectoryTree());
     }
@@ -166,11 +217,24 @@ public partial class ConsistDetailViewModel : ViewModelBase
         }
     }
 
+    private void NotifyExplorerEmptyStates()
+    {
+        OnPropertyChanged(nameof(ShowsStockFolderPrompt));
+        OnPropertyChanged(nameof(ShowsEmptyStockFolder));
+    }
+
     partial void OnSelectedDirectoryChanged(BrowserDirectory? value)
     {
         ExplorerLoading.Cancel();
         ExplorerStock.Clear();
         SelectedExplorerVehicle = null;
+        _hasLoadedExplorerFolder = false;
+        NotifyExplorerEmptyStates();
+
+        if (IsProductDirectorySelected)
+        {
+            _ = LoadAvailableStock();
+        }
     }
 
     private bool HasSelectedDirectory => SelectedDirectory is not null;
@@ -193,7 +257,14 @@ public partial class ConsistDetailViewModel : ViewModelBase
         return ExplorerLoading.RunAsync(
             Strings.loading_available_rolling_stock.CurrentValue,
             token => _rollingStock.GetAvailableStock(directory, token),
-            ExplorerStock.ReplaceWith);
+            ShowExplorerStock);
+    }
+
+    private void ShowExplorerStock(List<RollingStockEntry> stock)
+    {
+        _hasLoadedExplorerFolder = true;
+        ExplorerStock.ReplaceWith(stock);
+        NotifyExplorerEmptyStates();
     }
 
     protected override void OnDeactivated()
@@ -201,7 +272,22 @@ public partial class ConsistDetailViewModel : ViewModelBase
         StockLoading.Cancel();
         ExplorerLoading.Cancel();
         DirectoryLoading.Cancel();
+        _imageLoader.Cancel();
         Editor.PropertyChanged -= OnEditorChanged;
+        TranslationProvider.OnCultureChanged -= OnCultureChanged;
+        PendingChanges.Detach();
+    }
+
+    private void OnCultureChanged(object? sender, CultureInfo culture)
+    {
+        foreach (var vehicle in StripVehicles)
+        {
+            vehicle.RefreshCaption();
+        }
+
+        OnPropertyChanged(nameof(SelectionText));
+        OnPropertyChanged(nameof(VehicleCountText));
+        OnPropertyChanged(nameof(StatusText));
     }
 
     partial void OnSearchTermChanged(string? value)
@@ -229,6 +315,49 @@ public partial class ConsistDetailViewModel : ViewModelBase
     {
         Editor.Update();
         RailVehicles.Reset(vehicles);
+
+        var stripVehicles = vehicles.Select((vehicle, index) => new ConsistVehicleViewModel(vehicle, index)).ToList();
+
+        StripVehicles.ReplaceWith(stripVehicles);
+        OnPropertyChanged(nameof(VehicleCountText));
+        OnPropertyChanged(nameof(StatusText));
+        _imageLoader.Load(stripVehicles, item => _images.GetBlueprintImage(item.Vehicle), (item, image) => item.ImageBitmap = image);
+    }
+
+    private void OnSelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectionText));
+        NotifySelectionCommands();
+        SyncStripSelection();
+    }
+
+    private void SyncStripSelection()
+    {
+        if (_isSyncingSelection)
+        {
+            return;
+        }
+
+        var single = SingleSelectedVehicle;
+        var stripVehicle = StripVehicles.FirstOrDefault(item => ReferenceEquals(item.Vehicle, single));
+
+        _isSyncingSelection = true;
+        SelectedStripVehicle = stripVehicle;
+        _isSyncingSelection = false;
+    }
+
+    partial void OnSelectedStripVehicleChanged(ConsistVehicleViewModel? value)
+    {
+        if (_isSyncingSelection || value is null)
+        {
+            return;
+        }
+
+        _isSyncingSelection = true;
+        SelectedConsistVehicles.Clear();
+        SelectedConsistVehicles.Add(value.Vehicle);
+        _isSyncingSelection = false;
     }
 
     private Task SearchStock()
@@ -346,6 +475,89 @@ public partial class ConsistDetailViewModel : ViewModelBase
         ReplaceVehicleCommand.NotifyCanExecuteChanged();
         DeleteVehicleCommand.NotifyCanExecuteChanged();
         OpenConsistVehicleInExplorerCommand.NotifyCanExecuteChanged();
+        MoveVehicleForwardCommand.NotifyCanExecuteChanged();
+        MoveVehicleBackCommand.NotifyCanExecuteChanged();
+        FlipVehicleCommand.NotifyCanExecuteChanged();
+    }
+
+    private int SingleSelectedPosition
+    {
+        get
+        {
+            var vehicle = SingleSelectedVehicle;
+
+            if (vehicle is null)
+            {
+                return -1;
+            }
+
+            var vehicles = RailVehicles.Source.ToList();
+
+            return vehicles.IndexOf(vehicle);
+        }
+    }
+
+    private bool CanMoveVehicleForward => SingleSelectedPosition > 0;
+
+    private bool CanMoveVehicleBack
+    {
+        get
+        {
+            var position = SingleSelectedPosition;
+            var isLastVehicle = position == RailVehicles.Source.Count - 1;
+
+            return position >= 0 && !isLastVehicle;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        SelectedConsistVehicles.Clear();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveVehicleForward))]
+    private Task MoveVehicleForward()
+    {
+        return MoveSelectedVehicle(-1);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveVehicleBack))]
+    private Task MoveVehicleBack()
+    {
+        return MoveSelectedVehicle(1);
+    }
+
+    private async Task MoveSelectedVehicle(int offset)
+    {
+        var vehicle = SingleSelectedVehicle!;
+        var newPosition = SingleSelectedPosition + offset;
+
+        await Edit(session => session.MoveVehicle(_consist, vehicle, newPosition));
+        SelectVehicleAt(newPosition);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSingleSelectedVehicle))]
+    private async Task FlipVehicle()
+    {
+        var vehicle = SingleSelectedVehicle!;
+        var position = SingleSelectedPosition;
+
+        await Edit(session => session.FlipVehicle(_consist, vehicle));
+        SelectVehicleAt(position);
+    }
+
+    // Edits reload the consist as new vehicle objects, so the moved or flipped vehicle is selected again by position.
+    private void SelectVehicleAt(int position)
+    {
+        var isInRange = position >= 0 && position < StripVehicles.Count;
+
+        if (!isInRange)
+        {
+            return;
+        }
+
+        SelectedStripVehicle = StripVehicles[position];
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenConsistVehicleInExplorer))]

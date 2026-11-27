@@ -7,7 +7,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+        xmlns:controls="using:RailworksForge.Views.Components"
         xmlns:bh="using:RailworksForge.Behaviours"
         xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Xaml.Behaviors.Interactivity"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
@@ -24,7 +24,7 @@
 
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
-        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel Spacing="4">
                 <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}" Text="{echoes:Translate {x:Static translations:Strings.replace_tracks}}" />
             </StackPanel>
@@ -56,7 +56,7 @@
                     <ItemsControl ItemsSource="{Binding RouteTracks}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
+                                <Border Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}" Padding="12,8" CornerRadius="6">
                                     <Grid ColumnDefinitions="*,12,*">
                                         <StackPanel Grid.Column="0" Spacing="8" Orientation="Horizontal">
                                             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="{Binding RouteBlueprint.BlueprintSetIdProvider}" />
@@ -125,7 +125,7 @@
             </ScrollViewer>
         </Border>
 
-        <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="3" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
                 <Button Command="{Binding ReplaceTracksCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_tracks}}" />

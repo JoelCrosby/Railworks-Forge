@@ -1,0 +1,34 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="16">
+            <components:Thumbnail Width="92" Height="52" />
+            <components:Thumbnail Width="160" Height="90" PlaceholderIcon="Route" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|Thumbnail">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+        <Setter Property="Background" Value="{DynamicResource ThumbnailBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- The icon shows through until an image loads, and stays when there is none. -->
+                <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{TemplateBinding Background}" ClipToBounds="True">
+                    <Panel>
+                        <Viewbox MaxWidth="28" MaxHeight="28" Margin="6">
+                            <components:LucideIcon Icon="{TemplateBinding PlaceholderIcon}"
+                                              Width="24"
+                                              Height="24"
+                                              StrokeThickness="1.75"
+                                              StrokeBrush="{DynamicResource TextMutedBrush}" />
+                        </Viewbox>
+                        <Image Stretch="UniformToFill" Source="{TemplateBinding Source}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

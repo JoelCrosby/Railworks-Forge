@@ -10,7 +10,12 @@
         x:Class="RailworksForge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/railworks-forge-icon.png"
+        Background="{DynamicResource SurfaceBrush}"
         Title="{echoes:Translate {x:Static translations:Strings.railworks_forge}}">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Alt+Left" Command="{Binding NavigationBar.GoBackCommand}" />
+    </Window.KeyBindings>
 
     <Grid RowDefinitions="Auto, *, Auto, Auto">
         <controls:NavigationBar Grid.Row="0" DataContext="{Binding NavigationBar}" />
@@ -18,7 +23,10 @@
         <ContentControl Grid.Row="1" Content="{Binding Navigation.CurrentPage}" />
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Spacing="8" ZIndex="1">
-            <controls:LoadingState DataContext="{Binding Loading}" Margin="0" />
+            <!-- Progress shows in the status bar; only a failure needs the floating card and its retry button. -->
+            <Panel IsVisible="{Binding Loading.HasError}">
+                <controls:LoadingState DataContext="{Binding Loading}" Margin="0" />
+            </Panel>
             <controls:LoadingState DataContext="{Binding ToolsLoading}" Margin="0" />
         </StackPanel>
 

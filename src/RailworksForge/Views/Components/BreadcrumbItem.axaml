@@ -1,0 +1,101 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Margin="16">
+            <components:BreadcrumbItem Icon="Route" IconBackground="#3B82F6" Text="Routes" HasSeparator="False" />
+            <components:BreadcrumbItem Icon="ListEnd" IconBackground="#D97706" Text="(BLXT) 01-Going South" IsDirty="True" />
+            <components:BreadcrumbItem Icon="TrainFront" IconBackground="#8B5CF6" Text="IC 3529" IsCurrent="True" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|BreadcrumbItem">
+        <Setter Property="MaxWidth" Value="240" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DockPanel>
+                    <components:LucideIcon DockPanel.Dock="Left"
+                                           Icon="ChevronRight"
+                                           Width="14"
+                                           Height="14"
+                                           Margin="4,0"
+                                           VerticalAlignment="Center"
+                                           StrokeThickness="2"
+                                           StrokeBrush="{DynamicResource HeaderChevronBrush}"
+                                           IsVisible="{TemplateBinding HasSeparator}" />
+                    <Button Name="PART_Button"
+                            Classes="ghost"
+                            Height="26"
+                            Padding="3,0,8,0"
+                            CornerRadius="{StaticResource RadiusSmall}"
+                            Command="{TemplateBinding Command}"
+                            ToolTip.Tip="{TemplateBinding Text}">
+                        <DockPanel>
+                            <Border Name="PART_Tile"
+                                    DockPanel.Dock="Left"
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,0,8,0"
+                                    CornerRadius="5"
+                                    Opacity="0.7"
+                                    Background="{TemplateBinding IconBackground}">
+                                <components:LucideIcon Icon="{TemplateBinding Icon}"
+                                                       Width="13"
+                                                       Height="13"
+                                                       StrokeThickness="2"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       StrokeBrush="White" />
+                            </Border>
+                            <Ellipse Name="PART_Dirty"
+                                     DockPanel.Dock="Right"
+                                     Width="7"
+                                     Height="7"
+                                     Margin="6,0,0,0"
+                                     IsVisible="False"
+                                     VerticalAlignment="Center"
+                                     Fill="{DynamicResource WarningBorderBrush}"
+                                     ToolTip.Tip="{TemplateBinding DirtyText}" />
+                            <TextBlock Name="PART_Text"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource HeaderMutedForegroundBrush}"
+                                       Text="{TemplateBinding Text}" />
+                        </DockPanel>
+                    </Button>
+                </DockPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:pointerover /template/ Border#PART_Tile">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:pointerover /template/ TextBlock#PART_Text">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:current">
+        <Setter Property="MaxWidth" Value="360" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:current /template/ Button#PART_Button">
+        <Setter Property="Background" Value="{DynamicResource HeaderSelectedBrush}" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:current /template/ Border#PART_Tile">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:current /template/ TextBlock#PART_Text">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="components|BreadcrumbItem:dirty /template/ Ellipse#PART_Dirty">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+</Styles>

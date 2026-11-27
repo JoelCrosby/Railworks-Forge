@@ -4,7 +4,7 @@
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              xmlns:vm="using:RailworksForge.ViewModels"
              xmlns:loading="using:RailworksForge.Views.Controls"
-             xmlns:controls="using:RailworksForge.Views.TemplatedControls"
+             xmlns:controls="using:RailworksForge.Views.Components"
              x:Class="RailworksForge.Views.Controls.LoadingState"
              x:DataType="vm:LoadingOperation"
              IsVisible="{Binding IsVisible}"
@@ -39,8 +39,8 @@
             Padding="16,12"
             CornerRadius="8"
             BorderThickness="1"
-            BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
-            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+            BorderBrush="{DynamicResource DividerBrush}"
+            Background="{DynamicResource SurfaceRaisedBrush}"
             BoxShadow="0 4 16 0 #40000000">
         <StackPanel Spacing="8" HorizontalAlignment="Center" MaxWidth="600">
             <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding IsLoading}">

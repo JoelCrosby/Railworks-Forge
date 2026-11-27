@@ -7,10 +7,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
-             xmlns:packaging="clr-namespace:RailworksForge.Core.Packaging;assembly=RailworksForge.Core"
+             xmlns:components="using:RailworksForge.Views.Components"
              xmlns:scenarios="clr-namespace:RailworksForge.Core.Scenarios;assembly=RailworksForge.Core"
-             xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:converters="clr-namespace:RailworksForge.Converters"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
              xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
@@ -22,182 +20,181 @@
         <x:Static Member="design:DesignViewModels.RouteDetail" />
     </Design.DataContext>
 
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Enter" Command="{Binding OpenScenarioCommand}" />
+    </UserControl.KeyBindings>
+
     <DockPanel>
-        <Grid Margin="12,12,12,0" DockPanel.Dock="Top" ColumnDefinitions="280,*" >
-            <Grid.Styles>
-                <Style Selector="StackPanel">
-                    <Setter Property="Spacing" Value="4" />
-                    <Setter Property="Margin" Value="0, 0, 0, 8" />
-                </Style>
-
-                <Style Selector="TextBlock">
-                    <Setter Property="TextWrapping" Value="1" />
-                    <Setter Property="LineSpacing" Value="1.8" />
-                </Style>
-            </Grid.Styles>
-
-            <Border Background="Black" Margin="0,0,8,0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                <StackPanel>
-                    <Image Width="272" Height="146" Source="{Binding Route.ImageBitmap}" Stretch="UniformToFill" />
+        <components:PageHeader DockPanel.Dock="Top"
+                               Image="{Binding Route.ImageBitmap}"
+                               PlaceholderIcon="Route"
+                               Title="{Binding Route.Name}">
+            <components:PageHeader.Badges>
+                <WrapPanel ItemSpacing="8" LineSpacing="8">
+                    <components:Badge Content="{Binding ScenarioCountText}" />
+                    <components:Badge Classes="success" Content="{Binding CompletedText}" />
+                    <components:Badge Content="{Binding Route.PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
+                </WrapPanel>
+            </components:PageHeader.Badges>
+            <components:PageHeader.Actions>
+                <StackPanel Orientation="Horizontal" Spacing="8" IsEnabled="{Binding Loading.IsIdle}">
+                    <Button Command="{Binding CheckAssetsCommand}">
+                        <components:IconLabel Icon="ListChecks" Text="{echoes:Translate {x:Static translations:Strings.check_assets}}" />
+                    </Button>
+                    <Button>
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
+                                <Separator />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.changes_route_files}}" IsEnabled="False" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_track_action}}"
+                                          Foreground="{DynamicResource WarningTextBrush}"
+                                          Command="{Binding ReplaceTrackCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.route_tools}}" />
+                            <components:LucideIcon Icon="ChevronDown" Width="14" Height="14" StrokeThickness="2" StrokeBrush="{DynamicResource TextMutedBrush}" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-            </Border>
+            </components:PageHeader.Actions>
+        </components:PageHeader>
 
-            <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="12,8" CornerRadius="6">
-                <StackPanel>
-                    <StackPanel>
-                        <TextBlock FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.name}}" />
-                        <TextBlock Text="{Binding Route.Name}" />
-                    </StackPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="24,0,24,12" ItemSpacing="8" LineSpacing="8">
+            <Button Classes="chip" Classes.on="{Binding IsShowingAll}"
+                    Command="{Binding ShowCompletionCommand}" CommandParameter="{x:Static vm:CompletionFilter.All}"
+                    Content="{echoes:Translate {x:Static translations:Strings.filter_all}}" />
+            <Button Classes="chip" Classes.on="{Binding IsShowingNotCompleted}"
+                    Command="{Binding ShowCompletionCommand}" CommandParameter="{x:Static vm:CompletionFilter.NotCompleted}"
+                    Content="{echoes:Translate {x:Static translations:Strings.filter_not_completed}}" />
+            <Button Classes="chip" Classes.on="{Binding IsShowingCompleted}"
+                    Command="{Binding ShowCompletionCommand}" CommandParameter="{x:Static vm:CompletionFilter.Completed}"
+                    Content="{echoes:Translate {x:Static translations:Strings.filter_completed}}" />
+            <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center" Background="{DynamicResource DividerBrush}" />
+            <Button Classes="chip" Classes.on="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Spring}"
+                    Command="{Binding ToggleSeasonCommand}" CommandParameter="Spring"
+                    Content="{echoes:Translate {x:Static translations:Strings.season_spring}}" />
+            <Button Classes="chip" Classes.on="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Summer}"
+                    Command="{Binding ToggleSeasonCommand}" CommandParameter="Summer"
+                    Content="{echoes:Translate {x:Static translations:Strings.season_summer}}" />
+            <Button Classes="chip" Classes.on="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Autumn}"
+                    Command="{Binding ToggleSeasonCommand}" CommandParameter="Autumn"
+                    Content="{echoes:Translate {x:Static translations:Strings.season_autumn}}" />
+            <Button Classes="chip" Classes.on="{Binding Season, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Winter}"
+                    Command="{Binding ToggleSeasonCommand}" CommandParameter="Winter"
+                    Content="{echoes:Translate {x:Static translations:Strings.season_winter}}" />
+        </WrapPanel>
 
-                    <StackPanel>
-                        <TextBlock FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.packaging_type}}" />
-                        <TextBlock Text="{Binding Route.PackagingType, Converter={x:Static converters:ValueConverters.PackagingTypeConverter}}" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
+        <Border Classes="card" Margin="24,0,24,16">
+            <DockPanel>
+                <components:SectionHeader DockPanel.Dock="Top"
+                                          Title="{echoes:Translate {x:Static translations:Strings.scenarios}}"
+                                          Count="{Binding Scenarios.Count}">
+                    <components:SearchBox IsShortcutTarget="True"
+                                          ShortcutHint="{echoes:Translate {x:Static translations:Strings.search_shortcut}}"
+                                          Placeholder="{Binding SearchPlaceholder}"
+                                          Text="{Binding SearchTerm}" />
+                </components:SectionHeader>
 
-        <StackPanel IsEnabled="{Binding Loading.IsIdle}" DockPanel.Dock="Top" Margin="12" Orientation="Horizontal" Spacing="12">
-            <Button Command="{Binding OpenInExplorerCommand}" Content="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" />
-            <Button Command="{Binding CheckAssetsCommand}" Content="{echoes:Translate {x:Static translations:Strings.check_asset_availability}}" />
-            <Button Command="{Binding ReplaceTrackCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_track}}"/>
-        </StackPanel>
+                <Panel>
+                    <DataGrid
+                        Name="ScenariosDataGrid"
+                        IsEnabled="{Binding Loading.IsIdle}"
+                        ItemsSource="{Binding Scenarios}"
+                        SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
+                        SelectionMode="Single"
+                    >
+                        <i:Interaction.Behaviors>
+                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenScenarioCommand}" />
+                        </i:Interaction.Behaviors>
 
-        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
-            <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.scenarios}}" />
-        </StackPanel>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completed}}" SortMemberPath="PlayerInfo.Completion">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ScenarioRowViewModel">
+                                        <Viewbox Classes="cell-icon"
+                                                 IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}"
+                                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.completed}}">
+                                            <components:LucideIcon Icon="CircleCheckBig"
+                                                                   StrokeBrush="{DynamicResource SuccessBrush}" />
+                                        </Viewbox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Scenario.Name}" />
+                            <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive intact. -->
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Scenario.Locomotive">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ScenarioRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,6">
+                                            <components:Thumbnail Width="64" Height="36" Source="{Binding LocomotiveImage}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Locomotive}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="Scenario.ScenarioClass">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ScenarioRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                                            <Viewbox Classes="inline-icon"
+                                                     VerticalAlignment="Center"
+                                                     IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static scenarios:ScenarioClass.Unknown}}">
+                                                <components:LucideIcon Icon="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassIconConverter}}" />
+                                            </Viewbox>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" SortMemberPath="Scenario.Duration">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ScenarioRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0">
+                                            <Viewbox Classes="inline-icon">
+                                                <components:LucideIcon Icon="Clock3" />
+                                            </Viewbox>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Duration, Converter={x:Static converters:ValueConverters.DurationConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
 
-        <Panel>
-            <DataGrid
-                Name="ScenariosDataGrid"
-                IsEnabled="{Binding Loading.IsIdle}"
-                ItemsSource="{Binding Scenarios}"
-                SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
-                SelectionMode="Single"
-            >
-                <i:Interaction.Behaviors>
-                    <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenScenarioCommand}" />
-                </i:Interaction.Behaviors>
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" SortMemberPath="Scenario.Season">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="vm:ScenarioRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                                            <Viewbox Classes="inline-icon"
+                                                     VerticalAlignment="Center"
+                                                     IsVisible="{Binding Scenario.Season, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                <components:LucideIcon Icon="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonIconConverter}}" />
+                                            </Viewbox>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
 
-                <DataGrid.Columns>
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completed}}" SortMemberPath="PlayerInfo.Completion">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <Viewbox Classes="cell-icon"
-                                     IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}"
-                                     ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.completed}}">
-                                <lucideAvalonia:Lucide Icon="CircleCheckBig"
-                                                       StrokeBrush="{DynamicResource SuccessBrush}" />
-                            </Viewbox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Scenario.Name}" />
-                <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive intact. -->
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Scenario.Locomotive">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,6">
-                                <controls:VehicleThumbnail Width="64" Height="36" Source="{Binding LocomotiveImage}" />
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Locomotive}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}" SortMemberPath="Scenario.ScenarioClass">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
-                                <Viewbox Classes="inline-icon"
-                                         VerticalAlignment="Center"
-                                         IsVisible="{Binding Scenario.ScenarioClass, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static scenarios:ScenarioClass.Unknown}}">
-                                    <lucideAvalonia:Lucide Icon="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassIconConverter}}" />
-                                </Viewbox>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.duration}}" SortMemberPath="Scenario.Duration">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0">
-                                <Viewbox Classes="inline-icon">
-                                    <lucideAvalonia:Lucide Icon="Clock3" />
-                                </Viewbox>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Duration, Converter={x:Static converters:ValueConverters.DurationConverter}}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.rating}}" SortMemberPath="Scenario.Rating">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <TextBlock Margin="12,0"
-                                       VerticalAlignment="Center"
-                                       LetterSpacing="1"
-                                       Foreground="{DynamicResource SystemAccentColor}"
-                                       Text="{Binding Scenario.Rating, Converter={x:Static converters:ValueConverters.RatingConverter}}"
-                                       ToolTip.Tip="{Binding Scenario.Rating}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.season}}" SortMemberPath="Scenario.Season">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
-                                <Viewbox Classes="inline-icon"
-                                         VerticalAlignment="Center"
-                                         IsVisible="{Binding Scenario.Season, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                    <lucideAvalonia:Lucide Icon="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonIconConverter}}" />
-                                </Viewbox>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Season, Converter={x:Static converters:ValueConverters.SeasonConverter}}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.score}}" Binding="{Binding PlayerInfo.Score}" />
-
-                <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.packaging}}" SortMemberPath="Scenario.PackagingType">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="vm:ScenarioRowViewModel">
-                            <Panel>
-                                <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static packaging:PackagingType.Packed}}"
-                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.packed}}">
-                                    <lucideAvalonia:Lucide Icon="Package"
-                                                           StrokeBrush="{DynamicResource TextControlForeground}" />
-                                </Viewbox>
-                                <Viewbox Classes="cell-icon"
-                                         IsVisible="{Binding Scenario.PackagingType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static packaging:PackagingType.Unpacked}}"
-                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.unpacked}}">
-                                    <lucideAvalonia:Lucide Icon="FolderOpen"
-                                                           StrokeBrush="{DynamicResource TextControlPlaceholderForeground}" />
-                                </Viewbox>
-                            </Panel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding OpenScenarioCommand}" />
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyScenarioNameCommand}" />
-                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-            </DataGrid>
-            <loading:LoadingState DataContext="{Binding Loading}" />
-        </Panel>
-
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding OpenScenarioCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyScenarioNameCommand}" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenScenarioInExplorerCommand}"  />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                    <loading:LoadingState DataContext="{Binding Loading}" />
+                    <components:EmptyState Icon="SearchX"
+                                           Title="{echoes:Translate {x:Static translations:Strings.no_matches}}"
+                                           IsVisible="{Binding ShowsNoMatches}" />
+                </Panel>
+            </DockPanel>
+        </Border>
     </DockPanel>
-
 </UserControl>

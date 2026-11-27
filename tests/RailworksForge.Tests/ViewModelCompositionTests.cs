@@ -1,23 +1,34 @@
 using RailworksForge.Core.Consists;
 using RailworksForge.Core.Scenarios;
 using RailworksForge.DesignData;
+using RailworksForge.Tests.Components;
 using RailworksForge.ViewModels;
 
 namespace RailworksForge.Tests;
 
 // Pages and dialogs are built by ActivatorUtilities at runtime, so a missing registration only fails when a user opens them.
+// Resolving them reads Dispatcher.UIThread, which must belong to the shared headless session's thread.
+[Collection(ComponentSession.CollectionName)]
 public class ViewModelCompositionTests
 {
     [Fact]
-    public void ShellViewModels_ResolveFromServices()
+    public Task ShellViewModels_ResolveFromServices()
     {
-        Assert.NotNull(DesignServices.Get<MainWindowViewModel>());
-        Assert.NotNull(DesignServices.Get<RoutesViewModel>());
-        Assert.NotNull(DesignServices.Get<SettingsViewModel>());
+        return ComponentSession.Run(() =>
+        {
+            Assert.NotNull(DesignServices.Get<MainWindowViewModel>());
+            Assert.NotNull(DesignServices.Get<RoutesViewModel>());
+            Assert.NotNull(DesignServices.Get<SettingsViewModel>());
+        });
     }
 
     [Fact]
-    public void PagesAndDialogs_CanBeCreatedWithRuntimeArguments()
+    public Task PagesAndDialogs_CanBeCreatedWithRuntimeArguments()
+    {
+        return ComponentSession.Run(AssertPagesAndDialogsCanBeCreated);
+    }
+
+    private static void AssertPagesAndDialogsCanBeCreated()
     {
         Assert.NotNull(DesignViewModels.NavigationBar);
         Assert.NotNull(DesignViewModels.RouteDetail);

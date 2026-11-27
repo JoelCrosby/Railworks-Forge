@@ -21,7 +21,7 @@
         <Border Padding="24, 24">
                 <DockPanel MinWidth="540">
                         <StackPanel DockPanel.Dock="Top">
-                                <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}" Padding="8">
+                                <Border CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}" Padding="8">
                                         <StackPanel Spacing="4">
                                                 <TextBlock FontWeight="SemiBold" FontSize="{StaticResource CaptionFontSize}" Text="{echoes:Translate {x:Static translations:Strings.selected_consist}}" />
                                                 <TextBlock Text="{Binding LocomotiveName}" />

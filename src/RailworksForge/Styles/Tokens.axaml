@@ -1,0 +1,114 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Design tokens. Components and pages take colours, sizes and spacing from here rather than writing values inline,
+         so both themes stay consistent. -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="SurfaceBrush">#FFF7F7F8</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceRaisedBrush">#FFFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceSunkenBrush">#FFEDEDF0</SolidColorBrush>
+            <SolidColorBrush x:Key="DividerBrush">#FFDCDCE1</SolidColorBrush>
+            <SolidColorBrush x:Key="ControlBorderBrush">#FFC9C9D1</SolidColorBrush>
+            <SolidColorBrush x:Key="TextPrimaryBrush">#FF18181B</SolidColorBrush>
+            <SolidColorBrush x:Key="TextMutedBrush">#FF5B5B66</SolidColorBrush>
+
+            <SolidColorBrush x:Key="AccentBrush">#FF2563EB</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentHoverBrush">#FF1D4ED8</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentSubtleBrush">#FFDBE7FE</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentSubtleForegroundBrush">#FF1E3A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerBrush">#FFB42318</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerSubtleBrush">#FFFDECEA</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningSubtleBrush">#FFFEF3C7</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningBorderBrush">#FFF2C94C</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningForegroundBrush">#FF7A4B00</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessSubtleBrush">#FFDCF5E3</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessForegroundBrush">#FF14532D</SolidColorBrush>
+            <SolidColorBrush x:Key="ThumbnailBrush">#FFE4E7EC</SolidColorBrush>
+
+            <SolidColorBrush x:Key="SuccessBrush">DarkGreen</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningTextBrush">#FF9D5D00</SolidColorBrush>
+
+            <SolidColorBrush x:Key="HeaderTrayBrush">#0A000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderHoverBrush">#0F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderSelectedBrush">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBrush">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleBorderBrush">#1A000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleOnBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF6B6B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderChevronBrush">#FFA6A6A6</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderIconBrush">#FF2A2A2A</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="SurfaceBrush">#FF18181B</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceRaisedBrush">#FF1F1F23</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceSunkenBrush">#FF141416</SolidColorBrush>
+            <SolidColorBrush x:Key="DividerBrush">#FF2C2C32</SolidColorBrush>
+            <SolidColorBrush x:Key="ControlBorderBrush">#FF3A3A42</SolidColorBrush>
+            <SolidColorBrush x:Key="TextPrimaryBrush">#FFECECEE</SolidColorBrush>
+            <SolidColorBrush x:Key="TextMutedBrush">#FFA1A1AA</SolidColorBrush>
+
+            <SolidColorBrush x:Key="AccentBrush">#FF2563EB</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentHoverBrush">#FF3B74F0</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentSubtleBrush">#FF1E2A44</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentSubtleForegroundBrush">#FFBFDBFE</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerBrush">#FFFCA5A5</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerSubtleBrush">#FF2A1D1F</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningSubtleBrush">#FF2B2412</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningBorderBrush">#FF5A4A1C</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningForegroundBrush">#FFFDE68A</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessSubtleBrush">#FF14321F</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessForegroundBrush">#FF86EFAC</SolidColorBrush>
+            <SolidColorBrush x:Key="ThumbnailBrush">#FF2B3240</SolidColorBrush>
+
+            <SolidColorBrush x:Key="SuccessBrush">LightGreen</SolidColorBrush>
+            <SolidColorBrush x:Key="WarningTextBrush">#FFFCE100</SolidColorBrush>
+
+            <SolidColorBrush x:Key="HeaderTrayBrush">#0AFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderHoverBrush">#0FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderSelectedBrush">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBrush">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderInputBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleBorderBrush">#1AFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderToggleOnBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderMutedForegroundBrush">#FF9A9A9A</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderChevronBrush">#FF555555</SolidColorBrush>
+            <SolidColorBrush x:Key="HeaderIconBrush">#FFE6E6E6</SolidColorBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <SolidColorBrush x:Key="OnAccentBrush">White</SolidColorBrush>
+
+    <!-- Consist row highlights are translucent so one colour reads well on both the light and dark backgrounds,
+         and rows coloured before a theme switch still look right afterwards. -->
+    <SolidColorBrush x:Key="ErrorBrush">#40E81123</SolidColorBrush>
+    <SolidColorBrush x:Key="PartialBrush">#40F7630C</SolidColorBrush>
+    <SolidColorBrush x:Key="IsPlayerBrush">#3800B7C3</SolidColorBrush>
+
+    <!-- Breadcrumb level colours sit behind white icons, so they are mid-tones that read on light and dark headers. -->
+    <SolidColorBrush x:Key="CrumbRoutesBrush">#FF3B82F6</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbRouteBrush">#FF10A37F</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbScenarioBrush">#FFD97706</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbConsistBrush">#FF8B5CF6</SolidColorBrush>
+    <SolidColorBrush x:Key="CrumbSettingsBrush">#FF64748B</SolidColorBrush>
+
+    <x:Double x:Key="CaptionFontSize">12</x:Double>
+    <x:Double x:Key="BodyFontSize">14</x:Double>
+    <x:Double x:Key="HeadingFontSize">16</x:Double>
+    <x:Double x:Key="SubtitleFontSize">20</x:Double>
+    <x:Double x:Key="TitleFontSize">22</x:Double>
+
+    <CornerRadius x:Key="RadiusSmall">4</CornerRadius>
+    <CornerRadius x:Key="RadiusMedium">6</CornerRadius>
+    <CornerRadius x:Key="RadiusLarge">10</CornerRadius>
+
+    <x:Double x:Key="SpacingSmall">4</x:Double>
+    <x:Double x:Key="SpacingMedium">8</x:Double>
+    <x:Double x:Key="SpacingLarge">12</x:Double>
+    <x:Double x:Key="SpacingExtraLarge">20</x:Double>
+
+    <Thickness x:Key="PagePadding">24,16</Thickness>
+    <Thickness x:Key="CardPadding">16,12</Thickness>
+    <x:Double x:Key="ControlHeight">32</x:Double>
+    <x:Double x:Key="SmallControlHeight">28</x:Double>
+</ResourceDictionary>

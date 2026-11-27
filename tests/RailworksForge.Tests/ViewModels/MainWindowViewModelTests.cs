@@ -26,7 +26,7 @@ public class MainWindowViewModelTests
         var packages = Substitute.For<IPackageInstallService>();
         var toolsMenu = new ToolsMenuViewModel(_tools, picker, serz, packages);
         var navigationBar = new NavigationBarViewModel(_navigation, toolsMenu, Substitute.For<IDialogService>());
-        var statusBar = new StatusBarViewModel(_gameDirectory);
+        var statusBar = new StatusBarViewModel(_navigation);
 
         _mainWindow = new MainWindowViewModel(_navigation, navigationBar, statusBar, _tools, _gameDirectory, _scenarioDatabase);
     }

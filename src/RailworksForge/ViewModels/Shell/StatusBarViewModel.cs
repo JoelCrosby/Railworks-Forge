@@ -1,30 +1,55 @@
+using System.ComponentModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using Echoes;
-
-using RailworksForge.Core.Config;
-using RailworksForge.Translations;
+using RailworksForge.Services;
 
 namespace RailworksForge.ViewModels;
 
 public partial class StatusBarViewModel : ObservableObject
 {
-    private readonly IGameDirectoryService _gameDirectory;
+    private readonly INavigationService _navigation;
+    private ViewModelBase? _trackedPage;
 
     [ObservableProperty]
-    public partial string? StatusText { get; set; }
+    public partial LoadingOperation? BackgroundTask { get; set; }
 
-    public StatusBarViewModel(IGameDirectoryService gameDirectory)
+    public StatusBarViewModel(INavigationService navigation)
     {
-        _gameDirectory = gameDirectory;
+        _navigation = navigation;
 
-        ShowGameDirectory();
-
-        TranslationProvider.OnCultureChanged += (_, _) => ShowGameDirectory();
+        navigation.PropertyChanged += OnNavigationChanged;
     }
 
-    private void ShowGameDirectory()
+    public string? StatusText => _trackedPage?.StatusText;
+
+    private void OnNavigationChanged(object? sender, PropertyChangedEventArgs e)
     {
-        StatusText = string.Format(Strings.railworks_directory.CurrentValue, _gameDirectory.Current);
+        if (e.PropertyName != nameof(INavigationService.CurrentPage))
+        {
+            return;
+        }
+
+        if (_trackedPage is not null)
+        {
+            _trackedPage.PropertyChanged -= OnPageChanged;
+        }
+
+        _trackedPage = _navigation.CurrentPage;
+
+        if (_trackedPage is not null)
+        {
+            _trackedPage.PropertyChanged += OnPageChanged;
+        }
+
+        OnPropertyChanged(nameof(StatusText));
+    }
+
+    private void OnPageChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModelBase.StatusText))
+        {
+            OnPropertyChanged(nameof(StatusText));
+        }
     }
 }

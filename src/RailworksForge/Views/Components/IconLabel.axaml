@@ -1,0 +1,30 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="16">
+            <Button><components:IconLabel Icon="FolderOpen" Text="Open folder" /></Button>
+            <Button Classes="danger"><components:IconLabel Icon="Trash2" Text="Delete" /></Button>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- An icon beside text, used as button and menu content. The icon follows the text colour. -->
+    <Style Selector="components|IconLabel">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <components:LucideIcon Icon="{TemplateBinding Icon}"
+                                           Width="16"
+                                           Height="16"
+                                           StrokeThickness="2"
+                                           VerticalAlignment="Center"
+                                           StrokeBrush="{TemplateBinding Foreground}" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{TemplateBinding Text}"
+                               IsVisible="{TemplateBinding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

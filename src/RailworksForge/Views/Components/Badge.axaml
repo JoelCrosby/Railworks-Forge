@@ -1,0 +1,49 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="16">
+            <components:Badge Content="Standard" />
+            <components:Badge Classes="accent" Content="Player" />
+            <components:Badge Classes="success" Content="1 completed" />
+            <components:Badge Classes="warning" Content="Unsaved" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|Badge">
+        <Setter Property="Background" Value="{DynamicResource SurfaceSunkenBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        Padding="{TemplateBinding Padding}"
+                        MinHeight="{TemplateBinding MinHeight}"
+                        CornerRadius="11">
+                    <ContentPresenter VerticalAlignment="Center"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|Badge.accent">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentSubtleForegroundBrush}" />
+    </Style>
+
+    <Style Selector="components|Badge.success">
+        <Setter Property="Background" Value="{DynamicResource SuccessSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SuccessForegroundBrush}" />
+    </Style>
+
+    <Style Selector="components|Badge.warning">
+        <Setter Property="Background" Value="{DynamicResource WarningSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource WarningForegroundBrush}" />
+    </Style>
+</Styles>

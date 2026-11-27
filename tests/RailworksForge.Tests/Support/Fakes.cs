@@ -27,6 +27,7 @@ public static class Fakes
 
         editor.Scenario.Returns(scenario ?? TestData.Scenario());
         editor.GetSession(Arg.Any<CancellationToken>()).Returns(session);
+        editor.PendingChanges.Returns([]);
 
         return editor;
     }

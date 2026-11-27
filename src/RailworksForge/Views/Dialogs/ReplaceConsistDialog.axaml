@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
         xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
-        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+        xmlns:controls="using:RailworksForge.Views.Components"
         xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
         xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
@@ -22,7 +22,7 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel Spacing="4">
                 <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}" Text="{echoes:Translate {x:Static translations:Strings.select_consist}}" />
             </StackPanel>
@@ -31,7 +31,7 @@
         <Grid Grid.Row="1" ColumnDefinitions="*,4,3*">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.available_stock}}" />
+                    <controls:SectionHeader Title="{echoes:Translate {x:Static translations:Strings.available_stock}}" />
                 </StackPanel>
 
                 <Panel>
@@ -39,7 +39,7 @@
                         <TreeView.ItemTemplate>
                             <TreeDataTemplate ItemsSource="{Binding Subfolders}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <lucideAvalonia:Lucide Icon="Folder" StrokeBrush="{DynamicResource TextControlForeground}" StrokeThickness="1.5" Width="18" Height="18" />
+                                    <controls:LucideIcon Icon="Folder" Width="16" Height="16" StrokeThickness="1.75" StrokeBrush="{DynamicResource TextMutedBrush}" />
                                     <TextBlock VerticalAlignment="Center" Text="{Binding Name}"/>
                                 </StackPanel>
                             </TreeDataTemplate>
@@ -58,14 +58,14 @@
             </DockPanel>
 
             <GridSplitter Grid.Column="1"
-                          Background="{DynamicResource SystemChromeDisabledHighColor}"
+                          Background="{DynamicResource DividerBrush}"
                           ResizeDirection="Columns"
             />
 
             <Border Grid.Column="2">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
-                        <controls:TableHeader Text="{echoes:Translate {x:Static translations:Strings.consist}}" />
+                        <controls:SectionHeader Title="{echoes:Translate {x:Static translations:Strings.consist}}" />
                     </StackPanel>
 
                     <Panel>
@@ -79,7 +79,7 @@
                                 <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.image}}" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate DataType="vm:PreloadConsistViewModel">
-                                            <Border Classes="thumbnail"><Image Height="52" Stretch="UniformToFill" Source="{Binding ImageBitmap}" /></Border>
+                                            <controls:Thumbnail Width="92" Height="52" Margin="12,6" HorizontalAlignment="Left" Source="{Binding ImageBitmap}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -89,6 +89,13 @@
                                 <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.length}}" Binding="{Binding Consist.ConsistEntries.Count}" />
                             </DataGrid.Columns>
                         </DataGrid>
+                        <controls:EmptyState Icon="FolderOpen"
+                                             Title="{echoes:Translate {x:Static translations:Strings.choose_folder}}"
+                                             Hint="{echoes:Translate {x:Static translations:Strings.pick_consist_folder_hint}}"
+                                             IsVisible="{Binding ShowsFolderPrompt}" />
+                        <controls:EmptyState Icon="FolderOpen"
+                                             Title="{echoes:Translate {x:Static translations:Strings.folder_has_no_consists}}"
+                                             IsVisible="{Binding ShowsEmptyFolder}" />
                         <loading:LoadingState DataContext="{Binding StockLoading}" />
                     </Panel>
 
@@ -96,10 +103,10 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
-                <Button Command="{Binding ReplaceConsistCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_consist}}" />
+                <Button Classes="primary" Command="{Binding ReplaceConsistCommand}" Content="{echoes:Translate {x:Static translations:Strings.replace_consist}}" />
             </StackPanel>
         </Border>
     </Grid>

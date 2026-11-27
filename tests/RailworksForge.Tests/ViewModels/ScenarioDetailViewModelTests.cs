@@ -295,4 +295,34 @@ public class ScenarioDetailViewModelTests
             Substitute.For<IImageService>(),
             Substitute.For<ILauncherService>());
     }
+
+    [Fact]
+    public async Task Selection_IsCountedAndCanBeCleared()
+    {
+        await _page.Activate();
+
+        _page.SelectedServices.Add(_page.Services[0]);
+        _page.SelectedServices.Add(_page.Services[1]);
+
+        Assert.Equal(2, _page.SelectedCount);
+        Assert.Equal(string.Format(Strings.items_selected.CurrentValue, 2), _page.SelectionText);
+
+        _page.ClearSelectionCommand.Execute(null);
+
+        Assert.Equal(0, _page.SelectedCount);
+    }
+
+    [Fact]
+    public async Task PendingChanges_DescribeTheEditorsChanges()
+    {
+        await _page.Activate();
+        var change = new ScenarioChange(ScenarioChangeKind.DeleteConsists, "4M11", 1);
+        _editor.PendingChanges.Returns([change]);
+
+        Fakes.SetPendingChanges(_editor, true);
+
+        Assert.True(_page.PendingChanges.HasChanges);
+        Assert.Equal(Strings.unsaved_change_one.CurrentValue, _page.PendingChanges.Summary);
+        Assert.Contains(string.Format(Strings.change_deleted_consist.CurrentValue, "4M11"), _page.PendingChanges.Details);
+    }
 }

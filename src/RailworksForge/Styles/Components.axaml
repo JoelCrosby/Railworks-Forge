@@ -1,0 +1,22 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Every reusable component registers its theme here, so App.axaml includes one file. -->
+    <StyleInclude Source="avares://RailworksForge/Views/Components/AcquisitionStateIcon.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/Badge.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/BlueprintSummary.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/BreadcrumbItem.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/ConsistStrip.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/EmptyState.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/IconLabel.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/LoadingSpinner.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/PageHeader.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/PendingChangesBar.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/RouteCard.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/SearchBox.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/SectionHeader.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/SelectionToolbar.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/SettingsSection.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/TaskIndicator.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/Thumbnail.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/VehicleCard.axaml" />
+</Styles>

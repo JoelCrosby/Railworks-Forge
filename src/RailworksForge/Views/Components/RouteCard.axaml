@@ -1,0 +1,86 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Spacing="16" Margin="16">
+            <components:RouteCard Width="256" Title="(ATS) Kings Cross - Kings Lynn + Cambridge to Peterborough" />
+            <components:RouteCard Classes="compact" Width="320" Title="'t Zuiden van Nederland" Subtitle="Opened today" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|RouteCard">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Grid RowDefinitions="Auto,Auto">
+                        <components:Thumbnail Grid.Row="0"
+                                              Height="132"
+                                              CornerRadius="0"
+                                              PlaceholderIcon="Route"
+                                              Source="{TemplateBinding Image}" />
+                        <StackPanel Grid.Row="1" Margin="12,10,12,12" Spacing="4">
+                            <TextBlock Name="PART_Title"
+                                       FontWeight="Medium"
+                                       TextWrapping="Wrap"
+                                       MaxLines="2"
+                                       MinHeight="38"
+                                       TextTrimming="CharacterEllipsis"
+                                       Text="{TemplateBinding Title}"
+                                       ToolTip.Tip="{TemplateBinding Title}" />
+                            <TextBlock Classes="caption muted"
+                                       Text="{TemplateBinding Subtitle}"
+                                       IsVisible="{TemplateBinding Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|RouteCard.compact">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="8">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <components:Thumbnail Grid.Column="0"
+                                              Width="96"
+                                              Height="54"
+                                              Margin="0,0,12,0"
+                                              CornerRadius="{StaticResource RadiusMedium}"
+                                              PlaceholderIcon="Route"
+                                              Source="{TemplateBinding Image}" />
+                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"
+                                       Text="{TemplateBinding Title}"
+                                       ToolTip.Tip="{TemplateBinding Title}" />
+                            <TextBlock Classes="caption muted"
+                                       Text="{TemplateBinding Subtitle}"
+                                       IsVisible="{TemplateBinding Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="ListBoxItem:pointerover components|RouteCard">
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+    </Style>
+
+    <Style Selector="ListBoxItem:selected components|RouteCard">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+</Styles>

@@ -20,6 +20,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
     private readonly SemaphoreSlim _editLock = new(1, 1);
     private EditState _state;
     private DateTime? _savedVersion;
+    private List<ScenarioChange> _changes = [];
 
     private ScenarioEditSession(EditState state)
     {
@@ -29,7 +30,9 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
     public Scenario Scenario => _state.Scenario;
 
-    public bool HasChanges { get; private set; }
+    public bool HasChanges => _changes.Count > 0;
+
+    public IReadOnlyList<ScenarioChange> Changes => _changes;
 
     // Consists are listed straight from Scenario.bin, which takes milliseconds. Parsing the full document takes
     // seconds for a large scenario, so it carries on in the background and only edits wait for it.
@@ -118,7 +121,9 @@ public sealed class ScenarioEditSession : IScenarioEditSession
             VehicleToAdd = vehicle,
         };
 
-        return Run(new AddConsistVehicle(request));
+        var change = new ScenarioChange(ScenarioChangeKind.AddVehicle, consist.ServiceName, 1);
+
+        return Run(new AddConsistVehicle(request), change);
     }
 
     public Task ReplaceVehicles(Consist consist, IEnumerable<ConsistRailVehicle> targets, RollingStockEntry replacement)
@@ -137,7 +142,9 @@ public sealed class ScenarioEditSession : IScenarioEditSession
             Replacements = replacements,
         };
 
-        return Run(new ReplaceConsistVehicles(request));
+        var change = new ScenarioChange(ScenarioChangeKind.ReplaceVehicles, consist.ServiceName, replacements.Count);
+
+        return Run(new ReplaceConsistVehicles(request), change);
     }
 
     public Task DeleteVehicle(Consist consist, ConsistRailVehicle vehicle)
@@ -148,23 +155,65 @@ public sealed class ScenarioEditSession : IScenarioEditSession
             VehicleToDelete = vehicle,
         };
 
-        return Run(new DeleteConsistVehicle(request));
+        var change = new ScenarioChange(ScenarioChangeKind.DeleteVehicle, consist.ServiceName, 1);
+
+        return Run(new DeleteConsistVehicle(request), change);
+    }
+
+    public Task MoveVehicle(Consist consist, ConsistRailVehicle vehicle, int newIndex)
+    {
+        var request = new MoveConsistVehicleRequest
+        {
+            Consist = consist,
+            Vehicle = vehicle,
+            NewIndex = newIndex,
+        };
+
+        var change = new ScenarioChange(ScenarioChangeKind.MoveVehicle, consist.ServiceName, 1);
+
+        return Run(new MoveConsistVehicle(request), change);
+    }
+
+    public Task FlipVehicle(Consist consist, ConsistRailVehicle vehicle)
+    {
+        var request = new FlipConsistVehicleRequest
+        {
+            Consist = consist,
+            Vehicle = vehicle,
+        };
+
+        var change = new ScenarioChange(ScenarioChangeKind.FlipVehicle, consist.ServiceName, 1);
+
+        return Run(new FlipConsistVehicle(request), change);
     }
 
     public Task ReplaceConsists(IEnumerable<Consist> targets, PreloadConsist replacement)
     {
+        var targetList = targets.ToList();
         var request = new ReplaceConsistRequest
         {
-            Target = new TargetConsist(targets),
+            Target = new TargetConsist(targetList),
             PreloadConsist = replacement,
         };
 
-        return Run(new ReplaceConsist(request));
+        var change = new ScenarioChange(ScenarioChangeKind.ReplaceConsists, DescribeTargets(targetList), targetList.Count);
+
+        return Run(new ReplaceConsist(request), change);
     }
 
     public Task DeleteConsists(IEnumerable<Consist> targets)
     {
-        return Run(new DeleteConsist(new TargetConsist(targets)));
+        var targetList = targets.ToList();
+        var change = new ScenarioChange(ScenarioChangeKind.DeleteConsists, DescribeTargets(targetList), targetList.Count);
+
+        return Run(new DeleteConsist(new TargetConsist(targetList)), change);
+    }
+
+    private static string DescribeTargets(List<Consist> targets)
+    {
+        var isSingleTarget = targets.Count is 1;
+
+        return isSingleTarget ? targets[0].ServiceName : string.Empty;
     }
 
     public async Task Apply()
@@ -203,12 +252,12 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
         _state = state with { Scenario = scenario.Refresh() ?? scenario };
         _savedVersion = _state.Scenario.SavedVersion;
-        HasChanges = false;
+        _changes = [];
     }
 
     // A command can fail part way through, e.g. on the second of several replacements, so it runs against a copy
     // that only replaces the buffered documents once the whole command has succeeded.
-    private async Task Run(IConsistCommand command)
+    private async Task Run(IConsistCommand command, ScenarioChange change)
     {
         await _editLock.WaitAsync();
 
@@ -233,7 +282,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
                 ScenarioPropertiesDocument = working.ScenarioPropertiesDocument,
                 Consists = new Lazy<List<ScenarioNode>>(() => ScenarioNode.ReadConsists(working.ScenarioDocument)),
             };
-            HasChanges = true;
+            _changes = [.._changes, change];
         }
         finally
         {

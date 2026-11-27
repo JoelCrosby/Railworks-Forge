@@ -6,7 +6,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+             xmlns:components="using:RailworksForge.Views.Components"
+             xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+             xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RailworksForge.Views.Controls.RoutesGrid"
              x:DataType="vm:RoutesViewModel">
@@ -14,75 +16,87 @@
     <UserControl.Styles>
         <Style Selector="ListBox.route-cards ListBoxItem">
             <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="6" />
-            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
         </Style>
 
         <Style Selector="ListBox.route-cards ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
 
-        <Style Selector="Border.route-card">
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="ClipToBounds" Value="True" />
-            <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        <Style Selector="Button.recent-route">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
 
-        <Style Selector="ListBox.route-cards ListBoxItem:pointerover Border.route-card">
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
+        <Style Selector="Button.recent-route:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
 
-        <Style Selector="ListBox.route-cards ListBoxItem:selected Border.route-card">
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+        <Style Selector="Button.recent-route:pointerover components|RouteCard">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         </Style>
     </UserControl.Styles>
 
-    <DockPanel>
-        <Panel>
-            <ScrollViewer>
-
-                <Border Padding="12" IsVisible="{Binding !IsLoading}">
-                    <ListBox
-                        Classes="route-cards"
-                        VerticalAlignment="Top"
-                        ItemsSource="{Binding Routes}"
-                        Background="Transparent"
-                        SelectedItem="{Binding SelectedRoute, Mode=TwoWay}">
-                        <i:Interaction.Behaviors>
-                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenRouteCommand}" />
-                        </i:Interaction.Behaviors>
-
-                        <ListBox.ItemsPanel>
+    <Panel>
+        <ScrollViewer IsVisible="{Binding !IsLoading}">
+            <StackPanel Margin="24,8,24,24" Spacing="20">
+                <StackPanel Spacing="10" IsVisible="{Binding HasRecentRoutes}">
+                    <TextBlock Classes="caption muted" FontWeight="SemiBold" Text="{echoes:Translate {x:Static translations:Strings.recently_opened}}" />
+                    <ItemsControl ItemsSource="{Binding RecentRoutes}">
+                        <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel />
+                                <UniformGrid Columns="3" ColumnSpacing="16" RowSpacing="16" />
                             </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Classes="route-card" Width="256">
-                                    <StackPanel Orientation="Vertical">
-                                        <!-- Border.ClipToBounds clips square corners, so round the image's top corners itself; the clip extends past the bottom edge to leave those square. -->
-                                        <Image Height="128" Source="{Binding ImageBitmap}" Stretch="UniformToFill">
-                                            <Image.Clip>
-                                                <RectangleGeometry Rect="0,0,252,140" RadiusX="6" RadiusY="6" />
-                                            </Image.Clip>
-                                        </Image>
-                                        <Border Padding="12,10">
-                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RouteViewModel">
+                                <Button Classes="recent-route"
+                                        Command="{Binding $parent[UserControl].((vm:RoutesViewModel)DataContext).OpenRecentRouteCommand}"
+                                        CommandParameter="{Binding}">
+                                    <components:RouteCard Classes="compact" Image="{Binding ImageBitmap}" Title="{Binding Name}" />
+                                </Button>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </ScrollViewer>
-            <loading:LoadingState DataContext="{Binding Loading}" />
-        </Panel>
-    </DockPanel>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
 
+                <ListBox Classes="route-cards"
+                         ItemsSource="{Binding Routes}"
+                         Background="Transparent"
+                         Padding="0"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                         SelectedItem="{Binding SelectedRoute, Mode=TwoWay}">
+                    <i:Interaction.Behaviors>
+                        <bh:ItemDoubleTapCommandBehaviour Command="{Binding OpenRouteCommand}" />
+                    </i:Interaction.Behaviors>
+
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <components:UniformWrapPanel MinItemWidth="240" ColumnSpacing="16" RowSpacing="16" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RouteViewModel">
+                            <components:RouteCard Image="{Binding ImageBitmap}" Title="{Binding Name}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.details}}" Command="{Binding OpenRouteCommand}" />
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.copy}}" Command="{Binding CopyRouteNameCommand}" />
+                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </ListBox>
+            </StackPanel>
+        </ScrollViewer>
+        <loading:LoadingState DataContext="{Binding Loading}" />
+    </Panel>
 
 </UserControl>

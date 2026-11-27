@@ -1,0 +1,42 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="16">
+            <components:VehicleCard Position="0" Title="CT NS VIRMm6 mBvk" Caption="Forward" />
+            <components:VehicleCard Position="1" Title="CT NS VIRMm6 ABv6" Caption="Flipped" IsFlipped="True" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|VehicleCard">
+        <Setter Property="Width" Value="140" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Spacing="6">
+                    <components:Thumbnail Name="PART_Thumbnail"
+                                          Height="56"
+                                          RenderTransformOrigin="50%,50%"
+                                          Source="{TemplateBinding Image}" />
+                    <Grid ColumnDefinitions="Auto,*">
+                        <TextBlock Grid.Column="0" Classes="caption muted" Margin="0,0,6,0" VerticalAlignment="Center" Text="{TemplateBinding Position}" />
+                        <TextBlock Grid.Column="1"
+                                   Classes="caption"
+                                   FontWeight="Medium"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{TemplateBinding Title}"
+                                   ToolTip.Tip="{TemplateBinding Title}" />
+                    </Grid>
+                    <TextBlock Name="PART_Caption" Classes="caption muted" FontSize="11" Text="{TemplateBinding Caption}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|VehicleCard:flipped /template/ components|Thumbnail#PART_Thumbnail">
+        <Setter Property="RenderTransform" Value="scaleX(-1)" />
+    </Style>
+
+    <Style Selector="components|VehicleCard:flipped /template/ TextBlock#PART_Caption">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+</Styles>

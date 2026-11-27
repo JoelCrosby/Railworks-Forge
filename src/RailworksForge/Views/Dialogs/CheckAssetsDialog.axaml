@@ -8,7 +8,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:RailworksForge.ViewModels"
-        xmlns:controls="clr-namespace:RailworksForge.Views.TemplatedControls"
+        xmlns:controls="using:RailworksForge.Views.Components"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         x:Class="RailworksForge.Views.Dialogs.CheckAssetsDialog"
         x:DataType="vm:CheckAssetsViewModel"
@@ -23,7 +23,7 @@
 
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="0" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel Spacing="4">
                 <TextBlock FontWeight="SemiBold" FontSize="{StaticResource SubtitleFontSize}" Text="{echoes:Translate {x:Static translations:Strings.check_route_asset_availability}}" />
             </StackPanel>
@@ -42,7 +42,7 @@
         <DockPanel Grid.Row="1" IsVisible="{Binding !IsLoading}">
             <Panel>
                 <DataGrid BorderThickness="0,1,0,0"
-                          BorderBrush="{DynamicResource SystemChromeDisabledHighColor}"
+                          BorderBrush="{DynamicResource DividerBrush}"
                           ItemsSource="{Binding Blueprints}"
                           SelectionMode="Single"
                           IsReadOnly="True"
@@ -61,7 +61,7 @@
             </Panel>
         </DockPanel>
 
-        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
+        <Border Grid.Row="2" Height="64" Padding="24,8" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerBrush}">
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                 <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.close}}" />
             </StackPanel>

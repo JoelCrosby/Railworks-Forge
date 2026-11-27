@@ -1,0 +1,60 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <components:SettingsSection Title="Appearance" Width="640" Margin="16">
+            <StackPanel>
+                <components:SettingsRow Title="Theme" Description="Follow the system theme or always use a light or dark theme.">
+                    <ComboBox Width="200" />
+                </components:SettingsRow>
+                <components:SettingsRow Title="Language" Description="The language used throughout Railworks Forge.">
+                    <ComboBox Width="200" />
+                </components:SettingsRow>
+            </StackPanel>
+        </components:SettingsSection>
+    </Design.PreviewWith>
+
+    <Style Selector="components|SettingsSection">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel>
+                    <TextBlock Margin="4,24,0,8" FontWeight="SemiBold" Text="{TemplateBinding Title}" />
+                    <Border Classes="card">
+                        <ContentPresenter Content="{TemplateBinding Content}" />
+                    </Border>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|SettingsRow">
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Padding="{TemplateBinding Padding}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,16,0" VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Title}" />
+                                <TextBlock Classes="caption muted"
+                                           TextWrapping="Wrap"
+                                           Text="{TemplateBinding Description}"
+                                           IsVisible="{TemplateBinding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            </StackPanel>
+                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Content="{TemplateBinding Content}" />
+                        </Grid>
+                        <ContentPresenter Content="{TemplateBinding Footer}"
+                                          IsVisible="{TemplateBinding Footer, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|SettingsRow:nth-child(n+2)">
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+</Styles>

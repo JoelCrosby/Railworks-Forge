@@ -75,6 +75,30 @@ public class ArchitectureTests
         Assert.Empty(violations);
     }
 
+    // Components are reused across pages, so they take text and commands as properties rather than reaching for a
+    // view model or translating text themselves.
+    [Fact]
+    public void Components_DoNotDependOnViewModelsOrTranslations()
+    {
+        string[] forbiddenPrefixes = ["RailworksForge.ViewModels.", "RailworksForge.Translations.", "Echoes."];
+
+        using var module = ModuleDefinition.ReadModule(typeof(App).Assembly.Location);
+
+        var componentTypes = module.GetTypes()
+            .Where(type => GetOutermostType(type).Namespace == "RailworksForge.Views.Components")
+            .ToList();
+
+        var violations = componentTypes
+            .SelectMany(GetReferencedTypeNames)
+            .Where(name => forbiddenPrefixes.Any(name.StartsWith))
+            .Distinct()
+            .Order()
+            .ToList();
+
+        Assert.NotEmpty(componentTypes);
+        Assert.Empty(violations);
+    }
+
     [Fact]
     public void ForbiddenCoreReferences_StillExist()
     {
@@ -107,6 +131,21 @@ public class ArchitectureTests
                 yield return $"{owner} uses {referencedMember}";
             }
         }
+    }
+
+    private static IEnumerable<string> GetReferencedTypeNames(TypeDefinition type)
+    {
+        var baseType = type.BaseType is null ? [] : new[] { type.BaseType.FullName };
+        var fieldTypes = type.Fields.Select(field => field.FieldType.FullName);
+        var propertyTypes = type.Properties.Select(property => property.PropertyType.FullName);
+        var methodReferences = type.Methods
+            .Where(method => method.HasBody)
+            .SelectMany(method => method.Body.Instructions)
+            .Select(GetReferencedMember)
+            .OfType<MemberReference>()
+            .Select(GetReferencedType);
+
+        return baseType.Concat(fieldTypes).Concat(propertyTypes).Concat(methodReferences);
     }
 
     private static MemberReference? GetReferencedMember(Instruction instruction)

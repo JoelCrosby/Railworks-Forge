@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
+             xmlns:components="using:RailworksForge.Views.Components"
              mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="32"
              x:Class="RailworksForge.Views.Controls.StatusBar"
              x:DataType="vm:StatusBarViewModel">
@@ -12,19 +13,21 @@
         <x:Static Member="design:DesignViewModels.StatusBar" />
     </Design.DataContext>
 
-    <Border Padding="12,6" Background="{StaticResource SystemBaseHighColor}" Height="32" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemChromeDisabledHighColor}">
-
-        <Border.Styles>
-            <Style Selector="TextBlock">
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-
-            <Style Selector="TextBlock">
-                <Setter Property="LetterSpacing" Value="0.36" />
-            </Style>
-        </Border.Styles>
-
-        <TextBlock FontSize="{StaticResource CaptionFontSize}" Text="{Binding StatusText}" />
+    <Border Padding="16,0"
+            Height="30"
+            Background="{DynamicResource SurfaceSunkenBrush}"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource DividerBrush}">
+        <Grid ColumnDefinitions="*,Auto">
+            <components:TaskIndicator Grid.Column="0"
+                                      Foreground="{DynamicResource TextMutedBrush}"
+                                      Label="{Binding BackgroundTask.Message}"
+                                      IsVisible="{Binding BackgroundTask.IsLoading, FallbackValue=False}" />
+            <TextBlock Grid.Column="1"
+                       Classes="caption muted"
+                       VerticalAlignment="Center"
+                       Text="{Binding StatusText}" />
+        </Grid>
     </Border>
 
 </UserControl>

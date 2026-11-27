@@ -12,8 +12,7 @@
             <converters:IdValueConverter x:Key="IdValueConverter" />
 
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://RailworksForge/Styles/Colours.axaml"/>
-                <ResourceInclude Source="avares://RailworksForge/Styles/Typography.axaml"/>
+                <ResourceInclude Source="avares://RailworksForge/Styles/Tokens.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 
@@ -53,13 +52,8 @@
 
         <StyleInclude Source="avares://RailworksForge/Styles/DataGridRowHighlight.axaml"/>
         <StyleInclude Source="avares://RailworksForge/Styles/DataGridStyles.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableHeader.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/TableSearchBox.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/NameValueDisplay.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/LoadingSpinner.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/AcquisitionStateIcon.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/BlueprintSummary.axaml"/>
-        <StyleInclude Source="avares://RailworksForge/Views/TemplatedControls/VehicleThumbnail.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Styles/Controls.axaml"/>
+        <StyleInclude Source="avares://RailworksForge/Styles/Components.axaml"/>
 
         <Style Selector="DataGrid:focus DataGridCell /template/ Grid#FocusVisual">
             <Setter Property="IsVisible" Value="False" />

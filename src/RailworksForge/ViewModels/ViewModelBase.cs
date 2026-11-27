@@ -14,6 +14,8 @@ public abstract class ViewModelBase : ObservableObject
 
     public bool IsActive { get; private set; }
 
+    public virtual string? StatusText => null;
+
     public Task Activate()
     {
         IsActive = true;

@@ -8,6 +8,8 @@ public interface IScenarioEditor : INotifyPropertyChanged
 
     bool HasPendingChanges { get; }
 
+    IReadOnlyList<ScenarioChange> PendingChanges { get; }
+
     Task<IScenarioEditSession> GetSession(CancellationToken cancellationToken);
 
     Task<bool> Apply(CancellationToken cancellationToken);

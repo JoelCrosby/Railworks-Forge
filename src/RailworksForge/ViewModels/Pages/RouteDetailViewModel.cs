@@ -49,7 +49,34 @@ public partial class RouteDetailViewModel(
     [NotifyPropertyChangedFor(nameof(SearchPlaceholder))]
     public partial int ScenarioCount { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CompletedText))]
+    public partial int CompletedCount { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsShowingAll))]
+    [NotifyPropertyChangedFor(nameof(IsShowingNotCompleted))]
+    [NotifyPropertyChangedFor(nameof(IsShowingCompleted))]
+    public partial CompletionFilter Completion { get; set; }
+
+    [ObservableProperty]
+    public partial string? Season { get; set; }
+
     public string SearchPlaceholder => string.Format(Strings.search_scenarios.CurrentValue, ScenarioCount);
+
+    public string ScenarioCountText => string.Format(Strings.scenario_count.CurrentValue, ScenarioCount);
+
+    public string CompletedText => string.Format(Strings.completed_count.CurrentValue, CompletedCount);
+
+    public bool IsShowingAll => Completion is CompletionFilter.All;
+
+    public bool IsShowingNotCompleted => Completion is CompletionFilter.NotCompleted;
+
+    public bool IsShowingCompleted => Completion is CompletionFilter.Completed;
+
+    public bool ShowsNoMatches => Scenarios.Count == 0 && ScenarioCount > 0;
+
+    public override string StatusText => string.Format(Strings.scenario_count.CurrentValue, Scenarios.Count);
 
     private bool HasSelectedScenario => SelectedScenario is not null;
 
@@ -76,11 +103,87 @@ public partial class RouteDetailViewModel(
     private void OnCultureChanged(object? sender, CultureInfo culture)
     {
         OnPropertyChanged(nameof(SearchPlaceholder));
+        OnPropertyChanged(nameof(ScenarioCountText));
+        OnPropertyChanged(nameof(CompletedText));
+        OnPropertyChanged(nameof(StatusText));
     }
 
     partial void OnSearchTermChanged(string? value)
     {
         Scenarios.Filter(value);
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(ShowsNoMatches));
+    }
+
+    partial void OnScenarioCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(ScenarioCountText));
+    }
+
+    partial void OnCompletionChanged(CompletionFilter value)
+    {
+        ApplyFilters();
+    }
+
+    partial void OnSeasonChanged(string? value)
+    {
+        ApplyFilters();
+    }
+
+    [RelayCommand]
+    private void ShowCompletion(CompletionFilter filter)
+    {
+        Completion = filter;
+    }
+
+    [RelayCommand]
+    private void ToggleSeason(string season)
+    {
+        var isCurrentSeason = Season == season;
+
+        Season = isCurrentSeason ? null : season;
+    }
+
+    private void ApplyFilters()
+    {
+        var completion = Completion;
+        var season = Season;
+
+        bool Matches(ScenarioRowViewModel row)
+        {
+            var matchesCompletion = MatchesCompletion(row, completion);
+            var matchesSeason = MatchesSeason(row, season);
+
+            return matchesCompletion && matchesSeason;
+        }
+
+        Scenarios.Where(Matches);
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(ShowsNoMatches));
+    }
+
+    private static bool MatchesCompletion(ScenarioRowViewModel row, CompletionFilter filter)
+    {
+        var isCompleted = row.IsCompleted;
+
+        return filter switch
+        {
+            CompletionFilter.Completed => isCompleted,
+            CompletionFilter.NotCompleted => !isCompleted,
+            _ => true,
+        };
+    }
+
+    private static bool MatchesSeason(ScenarioRowViewModel row, string? season)
+    {
+        var hasSeasonFilter = season is not null;
+
+        return !hasSeasonFilter || row.Scenario.Season == season;
+    }
+
+    private void CountCompleted()
+    {
+        CompletedCount = Scenarios.Source.Count(row => row.IsCompleted);
     }
 
     private void ShowScenarios(List<Scenario> scenarios)
@@ -91,6 +194,9 @@ public partial class RouteDetailViewModel(
 
         Scenarios.Reset(rows);
         ScenarioCount = rows.Count;
+        CountCompleted();
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(ShowsNoMatches));
         LoadLocomotiveImages(rows);
     }
 
@@ -109,6 +215,9 @@ public partial class RouteDetailViewModel(
         {
             row.RefreshPlayerInfo();
         }
+
+        CountCompleted();
+        ApplyFilters();
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedScenario))]

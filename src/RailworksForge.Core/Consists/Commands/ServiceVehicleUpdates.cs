@@ -33,6 +33,23 @@ public static class ServiceVehicleUpdates
         UpdateLeadFilePath(serviceElement, vehicle);
     }
 
+    public static async Task UpdateLeadVehicleFrom(IDocument scenarioPropertiesDocument, Consist consist, IElement railVehicle)
+    {
+        const string absoluteBlueprintId = "BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID";
+
+        var blueprint = new Blueprint
+        {
+            BlueprintSetIdProvider = railVehicle.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Provider"),
+            BlueprintSetIdProduct = railVehicle.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Product"),
+            BlueprintId = railVehicle.SelectTextContent($"{absoluteBlueprintId} BlueprintID"),
+        };
+
+        var vehicleDocument = await blueprint.GetXmlDocument();
+        var leadVehicle = RollingStockEntry.Parse(vehicleDocument.DocumentElement, blueprint);
+
+        UpdateLeadVehicle(scenarioPropertiesDocument, consist, leadVehicle);
+    }
+
     public static void AppendInitialVehicleNumber(IDocument scenarioDocument, IElement serviceConsist, string number)
     {
         if (serviceConsist.QuerySelector("Driver cDriver InitialRV") is not { } initialRv)

@@ -1,0 +1,36 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <components:SectionHeader Title="Services" Count="12" Width="600">
+            <components:SearchBox Placeholder="Search" />
+        </components:SectionHeader>
+    </Design.PreviewWith>
+
+    <Style Selector="components|SectionHeader">
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}">
+                    <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Classes="heading"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{TemplateBinding Title}" />
+                        <components:Badge Grid.Column="1"
+                                          Margin="10,0,0,0"
+                                          VerticalAlignment="Center"
+                                          IsVisible="{TemplateBinding Count, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                          Content="{TemplateBinding Count}" />
+                        <ContentPresenter Grid.Column="3"
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          Content="{TemplateBinding Tools}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

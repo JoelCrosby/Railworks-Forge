@@ -1,6 +1,4 @@
-using RailworksForge.Core.Assets;
 using RailworksForge.Core.Extensions;
-using RailworksForge.Core.Vehicles;
 
 namespace RailworksForge.Core.Consists.Commands;
 
@@ -55,19 +53,6 @@ public class DeleteConsistVehicle : IConsistCommand
             return;
         }
 
-        const string absoluteBlueprintId = "BlueprintID iBlueprintLibrary-cAbsoluteBlueprintID";
-
-        var blueprint = new Blueprint
-        {
-            BlueprintSetIdProvider = entry.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Provider"),
-            BlueprintSetIdProduct = entry.SelectTextContent($"{absoluteBlueprintId} iBlueprintLibrary-cBlueprintSetID Product"),
-            BlueprintId = entry.SelectTextContent($"{absoluteBlueprintId} BlueprintID"),
-        };
-
-        var vehicleDocument = await blueprint.GetXmlDocument();
-        var vehicleElement = vehicleDocument.DocumentElement;
-        var leadVehicle = RollingStockEntry.Parse(vehicleElement, blueprint);
-
-        ServiceVehicleUpdates.UpdateLeadVehicle(context.ScenarioPropertiesDocument, _request.Consist, leadVehicle);
+        await ServiceVehicleUpdates.UpdateLeadVehicleFrom(context.ScenarioPropertiesDocument, _request.Consist, entry);
     }
 }

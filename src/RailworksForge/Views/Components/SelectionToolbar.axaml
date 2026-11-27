@@ -1,0 +1,45 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <components:SelectionToolbar Width="900" SelectedCount="2" SelectionText="2 selected" ClearText="Clear selection">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="small" Content="Open" />
+                <Button Classes="small primary" Content="Replace consist…" />
+                <Button Classes="small danger" Content="Delete" />
+            </StackPanel>
+        </components:SelectionToolbar>
+    </Design.PreviewWith>
+
+    <Style Selector="components|SelectionToolbar">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentSubtleForegroundBrush}" />
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        Padding="{TemplateBinding Padding}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Margin="0,0,16,0"
+                                   VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Text="{TemplateBinding SelectionText}" />
+                        <ContentPresenter Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          Content="{TemplateBinding Actions}" />
+                        <Button Grid.Column="2"
+                                Classes="ghost small"
+                                Foreground="{TemplateBinding Foreground}"
+                                Command="{TemplateBinding ClearCommand}"
+                                Content="{TemplateBinding ClearText}"
+                                IsVisible="{TemplateBinding ClearCommand, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

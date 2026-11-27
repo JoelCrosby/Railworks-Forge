@@ -15,6 +15,7 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
 {
     private RoutesViewModel? _routesPage;
     private ScenarioDetailViewModel? _scenarioPage;
+    private ViewModelBase? _pageBeforeSettings;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSettingsActive))]
@@ -77,7 +78,29 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
             return;
         }
 
+        _pageBeforeSettings = CurrentPage;
+
         Show(services.GetRequiredService<SettingsViewModel>());
+    }
+
+    public void CloseSettings()
+    {
+        if (CurrentPage is not SettingsViewModel)
+        {
+            return;
+        }
+
+        var previous = _pageBeforeSettings;
+        _pageBeforeSettings = null;
+
+        if (previous is null)
+        {
+            ShowRoutes();
+
+            return;
+        }
+
+        Show(previous);
     }
 
     public void ShowCurrentRoute()

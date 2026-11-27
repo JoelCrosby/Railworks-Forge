@@ -82,6 +82,7 @@ public class App : Application
         services.AddSingleton<IAppLifetimeService, AppLifetimeService>();
         services.AddSingleton<ToolsActivity>();
         services.AddSingleton<IImageService, ImageService>();
+        services.AddSingleton<IRecentRoutesService, RecentRoutesService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<ToolsMenuViewModel>();

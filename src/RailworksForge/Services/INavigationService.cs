@@ -30,6 +30,8 @@ public interface INavigationService : INotifyPropertyChanged
 
     void ShowSettings();
 
+    void CloseSettings();
+
     void ShowCurrentRoute();
 
     void ShowCurrentScenario();

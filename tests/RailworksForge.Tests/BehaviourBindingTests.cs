@@ -5,24 +5,29 @@ using Avalonia.Xaml.Interactivity;
 using CommunityToolkit.Mvvm.Input;
 
 using RailworksForge.Behaviours;
+using RailworksForge.Tests.Components;
 
 namespace RailworksForge.Tests;
 
 // The page behaviours bind to the view model, which only works if they inherit the control's DataContext.
+[Collection(ComponentSession.CollectionName)]
 public class BehaviourBindingTests
 {
     [Fact]
-    public void Behaviour_BindsAgainstTheAssociatedControlsDataContext()
+    public Task Behaviour_BindsAgainstTheAssociatedControlsDataContext()
     {
-        var command = new RelayCommand(() => { });
-        var behaviour = new ItemDoubleTapCommandBehaviour();
-        var control = new Border();
+        return ComponentSession.Run(() =>
+        {
+            var command = new RelayCommand(() => { });
+            var behaviour = new ItemDoubleTapCommandBehaviour();
+            var control = new Border();
 
-        behaviour.Bind(ItemDoubleTapCommandBehaviour.CommandProperty, new Binding(nameof(CommandHost.Command)));
-        Interaction.GetBehaviors(control).Add(behaviour);
-        control.DataContext = new CommandHost(command);
+            behaviour.Bind(ItemDoubleTapCommandBehaviour.CommandProperty, new Binding(nameof(CommandHost.Command)));
+            Interaction.GetBehaviors(control).Add(behaviour);
+            control.DataContext = new CommandHost(command);
 
-        Assert.Same(command, behaviour.Command);
+            Assert.Same(command, behaviour.Command);
+        });
     }
 
     private sealed record CommandHost(RelayCommand Command);

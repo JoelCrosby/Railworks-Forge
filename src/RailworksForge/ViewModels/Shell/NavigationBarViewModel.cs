@@ -1,9 +1,11 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Services;
 using RailworksForge.Translations;
 
@@ -12,6 +14,7 @@ namespace RailworksForge.ViewModels;
 public partial class NavigationBarViewModel : ObservableObject
 {
     private readonly IDialogService _dialogs;
+    private IScenarioEditor? _trackedEditor;
 
     public NavigationBarViewModel(INavigationService navigation, ToolsMenuViewModel tools, IDialogService dialogs)
     {
@@ -26,9 +29,9 @@ public partial class NavigationBarViewModel : ObservableObject
 
     public ToolsMenuViewModel Tools { get; }
 
-    public RoutesViewModel? RoutesPage => Navigation.CurrentPage as RoutesViewModel;
+    public bool IsSettingsActive => Navigation.IsSettingsActive;
 
-    public RouteDetailViewModel? RouteDetailPage => Navigation.CurrentPage as RouteDetailViewModel;
+    public bool ShowsTrail => !Navigation.IsSettingsActive;
 
     public bool IsRoutesCrumbCurrent => Navigation.CurrentRoute is null && !Navigation.IsSettingsActive;
 
@@ -38,14 +41,86 @@ public partial class NavigationBarViewModel : ObservableObject
 
     public bool IsConsistCrumbCurrent => !Navigation.IsSettingsActive;
 
+    public bool HasRoute => Navigation.CurrentRoute is not null;
+
+    public bool HasScenario => Navigation.CurrentScenario is not null;
+
+    public bool HasConsist => Navigation.CurrentConsist is not null;
+
+    public bool IsScenarioDirty => Navigation.CurrentEditor is { HasPendingChanges: true };
+
+    public bool CanGoBack => Navigation.IsSettingsActive || Navigation.CurrentRoute is not null;
+
     private void OnNavigationChanged()
     {
-        OnPropertyChanged(nameof(RoutesPage));
-        OnPropertyChanged(nameof(RouteDetailPage));
+        TrackEditor(Navigation.CurrentEditor);
+
+        OnPropertyChanged(nameof(IsSettingsActive));
+        OnPropertyChanged(nameof(ShowsTrail));
         OnPropertyChanged(nameof(IsRoutesCrumbCurrent));
         OnPropertyChanged(nameof(IsRouteCrumbCurrent));
         OnPropertyChanged(nameof(IsScenarioCrumbCurrent));
         OnPropertyChanged(nameof(IsConsistCrumbCurrent));
+        OnPropertyChanged(nameof(HasRoute));
+        OnPropertyChanged(nameof(HasScenario));
+        OnPropertyChanged(nameof(HasConsist));
+        OnPropertyChanged(nameof(IsScenarioDirty));
+        OnPropertyChanged(nameof(CanGoBack));
+        GoBackCommand.NotifyCanExecuteChanged();
+    }
+
+    private void TrackEditor(IScenarioEditor? editor)
+    {
+        if (ReferenceEquals(_trackedEditor, editor))
+        {
+            return;
+        }
+
+        if (_trackedEditor is not null)
+        {
+            _trackedEditor.PropertyChanged -= OnEditorChanged;
+        }
+
+        _trackedEditor = editor;
+
+        if (editor is not null)
+        {
+            editor.PropertyChanged += OnEditorChanged;
+        }
+    }
+
+    private void OnEditorChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(IsScenarioDirty));
+    }
+
+    // Back steps up one level of the trail, or out of Settings to the page it was opened from.
+    [RelayCommand(CanExecute = nameof(CanGoBack))]
+    private Task GoBack()
+    {
+        if (Navigation.IsSettingsActive)
+        {
+            Navigation.CloseSettings();
+
+            return Task.CompletedTask;
+        }
+
+        if (Navigation.CurrentConsist is not null)
+        {
+            return Show(Navigation.ShowCurrentScenario);
+        }
+
+        if (Navigation.CurrentScenario is not null)
+        {
+            return DiscardEditsThen(Navigation.ShowCurrentRoute);
+        }
+
+        if (Navigation.CurrentRoute is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return DiscardEditsThen(Navigation.ShowRoutes);
     }
 
     [RelayCommand]
@@ -80,6 +155,13 @@ public partial class NavigationBarViewModel : ObservableObject
     [RelayCommand]
     private void ShowSettings()
     {
+        if (Navigation.IsSettingsActive)
+        {
+            Navigation.CloseSettings();
+
+            return;
+        }
+
         Navigation.ShowSettings();
     }
 

@@ -1,0 +1,35 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <components:EmptyState Width="400" Height="240" Icon="FolderOpen" Title="No folder selected" Hint="Pick a folder on the left to see its consists." />
+    </Design.PreviewWith>
+
+    <Style Selector="components|EmptyState">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Spacing="8" Margin="24" MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <components:LucideIcon Icon="{TemplateBinding Icon}"
+                                           Width="32"
+                                           Height="32"
+                                           HorizontalAlignment="Center"
+                                           StrokeThickness="1.5"
+                                           StrokeBrush="{DynamicResource TextMutedBrush}" />
+                    <TextBlock HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               Text="{TemplateBinding Title}" />
+                    <TextBlock Classes="muted"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               Text="{TemplateBinding Hint}"
+                               IsVisible="{TemplateBinding Hint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

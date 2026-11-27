@@ -13,6 +13,7 @@ public class RoutesViewModelTests
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly ILauncherService _launcher = Substitute.For<ILauncherService>();
     private readonly IClipboardService _clipboard = Substitute.For<IClipboardService>();
+    private readonly IRecentRoutesService _recentRoutes = Substitute.For<IRecentRoutesService>();
     private readonly RoutesViewModel _page;
 
     public RoutesViewModelTests()
@@ -25,7 +26,8 @@ public class RoutesViewModelTests
             Substitute.For<IImageService>(),
             _launcher,
             _clipboard,
-            Fakes.ImmediateDispatcher());
+            Fakes.ImmediateDispatcher(),
+            _recentRoutes);
     }
 
     [Fact]
@@ -33,7 +35,7 @@ public class RoutesViewModelTests
     {
         await _page.Activate();
 
-        Assert.Equal(["West Coast Main Line", "Settle Carlisle"], _page.Routes.Select(route => route.Name));
+        Assert.Equal(["Settle Carlisle", "West Coast Main Line"], _page.Routes.Select(route => route.Name));
         Assert.Equal(2, _page.RouteCount);
         Assert.False(_page.IsLoading);
     }
@@ -149,7 +151,7 @@ public class RoutesViewModelTests
     public async Task RouteCommands_ActOnTheSelectedRoute()
     {
         await _page.Activate();
-        var route = _page.Routes[1];
+        var route = _page.Routes.First(candidate => candidate.Name == "Settle Carlisle");
         _page.SelectedRoute = route;
 
         _page.OpenRouteCommand.Execute(null);
@@ -157,7 +159,82 @@ public class RoutesViewModelTests
         _page.OpenInExplorerCommand.Execute(null);
 
         _navigation.Received(1).ShowRoute(route);
+        _recentRoutes.Received(1).Record(route.Id);
         await _clipboard.Received(1).SetText("Settle Carlisle");
         _launcher.Received(1).OpenDirectory(route.DirectoryPath);
+    }
+
+    [Fact]
+    public async Task RecentlyOpenedRoutes_AreListedMostRecentFirst()
+    {
+        _recentRoutes.GetRecentRouteIds().Returns(["West Coast Main Line", "Settle Carlisle"]);
+
+        await _page.Activate();
+
+        Assert.True(_page.HasRecentRoutes);
+        Assert.Equal(["West Coast Main Line", "Settle Carlisle"], _page.RecentRoutes.Select(route => route.Name));
+    }
+
+    [Fact]
+    public async Task SortingByRecentlyOpened_PutsRecentRoutesFirst()
+    {
+        _recentRoutes.GetRecentRouteIds().Returns(["West Coast Main Line"]);
+        await _page.Activate();
+
+        _page.SortOrder = RouteSortOrder.RecentlyOpened;
+
+        Assert.Equal(["West Coast Main Line", "Settle Carlisle"], _page.Routes.Select(route => route.Name));
+    }
+
+    [Fact]
+    public async Task OpeningARoute_SortedByName_KeepsTheRouteListAndRefreshesTheRecentRow()
+    {
+        await _page.Activate();
+        var route = _page.Routes.First(candidate => candidate.Name == "West Coast Main Line");
+        var resets = 0;
+        _page.Routes.CollectionChanged += (_, _) => resets++;
+        _recentRoutes.GetRecentRouteIds().Returns([route.Id]);
+        _page.SelectedRoute = route;
+
+        _page.OpenRouteCommand.Execute(null);
+
+        Assert.Equal(0, resets);
+        Assert.Same(route, Assert.Single(_page.RecentRoutes));
+    }
+
+    [Fact]
+    public async Task OpeningARoute_SortedByRecentlyOpened_MovesItToTheFront()
+    {
+        await _page.Activate();
+        _page.SortOrder = RouteSortOrder.RecentlyOpened;
+        var route = _page.Routes.First(candidate => candidate.Name == "West Coast Main Line");
+        _recentRoutes.GetRecentRouteIds().Returns([route.Id]);
+        _page.SelectedRoute = route;
+
+        _page.OpenRouteCommand.Execute(null);
+
+        Assert.Same(route, _page.Routes[0]);
+    }
+
+    [Fact]
+    public async Task DuplicateRecentRouteIds_AreListedOnce()
+    {
+        _recentRoutes.GetRecentRouteIds().Returns(["Settle Carlisle", "West Coast Main Line", "Settle Carlisle"]);
+
+        await _page.Activate();
+        _page.SortOrder = RouteSortOrder.RecentlyOpened;
+
+        Assert.Equal(["Settle Carlisle", "West Coast Main Line"], _page.RecentRoutes.Select(route => route.Name));
+        Assert.Equal(["Settle Carlisle", "West Coast Main Line"], _page.Routes.Select(route => route.Name));
+    }
+
+    [Fact]
+    public void SortIndex_IgnoresIndexesThatAreNotASortOrder()
+    {
+        _page.SortIndex = (int)RouteSortOrder.RecentlyOpened;
+
+        _page.SortIndex = -1;
+
+        Assert.Equal(RouteSortOrder.RecentlyOpened, _page.SortOrder);
     }
 }

@@ -1,0 +1,59 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <components:PageHeader Width="1000"
+                               Title="(BLXT) 01-Going South"
+                               Description="Saturday June 15 2019. You have just arrived in Utrecht with 5 minutes delay.">
+            <components:PageHeader.Badges>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <components:Badge Content="Standard" />
+                    <components:Badge Content="1h 10m" />
+                </StackPanel>
+            </components:PageHeader.Badges>
+            <components:PageHeader.Actions>
+                <Button Content="Open folder" />
+            </components:PageHeader.Actions>
+        </components:PageHeader>
+    </Design.PreviewWith>
+
+    <Style Selector="components|PageHeader">
+        <Setter Property="Padding" Value="24,20,24,16" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid Margin="{TemplateBinding Padding}" ColumnDefinitions="Auto,*,Auto">
+                    <components:Thumbnail Grid.Column="0"
+                                          Width="160"
+                                          Height="90"
+                                          Margin="0,0,20,0"
+                                          VerticalAlignment="Top"
+                                          CornerRadius="{StaticResource RadiusMedium}"
+                                          Source="{TemplateBinding Image}"
+                                          PlaceholderIcon="{TemplateBinding PlaceholderIcon}" />
+
+                    <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
+                        <TextBlock Classes="page-title"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{TemplateBinding Title}"
+                                   ToolTip.Tip="{TemplateBinding Title}" />
+                        <ContentPresenter Content="{TemplateBinding Badges}"
+                                          IsVisible="{TemplateBinding Badges, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <TextBlock Classes="muted"
+                                   TextWrapping="Wrap"
+                                   MaxLines="3"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="900"
+                                   HorizontalAlignment="Left"
+                                   Text="{TemplateBinding Description}"
+                                   IsVisible="{TemplateBinding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+
+                    <ContentPresenter Grid.Column="2"
+                                      Margin="16,0,0,0"
+                                      VerticalAlignment="Top"
+                                      Content="{TemplateBinding Actions}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

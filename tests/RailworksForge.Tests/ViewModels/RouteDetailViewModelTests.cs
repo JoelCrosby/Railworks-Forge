@@ -48,6 +48,44 @@ public class RouteDetailViewModelTests
     }
 
     [Fact]
+    public async Task CompletionFilter_ShowsOnlyMatchingScenarios()
+    {
+        _first.PlayerInfo = new ScenarioPlayerInfo
+        {
+            ScenarioId = _first.Id,
+            Score = 100,
+            Completion = "CompletedSuccessfully",
+            MedalsAwarded = 1,
+        };
+        await _page.Activate();
+
+        _page.ShowCompletionCommand.Execute(CompletionFilter.Completed);
+
+        Assert.Same(_first, Assert.Single(_page.Scenarios).Scenario);
+        Assert.Equal(1, _page.CompletedCount);
+
+        _page.ShowCompletionCommand.Execute(CompletionFilter.NotCompleted);
+
+        Assert.Same(_second, Assert.Single(_page.Scenarios).Scenario);
+    }
+
+    [Fact]
+    public async Task ToggleSeason_FiltersBySeasonAndTogglesOff()
+    {
+        var winter = TestData.Scenario("1S96 Willesden - Shieldmuir") with { Season = "Winter" };
+        _scenarios.GetScenarios(_route.Model, Arg.Any<CancellationToken>()).Returns([_first, winter]);
+        await _page.Activate();
+
+        _page.ToggleSeasonCommand.Execute("Winter");
+
+        Assert.Same(winter, Assert.Single(_page.Scenarios).Scenario);
+
+        _page.ToggleSeasonCommand.Execute("Winter");
+
+        Assert.Equal(2, _page.Scenarios.Count);
+    }
+
+    [Fact]
     public async Task SearchTerm_FiltersScenarios()
     {
         await _page.Activate();

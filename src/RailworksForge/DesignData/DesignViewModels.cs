@@ -29,7 +29,7 @@ public static class DesignViewModels
         {
             var statusBar = DesignServices.Create<StatusBarViewModel>();
 
-            statusBar.StatusText = "84 Routes found";
+            statusBar.BackgroundTask = new LoadingOperation { IsLoading = true, Message = "Loading scenario information" };
 
             return statusBar;
         }

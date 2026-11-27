@@ -38,7 +38,15 @@ public class ConsistDetailViewModelTests
         _directoryTree.GetDirectoryTree().Returns([]);
         _editor = Fakes.Editor(_session);
 
-        _page = new ConsistDetailViewModel(_editor, _consist, vehicleIndexes, _launcher, _directoryTree, _rollingStock, _dialogs);
+        _page = new ConsistDetailViewModel(
+            _editor,
+            _consist,
+            vehicleIndexes,
+            _launcher,
+            _directoryTree,
+            _rollingStock,
+            _dialogs,
+            Substitute.For<IImageService>());
     }
 
     [Fact]
@@ -181,6 +189,131 @@ public class ConsistDetailViewModelTests
     }
 
     [Fact]
+    public async Task MoveCommands_DependOnTheSelectedVehiclesPosition()
+    {
+        await _page.Activate();
+
+        _page.SelectedConsistVehicles.Add(_leadCar);
+
+        Assert.False(_page.MoveVehicleForwardCommand.CanExecute(null));
+        Assert.True(_page.MoveVehicleBackCommand.CanExecute(null));
+
+        _page.SelectedConsistVehicles.Clear();
+        _page.SelectedConsistVehicles.Add(_trailingCar);
+
+        Assert.True(_page.MoveVehicleForwardCommand.CanExecute(null));
+        Assert.False(_page.MoveVehicleBackCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task MoveVehicleBack_MovesTheSelectedVehicleOnePlaceBack()
+    {
+        await _page.Activate();
+        _page.SelectedConsistVehicles.Add(_leadCar);
+
+        await _page.MoveVehicleBackCommand.ExecuteAsync(null);
+
+        await _session.Received(1).MoveVehicle(_consist, _leadCar, 1);
+    }
+
+    [Fact]
+    public async Task MoveVehicleForward_MovesTheSelectedVehicleOnePlaceForward()
+    {
+        await _page.Activate();
+        _page.SelectedConsistVehicles.Add(_trailingCar);
+
+        await _page.MoveVehicleForwardCommand.ExecuteAsync(null);
+
+        await _session.Received(1).MoveVehicle(_consist, _trailingCar, 0);
+    }
+
+    [Fact]
+    public async Task MovedVehicle_IsSelectedAgainAtItsNewPosition()
+    {
+        await _page.Activate();
+        _page.SelectedConsistVehicles.Add(_leadCar);
+
+        await _page.MoveVehicleBackCommand.ExecuteAsync(null);
+
+        Assert.Same(_page.StripVehicles[1], _page.SelectedStripVehicle);
+    }
+
+    [Fact]
+    public async Task FlipVehicle_FlipsTheSelectedVehicle()
+    {
+        await _page.Activate();
+        _page.SelectedConsistVehicles.Add(_trailingCar);
+
+        await _page.FlipVehicleCommand.ExecuteAsync(null);
+
+        await _session.Received(1).FlipVehicle(_consist, _trailingCar);
+    }
+
+    [Fact]
+    public async Task SelectingAStripVehicle_SelectsItInTheTable()
+    {
+        await _page.Activate();
+
+        _page.SelectedStripVehicle = _page.StripVehicles[1];
+
+        Assert.Same(_trailingCar, Assert.Single(_page.SelectedConsistVehicles));
+        Assert.Equal(1, _page.SelectedCount);
+    }
+
+    [Fact]
+    public async Task ClearSelection_EmptiesTheSelection()
+    {
+        await _page.Activate();
+        _page.SelectedConsistVehicles.Add(_leadCar);
+
+        _page.ClearSelectionCommand.Execute(null);
+
+        Assert.Empty(_page.SelectedConsistVehicles);
+        Assert.Null(_page.SelectedStripVehicle);
+    }
+
+    [Fact]
+    public async Task SelectingAProductDirectory_LoadsItsStock()
+    {
+        var vehicle = TestData.RollingStock();
+        _rollingStock.GetAvailableStock(Arg.Any<ProductDirectory>(), Arg.Any<CancellationToken>()).Returns([vehicle]);
+
+        _page.SelectedDirectory = TestData.ProductDirectory("WCML");
+        await Wait.Until(() => _page.ExplorerStock.Count > 0);
+
+        Assert.Same(vehicle, Assert.Single(_page.ExplorerStock));
+        Assert.False(_page.ShowsStockFolderPrompt);
+        Assert.False(_page.ShowsEmptyStockFolder);
+    }
+
+    [Fact]
+    public void StockFolderPrompt_ShowsUntilAFolderIsLoaded()
+    {
+        Assert.True(_page.ShowsStockFolderPrompt);
+
+        _page.SelectedDirectory = TestData.ProviderDirectory();
+
+        Assert.True(_page.ShowsStockFolderPrompt);
+        Assert.False(_page.ShowsEmptyStockFolder);
+    }
+
+    [Fact]
+    public async Task EmptyProductDirectory_SaysTheFolderHasNoVehicles()
+    {
+        _rollingStock.GetAvailableStock(Arg.Any<ProductDirectory>(), Arg.Any<CancellationToken>()).Returns([]);
+
+        _page.SelectedDirectory = TestData.ProductDirectory("WCML");
+        await Wait.Until(() => _page.ShowsEmptyStockFolder);
+
+        Assert.False(_page.ShowsStockFolderPrompt);
+
+        _page.SelectedDirectory = null;
+
+        Assert.True(_page.ShowsStockFolderPrompt);
+        Assert.False(_page.ShowsEmptyStockFolder);
+    }
+
+    [Fact]
     public async Task FailedEdit_ShowsTheErrorWithoutRetry()
     {
         await _page.Activate();
@@ -230,7 +363,7 @@ public class ConsistDetailViewModelTests
         await _page.LoadAvailableStockCommand.ExecuteAsync(null);
         _page.SelectedExplorerVehicle = _page.ExplorerStock[0];
 
-        _page.SelectedDirectory = TestData.ProductDirectory("ECML");
+        _page.SelectedDirectory = TestData.ProviderDirectory("LNER");
 
         Assert.Empty(_page.ExplorerStock);
         Assert.Null(_page.SelectedExplorerVehicle);

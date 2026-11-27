@@ -1,0 +1,30 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Spacing="8" Margin="16">
+            <components:TaskIndicator Label="Loading scenario information" />
+            <components:TaskIndicator Label="Indexing vehicles" IsIndeterminate="False" Progress="64" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <Style Selector="components|TaskIndicator">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="caption" VerticalAlignment="Center" Text="{TemplateBinding Label}" />
+                    <ProgressBar Width="120"
+                                 MinWidth="0"
+                                 Height="4"
+                                 MinHeight="4"
+                                 VerticalAlignment="Center"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{TemplateBinding Progress}"
+                                 IsIndeterminate="{TemplateBinding IsIndeterminate}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

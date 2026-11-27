@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Specialized;
 
 using Avalonia;
 using Avalonia.Controls;
@@ -6,11 +7,14 @@ using Avalonia.Xaml.Interactivity;
 
 namespace RailworksForge.Behaviours;
 
-// DataGrid.SelectedItems is not bindable, so mirror it into a view model collection.
+// DataGrid.SelectedItems is not bindable, so mirror it into a view model collection. Changes the view model makes,
+// such as clearing the selection, are pushed back to the grid.
 public class DataGridSelectedItemsBehaviour : StyledElementBehavior<DataGrid>
 {
     public static readonly StyledProperty<IList?> SelectedItemsProperty =
         AvaloniaProperty.Register<DataGridSelectedItemsBehaviour, IList?>(nameof(SelectedItems));
+
+    private bool _isSyncing;
 
     public IList? SelectedItems
     {
@@ -26,6 +30,8 @@ public class DataGridSelectedItemsBehaviour : StyledElementBehavior<DataGrid>
         {
             AssociatedObject.SelectionChanged += OnSelectionChanged;
         }
+
+        Subscribe(SelectedItems);
     }
 
     protected override void OnDetaching()
@@ -35,35 +41,99 @@ public class DataGridSelectedItemsBehaviour : StyledElementBehavior<DataGrid>
             AssociatedObject.SelectionChanged -= OnSelectionChanged;
         }
 
+        Unsubscribe(SelectedItems);
+
         base.OnDetaching();
     }
 
-    private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
-        if (AssociatedObject is null || SelectedItems is null)
+        base.OnPropertyChanged(change);
+
+        if (change.Property != SelectedItemsProperty)
         {
             return;
         }
 
-        // Applying just the change keeps a single click from re-adding every selected row, each of which notifies.
-        foreach (var item in e.RemovedItems)
+        Unsubscribe(change.OldValue as IList);
+        Subscribe(change.NewValue as IList);
+    }
+
+    private void Subscribe(IList? items)
+    {
+        if (items is INotifyCollectionChanged observable)
         {
-            SelectedItems.Remove(item);
+            observable.CollectionChanged += OnViewModelSelectionChanged;
+        }
+    }
+
+    private void Unsubscribe(IList? items)
+    {
+        if (items is INotifyCollectionChanged observable)
+        {
+            observable.CollectionChanged -= OnViewModelSelectionChanged;
+        }
+    }
+
+    private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (AssociatedObject is null || SelectedItems is null || _isSyncing)
+        {
+            return;
         }
 
-        foreach (var item in e.AddedItems)
+        _isSyncing = true;
+
+        try
         {
-            if (!SelectedItems.Contains(item))
+            // Applying just the change keeps a single click from re-adding every selected row, each of which notifies.
+            foreach (var item in e.RemovedItems)
             {
-                SelectedItems.Add(item);
+                SelectedItems.Remove(item);
+            }
+
+            foreach (var item in e.AddedItems)
+            {
+                if (!SelectedItems.Contains(item))
+                {
+                    SelectedItems.Add(item);
+                }
+            }
+
+            var isInSync = SelectedItems.Count == AssociatedObject.SelectedItems.Count;
+
+            if (!isInSync)
+            {
+                RebuildSelectedItems(AssociatedObject, SelectedItems);
             }
         }
-
-        var isInSync = SelectedItems.Count == AssociatedObject.SelectedItems.Count;
-
-        if (!isInSync)
+        finally
         {
-            RebuildSelectedItems(AssociatedObject, SelectedItems);
+            _isSyncing = false;
+        }
+    }
+
+    private void OnViewModelSelectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (AssociatedObject is null || SelectedItems is null || _isSyncing)
+        {
+            return;
+        }
+
+        _isSyncing = true;
+
+        try
+        {
+            AssociatedObject.SelectedItems.Clear();
+
+            foreach (var item in SelectedItems)
+            {
+                AssociatedObject.SelectedItems.Add(item);
+            }
+        }
+        finally
+        {
+            _isSyncing = false;
         }
     }
 

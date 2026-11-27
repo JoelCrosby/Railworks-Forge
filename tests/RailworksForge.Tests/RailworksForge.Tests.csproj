@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" />
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NSubstitute" />
   </ItemGroup>

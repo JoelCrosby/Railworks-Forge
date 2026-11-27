@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 
 using Echoes;
@@ -6,6 +7,7 @@ using NSubstitute;
 
 using RailworksForge.Core.Config;
 using RailworksForge.Core.Packaging;
+using RailworksForge.Services;
 using RailworksForge.Tests.Support;
 using RailworksForge.Translations;
 using RailworksForge.ViewModels;
@@ -76,24 +78,46 @@ public class ShellIndicatorTests
     }
 
     [Fact]
-    public void StatusBar_ShowsTheGameDirectoryInTheCurrentLanguage()
+    public void StatusBar_ShowsTheCurrentPagesStatus()
     {
-        var gameDirectory = Substitute.For<IGameDirectoryService>();
-        gameDirectory.Current.Returns("/games/RailWorks");
-        var statusBar = new StatusBarViewModel(gameDirectory);
-        var previous = TranslationProvider.Culture;
+        var navigation = Substitute.For<INavigationService>();
+        var statusBar = new StatusBarViewModel(navigation);
+        var page = new StatusPage("12 services");
 
-        Assert.Equal(string.Format(Strings.railworks_directory.CurrentValue, "/games/RailWorks"), statusBar.StatusText);
+        navigation.CurrentPage.Returns(page);
+        navigation.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(navigation, new PropertyChangedEventArgs(nameof(INavigationService.CurrentPage)));
 
-        try
+        Assert.Equal("12 services", statusBar.StatusText);
+    }
+
+    [Fact]
+    public void StatusBar_FollowsTheStatusOfThePageItShows()
+    {
+        var navigation = Substitute.For<INavigationService>();
+        var statusBar = new StatusBarViewModel(navigation);
+        var page = new StatusPage("12 services");
+        var changed = new List<string?>();
+
+        navigation.CurrentPage.Returns(page);
+        navigation.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(navigation, new PropertyChangedEventArgs(nameof(INavigationService.CurrentPage)));
+        statusBar.PropertyChanged += (_, args) => changed.Add(args.PropertyName);
+
+        page.Update("12 services · 2 selected");
+
+        Assert.Contains(nameof(StatusBarViewModel.StatusText), changed);
+        Assert.Equal("12 services · 2 selected", statusBar.StatusText);
+    }
+
+    private sealed class StatusPage(string status) : ViewModelBase
+    {
+        private string _status = status;
+
+        public override string StatusText => _status;
+
+        public void Update(string status)
         {
-            TranslationProvider.SetCulture(CultureInfo.GetCultureInfo("de-DE"));
-
-            Assert.Equal("Railworks-Verzeichnis - /games/RailWorks", statusBar.StatusText);
-        }
-        finally
-        {
-            TranslationProvider.SetCulture(previous);
+            _status = status;
+            OnPropertyChanged(nameof(StatusText));
         }
     }
 }
