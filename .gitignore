@@ -43,6 +43,7 @@ msbuild.wrn
 
 build/*
 !build/PKGBUILD
+!build/install.sh
 
 # .NET artifacts output (UseArtifactsOutput)
 artifacts/

@@ -35,9 +35,10 @@ CI builds and tests the solution on Windows in Debug and Release.
 [build/PKGBUILD](build/PKGBUILD) builds the `railworks-forge-git` package from the GitHub repository. It installs the app to `/opt/railworks-forge` along with a desktop entry.
 
 ```bash
-cd build
-makepkg -si
+build/install.sh
 ```
+
+The script runs `makepkg -si` on a copy of the PKGBUILD in a temporary directory and deletes it afterwards, so the clone, build trees and package file don't pile up in `build/`. Extra arguments are passed to `makepkg`.
 
 ## Project layout
 
