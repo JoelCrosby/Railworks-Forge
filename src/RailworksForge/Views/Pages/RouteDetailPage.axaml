@@ -111,20 +111,23 @@
                         </i:Interaction.Behaviors>
 
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.completed}}" SortMemberPath="PlayerInfo.Completion">
+                            <!-- Completion is marked beside the name; a fixed slot keeps names aligned on rows without it. -->
+                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" SortMemberPath="Scenario.Name">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="vm:ScenarioRowViewModel">
-                                        <Viewbox Classes="cell-icon"
-                                                 IsVisible="{Binding PlayerInfo.Completion, Converter={x:Static converters:ValueConverters.IsCompleteConverter}}"
-                                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.completed}}">
-                                            <components:LucideIcon Icon="CircleCheckBig"
-                                                                   StrokeBrush="{DynamicResource SuccessBrush}" />
-                                        </Viewbox>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,0">
+                                            <Panel Width="14" VerticalAlignment="Center">
+                                                <Viewbox Classes="inline-icon success"
+                                                         IsVisible="{Binding IsCompleted}"
+                                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.completed}}">
+                                                    <components:LucideIcon Icon="CircleCheckBig" />
+                                                </Viewbox>
+                                            </Panel>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Scenario.Name}" />
+                                        </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Scenario.Name}" />
                             <!-- The thumbnail is not sortable, so pairing it with the name keeps sorting by locomotive intact. -->
                             <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.locomotive}}" SortMemberPath="Scenario.Locomotive">
                                 <DataGridTemplateColumn.CellTemplate>

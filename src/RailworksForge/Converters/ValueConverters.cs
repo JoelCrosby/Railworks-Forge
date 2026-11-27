@@ -15,15 +15,6 @@ public static class ValueConverters
 {
     private const int MaximumRating = 5;
 
-    public static FuncValueConverter<string?, bool> IsCompleteConverter { get; } = new (value =>
-    {
-        return value switch
-        {
-            "CompletedSuccessfully" => true,
-            _ => false,
-        };
-    });
-
     public static FuncValueConverter<int, string> DurationConverter { get; } = new (minutes =>
     {
         var hours = minutes / 60;
