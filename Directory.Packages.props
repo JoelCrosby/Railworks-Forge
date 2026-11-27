@@ -31,7 +31,6 @@
     <PackageVersion Include="Dameng.SepEx" Version="0.3.1" />
     <PackageVersion Include="Gameloop.Vdf" Version="0.6.2" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0" />
     <PackageVersion Include="Polly" Version="8.9.1" />
     <PackageVersion Include="Sep" Version="0.18.0" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />

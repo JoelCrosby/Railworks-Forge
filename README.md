@@ -20,7 +20,7 @@ A desktop app for managing Train Simulator (RailWorks) routes, scenarios, consis
 
 ## Building
 
-The app uses .NET 10 and Avalonia.
+The app uses .NET 11 and Avalonia.
 
 ```bash
 dotnet build RailworksForge.slnx
