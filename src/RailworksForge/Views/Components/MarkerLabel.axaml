@@ -1,0 +1,34 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:RailworksForge.Views.Components">
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="16">
+            <Button Classes="chip on"><components:MarkerLabel Text="English" IsMarked="True" /></Button>
+            <Button Classes="chip"><components:MarkerLabel Text="German" IsMarked="True" /></Button>
+            <Button Classes="chip"><components:MarkerLabel Text="French" /></Button>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- Chip content with a dot that fills in to mark the item, e.g. a language that already has text. -->
+    <Style Selector="components|MarkerLabel">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="7">
+                    <Ellipse Name="PART_Marker"
+                             Width="7"
+                             Height="7"
+                             VerticalAlignment="Center"
+                             StrokeThickness="1"
+                             Stroke="{DynamicResource TextMutedBrush}" />
+                    <TextBlock VerticalAlignment="Center" Text="{TemplateBinding Text}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="components|MarkerLabel[IsMarked=True] /template/ Ellipse#PART_Marker">
+        <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Stroke" Value="{DynamicResource AccentBrush}" />
+    </Style>
+</Styles>

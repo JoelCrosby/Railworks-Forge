@@ -28,6 +28,17 @@ public record Route
 
     public string TracksBinaryPath => Path.Join(DirectoryPath, "Networks", "Tracks.bin");
 
+    // A loose file already on disk may differ in case from the expected name, and edits must replace that copy.
+    public string LoosePropertiesPath
+    {
+        get
+        {
+            var expectedPath = Path.Join(DirectoryPath, "RouteProperties.xml");
+
+            return Paths.GetActualPathFromInsensitive(expectedPath) ?? expectedPath;
+        }
+    }
+
     public string BackupDirectory => Path.Join(Paths.GetConfigurationFolder(), "backups", "routes", Id);
 
     public virtual bool Equals(Route? other)
@@ -55,8 +66,7 @@ public record Route
     // Only the files a track replacement rewrites; anything not loose is still intact inside the route archives.
     public void CreateBackup()
     {
-        var routePropertiesPath = Path.Join(DirectoryPath, "RouteProperties.xml");
-        var loosePaths = new[] { TracksBinaryPath, routePropertiesPath }.Where(File.Exists).ToList();
+        var loosePaths = new[] { TracksBinaryPath, LoosePropertiesPath }.Where(File.Exists).ToList();
 
         if (loosePaths.Count is 0)
         {

@@ -22,6 +22,7 @@ namespace RailworksForge.ViewModels;
 public partial class RouteDetailViewModel(
     RouteViewModel route,
     IScenarioService scenarioService,
+    IRouteService routeService,
     ITrackService trackService,
     IImageService images,
     INavigationService navigation,
@@ -256,6 +257,31 @@ public partial class RouteDetailViewModel(
         }
 
         await Loading.RunAsync(Strings.replacing_tracks.CurrentValue, _ => trackService.ReplaceTracks(Route.Model, request));
+    }
+
+    [RelayCommand]
+    private async Task EditRouteDetails()
+    {
+        var details = await Loading.LoadAsync(Strings.loading_details.CurrentValue, _ => routeService.GetDetails(Route.Model));
+
+        if (details is null)
+        {
+            return;
+        }
+
+        var dialog = new EditRouteDetailsViewModel(Route.Id, details);
+        var edited = await dialogs.Show(dialog);
+
+        if (edited is null)
+        {
+            return;
+        }
+
+        await Loading.RunAsync(
+            Strings.saving_route_details.CurrentValue,
+            _ => routeService.UpdateDetails(Route.Model, edited),
+            Route.Update,
+            allowRetry: false);
     }
 
     [RelayCommand]

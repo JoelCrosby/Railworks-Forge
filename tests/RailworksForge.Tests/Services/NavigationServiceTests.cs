@@ -89,4 +89,30 @@ public class NavigationServiceTests
 
         Assert.Same(routesPage, _navigation.CurrentPage);
     }
+
+    [Fact]
+    public void UpdateCurrentScenario_ReplacesTheScenarioWithTheSameId()
+    {
+        var scenario = TestData.Scenario();
+        var renamed = scenario with { Name = "1A01 Euston - Glasgow (Sundays)" };
+        var changed = new List<string?>();
+        _navigation.CurrentScenario = scenario;
+        _navigation.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        _navigation.UpdateCurrentScenario(renamed);
+
+        Assert.Same(renamed, _navigation.CurrentScenario);
+        Assert.Contains(nameof(NavigationService.CurrentScenario), changed);
+    }
+
+    [Fact]
+    public void UpdateCurrentScenario_IgnoresAnotherScenario()
+    {
+        var scenario = TestData.Scenario();
+        _navigation.CurrentScenario = scenario;
+
+        _navigation.UpdateCurrentScenario(TestData.Scenario("1S96 Willesden - Shieldmuir"));
+
+        Assert.Same(scenario, _navigation.CurrentScenario);
+    }
 }

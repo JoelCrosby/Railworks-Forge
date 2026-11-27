@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+        xmlns:components="using:RailworksForge.Views.Components"
+        xmlns:design="using:RailworksForge.DesignData"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="580" d:DesignHeight="420"
+        x:Class="RailworksForge.Views.Dialogs.EditRouteDetailsDialog"
+        x:DataType="vm:EditRouteDetailsViewModel"
+        Width="580"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="{echoes:Translate {x:Static translations:Strings.edit_route_details_title}}">
+
+    <Design.DataContext>
+        <x:Static Member="design:DesignViewModels.EditRouteDetails" />
+    </Design.DataContext>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding DismissCommand}" />
+    </Window.KeyBindings>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="24,20,24,12" Spacing="2">
+            <TextBlock Classes="heading" Text="{echoes:Translate {x:Static translations:Strings.edit_route_details_heading}}" />
+            <TextBlock Classes="muted caption" Text="{echoes:Translate {x:Static translations:Strings.edit_route_details_hint}}" />
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="24,12">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
+                    <Button Classes="primary" IsDefault="True" Command="{Binding SaveCommand}" Content="{echoes:Translate {x:Static translations:Strings.save_route}}" />
+                </StackPanel>
+                <TextBlock VerticalAlignment="Center" Classes="caption"
+                           Foreground="{DynamicResource DangerBrush}"
+                           IsVisible="{Binding !HasName}"
+                           Text="{echoes:Translate {x:Static translations:Strings.details_name_required}}" />
+            </DockPanel>
+        </Border>
+
+        <StackPanel Margin="24,0,24,20" Spacing="14">
+            <Border Classes="warning-notice">
+                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.route_details_backup_warning}}" />
+            </Border>
+            <Border Classes="warning-notice" IsVisible="{Binding IsLocked}">
+                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.details_locked_warning}}" />
+            </Border>
+            <Border Classes="warning-notice" IsVisible="{Binding IsWorkshopItem}">
+                <TextBlock Text="{echoes:Translate {x:Static translations:Strings.details_workshop_warning_route}}" />
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Languages.Options}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:LanguageOptionViewModel">
+                        <Button Classes="chip" Classes.on="{Binding IsSelected}"
+                                Command="{Binding $parent[ItemsControl].((vm:EditRouteDetailsViewModel)DataContext).SelectLanguageCommand}"
+                                CommandParameter="{Binding Language}">
+                            <components:MarkerLabel Text="{Binding Label}" IsMarked="{Binding HasText}" />
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Spacing="4">
+                <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.name}}" />
+                <TextBox Text="{Binding Name}" />
+                <Border Classes="field-hint" IsVisible="{Binding NameFallback, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding NameFallback}" />
+                </Border>
+            </StackPanel>
+
+            <Border Classes="field-hint" Padding="10,8">
+                <WrapPanel ItemSpacing="18" LineSpacing="4">
+                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasAuthoredLanguage}">
+                        <TextBlock Text="{echoes:Translate {x:Static translations:Strings.authored_language}}" />
+                        <TextBlock Foreground="{DynamicResource TextPrimaryBrush}" Text="{Binding AuthoredLanguage}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{echoes:Translate {x:Static translations:Strings.identifier}}" />
+                        <TextBlock Foreground="{DynamicResource TextPrimaryBrush}" Text="{Binding RouteId}" />
+                    </StackPanel>
+                </WrapPanel>
+            </Border>
+        </StackPanel>
+    </DockPanel>
+
+</Window>

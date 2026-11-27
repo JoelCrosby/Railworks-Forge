@@ -9,6 +9,7 @@ public enum ScenarioChangeKind
     DeleteVehicle,
     MoveVehicle,
     FlipVehicle,
+    EditDetails,
 }
 
 // The UI words each change itself, so Core only reports what changed and which service it touched.

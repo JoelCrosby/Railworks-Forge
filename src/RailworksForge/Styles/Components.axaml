@@ -9,6 +9,7 @@
     <StyleInclude Source="avares://RailworksForge/Views/Components/EmptyState.axaml" />
     <StyleInclude Source="avares://RailworksForge/Views/Components/IconLabel.axaml" />
     <StyleInclude Source="avares://RailworksForge/Views/Components/LoadingSpinner.axaml" />
+    <StyleInclude Source="avares://RailworksForge/Views/Components/MarkerLabel.axaml" />
     <StyleInclude Source="avares://RailworksForge/Views/Components/PageHeader.axaml" />
     <StyleInclude Source="avares://RailworksForge/Views/Components/PendingChangesBar.axaml" />
     <StyleInclude Source="avares://RailworksForge/Views/Components/RouteCard.axaml" />

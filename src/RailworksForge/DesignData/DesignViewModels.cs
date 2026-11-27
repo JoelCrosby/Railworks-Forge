@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
 using RailworksForge.Core.Routes;
+using RailworksForge.Core.Scenarios;
 using RailworksForge.Services;
 using RailworksForge.ViewModels;
 
@@ -72,6 +75,29 @@ public static class DesignViewModels
         Name = "Class 390 'Pendolino'",
         LocomotiveName = "Class 390 'Pendolino'",
     };
+
+    public static EditScenarioDetailsViewModel EditScenarioDetails => new(new ScenarioDetails
+    {
+        Name = LocalisedText.From(
+            (GameLanguage.English, "[DWA] IR 1831: Dej Calatori - Beclean pe Somes"),
+            (GameLanguage.German, "[DWA] IR 1831: Dej Calatori - Beclean pe Someș")),
+        Description = LocalisedText.From((GameLanguage.English, "<supply description>")),
+        Briefing = LocalisedText.From((GameLanguage.English, "<supply briefing>")),
+        StartLocation = LocalisedText.From((GameLanguage.English, "Dej Calatori")),
+        DurationMinutes = 50,
+        Rating = 4,
+        Season = ScenarioSeason.Summer,
+        StartDate = new DateOnly(2010, 7, 1),
+        StartTime = new TimeSpan(14, 14, 0),
+        ScenarioClass = ScenarioClass.Standard,
+    });
+
+    public static EditRouteDetailsViewModel EditRouteDetails => new("fc8df6e1-dc30-4efc-92a6-2fe065b39826", new RouteDetails
+    {
+        Name = LocalisedText.From((GameLanguage.English, "Tirol Austria"), (GameLanguage.German, "Tirol Österreich")),
+        AuthoredLanguage = "en",
+        IsLocked = true,
+    });
 
     public static ReplaceConsistViewModel ReplaceConsist => DesignServices.Create<ReplaceConsistViewModel>();
 

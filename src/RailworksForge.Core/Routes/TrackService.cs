@@ -30,7 +30,7 @@ public class TrackService : ITrackService
         route.CreateBackup();
 
         await WriteTracksDocument(updatedDocument, route);
-        await WriteRoutePropertiesDocument(updatedPropertiesDocument, route);
+        await RouteWriter.WritePropertiesDocument(route, updatedPropertiesDocument);
     }
 
     private static IDocument UpdateProperties(IDocument document, ReplaceTracksRequest request)
@@ -104,19 +104,6 @@ public class TrackService : ITrackService
         var binaryDestination = Path.Join(destinationDirectory, "Tracks.bin");
 
         File.Copy(output.OutputPath, binaryDestination, true);
-    }
-
-    private static async Task WriteRoutePropertiesDocument(IDocument document, Route route)
-    {
-        Directory.CreateDirectory(Paths.GetCacheFolder());
-
-        var destination = Path.Join(Paths.GetCacheFolder(), "RouteProperties.xml");
-
-        await document.ToXmlAsync(destination);
-
-        var documentDestination = Path.Join(route.DirectoryPath, "RouteProperties.xml");
-
-        File.Copy(destination, documentDestination, true);
     }
 
     public Task<List<TrackBlueprint>> GetRouteTrackBlueprints(Route route)

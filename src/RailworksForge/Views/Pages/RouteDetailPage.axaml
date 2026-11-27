@@ -47,6 +47,7 @@
                                 <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
                                 <Separator />
                                 <MenuItem Header="{echoes:Translate {x:Static translations:Strings.changes_route_files}}" IsEnabled="False" />
+                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.edit_route_details}}" Command="{Binding EditRouteDetailsCommand}" />
                                 <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_track_action}}"
                                           Foreground="{DynamicResource WarningTextBrush}"
                                           Command="{Binding ReplaceTrackCommand}" />

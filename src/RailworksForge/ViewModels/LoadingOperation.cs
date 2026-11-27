@@ -103,6 +103,16 @@ public partial class LoadingOperation : ObservableObject
         }
     }
 
+    // Null when the load failed or was cancelled; the failure is shown like any other.
+    public async Task<T?> LoadAsync<T>(string message, Func<CancellationToken, Task<T>> load) where T : class
+    {
+        T? loaded = null;
+
+        await RunAsync(message, load, result => loaded = result, allowRetry: false);
+
+        return loaded;
+    }
+
     public Task RunAsync(string message, Func<CancellationToken, Task> work)
     {
         return RunAsync(message, async token =>

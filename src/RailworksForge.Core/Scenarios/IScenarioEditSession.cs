@@ -31,4 +31,8 @@ public interface IScenarioEditSession
     Task ReplaceConsists(IEnumerable<Consist> targets, PreloadConsist replacement);
 
     Task DeleteConsists(IEnumerable<Consist> targets);
+
+    ScenarioDetails GetDetails();
+
+    Task UpdateDetails(ScenarioDetails details);
 }

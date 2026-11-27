@@ -7,4 +7,8 @@ public interface IRouteService
     void InvalidateRoutes();
 
     Task<List<Route>> GetRoutes();
+
+    Task<RouteDetails> GetDetails(Route route);
+
+    Task<Route> UpdateDetails(Route route, RouteDetails details);
 }

@@ -104,7 +104,7 @@
         <Setter Property="Opacity" Value="0.55" />
     </Style>
 
-    <Style Selector="ComboBox">
+    <Style Selector="ComboBox, TextBox, NumericUpDown, CalendarDatePicker, TimePicker">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
     </Style>
 
@@ -132,6 +132,45 @@
 
     <Style Selector="TextBlock.caption">
         <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+    </Style>
+
+    <!-- Notices inside dialogs: a warning about what saving affects, and a muted hint beside a field. -->
+    <Style Selector="Border.warning-notice">
+        <Setter Property="Background" Value="{DynamicResource WarningSubtleBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource WarningBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="Border.warning-notice TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource WarningForegroundBrush}" />
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="Border.field-hint">
+        <Setter Property="Background" Value="{DynamicResource SurfaceSunkenBrush}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style Selector="Border.field-hint TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBlock.field-label">
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="TextBlock.group-label">
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="LetterSpacing" Value="0.6" />
     </Style>
 
     <Style Selector="MenuFlyoutPresenter">

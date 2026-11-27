@@ -29,8 +29,12 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private readonly ISavedConsistService _savedConsists;
     private readonly BackgroundImageLoader _imageLoader = new();
 
-    [ObservableProperty]
-    public partial Scenario Scenario { get; private set; }
+    // Compared by reference: a scenario equals any other with the same id, so an edited one would otherwise be ignored.
+    public Scenario Scenario
+    {
+        get;
+        private set => SetProperty(ref field, value, ReferenceEqualityComparer.Instance);
+    }
 
     [ObservableProperty]
     public partial string? SearchTerm { get; set; }
@@ -141,13 +145,19 @@ public partial class ScenarioDetailViewModel : ViewModelBase
     private void ShowServices(List<ConsistViewModel> services)
     {
         Editor.Update();
-        Scenario = Editor.Scenario;
+        ShowScenario(Editor.Scenario);
         Services.Reset(services);
         OnPropertyChanged(nameof(StatusText));
         _imageLoader.Load(
             services,
             service => _images.GetConsistImage(service.Consist),
             ShowServiceImage);
+    }
+
+    private void ShowScenario(Scenario scenario)
+    {
+        Scenario = scenario;
+        _navigation.UpdateCurrentScenario(scenario);
     }
 
     private void ShowServiceImage(ConsistViewModel service, Bitmap image)
@@ -168,7 +178,7 @@ public partial class ScenarioDetailViewModel : ViewModelBase
         return Loading.RunAsync(Strings.applying_changes.CurrentValue, Editor.Apply, applied =>
         {
             Editor.Update();
-            Scenario = Editor.Scenario;
+            ShowScenario(Editor.Scenario);
 
             if (!applied)
             {
@@ -252,6 +262,32 @@ public partial class ScenarioDetailViewModel : ViewModelBase
 
             return Task.CompletedTask;
         });
+    }
+
+    [RelayCommand]
+    private async Task EditDetails()
+    {
+        var details = await Loading.LoadAsync(Strings.loading_details.CurrentValue, async token =>
+        {
+            var session = await Editor.GetSession(token);
+
+            return session.GetDetails();
+        });
+
+        if (details is null)
+        {
+            return;
+        }
+
+        var dialog = new EditScenarioDetailsViewModel(details);
+        var edited = await _dialogs.Show(dialog);
+
+        if (edited is null)
+        {
+            return;
+        }
+
+        await Edit(session => session.UpdateDetails(edited));
     }
 
     [RelayCommand(CanExecute = nameof(HasSingleSelectedService))]

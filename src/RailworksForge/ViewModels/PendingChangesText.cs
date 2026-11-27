@@ -42,6 +42,7 @@ public static class PendingChangesText
             ScenarioChangeKind.DeleteVehicle => Format(Strings.change_deleted_vehicle.CurrentValue, change.ServiceName),
             ScenarioChangeKind.MoveVehicle => Format(Strings.change_moved_vehicle.CurrentValue, change.ServiceName),
             ScenarioChangeKind.FlipVehicle => Format(Strings.change_flipped_vehicle.CurrentValue, change.ServiceName),
+            ScenarioChangeKind.EditDetails => Strings.change_edited_details.CurrentValue,
             _ => string.Empty,
         };
     }

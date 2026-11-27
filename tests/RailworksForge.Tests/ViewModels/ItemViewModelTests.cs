@@ -53,4 +53,17 @@ public class ItemViewModelTests
         Assert.Same(updated, row.PlayerInfo);
         Assert.Contains(nameof(ScenarioRowViewModel.PlayerInfo), changed);
     }
+
+    [Fact]
+    public void Route_UpdateReplacesTheModelAndName()
+    {
+        var route = new RouteViewModel(TestData.Route());
+        var renamed = route.Model with { Name = "WCML South" };
+
+        route.Update(renamed);
+
+        Assert.Same(renamed, route.Model);
+        Assert.Equal("WCML South", route.Name);
+        Assert.Equal("wcml south", route.SearchIndex);
+    }
 }

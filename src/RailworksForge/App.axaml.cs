@@ -106,5 +106,7 @@ public class App : Application
         ViewLocator.Register<ReplaceConsistViewModel, ReplaceConsistDialog>();
         ViewLocator.Register<ReplaceTrackViewModel, ReplaceTrackDialog>();
         ViewLocator.Register<SaveConsistViewModel, SaveConsistDialog>();
+        ViewLocator.Register<EditScenarioDetailsViewModel, EditScenarioDetailsDialog>();
+        ViewLocator.Register<EditRouteDetailsViewModel, EditRouteDetailsDialog>();
     }
 }

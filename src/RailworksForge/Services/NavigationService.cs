@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,8 +25,12 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
     [ObservableProperty]
     public partial RouteViewModel? CurrentRoute { get; set; }
 
-    [ObservableProperty]
-    public partial Scenario? CurrentScenario { get; set; }
+    // Compared by reference: a scenario equals any other with the same id, so an edited one would otherwise be ignored.
+    public Scenario? CurrentScenario
+    {
+        get;
+        set => SetProperty(ref field, value, ReferenceEqualityComparer.Instance);
+    }
 
     [ObservableProperty]
     public partial Consist? CurrentConsist { get; set; }
@@ -60,6 +65,15 @@ public partial class NavigationService(IServiceProvider services) : ObservableOb
         _scenarioPage = Create<ScenarioDetailViewModel>(scenario);
 
         Show(_scenarioPage);
+    }
+
+    // Keeps the breadcrumb in step after the scenario's details are edited.
+    public void UpdateCurrentScenario(Scenario scenario)
+    {
+        if (CurrentScenario is not null && CurrentScenario.Equals(scenario))
+        {
+            CurrentScenario = scenario;
+        }
     }
 
     public IScenarioEditor? CurrentEditor => CurrentScenario is null ? null : _scenarioPage?.Editor;

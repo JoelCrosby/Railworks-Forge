@@ -41,6 +41,34 @@ public class RouteService : IRouteService
         }
     }
 
+    public async Task<RouteDetails> GetDetails(Route route)
+    {
+        var document = await GetPropertiesDocument(route);
+
+        return RouteDetails.Read(document);
+    }
+
+    public async Task<Route> UpdateDetails(Route route, RouteDetails details)
+    {
+        var document = await GetPropertiesDocument(route);
+
+        details.Write(document);
+        route.CreateBackup();
+
+        await RouteWriter.WritePropertiesDocument(route, document);
+
+        InvalidateRoutes();
+
+        return route with { Name = details.Name.DisplayText };
+    }
+
+    private static async Task<IDocument> GetPropertiesDocument(Route route)
+    {
+        var document = await route.GetRoutePropertiesDocument();
+
+        return document ?? throw new Exception($"could not read the route properties for {route.Name}");
+    }
+
     private static List<Route> ReadRoutes()
     {
         var baseDir = Paths.GetRoutesDirectory();

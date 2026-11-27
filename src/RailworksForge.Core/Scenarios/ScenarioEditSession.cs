@@ -20,12 +20,15 @@ public sealed class ScenarioEditSession : IScenarioEditSession
     private readonly SemaphoreSlim _editLock = new(1, 1);
     private EditState _state;
     private DateTime? _savedVersion;
+    private ScenarioDetails _savedDetails;
     private List<ScenarioChange> _changes = [];
+    private bool _hasBinaryChanges;
 
     private ScenarioEditSession(EditState state)
     {
         _state = state;
         _savedVersion = state.Scenario.SavedVersion;
+        _savedDetails = ScenarioDetails.Read(state.ScenarioPropertiesDocument);
     }
 
     public Scenario Scenario => _state.Scenario;
@@ -209,6 +212,47 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         return Run(new DeleteConsist(new TargetConsist(targetList)), change);
     }
 
+    public ScenarioDetails GetDetails()
+    {
+        return ScenarioDetails.Read(_state.ScenarioPropertiesDocument);
+    }
+
+    // Editing the details again replaces the earlier details change, so the pending changes list them once.
+    public async Task UpdateDetails(ScenarioDetails details)
+    {
+        await _editLock.WaitAsync();
+
+        try
+        {
+            var state = _state;
+            var current = ScenarioDetails.Read(state.ScenarioPropertiesDocument);
+
+            if (details == current)
+            {
+                return;
+            }
+
+            var properties = Copy(state.ScenarioPropertiesDocument);
+            details.Write(properties, current);
+
+            _state = state with
+            {
+                Scenario = details.ApplyTo(state.Scenario),
+                ScenarioPropertiesDocument = properties,
+            };
+
+            var otherChanges = _changes.Where(change => change.Kind is not ScenarioChangeKind.EditDetails);
+            var isBackToSaved = details == _savedDetails;
+            var detailsChange = new ScenarioChange(ScenarioChangeKind.EditDetails, string.Empty, 1);
+
+            _changes = isBackToSaved ? [..otherChanges] : [..otherChanges, detailsChange];
+        }
+        finally
+        {
+            _editLock.Release();
+        }
+    }
+
     private static string DescribeTargets(List<Consist> targets)
     {
         var isSingleTarget = targets.Count is 1;
@@ -230,9 +274,11 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         }
     }
 
+    // Scenario.bin is only rewritten when a consist was edited; converting it back to a binary is the slow part.
     private async Task ApplyEdits()
     {
-        var document = await GetDocument();
+        var hasBinaryChanges = _hasBinaryChanges;
+        var document = hasBinaryChanges ? await GetDocument() : null;
         var state = _state;
         var scenario = state.Scenario;
 
@@ -245,14 +291,20 @@ public sealed class ScenarioEditSession : IScenarioEditSession
 
         scenario.CreateBackup();
 
-        await ScenarioWriter.WriteBinary(scenario, document);
+        if (document is not null)
+        {
+            await ScenarioWriter.WriteBinary(scenario, document);
+        }
+
         await ScenarioWriter.WritePropertiesDocument(scenario, state.ScenarioPropertiesDocument);
 
         Cache.ClearScenarioCache(scenario);
 
         _state = state with { Scenario = scenario.Refresh() ?? scenario };
         _savedVersion = _state.Scenario.SavedVersion;
+        _savedDetails = ScenarioDetails.Read(state.ScenarioPropertiesDocument);
         _changes = [];
+        _hasBinaryChanges = false;
     }
 
     // A command can fail part way through, e.g. on the second of several replacements, so it runs against a copy
@@ -283,6 +335,7 @@ public sealed class ScenarioEditSession : IScenarioEditSession
                 Consists = new Lazy<List<ScenarioNode>>(() => ScenarioNode.ReadConsists(working.ScenarioDocument)),
             };
             _changes = [.._changes, change];
+            _hasBinaryChanges = true;
         }
         finally
         {

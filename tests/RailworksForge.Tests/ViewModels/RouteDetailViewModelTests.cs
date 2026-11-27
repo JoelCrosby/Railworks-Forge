@@ -1,5 +1,7 @@
 using NSubstitute;
 
+using RailworksForge.Core.Common;
+
 using RailworksForge.Core.Routes;
 using RailworksForge.Core.Scenarios;
 using RailworksForge.Services;
@@ -12,6 +14,7 @@ public class RouteDetailViewModelTests
 {
     private readonly RouteViewModel _route = new(TestData.Route());
     private readonly IScenarioService _scenarios = Substitute.For<IScenarioService>();
+    private readonly IRouteService _routes = Substitute.For<IRouteService>();
     private readonly ITrackService _tracks = Substitute.For<ITrackService>();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
@@ -28,6 +31,7 @@ public class RouteDetailViewModelTests
         _page = new RouteDetailViewModel(
             _route,
             _scenarios,
+            _routes,
             _tracks,
             Substitute.For<IImageService>(),
             _navigation,
@@ -194,6 +198,46 @@ public class RouteDetailViewModelTests
         await _page.ReplaceTrackCommand.ExecuteAsync(null);
 
         await _tracks.DidNotReceiveWithAnyArgs().ReplaceTracks(default!, default!);
+    }
+
+    [Fact]
+    public async Task EditRouteDetails_SavesTheEditedDetailsAndRenamesTheRoute()
+    {
+        var details = new RouteDetails { Name = LocalisedText.From((GameLanguage.English, "West Coast Main Line")) };
+        var edited = details with { Name = LocalisedText.From((GameLanguage.English, "WCML South")) };
+        var renamed = _route.Model with { Name = "WCML South" };
+        _routes.GetDetails(_route.Model).Returns(details);
+        _dialogs.Show(Arg.Any<EditRouteDetailsViewModel>()).Returns(edited);
+        _routes.UpdateDetails(_route.Model, edited).Returns(renamed);
+
+        await _page.EditRouteDetailsCommand.ExecuteAsync(null);
+
+        await _routes.Received(1).UpdateDetails(Arg.Any<Route>(), edited);
+        Assert.Equal("WCML South", _route.Name);
+        Assert.Equal("wcml south", _route.SearchIndex);
+    }
+
+    [Fact]
+    public async Task EditRouteDetails_CancelledDialog_SavesNothing()
+    {
+        var details = new RouteDetails { Name = LocalisedText.From((GameLanguage.English, "West Coast Main Line")) };
+        _routes.GetDetails(_route.Model).Returns(details);
+        _dialogs.Show(Arg.Any<EditRouteDetailsViewModel>()).Returns((RouteDetails?)null);
+
+        await _page.EditRouteDetailsCommand.ExecuteAsync(null);
+
+        await _routes.DidNotReceiveWithAnyArgs().UpdateDetails(default!, default!);
+    }
+
+    [Fact]
+    public async Task EditRouteDetails_ShowsAFailedLoadWithoutOpeningTheDialog()
+    {
+        _routes.GetDetails(_route.Model).Returns(Task.FromException<RouteDetails>(new IOException("archive is locked")));
+
+        await _page.EditRouteDetailsCommand.ExecuteAsync(null);
+
+        Assert.Equal("archive is locked", _page.Loading.ErrorMessage);
+        await _dialogs.DidNotReceiveWithAnyArgs().Show(Arg.Any<EditRouteDetailsViewModel>());
     }
 
     [Fact]

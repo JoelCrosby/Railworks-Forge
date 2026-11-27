@@ -1,0 +1,170 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
+        xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
+        xmlns:converters="clr-namespace:RailworksForge.Converters"
+        xmlns:components="using:RailworksForge.Views.Components"
+        xmlns:design="using:RailworksForge.DesignData"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:RailworksForge.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="660" d:DesignHeight="760"
+        x:Class="RailworksForge.Views.Dialogs.EditScenarioDetailsDialog"
+        x:DataType="vm:EditScenarioDetailsViewModel"
+        Width="660"
+        SizeToContent="Height"
+        MaxHeight="860"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="{echoes:Translate {x:Static translations:Strings.edit_scenario_details_title}}">
+
+    <Design.DataContext>
+        <x:Static Member="design:DesignViewModels.EditScenarioDetails" />
+    </Design.DataContext>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding DismissCommand}" />
+    </Window.KeyBindings>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="24,20,24,12" Spacing="2">
+            <TextBlock Classes="heading" Text="{echoes:Translate {x:Static translations:Strings.edit_scenario_details}}" />
+            <TextBlock Classes="muted caption" Text="{echoes:Translate {x:Static translations:Strings.edit_scenario_details_hint}}" />
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="24,12">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding DismissCommand}" Content="{echoes:Translate {x:Static translations:Strings.cancel}}" />
+                    <Button Classes="primary" IsDefault="True" Command="{Binding ApplyCommand}" Content="{echoes:Translate {x:Static translations:Strings.apply}}" />
+                </StackPanel>
+                <TextBlock VerticalAlignment="Center" Classes="caption"
+                           Foreground="{DynamicResource DangerBrush}"
+                           IsVisible="{Binding !HasName}"
+                           Text="{echoes:Translate {x:Static translations:Strings.details_name_required}}" />
+                <TextBlock VerticalAlignment="Center" Classes="muted caption"
+                           IsVisible="{Binding HasName}"
+                           Text="{echoes:Translate {x:Static translations:Strings.details_languages_hint}}" />
+            </DockPanel>
+        </Border>
+
+        <ScrollViewer>
+            <StackPanel Margin="24,0,24,20" Spacing="14">
+                <Border Classes="warning-notice" IsVisible="{Binding IsWorkshopItem}">
+                    <TextBlock Text="{echoes:Translate {x:Static translations:Strings.details_workshop_warning_scenario}}" />
+                </Border>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="group-label" Text="{echoes:Translate {x:Static translations:Strings.details_text_section}}" />
+                    <ItemsControl ItemsSource="{Binding Languages.Options}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:LanguageOptionViewModel">
+                                <Button Classes="chip" Classes.on="{Binding IsSelected}"
+                                        Command="{Binding $parent[ItemsControl].((vm:EditScenarioDetailsViewModel)DataContext).SelectLanguageCommand}"
+                                        CommandParameter="{Binding Language}">
+                                    <components:MarkerLabel Text="{Binding Label}" IsMarked="{Binding HasText}" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.name}}" />
+                    <TextBox Text="{Binding Name}" />
+                    <Border Classes="field-hint" IsVisible="{Binding NameFallback, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="{Binding NameFallback}" />
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.start_location}}" />
+                    <TextBox Text="{Binding StartLocation}" />
+                    <Border Classes="field-hint" IsVisible="{Binding StartLocationFallback, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="{Binding StartLocationFallback}" />
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.description}}" />
+                    <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64" MaxHeight="140" />
+                    <Border Classes="warning-notice" Padding="8,4" IsVisible="{Binding IsDescriptionPlaceholder}">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="ghost small" Command="{Binding ClearDescriptionCommand}"
+                                    Content="{echoes:Translate {x:Static translations:Strings.clear_text}}" />
+                            <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.details_placeholder_hint}}" />
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.briefing}}" />
+                    <TextBox Text="{Binding Briefing}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="88" MaxHeight="200" />
+                    <Border Classes="warning-notice" Padding="8,4" IsVisible="{Binding IsBriefingPlaceholder}">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="ghost small" Command="{Binding ClearBriefingCommand}"
+                                    Content="{echoes:Translate {x:Static translations:Strings.clear_text}}" />
+                            <TextBlock VerticalAlignment="Center" Text="{echoes:Translate {x:Static translations:Strings.details_placeholder_hint}}" />
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource DividerBrush}" />
+
+                <TextBlock Classes="group-label" Text="{echoes:Translate {x:Static translations:Strings.details_settings_section}}" />
+
+                <Grid ColumnDefinitions="*,12,*,12,*" RowDefinitions="Auto,14,Auto">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                        <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.duration_minutes}}" />
+                        <NumericUpDown Value="{Binding DurationMinutes}" Minimum="0" Maximum="1440" Increment="5" FormatString="0" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4">
+                        <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.rating}}" />
+                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding RatingOptions}" SelectedItem="{Binding SelectedRating}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="vm:RatingOption">
+                                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource AccentBrush}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="4" Spacing="4">
+                        <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.season}}" />
+                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SeasonOptions}" SelectedItem="{Binding SelectedSeason}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="vm:SeasonOption">
+                                    <TextBlock Text="{Binding Label}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4">
+                        <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.start_date}}" />
+                        <CalendarDatePicker HorizontalAlignment="Stretch" SelectedDate="{Binding StartDate}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" Spacing="4">
+                        <TextBlock Classes="field-label" Text="{echoes:Translate {x:Static translations:Strings.start_time}}" />
+                        <TimePicker SelectedTime="{Binding StartTime}" ClockIdentifier="24HourClock" UseSeconds="True" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Classes="field-hint" Padding="10,8">
+                    <WrapPanel ItemSpacing="18" LineSpacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{echoes:Translate {x:Static translations:Strings.scenario_class}}" />
+                            <TextBlock Foreground="{DynamicResource TextPrimaryBrush}"
+                                       Text="{Binding ScenarioClass, Converter={x:Static converters:ValueConverters.ScenarioClassConverter}}" />
+                        </StackPanel>
+                    </WrapPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+
+</Window>

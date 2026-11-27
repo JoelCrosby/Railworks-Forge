@@ -26,6 +26,8 @@ public interface INavigationService : INotifyPropertyChanged
 
     void ShowScenario(Scenario scenario);
 
+    void UpdateCurrentScenario(Scenario scenario);
+
     void ShowConsist(IScenarioEditor editor, Consist consist);
 
     void ShowSettings();

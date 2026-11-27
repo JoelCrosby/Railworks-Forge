@@ -209,6 +209,7 @@ public class ComponentTests
             {
                 new Badge { Content = "Standard" },
                 new IconLabel { Text = "Open folder" },
+                new MarkerLabel { Text = "English", IsMarked = true },
                 new PageHeader { Title = "Scenario", Description = "Description" },
                 new SectionHeader { Title = "Services", Count = 3 },
                 new SearchBox { Placeholder = "Search", ShortcutHint = "Ctrl F" },

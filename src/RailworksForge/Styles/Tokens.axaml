@@ -47,6 +47,26 @@
             <SolidColorBrush x:Key="ComboBoxBorderBrush">#1F000000</SolidColorBrush>
             <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver">#33000000</SolidColorBrush>
             <SolidColorBrush x:Key="ComboBoxBorderBrushPressed">#33000000</SolidColorBrush>
+
+            <!-- Text boxes, number boxes and date and time pickers take the same tints. -->
+            <SolidColorBrush x:Key="TextControlBackground">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused">#4DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver">#33000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackground">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundFocused">#4DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPointerOver">#33000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPressed">#33000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackground">#0D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackgroundPointerOver">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackgroundPressed">#14000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrush">#1F000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrushPointerOver">#33000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrushPressed">#33000000</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="SurfaceBrush">#FF18181B</SolidColorBrush>
@@ -91,6 +111,25 @@
             <SolidColorBrush x:Key="ComboBoxBorderBrush">#1FFFFFFF</SolidColorBrush>
             <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver">#33FFFFFF</SolidColorBrush>
             <SolidColorBrush x:Key="ComboBoxBorderBrushPressed">#33FFFFFF</SolidColorBrush>
+
+            <SolidColorBrush x:Key="TextControlBackground">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused">#4D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver">#33FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackground">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBackgroundFocused">#4D000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPointerOver">#33FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPressed">#33FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackground">#0DFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackgroundPointerOver">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBackgroundPressed">#14FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrush">#1FFFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrushPointerOver">#33FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="TimePickerButtonBorderBrushPressed">#33FFFFFF</SolidColorBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

@@ -180,6 +180,61 @@ public class ScenarioDetailViewModelTests
     }
 
     [Fact]
+    public async Task EditDetails_BuffersTheEditedDetailsInTheSession()
+    {
+        var details = TestData.ScenarioDetails();
+        var edited = details with { DurationMinutes = 95 };
+        _session.GetDetails().Returns(details);
+        _dialogs.Show(Arg.Any<EditScenarioDetailsViewModel>()).Returns(edited);
+        await _page.Activate();
+
+        await _page.EditDetailsCommand.ExecuteAsync(null);
+
+        await _session.Received(1).UpdateDetails(edited);
+        _navigation.Received().UpdateCurrentScenario(_scenario);
+    }
+
+    [Fact]
+    public async Task EditDetails_ShowsTheRenamedScenarioInTheHeader()
+    {
+        var details = TestData.ScenarioDetails();
+        var renamed = _scenario with { Name = "1A01 Euston - Glasgow (Sundays)" };
+        _session.GetDetails().Returns(details);
+        _dialogs.Show(Arg.Any<EditScenarioDetailsViewModel>()).Returns(details with { DurationMinutes = 95 });
+        await _page.Activate();
+        _editor.Scenario.Returns(renamed);
+
+        await _page.EditDetailsCommand.ExecuteAsync(null);
+
+        Assert.Same(renamed, _page.Scenario);
+        _navigation.Received().UpdateCurrentScenario(renamed);
+    }
+
+    [Fact]
+    public async Task EditDetails_CancelledDialog_ChangesNothing()
+    {
+        _session.GetDetails().Returns(TestData.ScenarioDetails());
+        _dialogs.Show(Arg.Any<EditScenarioDetailsViewModel>()).Returns((ScenarioDetails?)null);
+        await _page.Activate();
+
+        await _page.EditDetailsCommand.ExecuteAsync(null);
+
+        await _session.DidNotReceiveWithAnyArgs().UpdateDetails(default!);
+    }
+
+    [Fact]
+    public async Task PendingChanges_DescribeAnEditedDetailsChange()
+    {
+        await _page.Activate();
+        var change = new ScenarioChange(ScenarioChangeKind.EditDetails, string.Empty, 1);
+        _editor.PendingChanges.Returns([change]);
+
+        Fakes.SetPendingChanges(_editor, true);
+
+        Assert.Contains(Strings.change_edited_details.CurrentValue, _page.PendingChanges.Details);
+    }
+
+    [Fact]
     public async Task SaveConsist_SavesUnderTheChosenName()
     {
         _dialogs.Show(Arg.Any<SaveConsistViewModel>()).Returns("My Pendolino");

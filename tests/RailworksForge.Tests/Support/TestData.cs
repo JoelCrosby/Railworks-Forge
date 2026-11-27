@@ -1,4 +1,5 @@
 using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
 using RailworksForge.Core.Consists;
 using RailworksForge.Core.Packaging;
 using RailworksForge.Core.Routes;
@@ -28,6 +29,23 @@ public static class TestData
             Id = name,
             Name = name,
             SearchIndex = name.ToLowerInvariant(),
+        };
+    }
+
+    public static ScenarioDetails ScenarioDetails()
+    {
+        return new ScenarioDetails
+        {
+            Name = LocalisedText.From((GameLanguage.English, "1A01 Euston - Glasgow"), (GameLanguage.German, "1A01 Euston – Glasgow")),
+            Description = LocalisedText.From((GameLanguage.English, "<supply description>")),
+            Briefing = LocalisedText.From((GameLanguage.English, "Depart on time.")),
+            StartLocation = LocalisedText.From((GameLanguage.English, "Euston")),
+            DurationMinutes = 50,
+            Rating = 4,
+            Season = ScenarioSeason.Summer,
+            StartDate = new DateOnly(2010, 7, 1),
+            StartTime = new TimeSpan(14, 14, 0),
+            ScenarioClass = ScenarioClass.Standard,
         };
     }
 
