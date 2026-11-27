@@ -7,6 +7,7 @@
             <components:Badge Classes="accent" Content="Player" />
             <components:Badge Classes="success" Content="1 completed" />
             <components:Badge Classes="warning" Content="Unsaved" />
+            <components:Badge Classes="danger" Content="Missing" />
         </StackPanel>
     </Design.PreviewWith>
 
@@ -40,6 +41,11 @@
     <Style Selector="components|Badge.success">
         <Setter Property="Background" Value="{DynamicResource SuccessSubtleBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SuccessForegroundBrush}" />
+    </Style>
+
+    <Style Selector="components|Badge.danger">
+        <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
     </Style>
 
     <Style Selector="components|Badge.warning">

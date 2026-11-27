@@ -6,46 +6,47 @@ namespace RailworksForge.Core.Consists.Commands;
 
 // A consist's vehicles run front to back in document order, and the driver's InitialRV lists their numbers in the
 // same order, so both are reordered together.
-public class MoveConsistVehicle : IConsistCommand
+internal static class ConsistVehicleOrder
 {
-    private readonly MoveConsistVehicleRequest _request;
-
-    public MoveConsistVehicle(MoveConsistVehicleRequest request)
+    public static List<IElement> GetVehicles(IElement railVehicles)
     {
-        _request = request;
+        return railVehicles.Children.Where(element => element.LocalName == "cOwnedEntity").ToList();
     }
 
-    public async Task Run(ConsistCommandContext context)
+    public static async Task PlaceAt(ConsistCommandContext context, Consist consist, IElement serviceConsist, IElement vehicle, int position)
     {
-        var serviceConsist = ConsistVehicleElements.FindServiceConsist(context.ScenarioDocument, _request.Consist);
-        var railVehicle = ConsistVehicleElements.FindVehicle(serviceConsist, _request.Vehicle);
-        var container = railVehicle.ParentElement!;
-        var vehicles = container.Children.Where(element => element.LocalName == "cOwnedEntity").ToList();
-        var currentIndex = vehicles.IndexOf(railVehicle);
-        var newIndex = Math.Clamp(_request.NewIndex, 0, vehicles.Count - 1);
+        var vehicles = GetVehicles(vehicle.ParentElement!);
+        var currentIndex = vehicles.IndexOf(vehicle);
+        var newIndex = Math.Clamp(position, 0, vehicles.Count - 1);
 
         if (newIndex == currentIndex)
         {
             return;
         }
 
-        var previousLead = vehicles[0];
-
         vehicles.RemoveAt(currentIndex);
-        vehicles.Insert(newIndex, railVehicle);
+        vehicles.Insert(newIndex, vehicle);
 
-        foreach (var vehicle in vehicles)
+        await Apply(context, consist, serviceConsist, vehicles);
+    }
+
+    public static async Task Apply(ConsistCommandContext context, Consist consist, IElement serviceConsist, List<IElement> ordered)
+    {
+        var railVehicles = ordered[0].ParentElement!;
+        var previousLead = railVehicles.FirstElementChild;
+
+        foreach (var vehicle in ordered)
         {
-            container.AppendChild(vehicle);
+            railVehicles.AppendChild(vehicle);
         }
 
-        ReorderInitialVehicleNumbers(serviceConsist, vehicles);
+        ReorderInitialVehicleNumbers(serviceConsist, ordered);
 
-        var leadChanged = vehicles[0] != previousLead;
+        var leadChanged = ordered[0] != previousLead;
 
         if (leadChanged)
         {
-            await ServiceVehicleUpdates.UpdateLeadVehicleFrom(context.ScenarioPropertiesDocument, _request.Consist, vehicles[0]);
+            await ServiceVehicleUpdates.UpdateLeadVehicleFrom(context.ScenarioPropertiesDocument, consist, ordered[0]);
         }
     }
 

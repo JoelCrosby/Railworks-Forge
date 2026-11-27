@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using NSubstitute;
 
 using RailworksForge.Core.Assets;
+using RailworksForge.Core.Common;
+using RailworksForge.Core.Extensions;
 using RailworksForge.Core.Consists;
 using RailworksForge.Core.Scenarios;
 using RailworksForge.Core.Vehicles;
@@ -57,7 +59,7 @@ public class ConsistDetailViewModelTests
 
         await _page.Activate();
 
-        Assert.Equal([_leadCar, _trailingCar], _page.RailVehicles);
+        Assert.Equal([_leadCar, _trailingCar], _page.RailVehicles.Select(row => row.Vehicle));
         Assert.Equal([_indexedVehicle], _page.AvailableStock);
         Assert.Equal([provider], _page.DirectoryTree);
         Assert.Equal(1, _page.MatchingVehicles);
@@ -101,13 +103,13 @@ public class ConsistDetailViewModelTests
     }
 
     [Fact]
-    public void SearchTerm_FiltersTheConsistsVehicles()
+    public async Task SearchTerm_FiltersTheConsistsVehicles()
     {
-        _page.RailVehicles.Reset([_leadCar, _trailingCar]);
+        await _page.Activate();
 
         _page.SearchTerm = "2";
 
-        Assert.Same(_trailingCar, Assert.Single(_page.RailVehicles));
+        Assert.Same(_trailingCar, Assert.Single(_page.RailVehicles).Vehicle);
     }
 
     [Fact]
@@ -126,150 +128,318 @@ public class ConsistDetailViewModelTests
     }
 
     [Fact]
-    public async Task AddVehicle_AddsTheSelectedStockToTheConsist()
+    public async Task AddVehicle_WithNothingSelected_OpensThePickerToAddAtTheRear()
     {
         await _page.Activate();
 
-        Assert.False(_page.AddVehicleCommand.CanExecute(null));
+        _page.AddVehicleCommand.Execute(null);
+
+        Assert.Equal(VehiclePickerMode.Append, _page.PickerMode);
+        Assert.False(_page.ConfirmPickCommand.CanExecute(null));
 
         _page.SelectedVehicle = _indexedVehicle;
-        await _page.AddVehicleCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
-        await _session.Received(1).AddVehicle(_consist, _indexedVehicle);
+        await _session.Received(1).AddVehicle(_consist, _indexedVehicle, null);
+        Assert.True(_page.IsPickerOpen);
     }
 
     [Fact]
-    public async Task AddVehicle_PrefersTheExplorerSelection()
+    public async Task ConfirmPick_PrefersTheExplorerSelection()
     {
         var explorerVehicle = TestData.RollingStock("Explorer Vehicle");
         await _page.Activate();
+        _page.AddVehicleCommand.Execute(null);
 
         _page.SelectedExplorerVehicle = explorerVehicle;
-        await _page.AddVehicleCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
-        await _session.Received(1).AddVehicle(_consist, explorerVehicle);
+        await _session.Received(1).AddVehicle(_consist, explorerVehicle, null);
     }
 
     [Fact]
-    public async Task ReplaceVehicle_ReplacesEverySelectedConsistVehicle()
+    public async Task AddVehicle_WithASelection_InsertsBehindItAndSelectsTheNewVehicle()
+    {
+        var inserted = TestData.RailVehicle("3");
+        await _page.Activate();
+        SelectRows(0);
+
+        _page.AddVehicleCommand.Execute(null);
+
+        Assert.Equal(VehiclePickerMode.Insert, _page.PickerMode);
+
+        _session.GetVehicles(_consist, Arg.Any<CancellationToken>()).Returns([_leadCar, inserted, _trailingCar]);
+        _page.SelectedVehicle = _indexedVehicle;
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
+
+        await _session.Received(1).AddVehicle(_consist, _indexedVehicle, 1);
+        Assert.Same(inserted, Assert.Single(_page.SelectedConsistVehicles).Vehicle);
+    }
+
+    [Fact]
+    public async Task ReplaceVehicles_ReplacesEverySelectedVehicleAndClosesThePicker()
     {
         await _page.Activate();
+
+        Assert.False(_page.ReplaceVehiclesCommand.CanExecute(null));
+
+        SelectRows(1, 0);
+        _page.ReplaceVehiclesCommand.Execute(null);
         _page.SelectedVehicle = _indexedVehicle;
-
-        Assert.False(_page.ReplaceVehicleCommand.CanExecute(null));
-
-        _page.SelectedConsistVehicles.Add(_leadCar);
-        _page.SelectedConsistVehicles.Add(_trailingCar);
-        await _page.ReplaceVehicleCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
         await _session.Received(1).ReplaceVehicles(
             _consist,
             Arg.Is<IEnumerable<ConsistRailVehicle>>(targets => targets.SequenceEqual(new[] { _leadCar, _trailingCar })),
             _indexedVehicle);
+        Assert.False(_page.IsPickerOpen);
     }
 
     [Fact]
-    public async Task DeleteVehicle_NeedsExactlyOneSelectedVehicle()
+    public async Task PickerModesThatNeedASelection_AreUnavailableWithoutOne()
     {
         await _page.Activate();
 
-        Assert.False(_page.DeleteVehicleCommand.CanExecute(null));
+        Assert.True(_page.SetPickerModeCommand.CanExecute(VehiclePickerMode.Append));
+        Assert.False(_page.SetPickerModeCommand.CanExecute(VehiclePickerMode.Insert));
+        Assert.False(_page.SetPickerModeCommand.CanExecute(VehiclePickerMode.Replace));
 
-        _page.SelectedConsistVehicles.Add(_trailingCar);
+        SelectRows(0);
 
-        Assert.True(_page.DeleteVehicleCommand.CanExecute(null));
-
-        await _page.DeleteVehicleCommand.ExecuteAsync(null);
-
-        await _session.Received(1).DeleteVehicle(_consist, _trailingCar);
-
-        _page.SelectedConsistVehicles.Add(_leadCar);
-
-        Assert.False(_page.DeleteVehicleCommand.CanExecute(null));
+        Assert.True(_page.SetPickerModeCommand.CanExecute(VehiclePickerMode.Replace));
     }
 
     [Fact]
-    public async Task MoveCommands_DependOnTheSelectedVehiclesPosition()
+    public async Task DeleteVehicles_RemovesEverySelectedVehicle()
     {
+        var middleCar = TestData.RailVehicle("3");
+        _session.GetVehicles(_consist, Arg.Any<CancellationToken>()).Returns([_leadCar, middleCar, _trailingCar]);
         await _page.Activate();
 
-        _page.SelectedConsistVehicles.Add(_leadCar);
+        Assert.False(_page.DeleteVehiclesCommand.CanExecute(null));
 
-        Assert.False(_page.MoveVehicleForwardCommand.CanExecute(null));
-        Assert.True(_page.MoveVehicleBackCommand.CanExecute(null));
+        SelectRows(2, 0);
+        await _page.DeleteVehiclesCommand.ExecuteAsync(null);
 
-        _page.SelectedConsistVehicles.Clear();
-        _page.SelectedConsistVehicles.Add(_trailingCar);
-
-        Assert.True(_page.MoveVehicleForwardCommand.CanExecute(null));
-        Assert.False(_page.MoveVehicleBackCommand.CanExecute(null));
+        await _session.Received(1).DeleteVehicles(
+            _consist,
+            Arg.Is<IEnumerable<ConsistRailVehicle>>(vehicles => vehicles.SequenceEqual(new[] { _leadCar, _trailingCar })));
     }
 
     [Fact]
-    public async Task MoveVehicleBack_MovesTheSelectedVehicleOnePlaceBack()
+    public async Task DeleteVehicles_CannotRemoveTheWholeTrain()
     {
         await _page.Activate();
-        _page.SelectedConsistVehicles.Add(_leadCar);
 
-        await _page.MoveVehicleBackCommand.ExecuteAsync(null);
+        SelectRows(0, 1);
 
-        await _session.Received(1).MoveVehicle(_consist, _leadCar, 1);
+        Assert.False(_page.DeleteVehiclesCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task MoveVehicleForward_MovesTheSelectedVehicleOnePlaceForward()
+    public async Task FailedInsert_KeepsTheSelection()
     {
         await _page.Activate();
-        _page.SelectedConsistVehicles.Add(_trailingCar);
+        _session.AddVehicle(_consist, _indexedVehicle, 1).Returns(Task.FromException(new IOException("Blueprint unreadable")));
+        SelectRows(0);
+        _page.AddVehicleCommand.Execute(null);
+        _page.SelectedVehicle = _indexedVehicle;
 
-        await _page.MoveVehicleForwardCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
-        await _session.Received(1).MoveVehicle(_consist, _trailingCar, 0);
+        Assert.Same(_leadCar, Assert.Single(_page.SelectedConsistVehicles).Vehicle);
+        Assert.Equal(VehiclePickerMode.Insert, _page.PickerMode);
     }
 
     [Fact]
-    public async Task MovedVehicle_IsSelectedAgainAtItsNewPosition()
+    public async Task FailedReplace_LeavesThePickerOpen()
     {
         await _page.Activate();
-        _page.SelectedConsistVehicles.Add(_leadCar);
+        _session.ReplaceVehicles(_consist, Arg.Any<IEnumerable<ConsistRailVehicle>>(), _indexedVehicle)
+            .Returns(Task.FromException(new IOException("Blueprint unreadable")));
+        SelectRows(0);
+        _page.ReplaceVehiclesCommand.Execute(null);
+        _page.SelectedVehicle = _indexedVehicle;
 
-        await _page.MoveVehicleBackCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
-        Assert.Same(_page.StripVehicles[1], _page.SelectedStripVehicle);
+        Assert.Equal(VehiclePickerMode.Replace, _page.PickerMode);
     }
 
     [Fact]
-    public async Task FlipVehicle_FlipsTheSelectedVehicle()
+    public async Task ClearingTheSelection_MovesThePickerToAddingAtTheRear()
     {
         await _page.Activate();
-        _page.SelectedConsistVehicles.Add(_trailingCar);
+        SelectRows(0);
+        _page.ReplaceVehiclesCommand.Execute(null);
 
-        await _page.FlipVehicleCommand.ExecuteAsync(null);
+        _page.ClearSelectionCommand.Execute(null);
 
-        await _session.Received(1).FlipVehicle(_consist, _trailingCar);
+        Assert.Equal(VehiclePickerMode.Append, _page.PickerMode);
     }
 
     [Fact]
-    public async Task SelectingAStripVehicle_SelectsItInTheTable()
+    public async Task AddVehicleText_NamesWhereTheVehicleGoes()
     {
         await _page.Activate();
 
-        _page.SelectedStripVehicle = _page.StripVehicles[1];
+        Assert.Equal(Strings.add_vehicle.CurrentValue, _page.AddVehicleText);
 
-        Assert.Same(_trailingCar, Assert.Single(_page.SelectedConsistVehicles));
-        Assert.Equal(1, _page.SelectedCount);
+        SelectRows(0);
+
+        Assert.Equal(string.Format(Strings.insert_after_position.CurrentValue, 1), _page.AddVehicleText);
+    }
+
+    [Fact]
+    public async Task SelectionText_NamesASingleVehicle()
+    {
+        await _page.Activate();
+
+        SelectRows(1);
+
+        Assert.Equal("#2 Class 390", _page.SelectionText);
+
+        SelectRows(0, 1);
+
+        Assert.Equal(string.Format(Strings.items_selected.CurrentValue, 2), _page.SelectionText);
+    }
+
+    [Fact]
+    public async Task MoveCommands_AreOffWhileTheListIsFiltered()
+    {
+        await _page.Activate();
+        SelectRows(1);
+
+        _page.SearchTerm = "2";
+
+        Assert.False(_page.MoveTowardFrontCommand.CanExecute(null));
+
+        _page.SearchTerm = null;
+
+        Assert.True(_page.MoveTowardFrontCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task MoveCommands_DependOnWhereTheSelectionCanMove()
+    {
+        await _page.Activate();
+
+        SelectRows(0);
+
+        Assert.False(_page.MoveTowardFrontCommand.CanExecute(null));
+        Assert.True(_page.MoveTowardRearCommand.CanExecute(null));
+
+        SelectRows(1);
+
+        Assert.True(_page.MoveTowardFrontCommand.CanExecute(null));
+        Assert.False(_page.MoveTowardRearCommand.CanExecute(null));
+
+        SelectRows(0, 1);
+
+        Assert.False(_page.MoveTowardFrontCommand.CanExecute(null));
+        Assert.False(_page.MoveTowardRearCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task MoveTowardRear_MovesTheSelectionAndKeepsItSelected()
+    {
+        await _page.Activate();
+        SelectRows(0);
+
+        await _page.MoveTowardRearCommand.ExecuteAsync(null);
+
+        await _session.Received(1).MoveVehicles(
+            _consist,
+            Arg.Is<IEnumerable<ConsistRailVehicle>>(vehicles => vehicles.SequenceEqual(new[] { _leadCar })),
+            1);
+        Assert.Same(_leadCar, Assert.Single(_page.SelectedConsistVehicles).Vehicle);
+    }
+
+    [Fact]
+    public async Task MoveTowardFront_MovesTheSelectionOnePlaceForward()
+    {
+        await _page.Activate();
+        SelectRows(1);
+
+        await _page.MoveTowardFrontCommand.ExecuteAsync(null);
+
+        await _session.Received(1).MoveVehicles(
+            _consist,
+            Arg.Is<IEnumerable<ConsistRailVehicle>>(vehicles => vehicles.SequenceEqual(new[] { _trailingCar })),
+            -1);
+    }
+
+    [Fact]
+    public async Task FlipVehicles_FlipsEverySelectedVehicle()
+    {
+        await _page.Activate();
+        SelectRows(0, 1);
+
+        await _page.FlipVehiclesCommand.ExecuteAsync(null);
+
+        await _session.Received(1).FlipVehicles(
+            _consist,
+            Arg.Is<IEnumerable<ConsistRailVehicle>>(vehicles => vehicles.SequenceEqual(new[] { _leadCar, _trailingCar })));
+        Assert.Equal(2, _page.SelectedCount);
+    }
+
+    [Fact]
+    public async Task FlipRow_FlipsThatVehicleAndKeepsTheSelection()
+    {
+        await _page.Activate();
+        SelectRows(0);
+
+        await _page.FlipRowCommand.ExecuteAsync(_page.RailVehicles[1]);
+
+        await _session.Received(1).FlipVehicles(
+            _consist,
+            Arg.Is<IEnumerable<ConsistRailVehicle>>(vehicles => vehicles.SequenceEqual(new[] { _trailingCar })));
+        Assert.Same(_leadCar, Assert.Single(_page.SelectedConsistVehicles).Vehicle);
+    }
+
+    [Fact]
+    public async Task SelectMissing_SelectsOnlyTheMissingVehicles()
+    {
+        var missing = new ConsistRailVehicle
+        {
+            Id = "3",
+            LocomotiveName = "Missing wagon",
+            EntityID = "3",
+            SearchIndex = "3",
+            BlueprintSetIdProvider = string.Empty,
+            BlueprintSetIdProduct = string.Empty,
+            BlueprintId = @"RailVehicles\Wagon.xml",
+        };
+        var leadCarKey = Path.Join(_leadCar.BlueprintSetIdProvider, _leadCar.BlueprintSetIdProduct, _leadCar.RelativeBinaryPath).NormalisePath();
+        Cache.BlueprintAcquisitionStates[leadCarKey] = AcquisitionState.Found;
+        _session.GetVehicles(_consist, Arg.Any<CancellationToken>()).Returns([_leadCar, missing]);
+
+        try
+        {
+            await _page.Activate();
+
+            Assert.Equal(1, _page.MissingCount);
+
+            _page.SearchTerm = "1";
+            _page.SelectMissingCommand.Execute(null);
+
+            Assert.Same(missing, Assert.Single(_page.SelectedConsistVehicles).Vehicle);
+        }
+        finally
+        {
+            Cache.ClearAcquisitionStates();
+        }
     }
 
     [Fact]
     public async Task ClearSelection_EmptiesTheSelection()
     {
         await _page.Activate();
-        _page.SelectedConsistVehicles.Add(_leadCar);
+        SelectRows(0);
 
         _page.ClearSelectionCommand.Execute(null);
 
         Assert.Empty(_page.SelectedConsistVehicles);
-        Assert.Null(_page.SelectedStripVehicle);
     }
 
     [Fact]
@@ -317,10 +487,11 @@ public class ConsistDetailViewModelTests
     public async Task FailedEdit_ShowsTheErrorWithoutRetry()
     {
         await _page.Activate();
-        _session.AddVehicle(_consist, _indexedVehicle).Returns(Task.FromException(new IOException("Blueprint unreadable")));
+        _session.AddVehicle(_consist, _indexedVehicle, null).Returns(Task.FromException(new IOException("Blueprint unreadable")));
+        _page.AddVehicleCommand.Execute(null);
         _page.SelectedVehicle = _indexedVehicle;
 
-        await _page.AddVehicleCommand.ExecuteAsync(null);
+        await _page.ConfirmPickCommand.ExecuteAsync(null);
 
         Assert.Equal("Blueprint unreadable", _page.Loading.ErrorMessage);
         Assert.False(_page.Loading.CanRetry);
@@ -462,5 +633,15 @@ public class ConsistDetailViewModelTests
         await _page.RefreshVehicleIndexCommand.ExecuteAsync(null);
 
         await _index.Received(1).SearchAsync(Arg.Any<string?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+    }
+
+    private void SelectRows(params int[] indexes)
+    {
+        _page.SelectedConsistVehicles.Clear();
+
+        foreach (var index in indexes)
+        {
+            _page.SelectedConsistVehicles.Add(_page.RailVehicles[index]);
+        }
     }
 }

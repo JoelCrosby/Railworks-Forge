@@ -84,21 +84,6 @@ public class ComponentTests
     }
 
     [Fact]
-    public Task VehicleCard_MarksFlippedVehicles()
-    {
-        return ComponentSession.Run(() =>
-        {
-            var card = new VehicleCard();
-
-            Assert.DoesNotContain(":flipped", card.Classes);
-
-            card.IsFlipped = true;
-
-            Assert.Contains(":flipped", card.Classes);
-        });
-    }
-
-    [Fact]
     public Task BreadcrumbItem_MarksTheCurrentAndDirtyCrumbs()
     {
         return ComponentSession.Run(() =>
@@ -219,8 +204,6 @@ public class ComponentTests
                 new Thumbnail { Width = 92, Height = 52 },
                 new RouteCard { Title = "Route", Width = 248 },
                 new RouteCard { Title = "Route", Classes = { "compact" } },
-                new VehicleCard { Title = "Class 390", IsFlipped = true },
-                new ConsistStrip { ItemsSource = new[] { "A", "B" } },
                 new BreadcrumbItem { Text = "Routes", IsCurrent = true },
                 new SettingsSection { Title = "Appearance", Content = new SettingsRow { Title = "Theme" } },
                 new TaskIndicator { Label = "Loading" },

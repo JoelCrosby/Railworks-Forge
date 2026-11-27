@@ -33,7 +33,6 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private readonly IDialogService _dialogs;
     private readonly IImageService _images;
     private readonly BackgroundImageLoader _imageLoader = new();
-    private bool _isSyncingSelection;
     private bool _hasLoadedExplorerFolder;
 
     private IVehicleIndex? _vehicleIndex;
@@ -46,29 +45,68 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     public PendingChangesViewModel PendingChanges { get; }
 
-    public RangeObservableCollection<ConsistVehicleViewModel> StripVehicles { get; } = [];
+    public SearchableCollection<ConsistVehicleViewModel> RailVehicles { get; } = new(row => row.Vehicle.SearchIndex);
 
-    [ObservableProperty]
-    public partial ConsistVehicleViewModel? SelectedStripVehicle { get; set; }
+    public ObservableCollection<ConsistVehicleViewModel> SelectedConsistVehicles { get; } = [];
 
     public int SelectedCount => SelectedConsistVehicles.Count;
+
+    public bool HasSelection => SelectedCount > 0;
 
     public string SelectionText
     {
         get
         {
-            var vehicle = SingleSelectedVehicle;
+            var row = SingleSelectedVehicle;
 
-            if (vehicle is null)
+            if (row is null)
             {
                 return string.Format(Strings.items_selected.CurrentValue, SelectedCount);
             }
 
-            return $"#{vehicle.Index} {vehicle.LocomotiveName}";
+            return $"#{row.Position} {row.Vehicle.LocomotiveName}";
         }
     }
 
     public string VehicleCountText => string.Format(Strings.vehicle_count.CurrentValue, RailVehicles.Source.Count);
+
+    public int MissingCount => RailVehicles.Source.Count(row => row.IsMissing);
+
+    public bool HasMissingVehicles => MissingCount > 0;
+
+    public string SelectMissingText => string.Format(Strings.select_missing_vehicles.CurrentValue, MissingCount);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPickerOpen))]
+    [NotifyPropertyChangedFor(nameof(IsAppendMode))]
+    [NotifyPropertyChangedFor(nameof(IsInsertMode))]
+    [NotifyPropertyChangedFor(nameof(IsReplaceMode))]
+    [NotifyPropertyChangedFor(nameof(ConfirmPickText))]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmPickCommand))]
+    public partial VehiclePickerMode PickerMode { get; set; }
+
+    public bool IsPickerOpen => PickerMode is not VehiclePickerMode.Closed;
+
+    public bool IsAppendMode => PickerMode is VehiclePickerMode.Append;
+
+    public bool IsInsertMode => PickerMode is VehiclePickerMode.Insert;
+
+    public bool IsReplaceMode => PickerMode is VehiclePickerMode.Replace;
+
+    public string InsertModeText => string.Format(Strings.insert_after_position.CurrentValue, InsertAfterPosition);
+
+    public string AddVehicleText => HasSelection ? InsertModeText : Strings.add_vehicle.CurrentValue;
+
+    public string ReplaceModeText => string.Format(Strings.replace_selected_count.CurrentValue, SelectedCount);
+
+    public string ConfirmPickText => PickerMode switch
+    {
+        VehiclePickerMode.Replace => ReplaceModeText,
+        VehiclePickerMode.Insert => InsertModeText,
+        _ => Strings.add_to_rear.CurrentValue,
+    };
+
+    private int InsertAfterPosition => SelectedConsistVehicles.Select(row => row.Position).DefaultIfEmpty(0).Max();
 
     private bool HasNoExplorerStock => ExplorerStock.Count == 0 && ExplorerLoading.IsIdle;
 
@@ -97,15 +135,10 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public partial string? DirectoryTreeSearchTerm { get; set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddVehicleCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ReplaceVehicleCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmPickCommand))]
     public partial RollingStockEntry? SelectedExplorerVehicle { get; set; }
 
     private RollingStockEntry? ActiveSelectedVehicle => SelectedExplorerVehicle ?? SelectedVehicle;
-
-    public SearchableCollection<ConsistRailVehicle> RailVehicles { get; } = new(vehicle => vehicle.SearchIndex);
-
-    public ObservableCollection<ConsistRailVehicle> SelectedConsistVehicles { get; } = [];
 
     public RangeObservableCollection<RollingStockEntry> AvailableStock { get; } = [];
 
@@ -125,8 +158,7 @@ public partial class ConsistDetailViewModel : ViewModelBase
     public bool HasNoVehicles => HasSearchedStock && MatchingVehicles == 0;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddVehicleCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ReplaceVehicleCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmPickCommand))]
     public partial RollingStockEntry? SelectedVehicle { get; set; }
 
     [ObservableProperty]
@@ -157,15 +189,11 @@ public partial class ConsistDetailViewModel : ViewModelBase
         ExplorerLoading.PropertyChanged += (_, _) => NotifyExplorerEmptyStates();
     }
 
-    private ConsistRailVehicle? SingleSelectedVehicle => SelectedConsistVehicles.Count is 1 ? SelectedConsistVehicles[0] : null;
+    private ConsistVehicleViewModel? SingleSelectedVehicle => SelectedConsistVehicles.Count is 1 ? SelectedConsistVehicles[0] : null;
 
-    private bool HasSelectedVehicle => ActiveSelectedVehicle is not null;
+    private bool HasPickedStock => ActiveSelectedVehicle is not null;
 
-    private bool CanReplaceVehicle => HasSelectedVehicle && SelectedConsistVehicles.Count > 0;
-
-    private bool HasSingleSelectedVehicle => SingleSelectedVehicle is not null;
-
-    private bool CanOpenConsistVehicleInExplorer => SingleSelectedVehicle?.BinaryDirectoryPath is not null;
+    private bool CanOpenConsistVehicleInExplorer => SingleSelectedVehicle?.Vehicle.BinaryDirectoryPath is not null;
 
     protected override async Task OnActivated()
     {
@@ -280,19 +308,18 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private void OnCultureChanged(object? sender, CultureInfo culture)
     {
-        foreach (var vehicle in StripVehicles)
-        {
-            vehicle.RefreshCaption();
-        }
-
         OnPropertyChanged(nameof(SelectionText));
         OnPropertyChanged(nameof(VehicleCountText));
+        OnPropertyChanged(nameof(SelectMissingText));
         OnPropertyChanged(nameof(StatusText));
+        NotifyPickerTexts();
     }
 
     partial void OnSearchTermChanged(string? value)
     {
         RailVehicles.Filter(value);
+        MoveTowardFrontCommand.NotifyCanExecuteChanged();
+        MoveTowardRearCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnVehicleSearchTermChanged(string? value)
@@ -314,50 +341,54 @@ public partial class ConsistDetailViewModel : ViewModelBase
     private void ShowVehicles(List<ConsistRailVehicle> vehicles)
     {
         Editor.Update();
-        RailVehicles.Reset(vehicles);
 
-        var stripVehicles = vehicles.Select((vehicle, index) => new ConsistVehicleViewModel(vehicle, index)).ToList();
+        var rows = vehicles.Select((vehicle, index) => new ConsistVehicleViewModel(vehicle, index)).ToList();
 
-        StripVehicles.ReplaceWith(stripVehicles);
+        SelectedConsistVehicles.Clear();
+        RailVehicles.Reset(rows);
         OnPropertyChanged(nameof(VehicleCountText));
         OnPropertyChanged(nameof(StatusText));
-        _imageLoader.Load(stripVehicles, item => _images.GetBlueprintImage(item.Vehicle), (item, image) => item.ImageBitmap = image);
+        OnPropertyChanged(nameof(MissingCount));
+        OnPropertyChanged(nameof(HasMissingVehicles));
+        OnPropertyChanged(nameof(SelectMissingText));
+        SelectMissingCommand.NotifyCanExecuteChanged();
+        _imageLoader.Load(rows, row => _images.GetBlueprintImage(row.Vehicle), (row, image) => row.ImageBitmap = image);
     }
 
     private void OnSelectionChanged()
     {
         OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(SelectionText));
         NotifySelectionCommands();
-        SyncStripSelection();
-    }
 
-    private void SyncStripSelection()
-    {
-        if (_isSyncingSelection)
+        // Edits clear the selection while they reload and then select the vehicles again, so only a selection the
+        // user cleared moves the picker on to adding at the rear.
+        if (Loading.IsIdle)
         {
-            return;
+            KeepPickerModeAvailable();
         }
 
-        var single = SingleSelectedVehicle;
-        var stripVehicle = StripVehicles.FirstOrDefault(item => ReferenceEquals(item.Vehicle, single));
-
-        _isSyncingSelection = true;
-        SelectedStripVehicle = stripVehicle;
-        _isSyncingSelection = false;
+        NotifyPickerTexts();
     }
 
-    partial void OnSelectedStripVehicleChanged(ConsistVehicleViewModel? value)
+    private void KeepPickerModeAvailable()
     {
-        if (_isSyncingSelection || value is null)
-        {
-            return;
-        }
+        var isOpen = IsPickerOpen;
+        var hasTarget = CanSetPickerMode(PickerMode);
 
-        _isSyncingSelection = true;
-        SelectedConsistVehicles.Clear();
-        SelectedConsistVehicles.Add(value.Vehicle);
-        _isSyncingSelection = false;
+        if (isOpen && !hasTarget)
+        {
+            PickerMode = VehiclePickerMode.Append;
+        }
+    }
+
+    private void NotifyPickerTexts()
+    {
+        OnPropertyChanged(nameof(InsertModeText));
+        OnPropertyChanged(nameof(AddVehicleText));
+        OnPropertyChanged(nameof(ReplaceModeText));
+        OnPropertyChanged(nameof(ConfirmPickText));
     }
 
     private Task SearchStock()
@@ -429,15 +460,24 @@ public partial class ConsistDetailViewModel : ViewModelBase
     }
 
     // Edits are buffered in the editor's session and only written to the scenario when applied.
-    private Task Edit(Func<IScenarioEditSession, Task> edit)
+    // True when the edit was applied and the vehicles reloaded; a failure is shown by Loading.
+    private async Task<bool> Edit(Func<IScenarioEditSession, Task> edit)
     {
-        return Loading.RunAsync(Strings.updating_consist.CurrentValue, async token =>
+        var applied = false;
+
+        await Loading.RunAsync(Strings.updating_consist.CurrentValue, async token =>
         {
             var session = await Editor.GetSession(token);
             await edit(session);
 
             return session.GetVehicles(_consist, token);
-        }, ShowVehicles, allowRetry: false);
+        }, vehicles =>
+        {
+            ShowVehicles(vehicles);
+            applied = true;
+        }, allowRetry: false);
+
+        return applied;
     }
 
     private bool HasPendingChanges => Editor.HasPendingChanges;
@@ -472,43 +512,47 @@ public partial class ConsistDetailViewModel : ViewModelBase
 
     private void NotifySelectionCommands()
     {
-        ReplaceVehicleCommand.NotifyCanExecuteChanged();
-        DeleteVehicleCommand.NotifyCanExecuteChanged();
+        ConfirmPickCommand.NotifyCanExecuteChanged();
+        SetPickerModeCommand.NotifyCanExecuteChanged();
+        ReplaceVehiclesCommand.NotifyCanExecuteChanged();
+        DeleteVehiclesCommand.NotifyCanExecuteChanged();
         OpenConsistVehicleInExplorerCommand.NotifyCanExecuteChanged();
-        MoveVehicleForwardCommand.NotifyCanExecuteChanged();
-        MoveVehicleBackCommand.NotifyCanExecuteChanged();
-        FlipVehicleCommand.NotifyCanExecuteChanged();
+        MoveTowardFrontCommand.NotifyCanExecuteChanged();
+        MoveTowardRearCommand.NotifyCanExecuteChanged();
+        FlipVehiclesCommand.NotifyCanExecuteChanged();
     }
 
-    private int SingleSelectedPosition
+    private List<ConsistRailVehicle> SelectedRailVehicles => SelectedConsistVehicles
+        .OrderBy(row => row.Index)
+        .Select(row => row.Vehicle)
+        .ToList();
+
+    // A selected vehicle can move when the place it would move into holds a vehicle that is not selected. Moving is
+    // off while the list is filtered, since a vehicle would move past neighbours that aren't shown.
+    private bool CanMoveSelection(int direction)
     {
-        get
+        var isFiltered = !string.IsNullOrWhiteSpace(SearchTerm);
+
+        if (isFiltered)
         {
-            var vehicle = SingleSelectedVehicle;
-
-            if (vehicle is null)
-            {
-                return -1;
-            }
-
-            var vehicles = RailVehicles.Source.ToList();
-
-            return vehicles.IndexOf(vehicle);
+            return false;
         }
+
+        var rows = RailVehicles.Source;
+        var selected = SelectedConsistVehicles.ToHashSet();
+
+        return selected.Any(row =>
+        {
+            var target = row.Index + direction;
+            var isInRange = target >= 0 && target < rows.Count;
+
+            return isInRange && !selected.Contains(rows[target]);
+        });
     }
 
-    private bool CanMoveVehicleForward => SingleSelectedPosition > 0;
+    private bool CanMoveTowardFront => CanMoveSelection(-1);
 
-    private bool CanMoveVehicleBack
-    {
-        get
-        {
-            var position = SingleSelectedPosition;
-            var isLastVehicle = position == RailVehicles.Source.Count - 1;
-
-            return position >= 0 && !isLastVehicle;
-        }
-    }
+    private bool CanMoveTowardRear => CanMoveSelection(1);
 
     [RelayCommand]
     private void ClearSelection()
@@ -516,78 +560,192 @@ public partial class ConsistDetailViewModel : ViewModelBase
         SelectedConsistVehicles.Clear();
     }
 
-    [RelayCommand(CanExecute = nameof(CanMoveVehicleForward))]
-    private Task MoveVehicleForward()
+    private bool CanSelectMissing => HasMissingVehicles;
+
+    [RelayCommand(CanExecute = nameof(CanSelectMissing))]
+    private void SelectMissing()
     {
-        return MoveSelectedVehicle(-1);
+        SearchTerm = null;
+        SelectWhere(row => row.IsMissing);
     }
 
-    [RelayCommand(CanExecute = nameof(CanMoveVehicleBack))]
-    private Task MoveVehicleBack()
+    private void SelectWhere(Func<ConsistVehicleViewModel, bool> predicate)
     {
-        return MoveSelectedVehicle(1);
-    }
+        var matches = RailVehicles.AsEnumerable().Where(predicate).ToList();
 
-    private async Task MoveSelectedVehicle(int offset)
-    {
-        var vehicle = SingleSelectedVehicle!;
-        var newPosition = SingleSelectedPosition + offset;
+        SelectedConsistVehicles.Clear();
 
-        await Edit(session => session.MoveVehicle(_consist, vehicle, newPosition));
-        SelectVehicleAt(newPosition);
-    }
-
-    [RelayCommand(CanExecute = nameof(HasSingleSelectedVehicle))]
-    private async Task FlipVehicle()
-    {
-        var vehicle = SingleSelectedVehicle!;
-        var position = SingleSelectedPosition;
-
-        await Edit(session => session.FlipVehicle(_consist, vehicle));
-        SelectVehicleAt(position);
-    }
-
-    // Edits reload the consist as new vehicle objects, so the moved or flipped vehicle is selected again by position.
-    private void SelectVehicleAt(int position)
-    {
-        var isInRange = position >= 0 && position < StripVehicles.Count;
-
-        if (!isInRange)
+        foreach (var row in matches)
         {
-            return;
+            SelectedConsistVehicles.Add(row);
         }
+    }
 
-        SelectedStripVehicle = StripVehicles[position];
+    // Edits reload the consist as new rows, so the vehicles are selected again by their scenario ids.
+    private void SelectByIds(HashSet<string> ids)
+    {
+        SelectWhere(row => ids.Contains(row.Vehicle.Id));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveTowardFront))]
+    private Task MoveTowardFront()
+    {
+        return MoveSelection(-1);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveTowardRear))]
+    private Task MoveTowardRear()
+    {
+        return MoveSelection(1);
+    }
+
+    private async Task MoveSelection(int offset)
+    {
+        var vehicles = SelectedRailVehicles;
+        var ids = vehicles.Select(vehicle => vehicle.Id).ToHashSet();
+
+        var applied = await Edit(session => session.MoveVehicles(_consist, vehicles, offset));
+
+        if (applied)
+        {
+            SelectByIds(ids);
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task FlipVehicles()
+    {
+        var vehicles = SelectedRailVehicles;
+        var ids = vehicles.Select(vehicle => vehicle.Id).ToHashSet();
+
+        var applied = await Edit(session => session.FlipVehicles(_consist, vehicles));
+
+        if (applied)
+        {
+            SelectByIds(ids);
+        }
+    }
+
+    [RelayCommand]
+    private async Task FlipRow(ConsistVehicleViewModel row)
+    {
+        var ids = SelectedConsistVehicles.Select(selected => selected.Vehicle.Id).ToHashSet();
+
+        var applied = await Edit(session => session.FlipVehicles(_consist, [row.Vehicle]));
+
+        if (applied)
+        {
+            SelectByIds(ids);
+        }
+    }
+
+    private bool CanDeleteVehicles
+    {
+        get
+        {
+            var keepsAVehicle = SelectedCount < RailVehicles.Source.Count;
+
+            return HasSelection && keepsAVehicle;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteVehicles))]
+    private async Task DeleteVehicles()
+    {
+        var vehicles = SelectedRailVehicles;
+
+        await Edit(session => session.DeleteVehicles(_consist, vehicles));
+        KeepPickerModeAvailable();
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenConsistVehicleInExplorer))]
     private void OpenConsistVehicleInExplorer()
     {
-        _launcher.OpenDirectory(SingleSelectedVehicle!.BinaryDirectoryPath!);
+        _launcher.OpenDirectory(SingleSelectedVehicle!.Vehicle.BinaryDirectoryPath!);
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelectedVehicle))]
-    private Task AddVehicle()
+    [RelayCommand]
+    private void AddVehicle()
     {
-        var vehicle = ActiveSelectedVehicle!;
-
-        return Edit(session => session.AddVehicle(_consist, vehicle));
+        PickerMode = HasSelection ? VehiclePickerMode.Insert : VehiclePickerMode.Append;
     }
 
-    [RelayCommand(CanExecute = nameof(CanReplaceVehicle))]
-    private Task ReplaceVehicle()
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ReplaceVehicles()
     {
-        var replacement = ActiveSelectedVehicle!;
-        var targets = SelectedConsistVehicles.ToList();
-
-        return Edit(session => session.ReplaceVehicles(_consist, targets, replacement));
+        PickerMode = VehiclePickerMode.Replace;
     }
 
-    [RelayCommand(CanExecute = nameof(HasSingleSelectedVehicle))]
-    private Task DeleteVehicle()
+    private bool CanSetPickerMode(VehiclePickerMode mode)
     {
-        var vehicle = SingleSelectedVehicle!;
+        var modeNeedsSelection = mode is VehiclePickerMode.Insert or VehiclePickerMode.Replace;
 
-        return Edit(session => session.DeleteVehicle(_consist, vehicle));
+        return !modeNeedsSelection || HasSelection;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSetPickerMode))]
+    private void SetPickerMode(VehiclePickerMode mode)
+    {
+        PickerMode = mode;
+    }
+
+    [RelayCommand]
+    private void ClosePicker()
+    {
+        PickerMode = VehiclePickerMode.Closed;
+    }
+
+    private bool CanConfirmPick
+    {
+        get
+        {
+            var hasTarget = CanSetPickerMode(PickerMode);
+
+            return IsPickerOpen && HasPickedStock && hasTarget;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanConfirmPick))]
+    private Task ConfirmPick()
+    {
+        var picked = ActiveSelectedVehicle!;
+
+        return PickerMode switch
+        {
+            VehiclePickerMode.Replace => ReplaceSelection(picked),
+            VehiclePickerMode.Insert => InsertAfterSelection(picked),
+            _ => Edit(session => session.AddVehicle(_consist, picked)),
+        };
+    }
+
+    private async Task ReplaceSelection(RollingStockEntry replacement)
+    {
+        var targets = SelectedRailVehicles;
+
+        var applied = await Edit(session => session.ReplaceVehicles(_consist, targets, replacement));
+
+        if (applied)
+        {
+            PickerMode = VehiclePickerMode.Closed;
+        }
+    }
+
+    // The new vehicle is selected, so picking again inserts the next one behind it.
+    private async Task InsertAfterSelection(RollingStockEntry vehicle)
+    {
+        var position = InsertAfterPosition;
+
+        var applied = await Edit(session => session.AddVehicle(_consist, vehicle, position));
+        var isInRange = position < RailVehicles.Source.Count;
+
+        if (!applied || !isInRange)
+        {
+            return;
+        }
+
+        var inserted = RailVehicles.Source[position];
+
+        SearchTerm = null;
+        SelectWhere(row => ReferenceEquals(row, inserted));
     }
 }

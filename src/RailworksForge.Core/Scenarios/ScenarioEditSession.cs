@@ -116,12 +116,13 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         }
     }
 
-    public Task AddVehicle(Consist consist, RollingStockEntry vehicle)
+    public Task AddVehicle(Consist consist, RollingStockEntry vehicle, int? position = null)
     {
         var request = new AddConsistVehicleRequest
         {
             Consist = consist,
             VehicleToAdd = vehicle,
+            Position = position,
         };
 
         var change = new ScenarioChange(ScenarioChangeKind.AddVehicle, consist.ServiceName, 1);
@@ -150,44 +151,44 @@ public sealed class ScenarioEditSession : IScenarioEditSession
         return Run(new ReplaceConsistVehicles(request), change);
     }
 
-    public Task DeleteVehicle(Consist consist, ConsistRailVehicle vehicle)
+    public Task DeleteVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles)
     {
-        var request = new DeleteConsistVehicleRequest
+        var request = new DeleteConsistVehiclesRequest
         {
             Consist = consist,
-            VehicleToDelete = vehicle,
+            Vehicles = vehicles.ToList(),
         };
 
-        var change = new ScenarioChange(ScenarioChangeKind.DeleteVehicle, consist.ServiceName, 1);
+        var change = new ScenarioChange(ScenarioChangeKind.DeleteVehicle, consist.ServiceName, request.Vehicles.Count);
 
-        return Run(new DeleteConsistVehicle(request), change);
+        return Run(new DeleteConsistVehicles(request), change);
     }
 
-    public Task MoveVehicle(Consist consist, ConsistRailVehicle vehicle, int newIndex)
+    public Task MoveVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles, int offset)
     {
-        var request = new MoveConsistVehicleRequest
+        var request = new MoveConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = vehicle,
-            NewIndex = newIndex,
+            Vehicles = vehicles.ToList(),
+            Offset = offset,
         };
 
-        var change = new ScenarioChange(ScenarioChangeKind.MoveVehicle, consist.ServiceName, 1);
+        var change = new ScenarioChange(ScenarioChangeKind.MoveVehicle, consist.ServiceName, request.Vehicles.Count);
 
-        return Run(new MoveConsistVehicle(request), change);
+        return Run(new MoveConsistVehicles(request), change);
     }
 
-    public Task FlipVehicle(Consist consist, ConsistRailVehicle vehicle)
+    public Task FlipVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles)
     {
-        var request = new FlipConsistVehicleRequest
+        var request = new FlipConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = vehicle,
+            Vehicles = vehicles.ToList(),
         };
 
-        var change = new ScenarioChange(ScenarioChangeKind.FlipVehicle, consist.ServiceName, 1);
+        var change = new ScenarioChange(ScenarioChangeKind.FlipVehicle, consist.ServiceName, request.Vehicles.Count);
 
-        return Run(new FlipConsistVehicle(request), change);
+        return Run(new FlipConsistVehicles(request), change);
     }
 
     public Task ReplaceConsists(IEnumerable<Consist> targets, PreloadConsist replacement)

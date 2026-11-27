@@ -16,27 +16,30 @@ public class ConsistVehicleCommandTests
     private const string ServiceConsistId = "345408992";
 
     [Fact]
-    public async Task FlipVehicle_TogglesTheFlippedFlag()
+    public async Task FlipVehicles_TogglesEachVehiclesFlippedFlag()
     {
         var context = CreateContext();
         var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
-        var target = vehicles[2];
-        var request = new FlipConsistVehicleRequest
+        var targets = new List<ConsistRailVehicle> { vehicles[1], vehicles[2] };
+        var request = new FlipConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = target,
+            Vehicles = targets,
         };
 
-        await new FlipConsistVehicle(request).Run(context);
+        await new FlipConsistVehicles(request).Run(context);
 
-        var flipped = GetVehicleElement(context.ScenarioDocument, target.Id).SelectTextContent("Flipped");
-        var expected = target.Flipped ? "0" : "1";
+        foreach (var target in targets)
+        {
+            var flipped = GetVehicleElement(context.ScenarioDocument, target.Id).SelectTextContent("Flipped");
+            var expected = target.Flipped ? "0" : "1";
 
-        Assert.Equal(expected, flipped);
+            Assert.Equal(expected, flipped);
+        }
     }
 
     [Fact]
-    public async Task MoveVehicle_ReordersVehiclesAndInitialNumbers()
+    public async Task MoveVehicles_ReordersVehiclesAndInitialNumbers()
     {
         var context = CreateContext();
         var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
@@ -45,14 +48,14 @@ public class ConsistVehicleCommandTests
         SetInitialVehicleNumbers(context.ScenarioDocument, vehicleNumbers);
 
         var moved = vehicles[1];
-        var request = new MoveConsistVehicleRequest
+        var request = new MoveConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = moved,
-            NewIndex = 3,
+            Vehicles = [moved],
+            Offset = 2,
         };
 
-        await new MoveConsistVehicle(request).Run(context);
+        await new MoveConsistVehicles(request).Run(context);
 
         var (_, reordered) = GetServiceConsist(context.ScenarioDocument);
         var reorderedIds = reordered.Select(vehicle => vehicle.Id).ToList();
@@ -69,19 +72,64 @@ public class ConsistVehicleCommandTests
     }
 
     [Fact]
-    public async Task MoveVehicle_LeavesInitialNumbersThatDoNotMatchTheVehicles()
+    public async Task MoveVehicles_MovesABlockTogether()
+    {
+        var context = CreateContext();
+        var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
+        var request = new MoveConsistVehiclesRequest
+        {
+            Consist = consist,
+            Vehicles = [vehicles[2], vehicles[3]],
+            Offset = -1,
+        };
+
+        await new MoveConsistVehicles(request).Run(context);
+
+        var (_, reordered) = GetServiceConsist(context.ScenarioDocument);
+        var reorderedIds = reordered.Select(vehicle => vehicle.Id).ToList();
+        var expectedIds = vehicles.Select(vehicle => vehicle.Id).ToList();
+
+        expectedIds.RemoveAt(1);
+        expectedIds.Insert(3, vehicles[1].Id);
+
+        Assert.Equal(expectedIds, reorderedIds);
+    }
+
+    [Fact]
+    public async Task MoveVehicles_AtTheFront_StaysPutWhileTheRestMove()
+    {
+        var context = CreateContext();
+        var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
+        var request = new MoveConsistVehiclesRequest
+        {
+            Consist = consist,
+            Vehicles = [vehicles[0], vehicles[2]],
+            Offset = -1,
+        };
+
+        await new MoveConsistVehicles(request).Run(context);
+
+        var (_, reordered) = GetServiceConsist(context.ScenarioDocument);
+        var reorderedIds = reordered.Select(vehicle => vehicle.Id).Take(3);
+        var expectedIds = new[] { vehicles[0].Id, vehicles[2].Id, vehicles[1].Id };
+
+        Assert.Equal(expectedIds, reorderedIds);
+    }
+
+    [Fact]
+    public async Task MoveVehicles_LeavesInitialNumbersThatDoNotMatchTheVehicles()
     {
         var context = CreateContext();
         var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
         var originalNumbers = GetInitialVehicleNumbers(context.ScenarioDocument);
-        var request = new MoveConsistVehicleRequest
+        var request = new MoveConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = vehicles[1],
-            NewIndex = 3,
+            Vehicles = [vehicles[1]],
+            Offset = 2,
         };
 
-        await new MoveConsistVehicle(request).Run(context);
+        await new MoveConsistVehicles(request).Run(context);
 
         var initialNumbers = GetInitialVehicleNumbers(context.ScenarioDocument);
 
@@ -89,24 +137,98 @@ public class ConsistVehicleCommandTests
     }
 
     [Fact]
-    public async Task MoveVehicle_ToItsOwnPosition_ChangesNothing()
+    public async Task MoveVehicles_PastTheEnd_ChangesNothing()
     {
         var context = CreateContext();
         var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
-        var request = new MoveConsistVehicleRequest
+        var request = new MoveConsistVehiclesRequest
         {
             Consist = consist,
-            Vehicle = vehicles[2],
-            NewIndex = 2,
+            Vehicles = [vehicles[^1]],
+            Offset = 1,
         };
 
-        await new MoveConsistVehicle(request).Run(context);
+        await new MoveConsistVehicles(request).Run(context);
 
         var (_, unchanged) = GetServiceConsist(context.ScenarioDocument);
         var originalIds = vehicles.Select(vehicle => vehicle.Id);
         var unchangedIds = unchanged.Select(vehicle => vehicle.Id);
 
         Assert.Equal(originalIds, unchangedIds);
+    }
+
+    [Fact]
+    public async Task DeleteVehicles_RemovesEachVehicleAndItsInitialNumber()
+    {
+        var context = CreateContext();
+        var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
+        var vehicleNumbers = vehicles.Select(vehicle => vehicle.UniqueNumber ?? string.Empty).ToList();
+
+        SetInitialVehicleNumbers(context.ScenarioDocument, vehicleNumbers);
+
+        var request = new DeleteConsistVehiclesRequest
+        {
+            Consist = consist,
+            Vehicles = [vehicles[1], vehicles[2]],
+        };
+
+        await new DeleteConsistVehicles(request).Run(context);
+
+        var (_, remaining) = GetServiceConsist(context.ScenarioDocument);
+        var remainingIds = remaining.Select(vehicle => vehicle.Id).ToList();
+        var expectedIds = vehicles.Where((_, index) => index is not (1 or 2)).Select(vehicle => vehicle.Id).ToList();
+        var remainingNumbers = remaining.Select(vehicle => vehicle.UniqueNumber ?? string.Empty).ToList();
+        var initialNumbers = GetInitialVehicleNumbers(context.ScenarioDocument);
+
+        Assert.Equal(expectedIds, remainingIds);
+        Assert.Equal(remainingNumbers, initialNumbers);
+    }
+
+    [Fact]
+    public async Task DeleteVehicles_EveryVehicle_IsRefused()
+    {
+        var context = CreateContext();
+        var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
+        var request = new DeleteConsistVehiclesRequest
+        {
+            Consist = consist,
+            Vehicles = vehicles,
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => new DeleteConsistVehicles(request).Run(context));
+
+        var (_, remaining) = GetServiceConsist(context.ScenarioDocument);
+
+        Assert.Equal(vehicles.Count, remaining.Count);
+    }
+
+    [Fact]
+    public async Task PlaceAt_MovesAnAddedVehicleAndItsInitialNumber()
+    {
+        var context = CreateContext();
+        var (consist, vehicles) = GetServiceConsist(context.ScenarioDocument);
+        var vehicleNumbers = vehicles.Select(vehicle => vehicle.UniqueNumber ?? string.Empty).ToList();
+
+        SetInitialVehicleNumbers(context.ScenarioDocument, vehicleNumbers);
+
+        var added = vehicles[^1];
+        var serviceConsist = ConsistVehicleElements.FindServiceConsist(context.ScenarioDocument, consist);
+        var addedElement = ConsistVehicleElements.FindVehicle(serviceConsist, added);
+
+        await ConsistVehicleOrder.PlaceAt(context, consist, serviceConsist, addedElement, 1);
+
+        var (_, reordered) = GetServiceConsist(context.ScenarioDocument);
+        var reorderedIds = reordered.Select(vehicle => vehicle.Id).ToList();
+        var expectedIds = vehicles.Select(vehicle => vehicle.Id).ToList();
+
+        expectedIds.RemoveAt(expectedIds.Count - 1);
+        expectedIds.Insert(1, added.Id);
+
+        var reorderedNumbers = reordered.Select(vehicle => vehicle.UniqueNumber ?? string.Empty).ToList();
+        var initialNumbers = GetInitialVehicleNumbers(context.ScenarioDocument);
+
+        Assert.Equal(expectedIds, reorderedIds);
+        Assert.Equal(reorderedNumbers, initialNumbers);
     }
 
     private static ConsistCommandContext CreateContext()

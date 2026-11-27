@@ -7,7 +7,6 @@ namespace RailworksForge.Views.Pages;
 
 public partial class ConsistDetailPage : UserControl
 {
-    private readonly DataGridSortHandler _consistVehiclesDataGridSortHandler;
     private readonly DataGridSortHandler _availableStockDataGridSortHandler;
 
     private readonly DataGridSortHandler _explorerStockDataGridSortHandler;
@@ -16,8 +15,7 @@ public partial class ConsistDetailPage : UserControl
     {
         InitializeComponent();
 
-        _consistVehiclesDataGridSortHandler = new (ConsistVehiclesDataGrid);
-        _availableStockDataGridSortHandler = new (AvailableStockDataGrid);
+        _availableStockDataGridSortHandler = new(AvailableStockDataGrid);
         _explorerStockDataGridSortHandler = new(ExplorerStockDataGrid);
     }
 
@@ -25,7 +23,6 @@ public partial class ConsistDetailPage : UserControl
     {
         base.OnLoaded(e);
 
-        _consistVehiclesDataGridSortHandler.SortColumns();
         _availableStockDataGridSortHandler.SortColumns();
         _explorerStockDataGridSortHandler.SortColumns();
     }

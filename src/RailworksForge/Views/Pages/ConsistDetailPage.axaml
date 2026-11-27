@@ -6,7 +6,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:RailworksForge.ViewModels"
-             xmlns:consists="clr-namespace:RailworksForge.Core.Consists;assembly=RailworksForge.Core"
              xmlns:vehicles="clr-namespace:RailworksForge.Core.Vehicles;assembly=RailworksForge.Core"
              xmlns:components="using:RailworksForge.Views.Components"
              xmlns:translations="clr-namespace:RailworksForge.Translations;assembly=RailworksForge.Translations"
@@ -17,7 +16,6 @@
              x:DataType="vm:ConsistDetailViewModel">
 
     <UserControl.KeyBindings>
-        <KeyBinding Gesture="Delete" Command="{Binding DeleteVehicleCommand}" />
         <KeyBinding Gesture="Escape" Command="{Binding ClearSelectionCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding ApplyChangesCommand}" />
     </UserControl.KeyBindings>
@@ -39,6 +37,28 @@
                                          BlueprintId="{Binding Blueprint.BlueprintId}" />
         </DataTemplate>
     </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="ListBox#ConsistVehicleList ListBoxItem">
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="MinHeight" Value="56" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}" />
+        </Style>
+
+        <Style Selector="components|Thumbnail.flipped">
+            <Setter Property="RenderTransform" Value="scaleX(-1)" />
+        </Style>
+
+        <!-- Row actions stay out of the way until the row is hovered or selected. -->
+        <Style Selector="ListBox#ConsistVehicleList ListBoxItem Button.row-action">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <Style Selector="ListBox#ConsistVehicleList ListBoxItem:pointerover Button.row-action, ListBox#ConsistVehicleList ListBoxItem:selected Button.row-action">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </UserControl.Styles>
 
     <DockPanel>
         <Grid DockPanel.Dock="Top" Margin="24,16,24,12" ColumnDefinitions="Auto,*">
@@ -66,259 +86,316 @@
                                       DiscardCommand="{Binding DiscardChangesCommand}"
                                       ApplyCommand="{Binding ApplyChangesCommand}" />
 
-        <Grid ColumnDefinitions="*,4,440" Margin="24,0,16,16">
-            <DockPanel Grid.Column="0" Margin="0,0,8,0" IsEnabled="{Binding Loading.IsIdle}">
-                <Border DockPanel.Dock="Top" Classes="card" Padding="16,12,16,4" Margin="0,0,0,12">
-                    <StackPanel Spacing="8">
-                        <TextBlock Classes="caption muted" Text="{echoes:Translate {x:Static translations:Strings.front_of_train}}" />
-                        <components:ConsistStrip ItemsSource="{Binding StripVehicles}"
-                                                 SelectedItem="{Binding SelectedStripVehicle, Mode=TwoWay}">
-                            <components:ConsistStrip.ItemTemplate>
+        <Grid ColumnDefinitions="*,Auto" Margin="24,0,24,16">
+            <Border Grid.Column="0" Classes="card" IsEnabled="{Binding Loading.IsIdle}">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="16,12" ColumnDefinitions="Auto,Auto,*,Auto">
+                        <Button Grid.Column="0" Classes="primary" Command="{Binding AddVehicleCommand}">
+                            <components:IconLabel Icon="Plus" Text="{echoes:Translate {x:Static translations:Strings.add_vehicle}}" />
+                        </Button>
+                        <Button Grid.Column="1"
+                                Classes="danger"
+                                Margin="8,0,0,0"
+                                IsVisible="{Binding HasMissingVehicles}"
+                                Command="{Binding SelectMissingCommand}">
+                            <components:IconLabel Icon="TriangleAlert" Text="{Binding SelectMissingText}" />
+                        </Button>
+                        <components:SearchBox Grid.Column="3"
+                                              Width="240"
+                                              Placeholder="{echoes:Translate {x:Static translations:Strings.filter_train}}"
+                                              Text="{Binding SearchTerm}" />
+                    </Grid>
+
+                    <Border DockPanel.Dock="Top"
+                            Padding="16,6"
+                            Background="{DynamicResource SurfaceSunkenBrush}"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="0,1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <components:LucideIcon Icon="ArrowUp" Width="14" Height="14" StrokeBrush="{DynamicResource TextMutedBrush}" />
+                            <TextBlock Classes="caption muted" Text="{echoes:Translate {x:Static translations:Strings.front_of_train}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <components:SelectionToolbar DockPanel.Dock="Bottom"
+                                                 SelectedCount="{Binding SelectedCount}"
+                                                 SelectionText="{Binding SelectionText}"
+                                                 ClearText="{echoes:Translate {x:Static translations:Strings.clear_selection}}"
+                                                 ClearCommand="{Binding ClearSelectionCommand}">
+                        <WrapPanel ItemSpacing="8" LineSpacing="6">
+                            <Button Classes="small" Command="{Binding MoveTowardFrontCommand}">
+                                <components:IconLabel Icon="ArrowUp" Text="{echoes:Translate {x:Static translations:Strings.move_toward_front}}" />
+                            </Button>
+                            <Button Classes="small" Command="{Binding MoveTowardRearCommand}">
+                                <components:IconLabel Icon="ArrowDown" Text="{echoes:Translate {x:Static translations:Strings.move_toward_rear}}" />
+                            </Button>
+                            <Button Classes="small" Command="{Binding FlipVehiclesCommand}">
+                                <components:IconLabel Icon="ArrowLeftRight" Text="{echoes:Translate {x:Static translations:Strings.flip}}" />
+                            </Button>
+                            <Button Classes="small primary" Command="{Binding ReplaceVehiclesCommand}">
+                                <components:IconLabel Icon="Repeat" Text="{echoes:Translate {x:Static translations:Strings.replace_ellipsis}}" />
+                            </Button>
+                            <Button Classes="small danger" Command="{Binding DeleteVehiclesCommand}">
+                                <components:IconLabel Icon="Trash2" Text="{echoes:Translate {x:Static translations:Strings.delete}}" />
+                            </Button>
+                            <Button Classes="small ghost" Command="{Binding OpenConsistVehicleInExplorerCommand}">
+                                <components:IconLabel Icon="FolderOpen" Text="{echoes:Translate {x:Static translations:Strings.open_folder}}" />
+                            </Button>
+                        </WrapPanel>
+                    </components:SelectionToolbar>
+
+                    <Border DockPanel.Dock="Bottom" Padding="16,6" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <components:LucideIcon Icon="ArrowDown" Width="14" Height="14" StrokeBrush="{DynamicResource TextMutedBrush}" />
+                            <TextBlock Classes="caption muted" Text="{echoes:Translate {x:Static translations:Strings.rear_of_train}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Panel>
+                        <ListBox Name="ConsistVehicleList"
+                                 ItemsSource="{Binding RailVehicles}"
+                                 SelectionMode="Multiple"
+                                 Background="Transparent">
+                            <i:Interaction.Behaviors>
+                                <bh:ListBoxSelectedItemsBehaviour SelectedItems="{Binding SelectedConsistVehicles}" />
+                            </i:Interaction.Behaviors>
+
+                            <ListBox.KeyBindings>
+                                <KeyBinding Gesture="Delete" Command="{Binding DeleteVehiclesCommand}" />
+                            </ListBox.KeyBindings>
+
+                            <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:ConsistVehicleViewModel">
-                                    <components:VehicleCard Image="{Binding ImageBitmap}"
-                                                            Position="{Binding Position}"
-                                                            Title="{Binding Vehicle.LocomotiveName}"
-                                                            Caption="{Binding Caption}"
-                                                            IsFlipped="{Binding Vehicle.Flipped}" />
+                                    <Grid ColumnDefinitions="32,96,*,Auto,Auto" ColumnSpacing="12">
+                                        <TextBlock Grid.Column="0"
+                                                   Classes="muted"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Position}" />
+                                        <components:Thumbnail Grid.Column="1"
+                                                              Height="40"
+                                                              PlaceholderIcon="TrainFront"
+                                                              RenderTransformOrigin="50%,50%"
+                                                              Classes.flipped="{Binding Vehicle.Flipped}"
+                                                              Source="{Binding ImageBitmap}" />
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                                                <Run Text="{Binding Vehicle.LocomotiveName}" />
+                                                <Run Classes="muted" FontWeight="Normal" Text="{Binding Vehicle.UniqueNumber, StringFormat='· {0}'}" />
+                                            </TextBlock>
+                                            <components:BlueprintSummary Provider="{Binding Vehicle.BlueprintSetIdProvider}"
+                                                                         Product="{Binding Vehicle.BlueprintSetIdProduct}"
+                                                                         BlueprintId="{Binding Vehicle.BlueprintId}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <components:Badge Classes="accent"
+                                                              IsVisible="{Binding Vehicle.Flipped}"
+                                                              Content="{echoes:Translate {x:Static translations:Strings.flipped}}" />
+                                            <components:Badge Classes="danger"
+                                                              IsVisible="{Binding IsMissing}"
+                                                              Content="{echoes:Translate {x:Static translations:Strings.acquisition_missing}}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="4"
+                                                Classes="small ghost row-action"
+                                                VerticalAlignment="Center"
+                                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.flip}}"
+                                                Command="{Binding #ConsistVehicleList.((vm:ConsistDetailViewModel)DataContext).FlipRowCommand}"
+                                                CommandParameter="{Binding}">
+                                            <components:LucideIcon Icon="ArrowLeftRight" Width="16" Height="16" StrokeBrush="{DynamicResource TextPrimaryBrush}" />
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
-                            </components:ConsistStrip.ItemTemplate>
-                        </components:ConsistStrip>
-                    </StackPanel>
-                </Border>
+                            </ListBox.ItemTemplate>
 
-                <Border Classes="card">
-                    <DockPanel>
-                        <components:SectionHeader DockPanel.Dock="Top"
-                                                  Title="{echoes:Translate {x:Static translations:Strings.consist_vehicles}}"
-                                                  Count="{Binding RailVehicles.Count}">
-                            <components:SearchBox Width="220"
-                                                  Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
-                                                  Text="{Binding SearchTerm}" />
-                        </components:SectionHeader>
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_ellipsis}}" Command="{Binding ReplaceVehiclesCommand}" />
+                                    <MenuItem Header="{Binding AddVehicleText}" Command="{Binding AddVehicleCommand}" />
+                                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.flip}}" Command="{Binding FlipVehiclesCommand}" />
+                                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete}}" Command="{Binding DeleteVehiclesCommand}" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
 
-                        <components:SelectionToolbar DockPanel.Dock="Top"
-                                                     SelectedCount="{Binding SelectedCount}"
-                                                     SelectionText="{Binding SelectionText}"
-                                                     ClearText="{echoes:Translate {x:Static translations:Strings.clear_selection}}"
-                                                     ClearCommand="{Binding ClearSelectionCommand}">
-                            <WrapPanel ItemSpacing="8" LineSpacing="6">
-                                <Button Classes="small" Command="{Binding MoveVehicleForwardCommand}">
-                                    <components:IconLabel Icon="ArrowLeft" Text="{echoes:Translate {x:Static translations:Strings.move_forward}}" />
-                                </Button>
-                                <Button Classes="small" Command="{Binding MoveVehicleBackCommand}">
-                                    <components:IconLabel Icon="ArrowRight" Text="{echoes:Translate {x:Static translations:Strings.move_back}}" />
-                                </Button>
-                                <Button Classes="small" Command="{Binding FlipVehicleCommand}">
-                                    <components:IconLabel Icon="ArrowLeftRight" Text="{echoes:Translate {x:Static translations:Strings.flip}}" />
-                                </Button>
-                                <Button Classes="small primary" Command="{Binding ReplaceVehicleCommand}">
-                                    <components:IconLabel Icon="Repeat" Text="{echoes:Translate {x:Static translations:Strings.replace_with_selected}}" />
-                                </Button>
-                                <Button Classes="small danger" Command="{Binding DeleteVehicleCommand}">
-                                    <components:IconLabel Icon="Trash2" Text="{echoes:Translate {x:Static translations:Strings.delete}}" />
-                                </Button>
-                                <Button Classes="small ghost" Command="{Binding OpenConsistVehicleInExplorerCommand}">
-                                    <components:IconLabel Icon="FolderOpen" Text="{echoes:Translate {x:Static translations:Strings.open_folder}}" />
-                                </Button>
-                            </WrapPanel>
-                        </components:SelectionToolbar>
+                        <loading:LoadingState DataContext="{Binding Loading}" />
+                    </Panel>
+                </DockPanel>
+            </Border>
 
-                        <Panel>
-                            <DataGrid Name="ConsistVehiclesDataGrid"
-                                      ItemsSource="{Binding RailVehicles}"
-                                      SelectionMode="Extended">
-                                <i:Interaction.Behaviors>
-                                    <bh:DataGridSelectedItemsBehaviour SelectedItems="{Binding SelectedConsistVehicles}" />
-                                </i:Interaction.Behaviors>
-
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="#" Binding="{Binding Index}" />
-
-                                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.state}}" SortMemberPath="AcquisitionState">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate DataType="consists:ConsistRailVehicle">
-                                                <components:AcquisitionStateIcon Classes="cell" State="{Binding AcquisitionState}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.vehicle}}" Binding="{Binding LocomotiveName}" />
-                                    <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.number}}" Binding="{Binding UniqueNumber}" MinWidth="160" />
-
-                                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.flipped}}" SortMemberPath="Flipped">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate DataType="consists:ConsistRailVehicle">
-                                                <Viewbox Classes="cell-icon"
-                                                         IsVisible="{Binding Flipped}"
-                                                         ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_flipped}}">
-                                                    <components:LucideIcon Icon="ArrowLeftRight" StrokeBrush="{DynamicResource TextPrimaryBrush}" />
-                                                </Viewbox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <!-- Provider, product and blueprint path together identify the asset; the column sorts by provider. -->
-                                    <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}" Width="*" MinWidth="200" SortMemberPath="BlueprintSetIdProvider">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate DataType="consists:ConsistRailVehicle">
-                                                <components:BlueprintSummary Margin="12,0"
-                                                                             Provider="{Binding BlueprintSetIdProvider}"
-                                                                             Product="{Binding BlueprintSetIdProduct}"
-                                                                             BlueprintId="{Binding BlueprintId}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-
-                                <DataGrid.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_containing_folder_in_explorer}}" Command="{Binding OpenConsistVehicleInExplorerCommand}" />
-                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.replace_vehicle_with_selected}}" Command="{Binding ReplaceVehicleCommand}" />
-                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.flip}}" Command="{Binding FlipVehicleCommand}" />
-                                        <MenuItem Header="{echoes:Translate {x:Static translations:Strings.delete_vehicle}}" Command="{Binding DeleteVehicleCommand}" />
-                                    </ContextMenu>
-                                </DataGrid.ContextMenu>
-
-                                <DataGrid.Styles>
-                                    <Style Selector="DataGridRow">
-                                        <Setter Property="MinHeight" Value="52" />
-                                    </Style>
-                                </DataGrid.Styles>
-                            </DataGrid>
-
-                            <loading:LoadingState DataContext="{Binding Loading}" />
-                        </Panel>
-                    </DockPanel>
-                </Border>
-            </DockPanel>
-
-            <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
-
-            <Border Grid.Column="2" Classes="card" Margin="8,0,0,0" IsEnabled="{Binding Loading.IsIdle}">
-                <TabControl Padding="0">
-                    <TabItem Header="{echoes:Translate {x:Static translations:Strings.browse_stock}}" FontSize="{StaticResource BodyFontSize}">
-                        <Grid RowDefinitions="Auto,*,4,*">
-                            <components:SearchBox Grid.Row="0"
-                                                  Width="NaN"
-                                                  Margin="12,8"
-                                                  Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
-                                                  Text="{Binding DirectoryTreeSearchTerm}" />
-
-                            <Panel Grid.Row="1" IsEnabled="{Binding DirectoryLoading.IsIdle}">
-                                <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory, Mode=TwoWay}">
-                                    <TreeView.ItemTemplate>
-                                        <TreeDataTemplate ItemsSource="{Binding Subfolders}">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <components:LucideIcon Icon="Folder" Width="16" Height="16" StrokeThickness="1.75" StrokeBrush="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
-                                            </StackPanel>
-                                        </TreeDataTemplate>
-                                    </TreeView.ItemTemplate>
-                                    <TreeView.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
-                                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.load_consists}}" Command="{Binding LoadAvailableStockCommand}" />
-                                        </ContextMenu>
-                                    </TreeView.ContextMenu>
-                                </TreeView>
-                                <loading:LoadingState DataContext="{Binding DirectoryLoading}" />
-                            </Panel>
-
-                            <GridSplitter Grid.Row="2" ResizeDirection="Rows" Background="{DynamicResource DividerBrush}" />
-
-                            <Panel Grid.Row="3">
-                                <DataGrid Name="ExplorerStockDataGrid"
-                                          ItemsSource="{Binding ExplorerStock}"
-                                          SelectedItem="{Binding SelectedExplorerVehicle, Mode=TwoWay}"
-                                          SelectionMode="Single"
-                                          IsEnabled="{Binding ExplorerLoading.IsIdle}">
-                                    <i:Interaction.Behaviors>
-                                        <bh:ItemDoubleTapCommandBehaviour Command="{Binding AddVehicleCommand}" />
-                                    </i:Interaction.Behaviors>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" Width="*" />
-                                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}"
-                                                                SortMemberPath="BlueprintType"
-                                                                CellTemplate="{StaticResource VehicleTypeCell}" />
-                                    </DataGrid.Columns>
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}" />
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                </DataGrid>
-                                <components:EmptyState Icon="FolderOpen"
-                                                       Title="{echoes:Translate {x:Static translations:Strings.choose_folder}}"
-                                                       Hint="{echoes:Translate {x:Static translations:Strings.pick_stock_folder_hint}}"
-                                                       IsVisible="{Binding ShowsStockFolderPrompt}" />
-                                <components:EmptyState Icon="FolderOpen"
-                                                       Title="{echoes:Translate {x:Static translations:Strings.folder_has_no_vehicles}}"
-                                                       IsVisible="{Binding ShowsEmptyStockFolder}" />
-                                <loading:LoadingState DataContext="{Binding ExplorerLoading}" />
-                            </Panel>
+            <Border Grid.Column="1"
+                    Classes="card"
+                    Width="560"
+                    Margin="16,0,0,0"
+                    IsVisible="{Binding IsPickerOpen}"
+                    IsEnabled="{Binding Loading.IsIdle}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="16,12,8,8" Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Classes="heading"
+                                       VerticalAlignment="Center"
+                                       Text="{echoes:Translate {x:Static translations:Strings.vehicle_library}}" />
+                            <Button Grid.Column="1"
+                                    Classes="small ghost"
+                                    ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.close}}"
+                                    Command="{Binding ClosePickerCommand}">
+                                <components:LucideIcon Icon="X" Width="16" Height="16" StrokeBrush="{DynamicResource TextPrimaryBrush}" />
+                            </Button>
                         </Grid>
-                    </TabItem>
+                        <WrapPanel ItemSpacing="6" LineSpacing="6">
+                            <Button Classes="chip"
+                                    Classes.on="{Binding IsReplaceMode}"
+                                    IsVisible="{Binding HasSelection}"
+                                    Content="{Binding ReplaceModeText}"
+                                    Command="{Binding SetPickerModeCommand}"
+                                    CommandParameter="{x:Static vm:VehiclePickerMode.Replace}" />
+                            <Button Classes="chip"
+                                    Classes.on="{Binding IsInsertMode}"
+                                    IsVisible="{Binding HasSelection}"
+                                    Content="{Binding InsertModeText}"
+                                    Command="{Binding SetPickerModeCommand}"
+                                    CommandParameter="{x:Static vm:VehiclePickerMode.Insert}" />
+                            <Button Classes="chip"
+                                    Classes.on="{Binding IsAppendMode}"
+                                    Content="{echoes:Translate {x:Static translations:Strings.add_to_rear}}"
+                                    Command="{Binding SetPickerModeCommand}"
+                                    CommandParameter="{x:Static vm:VehiclePickerMode.Append}" />
+                        </WrapPanel>
+                    </StackPanel>
 
-                    <TabItem Header="{echoes:Translate {x:Static translations:Strings.search_all_vehicles}}" FontSize="{StaticResource BodyFontSize}">
-                        <DockPanel>
-                            <components:SearchBox DockPanel.Dock="Top"
-                                                  Width="NaN"
-                                                  Margin="12,8"
-                                                  Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
-                                                  Text="{Binding VehicleSearchTerm}"
-                                                  ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_search_hint}}" />
+                    <Border DockPanel.Dock="Bottom"
+                            Padding="16,12"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="0,1,0,0">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Button Grid.Column="0"
+                                    Classes="ghost"
+                                    Content="{echoes:Translate {x:Static translations:Strings.cancel}}"
+                                    Command="{Binding ClosePickerCommand}" />
+                            <Button Grid.Column="2"
+                                    Classes="primary"
+                                    Content="{Binding ConfirmPickText}"
+                                    Command="{Binding ConfirmPickCommand}" />
+                        </Grid>
+                    </Border>
 
-                            <Grid DockPanel.Dock="Top" Margin="12,0,12,8" ColumnDefinitions="*,Auto">
-                                <TextBlock Grid.Column="0" Classes="caption muted" VerticalAlignment="Center">
-                                    <Run Text="{echoes:Translate {x:Static translations:Strings.vehicle_matches}}" />
-                                    <Run Text="{Binding MatchingVehicles}" />
-                                </TextBlock>
-                                <Button Grid.Column="1" Classes="small" Command="{Binding RefreshVehicleIndexCommand}">
-                                    <components:IconLabel Icon="RefreshCw" Text="{echoes:Translate {x:Static translations:Strings.vehicle_refresh}}" />
-                                </Button>
+                    <TabControl Padding="0">
+                        <TabItem Header="{echoes:Translate {x:Static translations:Strings.search_all_vehicles}}" FontSize="{StaticResource BodyFontSize}">
+                            <DockPanel>
+                                <components:SearchBox DockPanel.Dock="Top"
+                                                      Width="NaN"
+                                                      Margin="12,8"
+                                                      Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
+                                                      Text="{Binding VehicleSearchTerm}"
+                                                      ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.vehicle_search_hint}}" />
+
+                                <Grid DockPanel.Dock="Top" Margin="12,0,12,8" ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Classes="caption muted" VerticalAlignment="Center">
+                                        <Run Text="{echoes:Translate {x:Static translations:Strings.vehicle_matches}}" />
+                                        <Run Text="{Binding MatchingVehicles}" />
+                                    </TextBlock>
+                                    <Button Grid.Column="1" Classes="small" Command="{Binding RefreshVehicleIndexCommand}">
+                                        <components:IconLabel Icon="RefreshCw" Text="{echoes:Translate {x:Static translations:Strings.vehicle_refresh}}" />
+                                    </Button>
+                                </Grid>
+
+                                <Button DockPanel.Dock="Bottom"
+                                        Margin="12,8"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        IsVisible="{Binding HasMoreVehicles}"
+                                        Content="{echoes:Translate {x:Static translations:Strings.vehicle_load_more}}"
+                                        Command="{Binding LoadMoreVehiclesCommand}" />
+
+                                <Panel>
+                                    <DataGrid Name="AvailableStockDataGrid"
+                                              ItemsSource="{Binding AvailableStock}"
+                                              SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
+                                              SelectionMode="Single"
+                                              IsEnabled="{Binding StockLoading.IsIdle}">
+                                        <i:Interaction.Behaviors>
+                                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding ConfirmPickCommand}" />
+                                        </i:Interaction.Behaviors>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
+                                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}"
+                                                                    SortMemberPath="BlueprintType"
+                                                                    CellTemplate="{StaticResource VehicleTypeCell}" />
+                                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}"
+                                                                    Width="*"
+                                                                    MinWidth="140"
+                                                                    CellTemplate="{StaticResource RollingStockBlueprintCell}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <components:EmptyState Icon="SearchX"
+                                                           Title="{echoes:Translate {x:Static translations:Strings.vehicle_no_matches}}"
+                                                           IsVisible="{Binding HasNoVehicles}" />
+                                    <loading:LoadingState DataContext="{Binding StockLoading}" />
+                                </Panel>
+                            </DockPanel>
+                        </TabItem>
+
+                        <TabItem Header="{echoes:Translate {x:Static translations:Strings.browse_stock}}" FontSize="{StaticResource BodyFontSize}">
+                            <Grid RowDefinitions="Auto,*,4,*">
+                                <components:SearchBox Grid.Row="0"
+                                                      Width="NaN"
+                                                      Margin="12,8"
+                                                      Placeholder="{echoes:Translate {x:Static translations:Strings.search}}"
+                                                      Text="{Binding DirectoryTreeSearchTerm}" />
+
+                                <Panel Grid.Row="1" IsEnabled="{Binding DirectoryLoading.IsIdle}">
+                                    <TreeView ItemsSource="{Binding DirectoryTree}" SelectedItem="{Binding SelectedDirectory, Mode=TwoWay}">
+                                        <TreeView.ItemTemplate>
+                                            <TreeDataTemplate ItemsSource="{Binding Subfolders}">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <components:LucideIcon Icon="Folder" Width="16" Height="16" StrokeThickness="1.75" StrokeBrush="{DynamicResource TextMutedBrush}" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                                                </StackPanel>
+                                            </TreeDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                        <TreeView.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{echoes:Translate {x:Static translations:Strings.open_in_explorer}}" Command="{Binding OpenInExplorerCommand}" />
+                                            </ContextMenu>
+                                        </TreeView.ContextMenu>
+                                    </TreeView>
+                                    <loading:LoadingState DataContext="{Binding DirectoryLoading}" />
+                                </Panel>
+
+                                <GridSplitter Grid.Row="2" ResizeDirection="Rows" Background="{DynamicResource DividerBrush}" />
+
+                                <Panel Grid.Row="3">
+                                    <DataGrid Name="ExplorerStockDataGrid"
+                                              ItemsSource="{Binding ExplorerStock}"
+                                              SelectedItem="{Binding SelectedExplorerVehicle, Mode=TwoWay}"
+                                              SelectionMode="Single"
+                                              IsEnabled="{Binding ExplorerLoading.IsIdle}">
+                                        <i:Interaction.Behaviors>
+                                            <bh:ItemDoubleTapCommandBehaviour Command="{Binding ConfirmPickCommand}" />
+                                        </i:Interaction.Behaviors>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" Width="*" />
+                                            <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}"
+                                                                    SortMemberPath="BlueprintType"
+                                                                    CellTemplate="{StaticResource VehicleTypeCell}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <components:EmptyState Icon="FolderOpen"
+                                                           Title="{echoes:Translate {x:Static translations:Strings.choose_folder}}"
+                                                           Hint="{echoes:Translate {x:Static translations:Strings.pick_stock_folder_hint}}"
+                                                           IsVisible="{Binding ShowsStockFolderPrompt}" />
+                                    <components:EmptyState Icon="FolderOpen"
+                                                           Title="{echoes:Translate {x:Static translations:Strings.folder_has_no_vehicles}}"
+                                                           IsVisible="{Binding ShowsEmptyStockFolder}" />
+                                    <loading:LoadingState DataContext="{Binding ExplorerLoading}" />
+                                </Panel>
                             </Grid>
-
-                            <Button DockPanel.Dock="Bottom"
-                                    Margin="12,8"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    IsVisible="{Binding HasMoreVehicles}"
-                                    Content="{echoes:Translate {x:Static translations:Strings.vehicle_load_more}}"
-                                    Command="{Binding LoadMoreVehiclesCommand}" />
-
-                            <Panel>
-                                <DataGrid Name="AvailableStockDataGrid"
-                                          ItemsSource="{Binding AvailableStock}"
-                                          SelectedItem="{Binding SelectedVehicle, Mode=TwoWay}"
-                                          SelectionMode="Single"
-                                          IsEnabled="{Binding StockLoading.IsIdle}">
-                                    <i:Interaction.Behaviors>
-                                        <bh:ItemDoubleTapCommandBehaviour Command="{Binding AddVehicleCommand}" />
-                                    </i:Interaction.Behaviors>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="{echoes:Translate {x:Static translations:Strings.name}}" Binding="{Binding Name}" />
-                                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.type}}"
-                                                                SortMemberPath="BlueprintType"
-                                                                CellTemplate="{StaticResource VehicleTypeCell}" />
-                                        <DataGridTemplateColumn Header="{echoes:Translate {x:Static translations:Strings.blueprint}}"
-                                                                Width="*"
-                                                                MinWidth="200"
-                                                                CellTemplate="{StaticResource RollingStockBlueprintCell}" />
-                                    </DataGrid.Columns>
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{echoes:Translate {x:Static translations:Strings.add_to_consist}}" Command="{Binding AddVehicleCommand}" />
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                </DataGrid>
-                                <components:EmptyState Icon="SearchX"
-                                                       Title="{echoes:Translate {x:Static translations:Strings.vehicle_no_matches}}"
-                                                       IsVisible="{Binding HasNoVehicles}" />
-                                <loading:LoadingState DataContext="{Binding StockLoading}" />
-                            </Panel>
-                        </DockPanel>
-                    </TabItem>
-                </TabControl>
+                        </TabItem>
+                    </TabControl>
+                </DockPanel>
             </Border>
         </Grid>
     </DockPanel>

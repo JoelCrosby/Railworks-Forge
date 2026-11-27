@@ -30,6 +30,7 @@ public static class PendingChangesText
     public static string Describe(ScenarioChange change)
     {
         var isSingleService = change.Count is 1 && change.ServiceName.Length > 0;
+        var isSingleVehicle = change.Count is 1;
 
         return change.Kind switch
         {
@@ -39,9 +40,12 @@ public static class PendingChangesText
             ScenarioChangeKind.DeleteConsists => Format(Strings.change_deleted_consists.CurrentValue, change.Count),
             ScenarioChangeKind.AddVehicle => Format(Strings.change_added_vehicle.CurrentValue, change.ServiceName),
             ScenarioChangeKind.ReplaceVehicles => string.Format(Strings.change_replaced_vehicles.CurrentValue, change.Count, change.ServiceName),
-            ScenarioChangeKind.DeleteVehicle => Format(Strings.change_deleted_vehicle.CurrentValue, change.ServiceName),
-            ScenarioChangeKind.MoveVehicle => Format(Strings.change_moved_vehicle.CurrentValue, change.ServiceName),
-            ScenarioChangeKind.FlipVehicle => Format(Strings.change_flipped_vehicle.CurrentValue, change.ServiceName),
+            ScenarioChangeKind.DeleteVehicle when isSingleVehicle => Format(Strings.change_deleted_vehicle.CurrentValue, change.ServiceName),
+            ScenarioChangeKind.DeleteVehicle => string.Format(Strings.change_deleted_vehicles.CurrentValue, change.Count, change.ServiceName),
+            ScenarioChangeKind.MoveVehicle when isSingleVehicle => Format(Strings.change_moved_vehicle.CurrentValue, change.ServiceName),
+            ScenarioChangeKind.MoveVehicle => string.Format(Strings.change_moved_vehicles.CurrentValue, change.Count, change.ServiceName),
+            ScenarioChangeKind.FlipVehicle when isSingleVehicle => Format(Strings.change_flipped_vehicle.CurrentValue, change.ServiceName),
+            ScenarioChangeKind.FlipVehicle => string.Format(Strings.change_flipped_vehicles.CurrentValue, change.Count, change.ServiceName),
             ScenarioChangeKind.EditDetails => Strings.change_edited_details.CurrentValue,
             _ => string.Empty,
         };

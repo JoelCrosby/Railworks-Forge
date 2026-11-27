@@ -18,15 +18,15 @@ public interface IScenarioEditSession
 
     Task<string> GetConsistRailVehiclesXml(Consist consist);
 
-    Task AddVehicle(Consist consist, RollingStockEntry vehicle);
+    Task AddVehicle(Consist consist, RollingStockEntry vehicle, int? position = null);
 
     Task ReplaceVehicles(Consist consist, IEnumerable<ConsistRailVehicle> targets, RollingStockEntry replacement);
 
-    Task DeleteVehicle(Consist consist, ConsistRailVehicle vehicle);
+    Task DeleteVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles);
 
-    Task MoveVehicle(Consist consist, ConsistRailVehicle vehicle, int newIndex);
+    Task MoveVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles, int offset);
 
-    Task FlipVehicle(Consist consist, ConsistRailVehicle vehicle);
+    Task FlipVehicles(Consist consist, IEnumerable<ConsistRailVehicle> vehicles);
 
     Task ReplaceConsists(IEnumerable<Consist> targets, PreloadConsist replacement);
 

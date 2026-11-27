@@ -2,24 +2,21 @@ using Avalonia.Media.Imaging;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using RailworksForge.Core.Assets;
 using RailworksForge.Core.Consists;
-using RailworksForge.Translations;
 
 namespace RailworksForge.ViewModels;
 
-public partial class ConsistVehicleViewModel(ConsistRailVehicle vehicle, int position) : ObservableObject
+public partial class ConsistVehicleViewModel(ConsistRailVehicle vehicle, int index) : ObservableObject
 {
     public ConsistRailVehicle Vehicle { get; } = vehicle;
 
-    public string Position { get; } = position.ToString();
+    public int Index { get; } = index;
 
-    public string Caption => Vehicle.Flipped ? Strings.flipped.CurrentValue : Strings.forward.CurrentValue;
+    public int Position => Index + 1;
+
+    public bool IsMissing => Vehicle.AcquisitionState is AcquisitionState.Missing;
 
     [ObservableProperty]
     public partial Bitmap? ImageBitmap { get; set; }
-
-    public void RefreshCaption()
-    {
-        OnPropertyChanged(nameof(Caption));
-    }
 }
